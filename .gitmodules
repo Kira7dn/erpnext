@@ -1,0 +1,4 @@
+[submodule "erpnext"]
+	path = erpnext
+	url = https://github.com/Kira7dn/erpnext.git
+	branch = version-16

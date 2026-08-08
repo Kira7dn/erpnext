@@ -1,0 +1,171 @@
+name: erpnext-source
+
+x-erpnext-defaults: &erpnext_defaults
+  image: ${ERPNEXT_IMAGE:-frappe/erpnext:v16.31.1}
+  platform: ${PLATFORM:-linux/amd64}
+  restart: ${RESTART_POLICY:-unless-stopped}
+  networks:
+    - frappe_network
+  volumes:
+    - sites:/home/frappe/frappe-bench/sites
+    - logs:/home/frappe/frappe-bench/logs
+    - ./erpnext:/home/frappe/frappe-bench/apps/erpnext:ro
+  environment: &erpnext_environment
+    DB_HOST: db
+    DB_PORT: "3306"
+    MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
+    MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
+    REDIS_CACHE: redis-cache:6379
+    REDIS_QUEUE: redis-queue:6379
+    FRAPPE_REDIS_CACHE: redis://redis-cache:6379
+    FRAPPE_REDIS_QUEUE: redis://redis-queue:6379
+    ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+
+services:
+  configurator:
+    <<: *erpnext_defaults
+    restart: "no"
+    entrypoint: ["bash", "-c"]
+    command:
+      - >-
+        ls -1 apps > sites/apps.txt;
+        bench set-config -g db_host $$DB_HOST;
+        bench set-config -gp db_port $$DB_PORT;
+        bench set-config -g redis_cache "redis://$$REDIS_CACHE";
+        bench set-config -g redis_queue "redis://$$REDIS_QUEUE";
+        bench set-config -g redis_socketio "redis://$$REDIS_QUEUE";
+        bench set-config -gp socketio_port 9000;
+        bench set-config -g chromium_path /usr/bin/chromium-headless-shell;
+    depends_on: {}
+
+  db:
+    image: mariadb:11.8
+    restart: ${RESTART_POLICY:-unless-stopped}
+    networks:
+      - frappe_network
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -p$${MARIADB_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - db-data:/var/lib/mysql
+
+  redis-cache:
+    image: redis:6.2-alpine
+    restart: ${RESTART_POLICY:-unless-stopped}
+    networks:
+      - frappe_network
+
+  redis-queue:
+    image: redis:6.2-alpine
+    restart: ${RESTART_POLICY:-unless-stopped}
+    networks:
+      - frappe_network
+    volumes:
+      - redis-queue-data:/data
+
+  create-site:
+    <<: *erpnext_defaults
+    restart: "no"
+    entrypoint: ["bash", "-c"]
+    command:
+      - >-
+        wait-for-it -t 120 db:3306;
+        wait-for-it -t 120 redis-cache:6379;
+        wait-for-it -t 120 redis-queue:6379;
+        export start=$$(date +%s);
+        until [[ -n $$(grep -hs ^ sites/common_site_config.json | jq -r ".db_host // empty") ]] &&
+          [[ -n $$(grep -hs ^ sites/common_site_config.json | jq -r ".redis_cache // empty") ]] &&
+          [[ -n $$(grep -hs ^ sites/common_site_config.json | jq -r ".redis_queue // empty") ]];
+        do
+          echo "Waiting for sites/common_site_config.json";
+          sleep 5;
+          if (( $$(date +%s)-start > 120 )); then exit 1; fi;
+        done;
+        if [ ! -f sites/frontend/site_config.json ]; then
+          bench new-site --mariadb-user-host-login-scope='%' --admin-password="$${ADMIN_PASSWORD:-admin}" --db-root-username=root --db-root-password="$${MARIADB_ROOT_PASSWORD}" --install-app erpnext --set-default frontend;
+        else
+          echo "Site frontend already exists";
+        fi
+    depends_on:
+      db:
+        condition: service_healthy
+      configurator:
+        condition: service_completed_successfully
+      redis-cache:
+        condition: service_started
+      redis-queue:
+        condition: service_started
+
+  backend:
+    <<: *erpnext_defaults
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+
+  frontend:
+    <<: *erpnext_defaults
+    command: ["nginx-entrypoint.sh"]
+    environment:
+      <<: *erpnext_environment
+      BACKEND: backend:8000
+      SOCKETIO: websocket:9000
+      FRAPPE_SITE_NAME_HEADER: frontend
+      UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
+      UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
+      UPSTREAM_REAL_IP_RECURSIVE: "off"
+      PROXY_READ_TIMEOUT: "120"
+      CLIENT_MAX_BODY_SIZE: 50m
+    depends_on:
+      backend:
+        condition: service_started
+      websocket:
+        condition: service_started
+    ports:
+      - "${HTTP_PORT:-8080}:8080"
+
+  websocket:
+    <<: *erpnext_defaults
+    command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+
+  queue-short:
+    <<: *erpnext_defaults
+    command: ["bench", "worker", "--queue", "short,default"]
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+
+  queue-long:
+    <<: *erpnext_defaults
+    command: ["bench", "worker", "--queue", "long,default,short"]
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+
+  scheduler:
+    <<: *erpnext_defaults
+    command: ["bench", "schedule"]
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+
+volumes:
+  db-data:
+  redis-queue-data:
+  sites:
+  logs:
+
+networks:
+  frappe_network:
+    driver: bridge
