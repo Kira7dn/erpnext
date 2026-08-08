@@ -1,0 +1,9 @@
+# Flat YAML configuration consumed by docker-start.ps1.
+# Change the passwords before using this outside local development.
+project_name: erpnext
+erpnext_image: frappe/erpnext:v16.31.1
+platform: linux/amd64
+http_port: 8080
+db_root_password: admin
+admin_password: admin
+restart_policy: unless-stopped
