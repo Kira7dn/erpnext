@@ -1,0 +1,34 @@
+version: 1
+kind: erpnext-integration-contract
+
+runtime:
+  source_of_truth: erpnext
+  api_style: frappe-native
+  openapi_version: 3.1.0
+  include_generic_resource_api: true
+  include_whitelisted_methods: true
+  include_doctype_metadata: true
+
+transport:
+  rest: true
+  webhook: true
+  realtime: true
+
+headers:
+  request_id: X-Request-Id
+  idempotency_key: X-Idempotency-Key
+
+documentation:
+  openapi_yaml: generated/openapi.yaml
+  openapi_json: generated/openapi.json
+  handbook: docs/ERPNext_Integration_Handbook.md
+
+sync:
+  primary_read_path: rest
+  change_notification: webhook
+  reconciliation: pull
+  realtime_is_source_of_truth: false
+
+auth:
+  mode: configured
+  production_sso: later

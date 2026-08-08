@@ -1,171 +1,205 @@
-name: erpnext-source
+name: ${PROJECT_NAME:-erpnext}
 
-x-erpnext-defaults: &erpnext_defaults
-  image: ${ERPNEXT_IMAGE:-frappe/erpnext:v16.31.1}
-  platform: ${PLATFORM:-linux/amd64}
-  restart: ${RESTART_POLICY:-unless-stopped}
-  networks:
-    - frappe_network
+x-frappe-defaults: &frappe_defaults
+  image: ${ERPNEXT_IMAGE}
+  platform: ${PLATFORM}
+  restart: ${RESTART_POLICY}
+  networks: [frappe_network]
   volumes:
     - sites:/home/frappe/frappe-bench/sites
     - logs:/home/frappe/frappe-bench/logs
+    - backups:/home/frappe/backups
     - ./erpnext:/home/frappe/frappe-bench/apps/erpnext:ro
-  environment: &erpnext_environment
-    DB_HOST: db
-    DB_PORT: "3306"
-    MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
-    MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
-    REDIS_CACHE: redis-cache:6379
-    REDIS_QUEUE: redis-queue:6379
-    FRAPPE_REDIS_CACHE: redis://redis-cache:6379
-    FRAPPE_REDIS_QUEUE: redis://redis-queue:6379
-    ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+    - ./apps/letron_api:/home/frappe/frappe-bench/apps/${INTEGRATION_APP}:ro
+    - ./bootstrap-seed.py:/home/frappe/frappe-bench/bootstrap-seed.py:ro
+  environment: &frappe_environment
+    DB_HOST: ${DB_HOST}
+    DB_PORT: ${DB_PORT}
+    MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    REDIS_CACHE: ${REDIS_CACHE}
+    REDIS_QUEUE: ${REDIS_QUEUE}
+    FRAPPE_REDIS_CACHE: redis://${REDIS_CACHE}
+    FRAPPE_REDIS_QUEUE: redis://${REDIS_QUEUE}
+    ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    DEVELOPER_MODE: ${DEVELOPER_MODE}
+    FRAPPE_SITE_NAME_HEADER: ${SITE_HEADER}
+    INTEGRATION_APP: ${INTEGRATION_APP}
+    INTEGRATION_APP_ENABLED: ${INTEGRATION_APP_ENABLED}
+    INTEGRATION_API_ENABLED: ${INTEGRATION_API_ENABLED}
+    PYTHONPATH: /home/frappe/frappe-bench/apps/${INTEGRATION_APP}
 
 services:
   configurator:
-    <<: *erpnext_defaults
+    <<: *frappe_defaults
     restart: "no"
-    entrypoint: ["bash", "-c"]
+    entrypoint: [bash, -c]
     command:
       - >-
+        set -e;
         ls -1 apps > sites/apps.txt;
         bench set-config -g db_host $$DB_HOST;
         bench set-config -gp db_port $$DB_PORT;
         bench set-config -g redis_cache "redis://$$REDIS_CACHE";
         bench set-config -g redis_queue "redis://$$REDIS_QUEUE";
-        bench set-config -g redis_socketio "redis://$$REDIS_QUEUE";
-        bench set-config -gp socketio_port 9000;
+        bench set-config -g redis_socketio "redis://$$REDIS_SOCKETIO";
+        bench set-config -gp socketio_port $$SOCKETIO_PORT;
+        bench set-config -gp developer_mode $$DEVELOPER_MODE;
+        bench set-config -gp allow_tests $$ALLOW_TESTS;
+        bench set-config -gp request_timeout $$REQUEST_TIMEOUT;
+        bench set-config -g country "$$COUNTRY";
+        bench set-config -g time_zone "$$TIMEZONE";
+        bench set-config -g lang "$$LANGUAGE";
+        bench set-config -g currency "$$CURRENCY";
+        if [ "$$EMAIL_ENABLED" = "True" ]; then
+          bench set-config -g mail_server "$$SMTP_HOST";
+          bench set-config -gp mail_port $$SMTP_PORT;
+          bench set-config -g mail_login "$$SMTP_USERNAME";
+          bench set-config -g mail_password "$$SMTP_PASSWORD";
+          bench set-config -gp use_tls $$SMTP_USE_TLS;
+        fi;
         bench set-config -g chromium_path /usr/bin/chromium-headless-shell;
-    depends_on: {}
+    environment:
+      <<: *frappe_environment
+      REDIS_SOCKETIO: ${REDIS_SOCKETIO}
+      SOCKETIO_PORT: "9000"
+      ALLOW_TESTS: ${ALLOW_TESTS}
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
+      COUNTRY: ${COUNTRY}
+      TIMEZONE: ${TIMEZONE}
+      LANGUAGE: ${LANGUAGE}
+      CURRENCY: ${CURRENCY}
+      EMAIL_ENABLED: ${EMAIL_ENABLED}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_USE_TLS: ${SMTP_USE_TLS}
+    depends_on:
+      db: {condition: service_healthy}
+      redis-cache: {condition: service_started}
+      redis-queue: {condition: service_started}
 
   db:
-    image: mariadb:11.8
-    restart: ${RESTART_POLICY:-unless-stopped}
-    networks:
-      - frappe_network
+    image: ${DB_IMAGE}
+    restart: ${RESTART_POLICY}
+    networks: [frappe_network]
     command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
+      - --character-set-server=${DB_CHARSET}
+      - --collation-server=${DB_COLLATION}
       - --skip-character-set-client-handshake
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
+      MARIADB_ROOT_USER: ${DB_ROOT_USER}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_AUTO_UPGRADE: "1"
     healthcheck:
-      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -p$${MARIADB_ROOT_PASSWORD} --silent"]
+      test: [CMD-SHELL, "mariadb-admin ping -h localhost -u$${MARIADB_ROOT_USER} -p$${MARIADB_ROOT_PASSWORD} --silent"]
       interval: 5s
       timeout: 5s
       retries: 30
-    volumes:
-      - db-data:/var/lib/mysql
+    volumes: ["db-data:/var/lib/mysql"]
 
   redis-cache:
-    image: redis:6.2-alpine
-    restart: ${RESTART_POLICY:-unless-stopped}
-    networks:
-      - frappe_network
+    image: ${REDIS_CACHE_IMAGE}
+    restart: ${RESTART_POLICY}
+    networks: [frappe_network]
 
   redis-queue:
-    image: redis:6.2-alpine
-    restart: ${RESTART_POLICY:-unless-stopped}
-    networks:
-      - frappe_network
-    volumes:
-      - redis-queue-data:/data
+    image: ${REDIS_QUEUE_IMAGE}
+    restart: ${RESTART_POLICY}
+    networks: [frappe_network]
+    volumes: ["redis-queue-data:/data"]
 
   create-site:
-    <<: *erpnext_defaults
+    <<: *frappe_defaults
     restart: "no"
-    entrypoint: ["bash", "-c"]
+    entrypoint: [bash, -c]
     command:
       - >-
+        set -e;
         wait-for-it -t 120 db:3306;
         wait-for-it -t 120 redis-cache:6379;
         wait-for-it -t 120 redis-queue:6379;
-        export start=$$(date +%s);
-        until [[ -n $$(grep -hs ^ sites/common_site_config.json | jq -r ".db_host // empty") ]] &&
-          [[ -n $$(grep -hs ^ sites/common_site_config.json | jq -r ".redis_cache // empty") ]] &&
-          [[ -n $$(grep -hs ^ sites/common_site_config.json | jq -r ".redis_queue // empty") ]];
-        do
-          echo "Waiting for sites/common_site_config.json";
-          sleep 5;
-          if (( $$(date +%s)-start > 120 )); then exit 1; fi;
-        done;
-        if [ ! -f sites/frontend/site_config.json ]; then
-          bench new-site --mariadb-user-host-login-scope='%' --admin-password="$${ADMIN_PASSWORD:-admin}" --db-root-username=root --db-root-password="$${MARIADB_ROOT_PASSWORD}" --install-app erpnext --set-default frontend;
+        if [ ! -f sites/$${SITE_NAME}/site_config.json ]; then
+          if [ "$${INTEGRATION_APP_ENABLED}" = "True" ]; then
+            bench new-site --mariadb-user-host-login-scope='%' --admin-password="$${ADMIN_PASSWORD}" --db-root-username="$${DB_ROOT_USER}" --db-root-password="$${MARIADB_ROOT_PASSWORD}" --install-app erpnext --install-app "$${INTEGRATION_APP}" --set-default "$${SITE_NAME}";
+          else
+            bench new-site --mariadb-user-host-login-scope='%' --admin-password="$${ADMIN_PASSWORD}" --db-root-username="$${DB_ROOT_USER}" --db-root-password="$${MARIADB_ROOT_PASSWORD}" --install-app erpnext --set-default "$${SITE_NAME}";
+          fi;
         else
-          echo "Site frontend already exists";
+          if [ "$${INTEGRATION_APP_ENABLED}" = "True" ] && ! bench --site "$${SITE_NAME}" list-apps | grep -Fxq "$${INTEGRATION_APP}"; then bench --site "$${SITE_NAME}" install-app "$${INTEGRATION_APP}"; fi;
+          bench --site "$${SITE_NAME}" migrate; echo "Site $${SITE_NAME} already exists";
         fi
+    environment:
+      <<: *frappe_environment
+      SITE_NAME: ${SITE_NAME}
+      DB_ROOT_USER: ${DB_ROOT_USER}
+      INTEGRATION_APP: ${INTEGRATION_APP}
+      INTEGRATION_APP_ENABLED: ${INTEGRATION_APP_ENABLED}
     depends_on:
-      db:
-        condition: service_healthy
-      configurator:
-        condition: service_completed_successfully
-      redis-cache:
-        condition: service_started
-      redis-queue:
-        condition: service_started
+      db: {condition: service_healthy}
+      configurator: {condition: service_completed_successfully}
+      redis-cache: {condition: service_started}
+      redis-queue: {condition: service_started}
+
+  seed:
+    <<: *frappe_defaults
+    restart: "no"
+    entrypoint: [bash, -c]
+    command: ["bench --site $${SITE_NAME} execute letron_api.local_seed.run"]
+    environment:
+      <<: *frappe_environment
+      SITE_NAME: ${SITE_NAME}
+      SEED_ENABLED: ${SEED_ENABLED}
+      COMPANY_NAME: ${COMPANY_NAME}
+      COMPANY_ABBR: ${COMPANY_ABBR}
+      COMPANY_DOMAIN: ${COMPANY_DOMAIN}
+      WAREHOUSE_NAME: ${WAREHOUSE_NAME}
+    depends_on:
+      create-site: {condition: service_completed_successfully}
 
   backend:
-    <<: *erpnext_defaults
-    depends_on:
-      create-site:
-        condition: service_completed_successfully
+    <<: *frappe_defaults
+    depends_on: {create-site: {condition: service_completed_successfully}}
 
   frontend:
-    <<: *erpnext_defaults
-    command: ["nginx-entrypoint.sh"]
+    <<: *frappe_defaults
+    command: [nginx-entrypoint.sh]
     environment:
-      <<: *erpnext_environment
-      BACKEND: backend:8000
-      SOCKETIO: websocket:9000
-      FRAPPE_SITE_NAME_HEADER: frontend
+      <<: *frappe_environment
+      BACKEND: ${FRONTEND_BACKEND}
+      SOCKETIO: ${FRONTEND_WEBSOCKET}
+      PROXY_READ_TIMEOUT: ${FRONTEND_PROXY_TIMEOUT}
+      CLIENT_MAX_BODY_SIZE: ${FRONTEND_UPLOAD_SIZE}
       UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
       UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
       UPSTREAM_REAL_IP_RECURSIVE: "off"
-      PROXY_READ_TIMEOUT: "120"
-      CLIENT_MAX_BODY_SIZE: 50m
-    depends_on:
-      backend:
-        condition: service_started
-      websocket:
-        condition: service_started
-    ports:
-      - "${HTTP_PORT:-8080}:8080"
+    depends_on: {backend: {condition: service_started}, websocket: {condition: service_started}}
+    ports: ["${HTTP_PORT}:8080"]
 
   websocket:
-    <<: *erpnext_defaults
-    command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
-    depends_on:
-      create-site:
-        condition: service_completed_successfully
-
+    <<: *frappe_defaults
+    command: [node, /home/frappe/frappe-bench/apps/frappe/socketio.js]
+    depends_on: {create-site: {condition: service_completed_successfully}}
   queue-short:
-    <<: *erpnext_defaults
-    command: ["bench", "worker", "--queue", "short,default"]
-    depends_on:
-      create-site:
-        condition: service_completed_successfully
-
+    <<: *frappe_defaults
+    command: [bash, -c, "${SHORT_COMMAND}"]
+    depends_on: {create-site: {condition: service_completed_successfully}}
   queue-long:
-    <<: *erpnext_defaults
-    command: ["bench", "worker", "--queue", "long,default,short"]
-    depends_on:
-      create-site:
-        condition: service_completed_successfully
-
+    <<: *frappe_defaults
+    command: [bash, -c, "${LONG_COMMAND}"]
+    depends_on: {create-site: {condition: service_completed_successfully}}
   scheduler:
-    <<: *erpnext_defaults
-    command: ["bench", "schedule"]
-    depends_on:
-      create-site:
-        condition: service_completed_successfully
+    <<: *frappe_defaults
+    command: [bash, -c, "${SCHEDULER_COMMAND}"]
+    depends_on: {create-site: {condition: service_completed_successfully}}
 
 volumes:
-  db-data:
-  redis-queue-data:
-  sites:
-  logs:
-
+  db-data: {name: "${DB_VOLUME}"}
+  redis-queue-data: {name: "${REDIS_QUEUE_VOLUME}"}
+  sites: {name: "${SITES_VOLUME}"}
+  logs: {name: "${LOGS_VOLUME}"}
+  backups: {name: "${BACKUP_VOLUME}"}
 networks:
-  frappe_network:
-    driver: bridge
+  frappe_network: {driver: bridge}

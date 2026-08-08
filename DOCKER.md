@@ -1,55 +1,70 @@
-# Run the checked-out ERPNext source with Docker
+# ERPNext backend bằng Docker
 
-This wrapper keeps the ERPNext source in this repository and uses the Frappe
-bench/container runtime pattern from `frappe_docker`.
+Runtime hiện đã được kiểm tra: `frontend`, backend, workers và frontend đều
+chạy; `configurator`, `create-site` và seed là các job một lần nên kết thúc với
+`Exited (0)` khi thành công. Seed đang tắt mặc định.
 
-## Start
+Docker là runtime duy nhất của ERPNext trong workspace này. Windows host chỉ
+cần Docker, uv và Node tooling; không cần cài MariaDB hoặc Redis native.
 
-PowerShell:
+## Cấu hình
+
+```text
+config.yml -> docker-start.ps1 -> Compose environment
+           -> common_site_config.json
+           -> site_config.json
+           -> ERPNext/Frappe API
+```
+
+`config.yml` chứa credential local và được Git ignore. Tạo từ template:
 
 ```powershell
-.\docker-start.ps1
+Copy-Item config.template.yml config.yml
+.\docker-start.ps1 -Action config
+.\docker-start.ps1 -Action up
 ```
 
-Git Bash:
+`common_site_config.json` chứa cấu hình dùng chung cho bench. `site_config.json`
+chứa database credential và encryption key của site; launcher không ghi đè
+credential đã sinh.
 
-```bash
-powershell.exe -ExecutionPolicy Bypass -File ./docker-start.ps1
-```
-
-The PowerShell script is the canonical launcher. It reads the flat UTF-8
-`config.yml`, exports its values for Compose, validates the rendered Compose
-configuration, and starts the stack.
-
-Open <http://localhost:8080> and sign in with:
-
-- User: `Administrator`
-- Password: the value of `admin_password` in `config.yml`
-
-The first startup creates the `frontend` site and can take several minutes.
-
-## Useful commands
-
-```bash
-docker compose ps
-docker compose logs -f create-site
-docker compose logs -f backend
-docker compose down
-```
-
-PowerShell equivalents:
+## Launcher
 
 ```powershell
+.\docker-start.ps1 -Action config
+.\docker-start.ps1 -Action up
 .\docker-start.ps1 -Action ps
 .\docker-start.ps1 -Action logs -FollowLogs
+.\docker-start.ps1 -Action restart
 .\docker-start.ps1 -Action down
 ```
 
-The local `./erpnext` directory is mounted read-only at
-`/home/frappe/frappe-bench/apps/erpnext`, so backend code runs from the
-checked-out source while database, site state, and logs remain in Docker
-volumes.
+## Kiểm tra API runtime
 
-This is a development/self-hosted wrapper. Before production use, replace the
-local default passwords, pin compatible database/image versions, configure
-TLS and backups, and use an external persistent database/Redis setup.
+Sau khi site chạy:
+
+```powershell
+docker compose exec backend bench --site frontend show-config
+docker compose exec backend bench --site frontend list-apps
+docker compose exec backend bench --site frontend console
+```
+
+Tool integration đọc metadata và API catalog trong container có Frappe runtime:
+
+```powershell
+docker compose exec backend bench --site frontend execute frappe.get_meta --args "['DocType']"
+uv run python -m workspace_api inspect
+uv run python -m workspace_api generate
+```
+
+OpenAPI và handbook là tài liệu mô tả API thật của ERPNext, không phải một
+backend thay thế ERPNext.
+
+## Reset local
+
+Lệnh sau xóa volume local và dữ liệu local:
+
+```powershell
+docker compose down -v
+.\docker-start.ps1 -Action up
+```

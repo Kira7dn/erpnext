@@ -1,0 +1,6 @@
+[project]
+name = "letron-api"
+version = "0.1.0"
+description = "Technical API integration app for the ERPNext bench"
+requires-python = ">=3.10"
+dependencies = []

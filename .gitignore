@@ -1,7 +1,10 @@
 # Local workspace state
 .env
+config.yml
+.venv/
 .agent/
 .cache/
+.workspace-archive/
 
 # Existing frappe_docker checkout is kept as a separate repository.
 ERP Next/
@@ -13,3 +16,5 @@ node_modules/
 dist/
 build/
 .pytest_cache/
+backups/
+generated/
