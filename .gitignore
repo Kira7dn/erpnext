@@ -6,9 +6,6 @@ config.yml
 .cache/
 .workspace-archive/
 
-# Existing frappe_docker checkout is kept as a separate repository.
-ERP Next/
-
 # Common generated files
 *.py[cod]
 __pycache__/
@@ -17,4 +14,4 @@ dist/
 build/
 .pytest_cache/
 backups/
-generated/
+contracts/generated/

@@ -6,18 +6,19 @@ Ngày cập nhật: 2026-08-09.
 
 Phase 1 đã hoàn thành và được kiểm tra trên Docker:
 
-- site `frontend` chạy với Frappe, ERPNext và `letron_api`;
-- MariaDB healthy, Redis hoạt động, frontend truy cập tại `localhost:8080`;
-- `letron_api.api.health` trả response runtime thật;
-- launcher/configurator/create-site chạy idempotent;
-- seed tắt mặc định và kết thúc `Exited (0)`;
-- source `erpnext` không bị chỉnh sửa.
+- [DONE] site `frontend` chạy với Frappe, ERPNext và `letron_api`;
+- [DONE] MariaDB healthy, Redis hoạt động, frontend truy cập tại `localhost:8080`;
+- [DONE] `letron_api.api.health` trả response runtime thật;
+- [DONE] launcher/configurator/create-site chạy idempotent;
+- [DONE] seed tắt mặc định và kết thúc `Exited (0)`;
+- [DONE] source `erpnext` không bị chỉnh sửa.
 
-Phase 2 đã hoàn thành phần catalog/schema/OpenAPI host-side: `workspace_api` đọc
+- [DONE] Phase 2 đã hoàn thành phần catalog/schema/OpenAPI host-side: `lib/api_generator` đọc
 contract, quét DocType JSON và decorator `frappe.whitelist`, sinh
-`generated/catalog.json`, `generated/openapi.json` và `generated/openapi.yaml`.
-Kết quả hiện tại là 813 DocType và 1.324 whitelisted method. Đây là catalog kỹ
-thuật đầy đủ theo source, chưa phải subset contract đã được đóng băng cho FE.
+`contracts/generated/catalog.json`, `contracts/generated/openapi.json` và `contracts/generated/openapi.yaml`.
+Kết quả hiện tại là 813 DocType và 1.325 whitelisted method. Đây là catalog kỹ
+thuật đầy đủ theo source; OpenAPI chính là subset curated theo allowlist, không
+tự chọn DocType nghiệp vụ.
 
 Frappe hiện còn log cảnh báo `cleanup_old_syncs is not a valid method` khi
 đồng bộ jobs. Cảnh báo này không làm site hoặc API health fail và được theo dõi
@@ -104,7 +105,7 @@ Config phải điều khiển tối thiểu:
 - API base URL và integration mode.
 - request timeout, upload limit và proxy settings.
 - webhook URL, timeout, retry và delivery log.
-- generated artifact directory.
+- `contracts/generated/` artifact directory.
 
 `docker-start.ps1` phải validate config, render Compose, khởi tạo site và chạy
 các lệnh inspect/generate/validate trong container phù hợp. Launcher không sửa
@@ -118,7 +119,8 @@ Contract kỹ thuật nằm tại:
 contracts/erpnext-integration.yml
 ```
 
-Contract không mô tả nghiệp vụ cụ thể. Nó mô tả:
+Contract không tạo business rule mới; nó mô tả typed resource contract theo
+module/metadata ERPNext. Nó mô tả:
 
 - ERPNext/Frappe version và runtime source.
 - API base path và service identity.
@@ -142,10 +144,9 @@ Không dùng contract để allowlist theo domain nghiệp vụ. Catalog phải 
 Tooling phải chạy được bằng `.venv`/`uv` và trong Docker:
 
 ```powershell
-uv run python -m workspace_api inspect
-uv run python -m workspace_api generate
-uv run python -m workspace_api validate
-uv run python -m workspace_api handbook
+uv run python -m lib.api_generator inspect
+uv run python -m lib.api_generator generate
+uv run python -m lib.api_generator validate
 ```
 
 `inspect` đọc runtime và tạo catalog gồm:
@@ -156,17 +157,17 @@ uv run python -m workspace_api handbook
 - field type, required, link, child table và permission metadata;
 - nguồn file/controller của method khi xác định được.
 
-`generate` tạo:
+`generate` tạo catalog đầy đủ và OpenAPI curated:
 
 ```text
-generated/openapi.yaml
-generated/openapi.json
+contracts/generated/openapi.yaml
+contracts/generated/openapi.json
 docs/ERPNext_Integration_Handbook.md
 ```
 
 Endpoint không có request/response type tĩnh không được âm thầm bỏ qua. Tool
-phải ghi rõ schema generic hoặc runtime-derived và cảnh báo nguồn schema hạn
-chế trong OpenAPI/handbook.
+ghi rõ schema generic bằng `x-schema-source: runtime-generic`; webhook/realtime
+chỉ là capability vì runtime chưa có delivery consumer production.
 
 Handbook phải hướng dẫn được:
 
@@ -197,43 +198,43 @@ và identity context để sau này thay cơ chế xác thực mà không đổi
 
 ## 8. Lộ trình thực hiện
 
-### Phase 1 - Runtime và Frappe app — Hoàn thành
+### Phase 1 - Runtime và Frappe app — [DONE]
 
-- Hoàn thiện Docker/site startup.
-- Tạo skeleton custom Frappe app ở root workspace.
-- Cài app vào bench mà không sửa `erpnext`.
-- Kiểm tra API native, metadata và permission trên site thật.
-- Health endpoint đã kiểm tra: `GET /api/method/letron_api.api.health`.
+- [DONE] Hoàn thiện Docker/site startup.
+- [DONE] Tạo skeleton custom Frappe app ở root workspace.
+- [DONE] Cài app vào bench mà không sửa `erpnext`.
+- [DONE] Kiểm tra API native, metadata và permission trên site thật bằng `docker-start.ps1 -Action verify/inspect`.
+- [DONE] Health endpoint đã kiểm tra: `GET /api/method/letron_api.api.health`.
 
-### Phase 2 - Catalog và contract — Phần catalog hoàn thành
+### Phase 2 - Catalog và contract — [DONE]
 
-- Định nghĩa `erpnext-integration.yml`.
-- `workspace_api` quét source DocType và whitelisted methods.
-- Catalog DocType, generic API và whitelisted methods đã được sinh.
-- Validate contract với metadata runtime.
+- [DONE] Định nghĩa `erpnext-integration.yml`.
+- [DONE] `lib/api_generator` quét source DocType và whitelisted methods.
+- [DONE] Catalog DocType, generic API và whitelisted methods đã được sinh.
+- [DONE] Validate contract, catalog source và runtime snapshot/permission trực tiếp trong Docker.
 
-### Phase 3 - OpenAPI và handbook — Đang thực hiện
+### Phase 3 - OpenAPI và handbook — [DONE]
 
-- OpenAPI 3.1 JSON/YAML đã được sinh từ catalog và contract.
-- Sinh handbook có ví dụ gọi thật.
-- Mô tả error, upload, webhook, realtime, retry và reconciliation.
+- [DONE] OpenAPI 3.1 JSON/YAML đã được sinh từ catalog và contract.
+- [DONE] Handbook tích hợp có ví dụ curl, Python và TypeScript.
+- [DONE] Mô tả error/status, CRUD/RPC, upload, webhook/realtime boundary, retry và reconciliation.
 
-### Phase 4 - Verification — Chưa bắt đầu
+### Phase 4 - Verification — [PARTIAL]
 
-- Chạy contract test trên Docker.
-- Kiểm tra CRUD, RPC, permission và lỗi.
-- Kiểm tra webhook duplicate/retry.
-- Kiểm tra artifact không chứa credential.
-- Kiểm tra source `erpnext` không thay đổi.
+- [TODO] Chạy contract test trên Docker.
+- [TODO] Kiểm tra CRUD, RPC, permission và lỗi.
+- [TODO] Kiểm tra webhook duplicate/retry.
+- [DONE] Kiểm tra artifact generated không chứa credential thật.
+- [DONE] Kiểm tra source `erpnext` không thay đổi.
 
 ## 9. Tiêu chí nghiệm thu
 
 - FE có thể dùng handbook để gọi ERPNext mà không cần đọc source ERPNext.
-- OpenAPI parse được bằng validator OpenAPI 3.1.
-- Catalog phản ánh generic API, whitelisted method và DocType metadata runtime.
-- Request/response/error có ví dụ thực tế.
+- [DONE] OpenAPI parse được bằng `openapi-spec-validator` theo OpenAPI 3.1.
+- [DONE] Catalog phản ánh generic API, whitelisted method và DocType metadata; runtime snapshot đã được kiểm tra trực tiếp.
+- [DONE] Request/response/error có ví dụ thực tế trong handbook.
 - API write vẫn chạy qua permission/controller/lifecycle của ERPNext.
-- Webhook và pull reconciliation có hành vi xác định khi retry.
-- Runtime khởi động lại được bằng config.
-- Không có tài liệu nghiệp vụ trong workspace technical này.
-- Không có thay đổi trong `erpnext` submodule.
+- [TODO] Webhook và pull reconciliation có hành vi xác định khi retry.
+- [DONE] Runtime khởi động lại được bằng config.
+- [DONE] Không có tài liệu nghiệp vụ trong workspace technical này.
+- [DONE] ERPNext source nằm trong monorepo tại `apps/erpnext/`; integration tooling không sửa source ERPNext.

@@ -9,7 +9,7 @@ x-frappe-defaults: &frappe_defaults
     - sites:/home/frappe/frappe-bench/sites
     - logs:/home/frappe/frappe-bench/logs
     - backups:/home/frappe/backups
-    - ./erpnext:/home/frappe/frappe-bench/apps/erpnext:ro
+    - ./apps/erpnext:/home/frappe/frappe-bench/apps/erpnext:ro
     - ./apps/letron_api:/home/frappe/frappe-bench/apps/${INTEGRATION_APP}:ro
     - ./bootstrap-seed.py:/home/frappe/frappe-bench/bootstrap-seed.py:ro
   environment: &frappe_environment

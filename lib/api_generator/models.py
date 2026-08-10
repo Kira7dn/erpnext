@@ -10,6 +10,8 @@ class Field:
     label: str | None = None
     options: str | None = None
     reqd: int = 0
+    read_only: int = 0
+    hidden: int = 0
 
 
 @dataclass
@@ -27,6 +29,9 @@ class WhitelistedMethod:
     source: str
     method: str
     app: str
+    methods: list[str] = field(default_factory=list)
+    allow_guest: bool = False
+    parameters: list[dict[str, Any]] = field(default_factory=list)
 
 
 def serialize(value: Any) -> Any:

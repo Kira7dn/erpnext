@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('up','down','restart','ps','logs','config','seed')]
+    [ValidateSet('up','down','restart','ps','logs','config','seed','inspect','verify')]
     [string]$Action = 'up',
     [switch]$FollowLogs,
     [switch]$ValidateOnly,
@@ -83,7 +83,7 @@ $composeArgs = @('compose','--project-name',$c['project.name'],'-f',$compose)
 function Invoke-Compose([string[]]$extra) { & docker @composeArgs @extra; if ($LASTEXITCODE -ne 0) { throw "Docker Compose failed with exit code $LASTEXITCODE" } }
 if ($ValidateOnly) { return }
 if ($Action -eq 'config') { Invoke-Compose @('config','--quiet'); Write-Host 'Compose configuration valid (secrets omitted)'; return }
-if ($Action -in @('up','restart','down','ps','logs','seed')) {
+if ($Action -in @('up','restart','down','ps','logs','seed','inspect','verify')) {
     & docker info --format '{{.ServerVersion}}' *> $null
     if ($LASTEXITCODE -ne 0) { throw 'Docker daemon is not available. Start Docker Desktop and retry.' }
 }
@@ -94,4 +94,12 @@ switch ($Action) {
     'ps' { Invoke-Compose @('ps','-a') }
     'logs' { Invoke-Compose ($(if($FollowLogs){@('logs','-f')}else{@('logs','--tail=100')})) }
     'seed' { Invoke-Compose @('run','--no-deps','--rm','seed') }
+    'inspect' { Invoke-Compose @('exec','-T','backend','bench','--site',$c['site.name'],'execute','letron_api.api.runtime_snapshot') }
+    'verify' {
+        Invoke-Compose @('exec','-T','backend','bench','--site',$c['site.name'],'execute','letron_api.api.runtime_snapshot')
+        $uri = "http://localhost:$($c['project.http_port'])/api/method/letron_api.api.health"
+        $response = Invoke-WebRequest -UseBasicParsing -Uri $uri -Method Get
+        if ($response.StatusCode -ne 200 -or $response.Content -notmatch '"ok"\s*:\s*true') { throw "Health verification failed: $($response.StatusCode)" }
+        Write-Host "HTTP health verified: $uri"
+    }
 }

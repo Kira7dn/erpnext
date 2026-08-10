@@ -5,9 +5,74 @@ runtime:
   source_of_truth: erpnext
   api_style: frappe-native
   openapi_version: 3.1.0
+  server_url: ${ERPNEXT_API_URL}
+  group_by: module
+  public_module_routes: true
   include_generic_resource_api: true
+  include_generic_rpc_fallback: true
   include_whitelisted_methods: true
   include_doctype_metadata: true
+  typed_doctypes: []
+  typed_modules:
+    - Accounts
+    - Assets
+    - Automation
+    - Bulk Transaction
+    - Buying
+    - CRM
+    - Communication
+    - Contacts
+    - Core
+    - Custom
+    - Desk
+    - EDI
+    - ERPNext Integrations
+    - Email
+    - Geo
+    - Integrations
+    - Maintenance
+    - Manufacturing
+    - Printing
+    - Projects
+    - Quality Management
+    - Regional
+    - Selling
+    - Setup
+    - Stock
+    - Subcontracting
+    - Support
+    - Telephony
+    - Utilities
+    - Website
+    - Workflow
+  # Only business modules receive clean public /api/v1 routes. The remaining
+  # typed modules stay available in catalog.json for discovery.
+  public_modules:
+    - Accounts
+    - Assets
+    - Buying
+    - CRM
+    - Communication
+    - Contacts
+    - Maintenance
+    - Manufacturing
+    - Projects
+    - Quality Management
+    - Selling
+    - Stock
+    - Subcontracting
+    - Support
+  document_actions:
+    - doctype: Sales Invoice
+      module: Accounts
+      actions: [submit, cancel]
+  include_methods:
+    - letron_api.api.health
+    - letron_api.api.runtime_info
+    - letron_api.api.runtime_snapshot
+  public_resources:
+    - doctype: Sales Invoice
+      path: /api/v1/accounts/sales-invoices
 
 transport:
   rest: true
@@ -19,8 +84,8 @@ headers:
   idempotency_key: X-Idempotency-Key
 
 documentation:
-  openapi_yaml: generated/openapi.yaml
-  openapi_json: generated/openapi.json
+  openapi_yaml: contracts/generated/openapi.yaml
+  openapi_json: contracts/generated/openapi.json
   handbook: docs/ERPNext_Integration_Handbook.md
 
 sync:
@@ -31,4 +96,18 @@ sync:
 
 auth:
   mode: configured
+  scheme: frappeToken
   production_sso: later
+
+upload:
+  enabled: true
+  path: /api/method/upload_file
+  field: file
+
+capabilities:
+  webhook:
+    declared: true
+    delivery_implemented: false
+  realtime:
+    declared: true
+    delivery_implemented: false

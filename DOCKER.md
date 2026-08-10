@@ -53,8 +53,8 @@ Tool integration đọc metadata và API catalog trong container có Frappe runt
 
 ```powershell
 docker compose exec backend bench --site frontend execute frappe.get_meta --args "['DocType']"
-uv run python -m workspace_api inspect
-uv run python -m workspace_api generate
+uv run python -m lib.api_generator inspect
+uv run python -m lib.api_generator generate
 ```
 
 OpenAPI và handbook là tài liệu mô tả API thật của ERPNext, không phải một
