@@ -8,10 +8,8 @@ runtime:
   server_url: ${ERPNEXT_API_URL}
   group_by: module
   public_module_routes: true
-  include_generic_resource_api: true
-  include_generic_rpc_fallback: true
   include_whitelisted_methods: true
-  include_doctype_metadata: true
+  include_doctype_metadata: false
   typed_doctypes: []
   typed_modules:
     - Accounts
@@ -66,13 +64,42 @@ runtime:
     - doctype: Sales Invoice
       module: Accounts
       actions: [submit, cancel]
+    - doctype: Purchase Invoice
+      module: Accounts
+      actions: [submit, cancel]
+    - doctype: Sales Order
+      module: Selling
+      actions: [submit, cancel]
+    - doctype: Purchase Order
+      module: Buying
+      actions: [submit, cancel]
   include_methods:
     - letron_api.api.health
     - letron_api.api.runtime_info
     - letron_api.api.runtime_snapshot
   public_resources:
+    - doctype: Customer
+      path: /api/v1/selling/customers
+    - doctype: Quotation
+      path: /api/v1/selling/quotations
+    - doctype: Sales Order
+      path: /api/v1/selling/sales-orders
+    - doctype: Delivery Note
+      path: /api/v1/selling/delivery-notes
     - doctype: Sales Invoice
       path: /api/v1/accounts/sales-invoices
+    - doctype: Purchase Invoice
+      path: /api/v1/accounts/purchase-invoices
+    - doctype: Payment Entry
+      path: /api/v1/accounts/payment-entries
+    - doctype: Supplier
+      path: /api/v1/buying/suppliers
+    - doctype: Purchase Order
+      path: /api/v1/buying/purchase-orders
+    - doctype: Item
+      path: /api/v1/stock/items
+    - doctype: Warehouse
+      path: /api/v1/stock/warehouses
 
 transport:
   rest: true
@@ -107,7 +134,90 @@ upload:
 capabilities:
   webhook:
     declared: true
-    delivery_implemented: false
+    delivery_implemented: true
+    delivery: durable-outbox
+    signature: hmac-sha256
+    max_attempts: 3
   realtime:
     declared: true
-    delivery_implemented: false
+    delivery_implemented: true
+    delivery: durable-outbox
+    source_of_truth: false
+
+acceptance:
+  default_status: not-tested
+  suites:
+    public-api:
+      level: docker-runtime
+      test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    extended-api:
+      level: docker-runtime
+      test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  operations:
+    letron_api_api_health_get: {status: passed, suite: public-api}
+    letron_api_api_runtime_info_get: {status: passed, suite: extended-api}
+    letron_api_api_runtime_snapshot_get: {status: passed, suite: public-api}
+    uploadFile: {status: passed, suite: extended-api}
+    listCustomer: {status: passed, suite: public-api}
+    createCustomer: {status: passed, suite: public-api}
+    getCustomer: {status: passed, suite: extended-api}
+    updateCustomer: {status: passed, suite: public-api}
+    deleteCustomer: {status: passed, suite: public-api}
+    listQuotation: {status: passed, suite: public-api}
+    createQuotation: {status: passed, suite: public-api}
+    getQuotation: {status: passed, suite: public-api}
+    updateQuotation: {status: passed, suite: public-api}
+    deleteQuotation: {status: passed, suite: public-api}
+    listSalesOrder: {status: passed, suite: public-api}
+    createSalesOrder: {status: passed, suite: public-api}
+    getSalesOrder: {status: passed, suite: public-api}
+    updateSalesOrder: {status: passed, suite: public-api}
+    deleteSalesOrder: {status: passed, suite: public-api}
+    submitSalesOrder: {status: passed, suite: extended-api}
+    cancelSalesOrder: {status: passed, suite: extended-api}
+    createDeliveryNote: {status: passed, suite: extended-api}
+    listDeliveryNote: {status: passed, suite: extended-api}
+    getDeliveryNote: {status: passed, suite: extended-api}
+    updateDeliveryNote: {status: passed, suite: extended-api}
+    deleteDeliveryNote: {status: passed, suite: extended-api}
+    listSalesInvoice: {status: passed, suite: public-api}
+    createSalesInvoice: {status: passed, suite: public-api}
+    getSalesInvoice: {status: passed, suite: public-api}
+    updateSalesInvoice: {status: passed, suite: public-api}
+    deleteSalesInvoice: {status: passed, suite: public-api}
+    submitSalesInvoice: {status: passed, suite: public-api}
+    cancelSalesInvoice: {status: passed, suite: public-api}
+    createPurchaseInvoice: {status: passed, suite: extended-api}
+    listPurchaseInvoice: {status: passed, suite: extended-api}
+    getPurchaseInvoice: {status: passed, suite: extended-api}
+    updatePurchaseInvoice: {status: passed, suite: extended-api}
+    deletePurchaseInvoice: {status: passed, suite: extended-api}
+    submitPurchaseInvoice: {status: passed, suite: extended-api}
+    cancelPurchaseInvoice: {status: passed, suite: extended-api}
+    createPaymentEntry: {status: passed, suite: extended-api}
+    listPaymentEntry: {status: passed, suite: extended-api}
+    getPaymentEntry: {status: passed, suite: extended-api}
+    updatePaymentEntry: {status: passed, suite: extended-api}
+    deletePaymentEntry: {status: passed, suite: extended-api}
+    listSupplier: {status: passed, suite: extended-api}
+    createSupplier: {status: passed, suite: extended-api}
+    getSupplier: {status: passed, suite: extended-api}
+    updateSupplier: {status: passed, suite: extended-api}
+    deleteSupplier: {status: passed, suite: extended-api}
+    createPurchaseOrder: {status: passed, suite: extended-api}
+    listPurchaseOrder: {status: passed, suite: extended-api}
+    getPurchaseOrder: {status: passed, suite: extended-api}
+    updatePurchaseOrder: {status: passed, suite: extended-api}
+    deletePurchaseOrder: {status: passed, suite: extended-api}
+    submitPurchaseOrder: {status: passed, suite: extended-api}
+    cancelPurchaseOrder: {status: passed, suite: extended-api}
+    listItem: {status: passed, suite: extended-api}
+    createItem: {status: passed, suite: extended-api}
+    getItem: {status: passed, suite: extended-api}
+    updateItem: {status: passed, suite: extended-api}
+    deleteItem: {status: passed, suite: extended-api}
+    listWarehouse: {status: passed, suite: extended-api}
+    createWarehouse: {status: passed, suite: extended-api}
+    getWarehouse: {status: passed, suite: extended-api}
+    updateWarehouse: {status: passed, suite: extended-api}
+    deleteWarehouse: {status: passed, suite: extended-api}

@@ -68,18 +68,16 @@ def generate(root: Path, output: Path) -> None:
     module_dir.mkdir(parents=True, exist_ok=True)
     for stale in (*module_dir.glob("*.json"), *module_dir.glob("*.yaml")):
         stale.unlink()
-    configured_public_modules = set(contract["runtime"].get("public_modules", []))
-    all_modules = {item.module or "Uncategorized" for item in doctypes}
-    module_names = sorted(all_modules & configured_public_modules) if configured_public_modules else sorted(all_modules)
+    public_resources = {item["doctype"] for item in contract["runtime"].get("public_resources", [])}
+    module_names = sorted({item.module or "Uncategorized" for item in doctypes if item.name in public_resources})
     try:
         artifact_prefix = output.relative_to(root).as_posix()
     except ValueError:
         artifact_prefix = output.name
     by_name = {item.name: item for item in doctypes}
-    typed_names = set(contract["runtime"].get("typed_doctypes", []))
     module_files: dict[str, dict[str, str]] = {}
     for module_name in module_names:
-        selected = {item.name for item in doctypes if item.name in typed_names and (item.module or "Uncategorized") == module_name}
+        selected = {item.name for item in doctypes if item.name in public_resources and (item.module or "Uncategorized") == module_name}
         pending = list(selected)
         while pending:
             current = by_name[pending.pop()]

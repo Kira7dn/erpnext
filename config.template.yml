@@ -71,3 +71,7 @@ seed:
   warehouse_name: Main Warehouse
 credentials:
   production_like: false
+
+# Event delivery is configured only through process environment variables:
+# LETRON_WEBHOOK_URL, LETRON_WEBHOOK_SECRET, LETRON_WEBHOOK_TIMEOUT_MS,
+# LETRON_REALTIME_URL and LETRON_REALTIME_TOKEN. Never store their values here.

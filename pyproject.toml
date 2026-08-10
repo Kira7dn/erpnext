@@ -27,11 +27,16 @@ dev = [
 [tool.ty.environment]
 python = ".venv"
 python-version = "3.14"
-extra-paths = [".cache/frappe-v16"]
+extra-paths = [".cache/frappe-v16", "apps/letron_api"]
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = [".", "apps/letron_api"]
 testpaths = ["tests"]
+addopts = "-m 'not integration'"
+markers = [
+    "integration: requires the local ERPNext Docker runtime",
+    "external_delivery: requires the configured staging event consumer",
+]
 
 # frappe is provided by the Frappe/ERPNext Docker image at runtime.
 # It is intentionally not installed into the root host environment.

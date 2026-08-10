@@ -27,12 +27,16 @@ def validate_contract(data: dict[str, Any], doctypes: list[Any] | None = None, m
     if not isinstance(public_resources, list) or any(not isinstance(item, dict) for item in public_resources):
         raise TypeError("runtime.public_resources must be a list of mappings")
     seen_paths: set[str] = set()
+    seen_doctypes: set[str] = set()
     for item in public_resources:
         if not isinstance(item.get("doctype"), str) or not item["doctype"] or not isinstance(item.get("path"), str) or not item["path"].startswith("/"):
             raise ValueError("runtime.public_resources entries require doctype and absolute path")
         if item["path"] in seen_paths:
             raise ValueError(f"runtime.public_resources path collision: {item['path']}")
+        if item["doctype"] in seen_doctypes:
+            raise ValueError(f"runtime.public_resources doctype collision: {item['doctype']}")
         seen_paths.add(item["path"])
+        seen_doctypes.add(item["doctype"])
     actions = runtime.get("document_actions", [])
     if not isinstance(actions, list) or any(not isinstance(item, dict) for item in actions):
         raise TypeError("runtime.document_actions must be a list of mappings")
@@ -43,7 +47,7 @@ def validate_contract(data: dict[str, Any], doctypes: list[Any] | None = None, m
             raise ValueError("runtime.document_actions actions must contain submit or cancel")
         if item["module"] not in runtime.get("public_modules", []):
             raise ValueError(f"runtime.document_actions module must be public: {item['module']}")
-    for key in ("include_generic_resource_api", "include_generic_rpc_fallback", "include_doctype_metadata"):
+    for key in ("include_doctype_metadata",):
         if not isinstance(runtime.get(key), bool):
             raise TypeError(f"runtime.{key} must be boolean")
     if not isinstance(runtime.get("server_url"), str) or not runtime["server_url"].strip():
@@ -51,6 +55,25 @@ def validate_contract(data: dict[str, Any], doctypes: list[Any] | None = None, m
     auth = data.get("auth")
     if not isinstance(auth, dict) or not isinstance(auth.get("scheme"), str) or not auth["scheme"]:
         raise ValueError("auth.scheme must be a non-empty string")
+    acceptance = data.get("acceptance", {})
+    if not isinstance(acceptance, dict):
+        raise TypeError("acceptance must be a mapping")
+    statuses = {"passed", "partial", "not-tested", "blocked"}
+    if acceptance.get("default_status", "not-tested") not in statuses:
+        raise ValueError("acceptance.default_status is invalid")
+    suites = acceptance.get("suites", {})
+    operations = acceptance.get("operations", {})
+    if not isinstance(suites, dict) or any(not isinstance(value, dict) for value in suites.values()):
+        raise TypeError("acceptance.suites must be a mapping of mappings")
+    if not isinstance(operations, dict) or any(not isinstance(value, dict) for value in operations.values()):
+        raise TypeError("acceptance.operations must be a mapping of mappings")
+    for operation_id, result in operations.items():
+        if not isinstance(operation_id, str) or not operation_id:
+            raise ValueError("acceptance operation IDs must be non-empty strings")
+        if result.get("status") not in statuses:
+            raise ValueError(f"acceptance status is invalid for {operation_id}")
+        if result.get("suite") not in suites:
+            raise ValueError(f"acceptance suite is unknown for {operation_id}")
     if doctypes is not None:
         available = {item.name for item in doctypes}
         unknown = sorted(set(runtime["typed_doctypes"]) - available)
@@ -60,6 +83,10 @@ def validate_contract(data: dict[str, Any], doctypes: list[Any] | None = None, m
         unknown_aliases = sorted(aliases - available)
         if unknown_aliases:
             raise ValueError(f"runtime.public_resources contains unknown DocType: {', '.join(unknown_aliases)}")
+        modules_by_name = {item.name: item.module or "Uncategorized" for item in doctypes}
+        unknown_public_modules = sorted({modules_by_name[name] for name in aliases} - set(runtime.get("public_modules", [])))
+        if unknown_public_modules:
+            raise ValueError(f"runtime.public_resources modules must be public: {', '.join(unknown_public_modules)}")
         unknown_actions = sorted({item["doctype"] for item in runtime.get("document_actions", [])} - available)
         if unknown_actions:
             raise ValueError(f"runtime.document_actions contains unknown DocType: {', '.join(unknown_actions)}")

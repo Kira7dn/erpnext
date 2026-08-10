@@ -62,6 +62,35 @@ if ($c['runtime.environment'] -notin @('local','production-like')) { throw 'runt
 if ($c['credentials.production_like'] -and ($c['database.root_password'] -in @('admin','123','password','change-me-local-db') -or $c['site.admin_password'] -in @('admin','123','password','change-me-local-admin'))) { throw 'Default password is forbidden when credentials.production_like is true' }
 if ($c['email.enabled'] -and ($c['email.host'] -eq 'smtp.example.local' -or $c['email.password'] -eq 'change-me')) { throw 'SMTP is enabled but still has placeholder credentials' }
 
+$deliveryEnvironment = @('LETRON_WEBHOOK_URL','LETRON_WEBHOOK_SECRET','LETRON_WEBHOOK_TIMEOUT_MS','LETRON_REALTIME_URL','LETRON_REALTIME_TOKEN','LETRON_CONSUMER_PORT')
+if ($c['runtime.environment'] -eq 'local') {
+    $localDeliveryDefaults = @{
+        LETRON_WEBHOOK_URL='http://event-consumer:8090/webhook'
+        LETRON_WEBHOOK_TIMEOUT_MS='5000'
+        LETRON_REALTIME_URL='http://event-consumer:8090/realtime'
+        LETRON_CONSUMER_PORT='8091'
+    }
+    foreach ($entry in $localDeliveryDefaults.GetEnumerator()) {
+        if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($entry.Key, 'Process'))) {
+            [Environment]::SetEnvironmentVariable($entry.Key, $entry.Value, 'Process')
+        }
+    }
+    foreach ($key in @('LETRON_WEBHOOK_SECRET','LETRON_REALTIME_TOKEN')) {
+        if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($key, 'Process'))) {
+            [Environment]::SetEnvironmentVariable($key, ([Guid]::NewGuid().ToString('N') + [Guid]::NewGuid().ToString('N')), 'Process')
+        }
+    }
+} else {
+    foreach ($key in $deliveryEnvironment | Where-Object { $_ -ne 'LETRON_CONSUMER_PORT' }) {
+        if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($key, 'Process'))) {
+            throw "Missing required production delivery environment variable: $key"
+        }
+    }
+    if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('LETRON_CONSUMER_PORT', 'Process'))) {
+        [Environment]::SetEnvironmentVariable('LETRON_CONSUMER_PORT', '8091', 'Process')
+    }
+}
+
 $envMap = @{
     PROJECT_NAME=$c['project.name']; ERPNEXT_IMAGE=$c['runtime.image']; PLATFORM=$c['runtime.platform']; RESTART_POLICY=$c['runtime.restart_policy']; HTTP_PORT=$c['project.http_port']; INTEGRATION_APP=$c['integration.app_name']; INTEGRATION_APP_ENABLED=$c['integration.install_on_site']; INTEGRATION_API_ENABLED=$c['integration.api_enabled'];
     DB_IMAGE=$c['database.image']; DB_HOST=$c['database.host']; DB_PORT=$c['database.port']; DB_ROOT_USER=$c['database.root_user']; DB_ROOT_PASSWORD=$c['database.root_password']; DB_CHARSET=$c['database.charset']; DB_COLLATION=$c['database.collation']; DB_VOLUME=$c['database.volume'];
@@ -70,6 +99,7 @@ $envMap = @{
     COUNTRY=$c['locale.country']; TIMEZONE=$c['locale.timezone']; LANGUAGE=$c['locale.language']; CURRENCY=$c['locale.currency']; FRONTEND_BACKEND=$c['frontend.backend']; FRONTEND_WEBSOCKET=$c['frontend.websocket']; FRONTEND_UPLOAD_SIZE=$c['frontend.upload_size']; FRONTEND_PROXY_TIMEOUT=$c['frontend.proxy_timeout'];
     SHORT_COMMAND=$c['workers.short_command']; LONG_COMMAND=$c['workers.long_command']; SCHEDULER_COMMAND=$c['workers.scheduler_command']; EMAIL_ENABLED=$c['email.enabled']; SMTP_HOST=$c['email.host']; SMTP_PORT=$c['email.port']; SMTP_USERNAME=$c['email.username']; SMTP_PASSWORD=$c['email.password']; SMTP_USE_TLS=$c['email.use_tls'];
     SITES_VOLUME=$c['storage.sites_volume']; LOGS_VOLUME=$c['storage.logs_volume']; BACKUP_VOLUME=$c['storage.backup_volume']; SEED_ENABLED=$c['seed.enabled']; COMPANY_NAME=$c['seed.company_name']; COMPANY_ABBR=$c['seed.company_abbr']; COMPANY_DOMAIN=$c['seed.domain']; WAREHOUSE_NAME=$c['seed.warehouse_name']
+    LETRON_WEBHOOK_URL=[Environment]::GetEnvironmentVariable('LETRON_WEBHOOK_URL','Process'); LETRON_WEBHOOK_SECRET=[Environment]::GetEnvironmentVariable('LETRON_WEBHOOK_SECRET','Process'); LETRON_WEBHOOK_TIMEOUT_MS=[Environment]::GetEnvironmentVariable('LETRON_WEBHOOK_TIMEOUT_MS','Process'); LETRON_REALTIME_URL=[Environment]::GetEnvironmentVariable('LETRON_REALTIME_URL','Process'); LETRON_REALTIME_TOKEN=[Environment]::GetEnvironmentVariable('LETRON_REALTIME_TOKEN','Process'); LETRON_CONSUMER_PORT=[Environment]::GetEnvironmentVariable('LETRON_CONSUMER_PORT','Process')
 }
 foreach ($entry in $envMap.GetEnumerator()) {
     # Frappe bench set-config parses -p values with Python ast.literal_eval,
@@ -98,8 +128,18 @@ switch ($Action) {
     'verify' {
         Invoke-Compose @('exec','-T','backend','bench','--site',$c['site.name'],'execute','letron_api.api.runtime_snapshot')
         $uri = "http://localhost:$($c['project.http_port'])/api/method/letron_api.api.health"
-        $response = Invoke-WebRequest -UseBasicParsing -Uri $uri -Method Get
-        if ($response.StatusCode -ne 200 -or $response.Content -notmatch '"ok"\s*:\s*true') { throw "Health verification failed: $($response.StatusCode)" }
+        $deadline = [DateTime]::UtcNow.AddSeconds(60)
+        $response = $null
+        do {
+            try {
+                $response = Invoke-WebRequest -UseBasicParsing -Uri $uri -Method Get
+            } catch {
+                $response = $null
+            }
+            if ($response -and $response.StatusCode -eq 200 -and $response.Content -match '"ok"\s*:\s*true') { break }
+            Start-Sleep -Seconds 2
+        } while ([DateTime]::UtcNow -lt $deadline)
+        if (-not $response -or $response.StatusCode -ne 200 -or $response.Content -notmatch '"ok"\s*:\s*true') { throw "Health verification did not become ready within 60 seconds: $uri" }
         Write-Host "HTTP health verified: $uri"
     }
 }

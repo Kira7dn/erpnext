@@ -28,8 +28,33 @@ x-frappe-defaults: &frappe_defaults
     INTEGRATION_APP_ENABLED: ${INTEGRATION_APP_ENABLED}
     INTEGRATION_API_ENABLED: ${INTEGRATION_API_ENABLED}
     PYTHONPATH: /home/frappe/frappe-bench/apps/${INTEGRATION_APP}
+    LETRON_WEBHOOK_URL: ${LETRON_WEBHOOK_URL:-}
+    LETRON_WEBHOOK_SECRET: ${LETRON_WEBHOOK_SECRET:-}
+    LETRON_WEBHOOK_TIMEOUT_MS: ${LETRON_WEBHOOK_TIMEOUT_MS:-5000}
+    LETRON_REALTIME_URL: ${LETRON_REALTIME_URL:-}
+    LETRON_REALTIME_TOKEN: ${LETRON_REALTIME_TOKEN:-}
 
 services:
+  event-consumer:
+    image: python:3.14-alpine
+    restart: ${RESTART_POLICY}
+    networks: [frappe_network]
+    command: [python, /app/staging_consumer.py]
+    environment:
+      LETRON_CONSUMER_DATABASE: /data/events.db
+      LETRON_CONSUMER_PORT: "8090"
+      LETRON_WEBHOOK_SECRET: ${LETRON_WEBHOOK_SECRET:-}
+      LETRON_REALTIME_TOKEN: ${LETRON_REALTIME_TOKEN:-}
+    ports: ["${LETRON_CONSUMER_PORT:-8091}:8090"]
+    volumes:
+      - ./staging_consumer.py:/app/staging_consumer.py:ro
+      - event-consumer-data:/data
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/health', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
   configurator:
     <<: *frappe_defaults
     restart: "no"
@@ -185,7 +210,7 @@ services:
   queue-short:
     <<: *frappe_defaults
     command: [bash, -c, "${SHORT_COMMAND}"]
-    depends_on: {create-site: {condition: service_completed_successfully}}
+    depends_on: {create-site: {condition: service_completed_successfully}, event-consumer: {condition: service_healthy}}
   queue-long:
     <<: *frappe_defaults
     command: [bash, -c, "${LONG_COMMAND}"]
@@ -193,7 +218,7 @@ services:
   scheduler:
     <<: *frappe_defaults
     command: [bash, -c, "${SCHEDULER_COMMAND}"]
-    depends_on: {create-site: {condition: service_completed_successfully}}
+    depends_on: {create-site: {condition: service_completed_successfully}, event-consumer: {condition: service_healthy}}
 
 volumes:
   db-data: {name: "${DB_VOLUME}"}
@@ -201,5 +226,6 @@ volumes:
   sites: {name: "${SITES_VOLUME}"}
   logs: {name: "${LOGS_VOLUME}"}
   backups: {name: "${BACKUP_VOLUME}"}
+  event-consumer-data: {name: "${PROJECT_NAME:-erpnext}-event-consumer-data"}
 networks:
   frappe_network: {driver: bridge}
