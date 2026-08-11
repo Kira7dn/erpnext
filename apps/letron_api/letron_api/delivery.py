@@ -25,10 +25,22 @@ PUBLIC_RESOURCE_PATHS = {
     "Sales Invoice": "/api/v1/accounts/sales-invoices",
     "Purchase Invoice": "/api/v1/accounts/purchase-invoices",
     "Payment Entry": "/api/v1/accounts/payment-entries",
+    "Bank": "/api/v1/accounts/banks",
+    "Bank Account": "/api/v1/accounts/bank-accounts",
+    "Mode of Payment": "/api/v1/accounts/modes-of-payment",
+    "Cost Center": "/api/v1/accounts/cost-centers",
+    "Journal Entry": "/api/v1/accounts/journal-entries",
+    "Payment Request": "/api/v1/accounts/payment-requests",
     "Supplier": "/api/v1/buying/suppliers",
     "Purchase Order": "/api/v1/buying/purchase-orders",
     "Item": "/api/v1/stock/items",
     "Warehouse": "/api/v1/stock/warehouses",
+    "Address": "/api/v1/contacts/addresses",
+    "Contact": "/api/v1/contacts/contacts",
+    "Material Request": "/api/v1/stock/material-requests",
+    "Purchase Receipt": "/api/v1/stock/purchase-receipts",
+    "Stock Entry": "/api/v1/stock/stock-entries",
+    "Item Price": "/api/v1/stock/item-prices",
 }
 
 
@@ -64,6 +76,8 @@ def _payload(doc: Any, event_id: str, event_type: str, occurred_at: str) -> dict
 
 def capture_event(doc: Any, event_type: str) -> None:
     """Persist an event in the business transaction, then queue delivery after commit."""
+    if (_setting("DELIVERY_ENABLED") or "false").lower() not in {"1", "true", "yes"}:
+        return
     if getattr(frappe.flags, "in_letron_outbox", False):
         return
     event_id = str(uuid.uuid4())
@@ -213,6 +227,8 @@ def process_outbox_event(event_id: str) -> None:
 
 
 def process_pending_outbox() -> None:
+    if (_setting("DELIVERY_ENABLED") or "false").lower() not in {"1", "true", "yes"}:
+        return
     for event_id in frappe.get_all(
         OUTBOX_DOCTYPE,
         filters={"delivery_state": ["in", ["Pending", "Blocked"]]},

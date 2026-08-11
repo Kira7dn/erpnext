@@ -3,6 +3,8 @@ import uuid
 from threading import Lock
 from typing import Any, cast
 
+from letron_api.policy import POLICY_DOCTYPES
+
 app_name = "letron_api"
 app_title = "Letron API"
 app_publisher = "Letron"
@@ -22,16 +24,33 @@ PUBLIC_RESOURCE_ROUTES = {
     ("accounts", "sales-invoices"): "Sales Invoice",
     ("accounts", "purchase-invoices"): "Purchase Invoice",
     ("accounts", "payment-entries"): "Payment Entry",
+    ("accounts", "banks"): "Bank",
+    ("accounts", "bank-accounts"): "Bank Account",
+    ("accounts", "modes-of-payment"): "Mode of Payment",
+    ("accounts", "cost-centers"): "Cost Center",
+    ("accounts", "journal-entries"): "Journal Entry",
+    ("accounts", "payment-requests"): "Payment Request",
     ("buying", "suppliers"): "Supplier",
     ("buying", "purchase-orders"): "Purchase Order",
     ("stock", "items"): "Item",
     ("stock", "warehouses"): "Warehouse",
+    ("contacts", "addresses"): "Address",
+    ("contacts", "contacts"): "Contact",
+    ("stock", "material-requests"): "Material Request",
+    ("stock", "purchase-receipts"): "Purchase Receipt",
+    ("stock", "stock-entries"): "Stock Entry",
+    ("stock", "item-prices"): "Item Price",
 }
 DOCUMENT_ACTIONS = {
     ("accounts", "sales-invoices"): {"submit", "cancel"},
     ("accounts", "purchase-invoices"): {"submit", "cancel"},
     ("selling", "sales-orders"): {"submit", "cancel"},
     ("buying", "purchase-orders"): {"submit", "cancel"},
+    ("stock", "material-requests"): {"submit", "cancel"},
+    ("stock", "purchase-receipts"): {"submit", "cancel"},
+    ("stock", "stock-entries"): {"submit", "cancel"},
+    ("accounts", "journal-entries"): {"submit", "cancel"},
+    ("accounts", "payment-requests"): {"submit", "cancel"},
 }
 
 
@@ -130,6 +149,16 @@ doc_events = {
     for doctype in PUBLIC_RESOURCE_ROUTES.values()
 }
 
+for policy_doctype in POLICY_DOCTYPES:
+    handlers = doc_events.setdefault(policy_doctype, {})
+    handlers["validate"] = "letron_api.policy.protect_managed_configuration"
+    handlers["on_trash"] = "letron_api.policy.protect_managed_configuration"
+
+system_settings_handlers = doc_events.setdefault("System Settings", {})
+system_settings_handlers["validate"] = "letron_api.system_config.protect_system_settings"
+system_settings_handlers["on_trash"] = "letron_api.system_config.protect_system_settings"
+
 scheduler_events = {
     "all": ["letron_api.delivery.process_pending_outbox"],
+    "hourly": ["letron_api.policy.audit", "letron_api.system_config.audit"],
 }

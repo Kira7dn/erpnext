@@ -11,6 +11,7 @@ from .api_runtime_harness import (
     ApiClient,
     RuntimeUnavailable,
     cleanup,
+    cleanup_consumer_events,
     create_or_reuse,
     response_data,
 )
@@ -36,6 +37,16 @@ def test_public_contract_and_lifecycle(request: pytest.FixtureRequest) -> None:
     created: list[tuple[str, str]] = []
     prefix = f"ACCEPTANCE-LOCAL-{uuid.uuid4().hex[:8]}-"
     abbr = f"P{uuid.uuid4().hex[:3].upper()}"
+    original_companies: list[dict[str, object]] | None = None
+
+    def finalize() -> None:
+        if original_companies is not None:
+            client.document("PUT", "Fiscal Year", "2026", {"companies": original_companies}, expected={200})
+        cleanup(client, created, prefix)
+        cleanup_consumer_events(prefix)
+        client.write_evidence()
+
+    request.addfinalizer(finalize)
     create_or_reuse(client, "Warehouse Type", {"name": "Transit", "warehouse_type_name": "Transit"}, created)
     company = create_or_reuse(client, "Company", {"name": prefix + "Company", "company_name": prefix + "Company", "abbr": abbr, "country": "Vietnam", "default_currency": "VND", "domain": "Distribution"}, created)
     fiscal_year = response_data(client.document("GET", "Fiscal Year", "2026", expected={200}))
@@ -45,7 +56,6 @@ def test_public_contract_and_lifecycle(request: pytest.FixtureRequest) -> None:
             original_companies.append(row)
     if not any(row.get("company") == company for row in original_companies):
         client.document("PUT", "Fiscal Year", "2026", {"companies": [*original_companies, {"company": company}]}, expected={200})
-    request.addfinalizer(lambda: (client.document("PUT", "Fiscal Year", "2026", {"companies": original_companies}, expected={200}), cleanup(client, created, prefix), client.write_evidence()))
     cost_center = create_or_reuse(client, "Cost Center", {"name": prefix + f"Cost Center - {abbr}", "cost_center_name": prefix + "Cost Center", "company": company, "parent_cost_center": f"{company} - {abbr}", "is_group": 0}, created)
     warehouse = create_or_reuse(client, "Warehouse", {"name": prefix + "Warehouse - P4", "warehouse_name": prefix + "Warehouse", "company": company}, created)
     group = create_or_reuse(client, "Customer Group", {"name": prefix + "Customer Group", "customer_group_name": prefix + "Customer Group", "is_group": 0}, created)

@@ -1,7 +1,13 @@
 name: ${PROJECT_NAME:-erpnext}
 
 x-frappe-defaults: &frappe_defaults
-  image: ${ERPNEXT_IMAGE}
+  image: ${PROJECT_NAME:-erpnext}-letron-runtime:local
+  pull_policy: never
+  build:
+    context: .
+    dockerfile: Dockerfile
+    args:
+      ERPNEXT_IMAGE: ${ERPNEXT_IMAGE}
   platform: ${PLATFORM}
   restart: ${RESTART_POLICY}
   networks: [frappe_network]
@@ -11,50 +17,25 @@ x-frappe-defaults: &frappe_defaults
     - backups:/home/frappe/backups
     - ./apps/erpnext:/home/frappe/frappe-bench/apps/erpnext:ro
     - ./apps/letron_api:/home/frappe/frappe-bench/apps/${INTEGRATION_APP}:ro
-    - ./bootstrap-seed.py:/home/frappe/frappe-bench/bootstrap-seed.py:ro
+    - type: bind
+      source: ${LETRON_CONFIG_HOST_DIR:-./config}
+      target: /etc/letron/config
   environment: &frappe_environment
     DB_HOST: ${DB_HOST}
     DB_PORT: ${DB_PORT}
-    MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-    MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     REDIS_CACHE: ${REDIS_CACHE}
     REDIS_QUEUE: ${REDIS_QUEUE}
     FRAPPE_REDIS_CACHE: redis://${REDIS_CACHE}
     FRAPPE_REDIS_QUEUE: redis://${REDIS_QUEUE}
-    ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     DEVELOPER_MODE: ${DEVELOPER_MODE}
     FRAPPE_SITE_NAME_HEADER: ${SITE_HEADER}
     INTEGRATION_APP: ${INTEGRATION_APP}
     INTEGRATION_APP_ENABLED: ${INTEGRATION_APP_ENABLED}
-    INTEGRATION_API_ENABLED: ${INTEGRATION_API_ENABLED}
+    DELIVERY_ENABLED: ${DELIVERY_ENABLED}
     PYTHONPATH: /home/frappe/frappe-bench/apps/${INTEGRATION_APP}
-    LETRON_WEBHOOK_URL: ${LETRON_WEBHOOK_URL:-}
-    LETRON_WEBHOOK_SECRET: ${LETRON_WEBHOOK_SECRET:-}
-    LETRON_WEBHOOK_TIMEOUT_MS: ${LETRON_WEBHOOK_TIMEOUT_MS:-5000}
-    LETRON_REALTIME_URL: ${LETRON_REALTIME_URL:-}
-    LETRON_REALTIME_TOKEN: ${LETRON_REALTIME_TOKEN:-}
+    LETRON_CONFIG_DIR: /etc/letron/config
 
 services:
-  event-consumer:
-    image: python:3.14-alpine
-    restart: ${RESTART_POLICY}
-    networks: [frappe_network]
-    command: [python, /app/staging_consumer.py]
-    environment:
-      LETRON_CONSUMER_DATABASE: /data/events.db
-      LETRON_CONSUMER_PORT: "8090"
-      LETRON_WEBHOOK_SECRET: ${LETRON_WEBHOOK_SECRET:-}
-      LETRON_REALTIME_TOKEN: ${LETRON_REALTIME_TOKEN:-}
-    ports: ["${LETRON_CONSUMER_PORT:-8091}:8090"]
-    volumes:
-      - ./staging_consumer.py:/app/staging_consumer.py:ro
-      - event-consumer-data:/data
-    healthcheck:
-      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/health', timeout=2)"]
-      interval: 3s
-      timeout: 3s
-      retries: 20
-
   configurator:
     <<: *frappe_defaults
     restart: "no"
@@ -160,6 +141,8 @@ services:
       <<: *frappe_environment
       SITE_NAME: ${SITE_NAME}
       DB_ROOT_USER: ${DB_ROOT_USER}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       INTEGRATION_APP: ${INTEGRATION_APP}
       INTEGRATION_APP_ENABLED: ${INTEGRATION_APP_ENABLED}
     depends_on:
@@ -168,25 +151,42 @@ services:
       redis-cache: {condition: service_started}
       redis-queue: {condition: service_started}
 
-  seed:
+  policy-bootstrap:
     <<: *frappe_defaults
     restart: "no"
     entrypoint: [bash, -c]
-    command: ["bench --site $${SITE_NAME} execute letron_api.local_seed.run"]
+    command: ["bench --site $${SITE_NAME} execute letron_api.tenant_bootstrap.run"]
     environment:
       <<: *frappe_environment
       SITE_NAME: ${SITE_NAME}
-      SEED_ENABLED: ${SEED_ENABLED}
-      COMPANY_NAME: ${COMPANY_NAME}
-      COMPANY_ABBR: ${COMPANY_ABBR}
-      COMPANY_DOMAIN: ${COMPANY_DOMAIN}
-      WAREHOUSE_NAME: ${WAREHOUSE_NAME}
     depends_on:
       create-site: {condition: service_completed_successfully}
 
+  config-sync:
+    <<: *frappe_defaults
+    restart: "no"
+    entrypoint: [bash, -c]
+    command: ["bench --site $${SITE_NAME} execute letron_api.system_config.sync"]
+    environment:
+      <<: *frappe_environment
+      SITE_NAME: ${SITE_NAME}
+    depends_on:
+      policy-bootstrap: {condition: service_completed_successfully}
+
+  policy-sync:
+    <<: *frappe_defaults
+    restart: "no"
+    entrypoint: [bash, -c]
+    command: ["bench --site $${SITE_NAME} execute letron_api.policy.sync"]
+    environment:
+      <<: *frappe_environment
+      SITE_NAME: ${SITE_NAME}
+    depends_on:
+      config-sync: {condition: service_completed_successfully}
+
   backend:
     <<: *frappe_defaults
-    depends_on: {create-site: {condition: service_completed_successfully}}
+    depends_on: {policy-sync: {condition: service_completed_successfully}}
 
   frontend:
     <<: *frappe_defaults
@@ -206,19 +206,100 @@ services:
   websocket:
     <<: *frappe_defaults
     command: [node, /home/frappe/frappe-bench/apps/frappe/socketio.js]
-    depends_on: {create-site: {condition: service_completed_successfully}}
+    depends_on: {policy-sync: {condition: service_completed_successfully}}
   queue-short:
     <<: *frappe_defaults
     command: [bash, -c, "${SHORT_COMMAND}"]
-    depends_on: {create-site: {condition: service_completed_successfully}, event-consumer: {condition: service_healthy}}
+    deploy:
+      replicas: ${SHORT_WORKER_REPLICAS}
+    environment:
+      <<: *frappe_environment
+      LETRON_WEBHOOK_URL: ${LETRON_WEBHOOK_URL:-}
+      LETRON_WEBHOOK_SECRET: ${LETRON_WEBHOOK_SECRET:-}
+      LETRON_WEBHOOK_TIMEOUT_MS: ${LETRON_WEBHOOK_TIMEOUT_MS:-5000}
+      LETRON_REALTIME_URL: ${LETRON_REALTIME_URL:-}
+      LETRON_REALTIME_TOKEN: ${LETRON_REALTIME_TOKEN:-}
+    depends_on: {policy-sync: {condition: service_completed_successfully}}
   queue-long:
     <<: *frappe_defaults
     command: [bash, -c, "${LONG_COMMAND}"]
-    depends_on: {create-site: {condition: service_completed_successfully}}
+    depends_on: {policy-sync: {condition: service_completed_successfully}}
   scheduler:
     <<: *frappe_defaults
     command: [bash, -c, "${SCHEDULER_COMMAND}"]
-    depends_on: {create-site: {condition: service_completed_successfully}, event-consumer: {condition: service_healthy}}
+    environment:
+      <<: *frappe_environment
+      LETRON_WEBHOOK_URL: ${LETRON_WEBHOOK_URL:-}
+      LETRON_WEBHOOK_SECRET: ${LETRON_WEBHOOK_SECRET:-}
+      LETRON_WEBHOOK_TIMEOUT_MS: ${LETRON_WEBHOOK_TIMEOUT_MS:-5000}
+      LETRON_REALTIME_URL: ${LETRON_REALTIME_URL:-}
+      LETRON_REALTIME_TOKEN: ${LETRON_REALTIME_TOKEN:-}
+    depends_on: {policy-sync: {condition: service_completed_successfully}}
+
+  backup-init:
+    <<: *frappe_defaults
+    user: root
+    restart: "no"
+    entrypoint: [sh, -c]
+    command: ["chown -R 1000:1000 /home/frappe/backups"]
+    depends_on: {policy-sync: {condition: service_completed_successfully}}
+
+  backup:
+    <<: *frappe_defaults
+    entrypoint: [bash, -c]
+    command:
+      - >-
+        set -e;
+        if [ "$${BACKUP_ENABLED}" != "True" ] && [ "$${BACKUP_ENABLED}" != "true" ]; then
+          echo "Scheduled backup disabled";
+          exec sleep infinity;
+        fi;
+        while true; do
+          files_flag="";
+          if [ "$${BACKUP_WITH_FILES}" = "True" ] || [ "$${BACKUP_WITH_FILES}" = "true" ]; then files_flag="--with-files --compress"; fi;
+          bench --site "$${SITE_NAME}" backup $$files_flag --backup-path /home/frappe/backups;
+          find /home/frappe/backups -type f -mtime +"$${BACKUP_RETENTION_DAYS}" -delete;
+          if [ "$${BACKUP_ONCE}" = "True" ] || [ "$${BACKUP_ONCE}" = "true" ]; then exit 0; fi;
+          sleep "$$(($${BACKUP_INTERVAL_HOURS} * 3600))";
+        done
+    environment:
+      <<: *frappe_environment
+      SITE_NAME: ${SITE_NAME}
+      BACKUP_ENABLED: ${BACKUP_ENABLED}
+      BACKUP_INTERVAL_HOURS: ${BACKUP_INTERVAL_HOURS}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS}
+      BACKUP_WITH_FILES: ${BACKUP_WITH_FILES}
+      BACKUP_ONCE: "False"
+    depends_on: {backup-init: {condition: service_completed_successfully}}
+
+  backup-verify:
+    <<: *frappe_defaults
+    profiles: [operations]
+    restart: "no"
+    entrypoint: [bash, -c]
+    command:
+      - >-
+        set -e;
+        sql="$$(ls -1t /home/frappe/backups/*-database.sql.gz | head -1)";
+        prefix="$${sql%-database.sql.gz}";
+        public="$${prefix}-files.tgz";
+        private="$${prefix}-private-files.tgz";
+        drill_site="restore-drill-$$$$.local";
+        drill_db="letron_restore_drill_$$$$";
+        cleanup() { bench drop-site "$${drill_site}" --no-backup --force --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${DB_ROOT_PASSWORD}" >/dev/null 2>&1 || true; };
+        trap cleanup EXIT;
+        bench new-site "$${drill_site}" --mariadb-user-host-login-scope='%' --db-name "$${drill_db}" --admin-password "$${ADMIN_PASSWORD}" --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${DB_ROOT_PASSWORD}";
+        bench --site "$${drill_site}" restore "$${sql}" --force --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${DB_ROOT_PASSWORD}" --with-public-files "$${public}" --with-private-files "$${private}";
+        bench --site "$${drill_site}" execute letron_api.api.runtime_info;
+        echo "Backup restore drill verified: $${drill_site}";
+    environment:
+      <<: *frappe_environment
+      DB_ROOT_USER: ${DB_ROOT_USER}
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    depends_on:
+      db: {condition: service_healthy}
+      backup-init: {condition: service_completed_successfully}
 
 volumes:
   db-data: {name: "${DB_VOLUME}"}
@@ -226,6 +307,5 @@ volumes:
   sites: {name: "${SITES_VOLUME}"}
   logs: {name: "${LOGS_VOLUME}"}
   backups: {name: "${BACKUP_VOLUME}"}
-  event-consumer-data: {name: "${PROJECT_NAME:-erpnext}-event-consumer-data"}
 networks:
   frappe_network: {driver: bridge}

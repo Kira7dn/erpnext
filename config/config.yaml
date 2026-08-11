@@ -1,77 +1,104 @@
-# UTF-8 local configuration template. Copy to config.yml; config.yml is ignored.
+version: 2
+erpnext_version: 16.31.1
+
 runtime:
-  environment: local
+  environment: production-like
   image: frappe/erpnext:v16.31.1
   platform: linux/amd64
   restart_policy: unless-stopped
+
 project:
   name: erpnext
   http_port: 8080
+
 integration:
   app_name: letron_api
   app_path: apps/letron_api
   install_on_site: true
-  api_enabled: true
+
 database:
   image: mariadb:11.8
   host: db
   port: 3306
   root_user: root
-  root_password: change-me-local-db
+  root_password: ${DB_ROOT_PASSWORD}
   charset: utf8mb4
   collation: utf8mb4_unicode_ci
   volume: db-data
+
 redis:
   cache: redis-cache:6379
   queue: redis-queue:6379
   socketio: redis-queue:6379
   cache_image: redis:6.2-alpine
   queue_image: redis:6.2-alpine
+
 site:
   name: frontend
   header: frontend
   database_type: mariadb
-  admin_password: change-me-local-admin
+  admin_password: ${ADMIN_PASSWORD}
+
 locale:
   country: Vietnam
   timezone: Asia/Ho_Chi_Minh
   language: vi
   currency: VND
+
 developer:
-  mode: true
-  allow_tests: true
+  mode: false
+  allow_tests: false
   request_timeout: 120
+
 frontend:
   backend: backend:8000
   websocket: websocket:9000
   upload_size: 50m
   proxy_timeout: 120
+
 workers:
-  short_command: "bench worker --queue short,default"
-  long_command: "bench worker --queue long,default,short"
+  short_command: "bench worker --queue short"
+  short_replicas: 2
+  long_command: "bench worker --queue long,default"
   scheduler_command: "bench schedule"
+
 email:
   enabled: false
   host: smtp.example.local
   port: 587
   username: change-me
-  password: change-me
+  password: ${SMTP_PASSWORD}
   use_tls: true
+
 storage:
   sites_volume: sites
   logs_volume: logs
   redis_queue_volume: redis-queue-data
-  backup_enabled: false
   backup_volume: backups
-seed:
-  enabled: false
-  company_name: Letron Việt Nam
-  company_abbr: LTVN
-  domain: Distribution
-  warehouse_name: Main Warehouse
-credentials:
-  production_like: false
 
-# Event delivery is configured only through process environment variables:
-# LETRON_WEBHOOK_URL, LETRON_WEBHOOK_SECRET, LETRON_WEBHOOK_TIMEOUT_MS,
-# LETRON_REALTIME_URL and LETRON_REALTIME_TOKEN. Never store their values here.
+backup:
+  enabled: true
+  interval_hours: 24
+  retention_days: 14
+  with_files: true
+
+credentials:
+  production_like: true
+
+delivery:
+  enabled: false
+  webhook_url: https://integration.example.invalid/webhook
+  webhook_secret: ${LETRON_WEBHOOK_SECRET}
+  webhook_timeout_ms: 5000
+  realtime_url: https://integration.example.invalid/realtime
+  realtime_token: ${LETRON_REALTIME_TOKEN}
+
+# These are native Frappe System Settings harvested from the current tenant.
+# letron_api only validates and reconciles their native field values.
+system_settings:
+  language: vi
+  time_zone: Asia/Ho_Chi_Minh
+  date_format: yyyy-mm-dd
+  number_format: "#,###.##"
+  enable_password_policy: 1
+  session_expiry: "170:00"

@@ -21,7 +21,24 @@ def _runtime_info() -> dict[str, object]:
 def health() -> dict[str, object]:
     """Return a lightweight authenticated application health response."""
 
-    return {"ok": True, "app": "letron_api", **_runtime_info()}
+    from letron_api.policy import cached_status as policy_status
+    from letron_api.system_config import bundle_status
+    from letron_api.system_config import cached_status as config_status
+    from letron_api.tenant_bootstrap import status as bootstrap_status
+
+    bootstrap = bootstrap_status()
+    policy = policy_status()
+    config = config_status()
+    bundle = bundle_status()
+    return {
+        "ok": bool(bootstrap["ok"] and policy["ok"] and config["ok"] and bundle["ok"]),
+        "app": "letron_api",
+        "bootstrap": bootstrap,
+        "config": config,
+        "policy": policy,
+        "configuration_bundle": bundle,
+        **_runtime_info(),
+    }
 
 
 @frappe.whitelist(methods=["GET"])
@@ -35,7 +52,19 @@ def runtime_info() -> dict[str, object]:
 def runtime_snapshot() -> dict[str, object]:
     """Return runtime metadata used by integration verification, not business logic."""
 
-    snapshot: dict[str, object] = {**_runtime_info(), "doctype_metadata": {}}
+    from letron_api.policy import status as policy_status
+    from letron_api.system_config import bundle_status
+    from letron_api.system_config import status as config_status
+    from letron_api.tenant_bootstrap import status as bootstrap_status
+
+    snapshot: dict[str, object] = {
+        **_runtime_info(),
+        "doctype_metadata": {},
+        "bootstrap": bootstrap_status(),
+        "config": config_status(),
+        "policy": policy_status(),
+        "configuration_bundle": bundle_status(),
+    }
     for doctype in ("Company", "Currency", "User"):
         try:
             meta = frappe.get_meta(doctype)
@@ -71,6 +100,16 @@ def document_action(doctype: str, name: str, action: str) -> dict[str, object]:
         ("Sales Order", "cancel"),
         ("Purchase Order", "submit"),
         ("Purchase Order", "cancel"),
+        ("Material Request", "submit"),
+        ("Material Request", "cancel"),
+        ("Purchase Receipt", "submit"),
+        ("Purchase Receipt", "cancel"),
+        ("Stock Entry", "submit"),
+        ("Stock Entry", "cancel"),
+        ("Journal Entry", "submit"),
+        ("Journal Entry", "cancel"),
+        ("Payment Request", "submit"),
+        ("Payment Request", "cancel"),
     }
     if (doctype, action) not in supported:
         frappe.throw(f"Unsupported document action: {action}")
@@ -96,15 +135,70 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
         frappe.throw("Invalid local acceptance fixture prefix", exc=frappe.ValidationError)
 
     companies = frappe.get_all("Company", filters={"name": ["like", f"{prefix}%"]}, pluck="name")
-    invoices = []
-    for invoice_doctype in ("Sales Invoice", "Purchase Invoice", "Payment Entry"):
-        invoices.extend(frappe.get_all(invoice_doctype, filters={"name": ["like", f"{prefix}%"]}, pluck="name"))
+    # A failed run may delete its Company before invoking this fallback while
+    # ledger rows still retain that company name. Recover the scope from those
+    # ledgers so teardown remains fail-closed.
+    for ledger_doctype in ("GL Entry", "Payment Ledger Entry", "Stock Ledger Entry"):
+        companies.extend(
+            frappe.get_all(
+                ledger_doctype,
+                filters={"company": ["like", f"{prefix}%"]},
+                pluck="company",
+            )
+        )
+    companies = list(dict.fromkeys(companies))
     deleted: list[str] = []
     failures: list[str] = []
-
-    for ledger_doctype in ("GL Entry", "Payment Ledger Entry"):
-        filters = {"voucher_no": ["in", invoices]} if invoices else {"name": "__acceptance_none__"}
-        for name in frappe.get_all(ledger_doctype, filters=filters, pluck="name"):
+    fiscal_year_company_names = frappe.get_all(
+        "Fiscal Year Company",
+        filters={"company": ["like", f"{prefix}%"]},
+        pluck="name",
+    )
+    if fiscal_year_company_names:
+        frappe.db.delete("Fiscal Year Company", {"name": ["in", fiscal_year_company_names]})
+        deleted.extend(f"Fiscal Year Company:{name}" for name in fiscal_year_company_names)
+    fixture_document_names: set[str] = set()
+    transaction_doctypes = (
+        "Payment Request",
+        "Journal Entry",
+        "Sales Invoice",
+        "Purchase Invoice",
+        "Payment Entry",
+        "Material Request",
+        "Purchase Receipt",
+        "Stock Entry",
+    )
+    vouchers: list[str] = []
+    transaction_names: dict[str, list[str]] = {}
+    for transaction_doctype in transaction_doctypes:
+        meta = frappe.get_meta(transaction_doctype)
+        filters: dict[str, object] = {"name": ["like", f"{prefix}%"]}
+        if companies and meta.get_field("company"):
+            filters = {"company": ["in", companies]}
+        names = frappe.get_all(transaction_doctype, filters=filters, pluck="name")
+        transaction_names[transaction_doctype] = names
+        fixture_document_names.update(names)
+        vouchers.extend(names)
+        # Cancel through the native controller before removing generated
+        # ledger rows. This keeps teardown valid even when a test aborts after
+        # submit but before its normal cancel assertion.
+        for name in names:
+            document = frappe.get_doc(transaction_doctype, name)
+            if document.docstatus == 1:
+                try:
+                    document.flags.ignore_permissions = True
+                    document.cancel()
+                    deleted.append(f"{transaction_doctype}:{name}:cancelled")
+                except Exception as error:  # noqa: BLE001 - report cleanup residue
+                    failures.append(f"{transaction_doctype}:{name}:cancel:{type(error).__name__}")
+    frappe.db.commit()
+    for ledger_doctype in ("GL Entry", "Payment Ledger Entry", "Stock Ledger Entry"):
+        ledger_names: list[str] = []
+        if vouchers:
+            ledger_names.extend(frappe.get_all(ledger_doctype, filters={"voucher_no": ["in", vouchers]}, pluck="name"))
+        if companies:
+            ledger_names.extend(frappe.get_all(ledger_doctype, filters={"company": ["in", companies]}, pluck="name"))
+        for name in dict.fromkeys(ledger_names):
             try:
                 frappe.delete_doc(ledger_doctype, name, force=True, ignore_permissions=True)
                 deleted.append(f"{ledger_doctype}:{name}")
@@ -112,6 +206,20 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
                 deleted.append(f"{ledger_doctype}:{name}")
             except Exception as error:  # noqa: BLE001 - report cleanup residue
                 failures.append(f"{ledger_doctype}:{name}:{type(error).__name__}")
+
+    # Journal Entry children link directly to Account, and Payment Request
+    # links to its submitted invoice. Remove both after native cancellation
+    # and ledger cleanup, before tearing down their referenced masters.
+    for doctype in ("Payment Request", "Journal Entry"):
+        for name in transaction_names.get(doctype, []):
+            try:
+                frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
+                deleted.append(f"{doctype}:{name}")
+            except frappe.DoesNotExistError:
+                deleted.append(f"{doctype}:{name}")
+            except Exception as error:  # noqa: BLE001 - report cleanup residue
+                failures.append(f"{doctype}:{name}:{type(error).__name__}")
+    frappe.db.commit()
 
     # Delete the fixture Cost Center before its generated company root. The
     # root is not prefixed, so it is otherwise easy to leave a NestedSet child
@@ -124,6 +232,7 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
         cost_center_names.extend(cost_center_roots)
         for company in companies:
             cost_center_names.extend(frappe.get_all(doctype, filters={"company": company}, pluck="name", order_by="lft desc"))
+        fixture_document_names.update(cost_center_names)
         blocked: list[tuple[str, str]] = []
         for _ in range(2):
             blocked = []
@@ -142,6 +251,25 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
         for name, error_type in blocked:
             if frappe.db.exists(doctype, name):
                 failures.append(f"{doctype}:{name}:{error_type}")
+
+    # These setup documents retain Links to the fixture chart. Delete them
+    # before Account NestedSet teardown so no broken child mapping remains.
+    for doctype in ("Bank Account", "Mode of Payment"):
+        meta = frappe.get_meta(doctype)
+        filters: dict[str, object] = {"name": ["like", f"{prefix}%"]}
+        if companies and meta.get_field("company"):
+            filters = {"company": ["in", companies]}
+        names = frappe.get_all(doctype, filters=filters, pluck="name")
+        fixture_document_names.update(names)
+        for name in names:
+            try:
+                frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
+                deleted.append(f"{doctype}:{name}")
+            except frappe.DoesNotExistError:
+                deleted.append(f"{doctype}:{name}")
+            except Exception as error:  # noqa: BLE001 - report cleanup residue
+                failures.append(f"{doctype}:{name}:{type(error).__name__}")
+    frappe.db.commit()
 
     for company in companies:
         account_names = frappe.get_all("Account", filters={"company": company}, pluck="name", order_by="rgt desc")
@@ -184,12 +312,18 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
         rebuild_tree("Account")
 
     doctypes = (
+        "Payment Request",
+        "Journal Entry",
         "Payment Entry",
         "Sales Invoice",
         "Delivery Note",
         "Sales Order",
         "Quotation",
         "Purchase Invoice",
+        "Purchase Receipt",
+        "Stock Entry",
+        "Stock Entry Type",
+        "Material Request",
         "Purchase Order",
         "Supplier",
         "Supplier Group",
@@ -199,11 +333,18 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
         "Territory",
         "Customer Group",
         "Warehouse",
+        "Item Price",
+        "Address",
+        "Contact",
+        "Address Template",
+        "Country",
+        "Bank Account",
+        "Mode of Payment",
+        "Bank",
         "Company",
         "Price List",
         "User",
     )
-    fixture_document_names: set[str] = set()
     for doctype in doctypes:
         order_by = "lft desc" if frappe.get_meta(doctype).get_field("lft") else None
         name_prefix = prefix.lower() if doctype == "User" else prefix
@@ -214,6 +355,14 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
         fixture_document_names.update(names)
         for name in names:
             try:
+                if doctype == "Stock Entry Type":
+                    # Custom type names are run-prefixed, but Link existence
+                    # scans can still see transaction children during the
+                    # same teardown. Business documents were deleted above;
+                    # remove this internal prerequisite directly and scoped.
+                    frappe.db.delete(doctype, {"name": name})
+                    deleted.append(f"{doctype}:{name}")
+                    continue
                 document = frappe.get_doc(doctype, name)
                 if document.docstatus == 1:
                     document.flags.ignore_permissions = True
@@ -230,6 +379,17 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
             deleted.append(f"File:{name}")
         except Exception as error:  # noqa: BLE001 - report cleanup residue
             failures.append(f"File:{name}:{type(error).__name__}")
+    # Address Template prevents deleting the active default through its
+    # controller. Remove only a template whose body carries this run's prefix;
+    # a pre-existing site template is reused and never matches this scope.
+    acceptance_templates = frappe.get_all(
+        "Address Template",
+        filters={"template": ["like", f"%{prefix}%"]},
+        pluck="name",
+    )
+    if acceptance_templates:
+        frappe.db.delete("Address Template", {"name": ["in", acceptance_templates]})
+        deleted.extend(f"Address Template:{name}" for name in acceptance_templates)
     outbox_names = frappe.get_all(
         "Letron Event Outbox",
         filters={"document_name": ["in", list(fixture_document_names)]},

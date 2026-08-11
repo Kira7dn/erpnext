@@ -1,0 +1,377 @@
+bootstrap:
+  company:
+    abbreviation: LTVN
+    chart_of_accounts: Standard
+    country: Vietnam
+    currency: VND
+    domain: Distribution
+    name: Letron Việt Nam
+documents:
+- doctype: Accounts Settings
+  fields:
+    add_taxes_from_item_tax_template: 1
+    add_taxes_from_taxes_and_charges_template: 0
+    allow_multi_currency_invoices_against_single_party_account: 0
+    allow_pegged_currencies_exchange_rates: 0
+    allow_stale: 1
+    auto_reconcile_payments: 0
+    auto_reconciliation_job_trigger: 15
+    automatically_fetch_payment_terms: 0
+    automatically_process_deferred_accounting_entry: 1
+    automatically_run_rules_on_unreconciled_transactions: 1
+    book_asset_depreciation_entry_automatically: 1
+    book_deferred_entries_based_on: Days
+    book_deferred_entries_via_journal_entry: 0
+    book_stock_expense_gl_entries: 0
+    book_tax_discount_loss: 0
+    calculate_depr_using_total_days: 0
+    check_supplier_invoice_uniqueness: 0
+    confirm_before_resetting_posting_date: 1
+    create_pr_in_draft_status: 1
+    credit_controller: null
+    default_ageing_range: 30, 60, 90, 120
+    delete_linked_ledger_entries: 0
+    determine_address_tax_category_from: Billing Address
+    enable_accounting_dimensions: 0
+    enable_common_party_accounting: 0
+    enable_discounts_and_margin: 0
+    enable_fuzzy_matching: 0
+    enable_immutable_ledger: 0
+    enable_loyalty_point_program: 0
+    enable_overdue_billing_threshold: 0
+    enable_party_matching: 0
+    enable_subscription: 1
+    exchange_gain_loss_posting_date: Payment
+    fetch_payment_schedule_in_payment_request: 1
+    fetch_valuation_rate_for_internal_transaction: 0
+    general_ledger_remarks_length: 0
+    ignore_account_closing_balance: 0
+    ignore_is_opening_check_for_reporting: 0
+    maintain_same_internal_transaction_rate: 0
+    maintain_same_rate_action: Stop
+    make_payment_via_journal_entry: 0
+    merge_similar_account_heads: 0
+    over_billing_allowance: 0.0
+    pcv_job_timeout: 3600
+    receivable_payable_fetch_method: Buffered Cursor
+    receivable_payable_remarks_length: 0
+    reconciliation_queue_size: 5
+    repost_allowed_types:
+    - document_type: Sales Invoice
+    - document_type: Purchase Invoice
+    - document_type: Journal Entry
+    - document_type: Payment Entry
+    - document_type: Purchase Receipt
+    role_allowed_to_bypass_overdue_billing: null
+    role_allowed_to_over_bill: null
+    role_to_notify_on_depreciation_failure: null
+    role_to_override_stop_action: null
+    round_row_wise_tax: 0
+    show_balance_in_coa: 1
+    show_inclusive_tax_in_print: 0
+    show_payment_schedule_in_print: 0
+    show_taxes_as_table_in_print: 0
+    stale_days: 1
+    submit_journal_entries: 0
+    transfer_match_days: 3
+    unlink_advance_payment_on_cancelation_of_order: 1
+    unlink_payment_on_cancellation_of_invoice: 1
+    use_legacy_budget_controller: 0
+    use_legacy_controller_for_pcv: 1
+  name: Accounts Settings
+  state: present
+- doctype: Buying Settings
+  fields:
+    allow_multiple_items: 0
+    allow_negative_rates_for_items: 0
+    allow_zero_qty_in_purchase_order: 0
+    allow_zero_qty_in_request_for_quotation: 0
+    allow_zero_qty_in_supplier_quotation: 0
+    auto_create_purchase_receipt: 0
+    auto_create_subcontracting_order: 0
+    backflush_raw_materials_of_subcontract_based_on: BOM
+    bill_for_rejected_quantity_in_purchase_invoice: 1
+    blanket_order_allowance: 0.0
+    buying_price_list: null
+    disable_last_purchase_rate: 0
+    fixed_email: null
+    maintain_same_rate: 0
+    maintain_same_rate_action: Stop
+    over_order_allowance: 0.0
+    over_transfer_allowance: 0.0
+    po_required: null
+    pr_required: null
+    project_update_frequency: Each Transaction
+    role_to_override_stop_action: null
+    set_landed_cost_based_on_purchase_invoice_rate: 0
+    set_valuation_rate_for_rejected_materials: 0
+    show_pay_button: 1
+    supp_master_name: Supplier Name
+    supplier_group: null
+    use_transaction_date_exchange_rate: 0
+    validate_consumed_qty: 0
+  name: Buying Settings
+  state: present
+- doctype: Currency Exchange Settings
+  fields:
+    api_endpoint: https://api.frankfurter.dev/v2/rate/{from_currency}/{to_currency}
+    disabled: 0
+    req_params:
+    - key: date
+      value: '{transaction_date}'
+    result_key:
+    - key: rate
+    service_provider: frankfurter.dev - v2
+    url: null
+    use_http: 0
+  name: Currency Exchange Settings
+  state: present
+- doctype: Delivery Settings
+  fields:
+    dispatch_attachment: null
+    dispatch_template: null
+    send_with_attachment: 0
+    stop_delay: 0
+  name: Delivery Settings
+  state: present
+- doctype: Item Variant Settings
+  fields:
+    allow_different_uom: 0
+    allow_rename_attribute_value: 0
+    do_not_update_variants: 0
+    fields: []
+  name: Item Variant Settings
+  state: present
+- doctype: Ledger Health Monitor
+  fields:
+    companies: []
+    debit_credit_mismatch: 0
+    enable_health_monitor: 0
+    general_and_payment_ledger_mismatch: 0
+    monitor_for_last_x_days: 60
+  name: Ledger Health Monitor
+  state: present
+- doctype: Pegged Currencies
+  fields:
+    pegged_currency_item:
+    - pegged_against: USD
+      pegged_exchange_rate: '3.6725'
+      source_currency: AED
+    - pegged_against: USD
+      pegged_exchange_rate: '0.376'
+      source_currency: BHD
+    - pegged_against: USD
+      pegged_exchange_rate: '0.709'
+      source_currency: JOD
+    - pegged_against: USD
+      pegged_exchange_rate: '0.3845'
+      source_currency: OMR
+    - pegged_against: USD
+      pegged_exchange_rate: '3.64'
+      source_currency: QAR
+    - pegged_against: USD
+      pegged_exchange_rate: '3.75'
+      source_currency: SAR
+  name: Pegged Currencies
+  state: present
+- doctype: POS Settings
+  fields:
+    invoice_fields: []
+    invoice_type: Sales Invoice
+    pos_search_fields: []
+    post_change_gl_entries: 0
+  name: POS Settings
+  state: present
+- doctype: Selling Settings
+  fields:
+    allow_against_multiple_purchase_orders: 0
+    allow_delivery_of_overproduced_qty: 0
+    allow_multiple_items: 0
+    allow_negative_rates_for_items: 0
+    allow_sales_order_creation_for_expired_quotation: 0
+    allow_zero_qty_in_quotation: 0
+    allow_zero_qty_in_sales_order: 0
+    blanket_order_allowance: 0.0
+    cust_master_name: Customer Name
+    customer_group: null
+    deliver_secondary_items: 0
+    dn_required: null
+    dont_reserve_sales_order_qty_on_sales_return: 0
+    editable_bundle_item_rates: 0
+    editable_price_list_rate: 0
+    enable_cutoff_date_on_bulk_delivery_note_creation: 0
+    enable_discount_accounting: 0
+    enable_tracking_sales_commissions: 0
+    enable_utm: 0
+    fallback_to_default_price_list: 0
+    hide_tax_id: 0
+    maintain_same_rate_action: Stop
+    maintain_same_sales_rate: 0
+    role_to_override_stop_action: null
+    sales_update_frequency: Daily
+    selling_price_list: null
+    set_zero_rate_for_expired_batch: 0
+    so_required: null
+    territory: null
+    use_legacy_js_reactivity: 0
+    validate_selling_price: 0
+  name: Selling Settings
+  state: present
+- doctype: Stock Settings
+  fields:
+    action_if_quality_inspection_is_not_submitted: Stop
+    action_if_quality_inspection_is_rejected: Stop
+    allow_existing_serial_no: 1
+    allow_internal_transfer_at_arms_length_price: 0
+    allow_negative_stock: 0
+    allow_negative_stock_for_batch: 0
+    allow_partial_reservation: 1
+    allow_to_edit_stock_uom_qty_for_purchase: 0
+    allow_to_edit_stock_uom_qty_for_sales: 0
+    allow_to_edit_stock_uom_qty_for_stock_entry: 0
+    allow_to_make_quality_inspection_after_purchase_or_delivery: 0
+    allow_uom_with_conversion_rate_defined_in_item: 0
+    auto_create_serial_and_batch_bundle_for_outward: 1
+    auto_indent: 0
+    auto_insert_price_list_rate_if_missing: 0
+    auto_reserve_serial_and_batch: 1
+    auto_reserve_stock: 0
+    auto_reserve_stock_for_sales_order_on_purchase: 0
+    clean_description_html: 1
+    default_warehouse: null
+    disable_serial_no_and_batch_selector: 0
+    do_not_update_serial_batch_on_creation_of_auto_bundle: 1
+    do_not_use_batchwise_valuation: 0
+    enable_serial_and_batch_no_for_item: 0
+    enable_stock_reservation: 0
+    item_group: null
+    item_naming_by: Item Code
+    mr_qty_allowance: 0.0
+    naming_series_prefix: BATCH-
+    over_delivery_receipt_allowance: 0.0
+    over_picking_allowance: 0.0
+    pick_serial_and_batch_based_on: FIFO
+    reorder_email_notify: 0
+    role_allowed_to_create_edit_back_dated_transactions: null
+    role_allowed_to_over_deliver_receive: null
+    sample_retention_warehouse: null
+    set_serial_and_batch_bundle_naming_based_on_naming_series: 0
+    show_barcode_field: 1
+    stock_auth_role: null
+    stock_frozen_upto: null
+    stock_frozen_upto_days: 0
+    stock_uom: null
+    update_existing_price_list_rate: 0
+    update_price_list_based_on: Rate
+    use_naming_series: 0
+    use_serial_batch_fields: 1
+    validate_material_transfer_warehouses: 0
+    valuation_method: FIFO
+  name: Stock Settings
+  state: present
+- doctype: Stock Reposting Settings
+  fields:
+    do_not_fetch_incoming_rate_from_serial_no: 0
+    enable_parallel_reposting: 0
+    enable_separate_reposting_for_gl: 0
+    end_time: null
+    item_based_reposting: 1
+    limit_reposting_timeslot: 0
+    limits_dont_apply_on: ''
+    no_of_parallel_reposting: 4
+    notify_reposting_error_to_role: null
+    repost_incorrect_valuation_entries: 0
+    start_time: null
+  name: Stock Reposting Settings
+  state: present
+- doctype: Global Defaults
+  fields:
+    country: Vietnam
+    default_company: null
+    default_currency: VND
+    default_distance_unit: null
+    demo_company: null
+    disable_in_words: 0
+    disable_rounded_total: 0
+    hide_currency_symbol: ''
+    use_posting_datetime_for_naming_documents: 0
+  name: Global Defaults
+  state: present
+- doctype: Item Tax Template
+  fields:
+    company: Letron Việt Nam
+    disabled: 0
+    taxes:
+    - not_applicable: 0
+      tax_rate: 10.0
+      tax_type: VAT - LTVN
+    title: Vietnam Tax
+  name: Vietnam Tax - LTVN
+  state: present
+- doctype: Purchase Taxes and Charges Template
+  fields:
+    company: Letron Việt Nam
+    disabled: 0
+    is_default: 0
+    tax_category: null
+    taxes:
+    - account_currency: null
+      account_head: VAT - LTVN
+      add_deduct_tax: Add
+      allocate_full_amount_to_stock_items: 1
+      base_net_amount: 0.0
+      base_tax_amount: 0.0
+      base_tax_amount_after_discount_amount: 0.0
+      base_total: 0.0
+      category: Total
+      charge_type: On Net Total
+      cost_center: Chính - LTVN
+      description: VAT @ 10.0
+      dont_recompute_tax: 0
+      included_in_paid_amount: 0
+      included_in_print_rate: 0
+      is_tax_withholding_account: 0
+      net_amount: 0.0
+      project: null
+      rate: 10.0
+      row_id: null
+      set_by_item_tax_template: 0
+      tax_amount: 0.0
+      tax_amount_after_discount_amount: 0.0
+      total: 0.0
+    title: Vietnam Tax
+  name: Vietnam Tax - LTVN
+  state: present
+- doctype: Sales Taxes and Charges Template
+  fields:
+    company: Letron Việt Nam
+    disabled: 0
+    is_default: 0
+    tax_category: null
+    taxes:
+    - account_currency: null
+      account_head: VAT - LTVN
+      base_net_amount: 0.0
+      base_tax_amount: 0.0
+      base_tax_amount_after_discount_amount: 0.0
+      base_total: 0.0
+      charge_type: On Net Total
+      cost_center: Chính - LTVN
+      description: VAT @ 10.0
+      dont_recompute_tax: 0
+      included_in_paid_amount: 0
+      included_in_print_rate: 0
+      is_tax_withholding_account: 0
+      net_amount: 0.0
+      project: null
+      rate: 10.0
+      row_id: null
+      set_by_item_tax_template: 0
+      tax_amount: 0.0
+      tax_amount_after_discount_amount: 0.0
+      total: 0.0
+    title: Vietnam Tax
+  name: Vietnam Tax - LTVN
+  state: present
+erpnext_version: 16.31.1
+version: 1

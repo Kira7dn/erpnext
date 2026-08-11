@@ -19,14 +19,68 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, build_opener
 
-import yaml
+from letron_api.system_config import load_config
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def _config() -> dict[str, Any]:
-    with (ROOT / "config.yml").open(encoding="utf-8") as stream:
-        return yaml.safe_load(stream)
+    acceptance_dir = os.environ.get("LETRON_ACCEPTANCE_CONFIG_DIR")
+    source = Path(acceptance_dir) / "config.yaml" if acceptance_dir else ROOT / "config" / "config.yaml"
+    config = load_config(source, resolve_secrets=True)
+    delivery = config["delivery"]
+    values = {
+        "LETRON_WEBHOOK_URL": delivery["webhook_url"],
+        "LETRON_WEBHOOK_SECRET": delivery["webhook_secret"],
+        "LETRON_WEBHOOK_TIMEOUT_MS": delivery["webhook_timeout_ms"],
+        "LETRON_REALTIME_URL": delivery["realtime_url"],
+        "LETRON_REALTIME_TOKEN": delivery["realtime_token"],
+        "LETRON_CONSUMER_PORT": os.environ.get("LETRON_CONSUMER_PORT", "8091"),
+    }
+    for key, value in values.items():
+        os.environ.setdefault(key, str(value))
+    return config
+
+
+def cleanup_consumer_events(prefix: str, event_ids: list[str] | None = None) -> None:
+    """Delete one run's durable consumer events and require a stable zero."""
+
+    realtime_url = os.environ.get("LETRON_REALTIME_URL")
+    realtime_token = os.environ.get("LETRON_REALTIME_TOKEN")
+    if not realtime_url or not realtime_token:
+        return
+    port = os.environ.get("LETRON_CONSUMER_PORT", "8091")
+    events_url = realtime_url.replace("http://event-consumer:8090", f"http://127.0.0.1:{port}").replace(
+        "/realtime", "/events"
+    )
+    headers = {"Authorization": f"Bearer {realtime_token}", "Content-Type": "application/json"}
+
+    def delete_events(ids: list[str]) -> int:
+        request = Request(
+            events_url,
+            data=json.dumps({"event_ids": ids, "prefix": prefix}).encode(),
+            method="DELETE",
+            headers=headers,
+        )
+        try:
+            with build_opener().open(request, timeout=30) as response:
+                status = response.status
+                payload = json.loads(response.read().decode())
+        except HTTPError as error:
+            status = error.code
+            payload = json.loads(error.read().decode())
+        assert status == 200, f"consumer cleanup failed for {prefix}: {status} {payload}"
+        return int(payload["deleted"])
+
+    time.sleep(2)
+    delete_events(event_ids or [])
+    stable_zero_polls = 0
+    for _ in range(60):
+        time.sleep(0.5)
+        stable_zero_polls = stable_zero_polls + 1 if delete_events([]) == 0 else 0
+        if stable_zero_polls >= 5:
+            return
+    raise AssertionError("consumer acceptance residue did not remain zero for five consecutive polls")
 
 
 @dataclass
@@ -50,6 +104,7 @@ class ApiClient:
     def __init__(self) -> None:
         config = _config()
         self.base = f"http://127.0.0.1:{config['project']['http_port']}"
+        self.timeout = int(config["developer"]["request_timeout"])
         self.username = "Administrator"
         self.password = os.environ.get("LETRON_ACCEPTANCE_ADMIN_PASSWORD") or config["site"]["admin_password"]
         self.cookies = CookieJar()
@@ -81,7 +136,7 @@ class ApiClient:
             body = json.dumps(payload).encode("utf-8")
         request = Request(self.base + path, data=body, headers=request_headers, method=method)
         try:
-            with self.opener.open(request, timeout=30) as raw:
+            with self.opener.open(request, timeout=self.timeout) as raw:
                 status = raw.status
                 response_headers = {key.lower(): value for key, value in raw.headers.items()}
                 content = raw.read().decode("utf-8", errors="replace")
@@ -118,7 +173,7 @@ class ApiClient:
             headers["Authorization"] = self.authorization
         request = Request(self.base + "/api/method/upload_file", data=body, headers=headers, method="POST")
         try:
-            with self.opener.open(request, timeout=30) as raw:
+            with self.opener.open(request, timeout=self.timeout) as raw:
                 status = raw.status
                 response_headers = {key.lower(): value for key, value in raw.headers.items()}
                 data = json.loads(raw.read().decode("utf-8"))
@@ -240,6 +295,15 @@ def cleanup(client: ApiClient, created: list[tuple[str, str]], prefix: str) -> N
     residue_queries = (
         ("File", [["file_name", "like", f"{prefix}%"]]),
         ("Letron Event Outbox", [["payload", "like", f"%{prefix}%"]]),
+        ("Bank", [["name", "like", f"{prefix}%"]]),
+        ("Bank Account", [["name", "like", f"{prefix}%"]]),
+        ("Mode of Payment", [["name", "like", f"{prefix}%"]]),
+        ("Cost Center", [["company", "like", f"{prefix}%"]]),
+        ("Journal Entry", [["company", "like", f"{prefix}%"]]),
+        ("Payment Request", [["company", "like", f"{prefix}%"]]),
+        ("Stock Ledger Entry", [["company", "like", f"{prefix}%"]]),
+        ("GL Entry", [["company", "like", f"{prefix}%"]]),
+        ("Payment Ledger Entry", [["company", "like", f"{prefix}%"]]),
     )
     for doctype, filters in residue_queries:
         query = quote(json.dumps(filters))

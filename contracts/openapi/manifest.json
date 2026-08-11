@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "artifacts": {
+    "public": {
+      "operations": 137,
+      "json_sha256": "10d1ec255453c647e9e0ca8440b342c98c6da531cb64a2f31a4374605f4d1d5d",
+      "yaml_sha256": "95d8724496810afabbdc629595c6fc95d54af3fe93580f72bd1cd2e1bb7bbb27"
+    },
+    "control-plane": {
+      "operations": 2,
+      "json_sha256": "aca7b84e82c94595f3cdcc213081220ec8c9119df2cc26bfe275b87817dc5873",
+      "yaml_sha256": "c73da6fa3430f9e5f6b07187a3a8fdedf92410fe386d861f19726e1dbf2d014f"
+    }
+  }
+}

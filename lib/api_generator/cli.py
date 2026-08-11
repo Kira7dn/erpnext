@@ -2,11 +2,13 @@ import argparse
 import copy
 import json
 import re
+import tempfile
 from pathlib import Path
 
 import yaml
 
 from .contract import load_contract, validate_contract
+from .handoff import build_control_plane, write_handoff
 from .metadata import discover_doctypes, discover_whitelisted_methods
 from .models import serialize
 from .openapi import build_openapi
@@ -44,18 +46,18 @@ def expand_typed_modules(contract, doctypes):
     return contract
 
 
-def generate(root: Path, output: Path) -> None:
+def generate(root: Path, output: Path, handoff: Path | None = None) -> None:
     doctypes, methods = collect(root)
     contract = expand_typed_modules(load_contract(root / "contracts/erpnext-integration.yml"), doctypes)
     validate_contract(contract, doctypes, methods)
-    config_path = root / "config.yml"
+    config_path = root / "config" / "config.yaml"
     if config_path.exists():
         config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
         port = config.get("project", {}).get("http_port")
         if port and contract["runtime"]["server_url"].startswith("${"):
             contract["runtime"]["server_url"] = f"http://127.0.0.1:{port}"
     if contract["runtime"]["server_url"].startswith("${"):
-        raise ValueError("runtime.server_url must resolve from ERPNEXT_API_URL or config.yml before generation")
+        raise ValueError("runtime.server_url must resolve from ERPNEXT_API_URL or config/config.yaml before generation")
     output.mkdir(parents=True, exist_ok=True)
     module_index: dict[str, list[str]] = {}
     for item in doctypes:
@@ -97,12 +99,32 @@ def generate(root: Path, output: Path) -> None:
         (module_dir / yaml_name).write_text(yaml.safe_dump(module_spec, sort_keys=False, allow_unicode=True), encoding="utf-8")
         module_files[module_name] = {"json": f"{artifact_prefix}/openapi/modules/{json_name}", "yaml": f"{artifact_prefix}/openapi/modules/{yaml_name}"}
     (output / "openapi" / "index.json").write_text(json.dumps({"modules": module_files}, indent=2, ensure_ascii=False), encoding="utf-8")
+    if handoff is not None:
+        write_handoff(handoff, spec, build_control_plane(contract["runtime"]["server_url"]))
     print(f"generated {len(doctypes)} doctypes and {len(methods)} methods")
+
+
+def check_handoff(root: Path) -> None:
+    expected = root / "contracts" / "openapi"
+    if not expected.is_dir():
+        raise ValueError("Missing committed contracts/openapi handoff artifacts")
+    with tempfile.TemporaryDirectory() as directory:
+        temporary = Path(directory)
+        generated = temporary / "generated"
+        handoff = temporary / "openapi"
+        generate(root, generated, handoff)
+        expected_files = {path.name for path in expected.iterdir() if path.is_file()}
+        actual_files = {path.name for path in handoff.iterdir() if path.is_file()}
+        if expected_files != actual_files:
+            raise ValueError("Committed OpenAPI handoff file set is stale")
+        stale = [name for name in sorted(actual_files) if (expected / name).read_bytes() != (handoff / name).read_bytes()]
+        if stale:
+            raise ValueError("Committed OpenAPI handoff artifacts are stale: " + ", ".join(stale))
 
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Inspect ERPNext source and generate integration artifacts")
-    parser.add_argument("command", choices=["validate", "inspect", "generate", "handbook"])
+    parser.add_argument("command", choices=["validate", "inspect", "generate", "check", "handbook"])
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args(argv)
@@ -115,8 +137,15 @@ def main(argv=None) -> int:
     elif args.command == "inspect":
         doctypes, methods = collect(root)
         print(json.dumps({"doctype_count": len(doctypes), "method_count": len(methods), "sample_methods": [m.dotted_path for m in methods[:20]]}, indent=2))
+    elif args.command == "check":
+        check_handoff(root)
+        print("committed OpenAPI handoff artifacts are current")
     else:
-        generate(root, (args.output or root / "contracts/generated").resolve())
+        generate(
+            root,
+            (args.output or root / "contracts/generated").resolve(),
+            root / "contracts" / "openapi",
+        )
         if args.command == "handbook":
-            print("OpenAPI/catalog artifacts generated; handbook source is docs/ERPNext_Integration_Handbook.md")
+            print("OpenAPI/catalog artifacts generated; handbook source is docs/Integration_Handbook.md")
     return 0

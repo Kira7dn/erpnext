@@ -1,6 +1,5 @@
 # Local workspace state
 .env
-config.yml
 .venv/
 .agent/
 .cache/

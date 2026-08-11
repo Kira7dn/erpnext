@@ -6,8 +6,8 @@ Tài liệu này mô tả kiến trúc tổng quan của lớp tương tác Open
 thái Letron ERP.
 
 OpenAPI là contract chung để các ứng dụng và hệ thống bên ngoài tương tác với
-ERPNext/Frappe. Tài liệu không mô tả source code, business workflow, field
-implementation, deployment hoặc chi tiết vận hành.
+ERPNext/Frappe. Tài liệu chốt các boundary và source of truth, nhưng không mô
+tả source code, field implementation hoặc runbook vận hành chi tiết.
 
 ## 2. Phạm vi
 
@@ -18,8 +18,8 @@ Kiến trúc tập trung vào:
 - integration boundary giữa consumer và ERPNext/Frappe;
 - sự khác nhau giữa curated contract và runtime catalog.
 
-Các hệ thống như Identity, Data, Event Delivery và hạ tầng triển khai không
-thuộc phạm vi của tài liệu này.
+Chi tiết triển khai Identity, Data, Event Delivery và hạ tầng không thuộc phạm
+vi; tài liệu chỉ ghi ranh giới sở hữu cần thiết để các lớp không chồng lấn.
 
 ## 3. System context
 
@@ -61,16 +61,18 @@ là một service độc lập.
 
 ## 5. Tổ chức OpenAPI theo module
 
-OpenAPI chính được tổ chức theo các module nghiệp vụ của ERPNext, ví dụ:
+OpenAPI public hiện được tổ chức đúng theo năm module nghiệp vụ:
 
 - Accounts;
-- Selling;
 - Buying;
+- Contacts;
+- Selling;
 - Stock;
-- Manufacturing;
-- Projects;
-- CRM;
-- Setup và System.
+
+Các module khác chỉ có thể xuất hiện trong runtime catalog để discovery; chúng
+không phải public module và không tự sinh route. Public contract hiện có đúng
+23 resource và 137 operation. Manufacturing không thuộc roadmap public hiện
+tại.
 
 Mỗi module có contract riêng cho các capability được chọn. Một operation chỉ
 được đưa vào OpenAPI module khi đã có contract rõ ràng về:
@@ -119,9 +121,28 @@ ERPNext/Frappe runtime
 7. Thay đổi nội bộ ERPNext không được làm thay đổi public contract nếu chưa có
    quyết định cập nhật contract.
 
-## 8. Trạng thái kiến trúc
+## 8. Configuration và policy boundary
 
-- OpenAPI curated là interaction contract chính.
+OpenAPI business contract và control plane cấu hình là hai boundary tách biệt:
+
+```text
+config/config.yaml  -> system/runtime reconcile
+config/policy.yaml  -> Company bootstrap + native business policy reconcile
+.env                -> secret resolution only
+ERPNext MariaDB     -> entity, master, transaction, ledger và runtime state
+```
+
+Một Docker project/Frappe site tương ứng một tenant và đúng một Company.
+`letron_api` chỉ điều phối native controller/DocType; không tạo business
+DocType, policy language hoặc workflow engine song song. System Manager có thể
+sửa đúng hai YAML bind-mounted qua fixed-path control API. Production deploy
+chỉ chạy `.\docker-start.ps1` trên Windows hoặc `./erpctl` trên Ubuntu, không
+truyền action.
+
+## 9. Trạng thái kiến trúc
+
+- OpenAPI curated gồm 5 module, 23 resource và 137 operation đã qua Docker
+  acceptance.
 - Runtime catalog là discovery artifact đầy đủ.
 - Các module được công bố tăng dần theo nhu cầu tích hợp.
 - Webhook, realtime hoặc consumer cụ thể chỉ thuộc OpenAPI contract khi
@@ -129,6 +150,20 @@ ERPNext/Frappe runtime
 - Phase 5 dùng `Letron Event Outbox` làm durable boundary: business transaction
   chỉ ghi queued state; worker gửi webhook/realtime sau commit, retry có giới hạn,
   và consumer deduplicate theo event ID. REST tiếp tục là source of truth.
+
+Business boundary và production implementation đã đóng các gap về artifact
+OpenAPI bền vững, control-plane typed contract, error contract, rollback
+YAML/DB, invariant liên file và production runtime profile. Ubuntu clean-host
+evidence còn được theo dõi trong mục
+[Audit bàn giao API, config và policy](ERP_PRD.md#audit-bàn-giao-api-config-và-policy)
+của PRD.
+
+Evidence 2026-08-12: host `52 passed, 5 deselected`, Docker integration
+`5 passed, 49 deselected`, public contract 137/137 operation `passed`, control
+plane 2 operation, backup/restore drill và Windows no-flag readiness đều pass.
+Policy runtime zero drift chỉ chứng minh 15 native document đã khai báo; không
+được suy diễn thành bao phủ toàn bộ setting ERPNext. Ubuntu clean-checkout vẫn
+là gate chưa có evidence.
 
 Các quyết định về business workflow, identity provider, data storage và cơ chế
 triển khai phải được ghi ở tài liệu chuyên biệt, không đưa vào kiến trúc

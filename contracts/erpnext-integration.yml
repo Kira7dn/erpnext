@@ -47,19 +47,10 @@ runtime:
   # typed modules stay available in catalog.json for discovery.
   public_modules:
     - Accounts
-    - Assets
     - Buying
-    - CRM
-    - Communication
     - Contacts
-    - Maintenance
-    - Manufacturing
-    - Projects
-    - Quality Management
     - Selling
     - Stock
-    - Subcontracting
-    - Support
   document_actions:
     - doctype: Sales Invoice
       module: Accounts
@@ -72,6 +63,21 @@ runtime:
       actions: [submit, cancel]
     - doctype: Purchase Order
       module: Buying
+      actions: [submit, cancel]
+    - doctype: Material Request
+      module: Stock
+      actions: [submit, cancel]
+    - doctype: Purchase Receipt
+      module: Stock
+      actions: [submit, cancel]
+    - doctype: Stock Entry
+      module: Stock
+      actions: [submit, cancel]
+    - doctype: Journal Entry
+      module: Accounts
+      actions: [submit, cancel]
+    - doctype: Payment Request
+      module: Accounts
       actions: [submit, cancel]
   include_methods:
     - letron_api.api.health
@@ -92,6 +98,18 @@ runtime:
       path: /api/v1/accounts/purchase-invoices
     - doctype: Payment Entry
       path: /api/v1/accounts/payment-entries
+    - doctype: Bank
+      path: /api/v1/accounts/banks
+    - doctype: Bank Account
+      path: /api/v1/accounts/bank-accounts
+    - doctype: Mode of Payment
+      path: /api/v1/accounts/modes-of-payment
+    - doctype: Cost Center
+      path: /api/v1/accounts/cost-centers
+    - doctype: Journal Entry
+      path: /api/v1/accounts/journal-entries
+    - doctype: Payment Request
+      path: /api/v1/accounts/payment-requests
     - doctype: Supplier
       path: /api/v1/buying/suppliers
     - doctype: Purchase Order
@@ -100,6 +118,18 @@ runtime:
       path: /api/v1/stock/items
     - doctype: Warehouse
       path: /api/v1/stock/warehouses
+    - doctype: Address
+      path: /api/v1/contacts/addresses
+    - doctype: Contact
+      path: /api/v1/contacts/contacts
+    - doctype: Material Request
+      path: /api/v1/stock/material-requests
+    - doctype: Purchase Receipt
+      path: /api/v1/stock/purchase-receipts
+    - doctype: Stock Entry
+      path: /api/v1/stock/stock-entries
+    - doctype: Item Price
+      path: /api/v1/stock/item-prices
 
 transport:
   rest: true
@@ -221,3 +251,73 @@ acceptance:
     getWarehouse: {status: passed, suite: extended-api}
     updateWarehouse: {status: passed, suite: extended-api}
     deleteWarehouse: {status: passed, suite: extended-api}
+    listAddress: {status: passed, suite: extended-api}
+    createAddress: {status: passed, suite: extended-api}
+    getAddress: {status: passed, suite: extended-api}
+    updateAddress: {status: passed, suite: extended-api}
+    deleteAddress: {status: passed, suite: extended-api}
+    listContact: {status: passed, suite: extended-api}
+    createContact: {status: passed, suite: extended-api}
+    getContact: {status: passed, suite: extended-api}
+    updateContact: {status: passed, suite: extended-api}
+    deleteContact: {status: passed, suite: extended-api}
+    listMaterialRequest: {status: passed, suite: extended-api}
+    createMaterialRequest: {status: passed, suite: extended-api}
+    getMaterialRequest: {status: passed, suite: extended-api}
+    updateMaterialRequest: {status: passed, suite: extended-api}
+    deleteMaterialRequest: {status: passed, suite: extended-api}
+    submitMaterialRequest: {status: passed, suite: extended-api}
+    cancelMaterialRequest: {status: passed, suite: extended-api}
+    listPurchaseReceipt: {status: passed, suite: extended-api}
+    createPurchaseReceipt: {status: passed, suite: extended-api}
+    getPurchaseReceipt: {status: passed, suite: extended-api}
+    updatePurchaseReceipt: {status: passed, suite: extended-api}
+    deletePurchaseReceipt: {status: passed, suite: extended-api}
+    submitPurchaseReceipt: {status: passed, suite: extended-api}
+    cancelPurchaseReceipt: {status: passed, suite: extended-api}
+    listStockEntry: {status: passed, suite: extended-api}
+    createStockEntry: {status: passed, suite: extended-api}
+    getStockEntry: {status: passed, suite: extended-api}
+    updateStockEntry: {status: passed, suite: extended-api}
+    deleteStockEntry: {status: passed, suite: extended-api}
+    submitStockEntry: {status: passed, suite: extended-api}
+    cancelStockEntry: {status: passed, suite: extended-api}
+    listItemPrice: {status: passed, suite: extended-api}
+    createItemPrice: {status: passed, suite: extended-api}
+    getItemPrice: {status: passed, suite: extended-api}
+    updateItemPrice: {status: passed, suite: extended-api}
+    deleteItemPrice: {status: passed, suite: extended-api}
+    listBank: {status: passed, suite: extended-api}
+    createBank: {status: passed, suite: extended-api}
+    getBank: {status: passed, suite: extended-api}
+    updateBank: {status: passed, suite: extended-api}
+    deleteBank: {status: passed, suite: extended-api}
+    listBankAccount: {status: passed, suite: extended-api}
+    createBankAccount: {status: passed, suite: extended-api}
+    getBankAccount: {status: passed, suite: extended-api}
+    updateBankAccount: {status: passed, suite: extended-api}
+    deleteBankAccount: {status: passed, suite: extended-api}
+    listModeofPayment: {status: passed, suite: extended-api}
+    createModeofPayment: {status: passed, suite: extended-api}
+    getModeofPayment: {status: passed, suite: extended-api}
+    updateModeofPayment: {status: passed, suite: extended-api}
+    deleteModeofPayment: {status: passed, suite: extended-api}
+    listCostCenter: {status: passed, suite: extended-api}
+    createCostCenter: {status: passed, suite: extended-api}
+    getCostCenter: {status: passed, suite: extended-api}
+    updateCostCenter: {status: passed, suite: extended-api}
+    deleteCostCenter: {status: passed, suite: extended-api}
+    listJournalEntry: {status: passed, suite: extended-api}
+    createJournalEntry: {status: passed, suite: extended-api}
+    getJournalEntry: {status: passed, suite: extended-api}
+    updateJournalEntry: {status: passed, suite: extended-api}
+    deleteJournalEntry: {status: passed, suite: extended-api}
+    submitJournalEntry: {status: passed, suite: extended-api}
+    cancelJournalEntry: {status: passed, suite: extended-api}
+    listPaymentRequest: {status: passed, suite: extended-api}
+    createPaymentRequest: {status: passed, suite: extended-api}
+    getPaymentRequest: {status: passed, suite: extended-api}
+    updatePaymentRequest: {status: passed, suite: extended-api}
+    deletePaymentRequest: {status: passed, suite: extended-api}
+    submitPaymentRequest: {status: passed, suite: extended-api}
+    cancelPaymentRequest: {status: passed, suite: extended-api}

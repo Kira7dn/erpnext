@@ -178,13 +178,26 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
     schemas = {names[dt.name]: _schema(dt, names) for dt in doctypes if dt.name in public_names}
     schemas.update({
         "FrappeResponse": {"type": "object", "properties": {"message": {}}, "required": ["message"]},
-        "FrappeError": {"type": "object", "properties": {"exc_type": {"type": "string"}, "exception": {"type": "string"}, "_server_messages": {"type": "string"}}},
+        "FrappeError": {"type": "object", "properties": {"exc_type": {"type": "string"}, "exception": {"type": "string"}, "_server_messages": {"type": "string"}, "request_id": {"type": "string"}}},
         "ResourceListResponse": {"type": "object", "properties": {"data": {"type": "array", "items": {"type": "object"}}, "message": {}}},
         "FileUploadResponse": {"type": "object", "properties": {"file_url": {"type": "string"}, "file_name": {"type": "string"}, "message": {}}},
         "PageInfo": {"type": "object", "properties": {"limit_start": {"type": "integer"}, "limit_page_length": {"type": "integer"}}},
+        "RuntimeStatus": {"type": "object", "properties": {"ok": {"type": "boolean"}, "status": {"type": "string"}, "version": {"type": "integer"}, "erpnext_version": {"type": "string"}, "sha256": {"type": "string"}, "drift_count": {"type": "integer"}}, "required": ["ok"]},
+        "HealthResponse": {"type": "object", "properties": {"message": {"type": "object", "properties": {"ok": {"type": "boolean"}, "app": {"type": "string"}, "site": {"type": "string"}, "frappe_version": {"type": ["string", "null"]}, "installed_apps": {"type": "array", "items": {"type": "string"}}, "bootstrap": {"$ref": "#/components/schemas/RuntimeStatus"}, "config": {"$ref": "#/components/schemas/RuntimeStatus"}, "policy": {"$ref": "#/components/schemas/RuntimeStatus"}, "configuration_bundle": {"$ref": "#/components/schemas/RuntimeStatus"}}, "required": ["ok", "app", "bootstrap", "config", "policy", "configuration_bundle"]}}, "required": ["message"]},
     })
-    error = {"400": {"description": "Frappe error", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/FrappeError"}}}}, "401": {"description": "Authentication required"}, "403": {"description": "Permission denied"}, "404": {"description": "Resource not found"}}
-    request_headers = [{"$ref": "#/components/parameters/RequestId"}, {"$ref": "#/components/parameters/IdempotencyKey"}]
+    error_schema = {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/FrappeError"}}}}
+    error = {
+        "400": {"description": "Invalid request", **error_schema},
+        "401": {"description": "Authentication required", **error_schema},
+        "403": {"description": "Permission denied", **error_schema},
+        "404": {"description": "Resource not found", **error_schema},
+        "409": {"description": "Idempotency or optimistic concurrency conflict", **error_schema},
+        "417": {"description": "Native Frappe validation failure", **error_schema},
+        "429": {"description": "Rate limited", **error_schema},
+        "500": {"description": "Server or rollback failure", **error_schema},
+    }
+    request_headers = [{"$ref": "#/components/parameters/RequestId"}]
+    write_headers = [*request_headers, {"$ref": "#/components/parameters/IdempotencyKey"}]
     list_parameters = [
         {"name": "fields", "in": "query", "schema": {"type": "string"}, "description": "JSON field-name array"},
         {"name": "filters", "in": "query", "schema": {"type": "string"}, "description": "JSON Frappe filters"},
@@ -202,14 +215,15 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
         if method.dotted_path not in include:
             continue
         body, source = _rpc_body(method)
-        operation = {"tags": ["Whitelisted methods"], "operationId": method.dotted_path.replace(".", "_"), "parameters": request_headers, "requestBody": _json_body(body, bool(method.parameters)), "responses": {**_response("Frappe method response", {"$ref": "#/components/schemas/FrappeResponse"}), **error}, "x-source": method.source, "x-schema-source": source}
+        response_schema = {"$ref": "#/components/schemas/HealthResponse"} if method.dotted_path == "letron_api.api.health" else {"$ref": "#/components/schemas/FrappeResponse"}
+        operation = {"tags": ["Whitelisted methods"], "operationId": method.dotted_path.replace(".", "_"), "parameters": request_headers, "requestBody": _json_body(body, bool(method.parameters)), "responses": {**_response("Frappe method response", response_schema), **error}, "x-source": method.source, "x-schema-source": source}
         if method.allow_guest:
             operation["security"] = []
         verbs = method.methods or ["GET", "POST"]
         path = f"/api/method/{method.dotted_path}"
         paths.setdefault(path, {})
         for verb in verbs:
-            paths[path][verb.lower()] = {**operation, "operationId": f"{operation['operationId']}_{verb.lower()}"}
+            paths[path][verb.lower()] = {**operation, "parameters": write_headers if verb.upper() not in {"GET", "HEAD"} else request_headers, "operationId": f"{operation['operationId']}_{verb.lower()}"}
     module_names = sorted({dt.module or "Uncategorized" for dt in doctypes})
     for dt in doctypes:
         if dt.name not in aliases:
@@ -221,6 +235,7 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
         route = aliases[dt.name]
         detail_route = route + "/{name}"
         detail_parameters = [{"name": "name", "in": "path", "required": True, "schema": {"type": "string"}}, *request_headers]
+        detail_write_parameters = [{"name": "name", "in": "path", "required": True, "schema": {"type": "string"}}, *write_headers]
         typed_schema = {"$ref": f"#/components/schemas/{names[dt.name]}"}
         write_schema = _write_schema(schemas[names[dt.name]])
         tag = f"Module: {dt.module or 'Uncategorized'}"
@@ -229,17 +244,17 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
         request_body["content"]["application/json"]["example"] = _example(dt, write_schema)["example"]
         paths[route] = {
             "get": {"tags": [tag], "summary": f"List {dt.name} records", "description": f"List typed {dt.name} documents.", "operationId": f"list{names[dt.name]}", "parameters": [*request_headers, *list_parameters], "responses": {**_response("Typed resource list", list_schema), **error}},
-            "post": {"tags": [tag], "summary": f"Create {dt.name}", "description": f"Create a {dt.name} using the runtime DocType schema.", "operationId": f"create{names[dt.name]}", "parameters": request_headers, "requestBody": request_body, "responses": {**_response("Created typed resource", _document_response(typed_schema)), **error}},
+            "post": {"tags": [tag], "summary": f"Create {dt.name}", "description": f"Create a {dt.name} using the runtime DocType schema.", "operationId": f"create{names[dt.name]}", "parameters": write_headers, "requestBody": request_body, "responses": {**_response("Created typed resource", _document_response(typed_schema)), **error}},
         }
         paths[detail_route] = {
             "get": {"tags": [f"Module: {dt.module or 'Uncategorized'}"], "operationId": f"get{names[dt.name]}", "parameters": detail_parameters, "responses": {**_response("Typed resource", _document_response(typed_schema)), **error}},
-            "put": {"tags": [f"Module: {dt.module or 'Uncategorized'}"], "operationId": f"update{names[dt.name]}", "parameters": detail_parameters, "requestBody": _json_body(write_schema), "responses": {**_response("Updated typed resource", _document_response(typed_schema)), **error}},
-            "delete": {"tags": [f"Module: {dt.module or 'Uncategorized'}"], "operationId": f"delete{names[dt.name]}", "parameters": detail_parameters, "responses": {**_response("Deleted typed resource", {"$ref": "#/components/schemas/FrappeResponse"}), **error}},
+            "put": {"tags": [f"Module: {dt.module or 'Uncategorized'}"], "operationId": f"update{names[dt.name]}", "parameters": detail_write_parameters, "requestBody": _json_body(write_schema), "responses": {**_response("Updated typed resource", _document_response(typed_schema)), **error}},
+            "delete": {"tags": [f"Module: {dt.module or 'Uncategorized'}"], "operationId": f"delete{names[dt.name]}", "parameters": detail_write_parameters, "responses": {**_response("Deleted typed resource", {"$ref": "#/components/schemas/FrappeResponse"}), **error}},
         }
         for action in next((item["actions"] for item in runtime.get("document_actions", []) if item["doctype"] == dt.name), []):
-            paths[f"{detail_route}/{action}"] = {"post": {"tags": [f"Module: {dt.module or 'Uncategorized'}", "Document actions"], "operationId": f"{action}{names[dt.name]}", "parameters": detail_parameters, "responses": {**_response(f"{action.title()} document", _document_response(typed_schema, "message")), **error}, "x-frappe-action": action}}
+            paths[f"{detail_route}/{action}"] = {"post": {"tags": [f"Module: {dt.module or 'Uncategorized'}", "Document actions"], "operationId": f"{action}{names[dt.name]}", "parameters": detail_write_parameters, "responses": {**_response(f"{action.title()} document", _document_response(typed_schema, "message")), **error}, "x-frappe-action": action}}
     if module_name is None:
-        paths["/api/method/upload_file"] = {"post": {"tags": ["Files"], "operationId": "uploadFile", "parameters": request_headers, "requestBody": {"required": True, "content": {"multipart/form-data": {"schema": {"type": "object", "required": ["file"], "properties": {"file": {"type": "string", "format": "binary"}, "is_private": {"type": "boolean"}, "doctype": {"type": "string"}, "docname": {"type": "string"}}}}}}, "responses": {**_response("Uploaded file", {"$ref": "#/components/schemas/FileUploadResponse"}), **error}}}
+        paths["/api/method/upload_file"] = {"post": {"tags": ["Files"], "operationId": "uploadFile", "parameters": write_headers, "requestBody": {"required": True, "content": {"multipart/form-data": {"schema": {"type": "object", "required": ["file"], "properties": {"file": {"type": "string", "format": "binary"}, "is_private": {"type": "boolean"}, "doctype": {"type": "string"}, "docname": {"type": "string"}}}}}}, "responses": {**_response("Uploaded file", {"$ref": "#/components/schemas/FileUploadResponse"}), **error}}}
     server = os.environ.get("ERPNEXT_API_URL") or runtime["server_url"]
     if server.startswith("${"):
         server = runtime["server_url"]

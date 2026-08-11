@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG="$ROOT/config/config.yaml"
+POLICY="$ROOT/config/policy.yaml"
+COMPOSE="$ROOT/docker-compose.yml"
+ACCEPTANCE_COMPOSE="$ROOT/docker-compose.acceptance.yml"
+ACTION="${1:-up}"
+
+if [[ "${LETRON_ACCEPTANCE:-0}" == "1" ]]; then
+  : "${LETRON_ACCEPTANCE_CONFIG_DIR:?LETRON_ACCEPTANCE_CONFIG_DIR is required in acceptance mode}"
+  CONFIG="$LETRON_ACCEPTANCE_CONFIG_DIR/config.yaml"
+  POLICY="$LETRON_ACCEPTANCE_CONFIG_DIR/policy.yaml"
+fi
+
+export PYTHONPATH="$ROOT/apps/letron_api"
+
+case "$ACTION" in
+  config-validate)
+    uv run python -m letron_api.system_config validate --path "$CONFIG"
+    exit 0
+    ;;
+  policy-validate)
+    uv run python -m letron_api.policy validate --path "$POLICY"
+    exit 0
+    ;;
+esac
+
+uv run python -m letron_api.system_config validate --path "$CONFIG"
+uv run python -m letron_api.policy validate --path "$POLICY"
+uv run python -m letron_api.system_config bundle-validate --config "$CONFIG" --policy "$POLICY"
+eval "$(uv run python -m letron_api.system_config env --path "$CONFIG" --format posix)"
+
+compose=(docker compose --project-name "$PROJECT_NAME" -f "$COMPOSE")
+if [[ "${LETRON_ACCEPTANCE:-0}" == "1" ]]; then compose+=(-f "$ACCEPTANCE_COMPOSE"); fi
+
+readiness() {
+  local deadline=$((SECONDS + 180))
+  while (( SECONDS < deadline )); do
+    if response="$(curl --fail --silent --show-error "http://127.0.0.1:$HTTP_PORT/api/method/letron_api.api.health" 2>/dev/null)" \
+      && [[ "$response" =~ \"ok\"[[:space:]]*:[[:space:]]*true ]]; then
+      "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.system_config.audit
+      "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.api.runtime_snapshot
+      response="$(curl --fail --silent --show-error "http://127.0.0.1:$HTTP_PORT/api/method/letron_api.api.health")"
+      [[ "$response" =~ \"restart_required\"[[:space:]]*:[[:space:]]*false ]]
+      echo "HTTP health verified: http://127.0.0.1:$HTTP_PORT/api/method/letron_api.api.health"
+      return
+    fi
+    sleep 2
+  done
+  "${compose[@]}" ps -a
+  "${compose[@]}" logs --tail=80 backend frontend config-sync policy-sync
+  echo "Runtime did not reach zero-drift HTTP readiness within 180 seconds" >&2
+  return 1
+}
+
+case "$ACTION" in
+  config)
+    "${compose[@]}" config --quiet
+    echo "Compose, config and policy YAML are valid (secrets omitted)"
+    ;;
+  up)
+    "${compose[@]}" config --quiet
+    "${compose[@]}" up -d --remove-orphans
+    "${compose[@]}" restart backend frontend websocket scheduler queue-short queue-long
+    "${compose[@]}" ps
+    readiness
+    ;;
+  down) "${compose[@]}" down ;;
+  restart)
+    "${compose[@]}" down
+    "${compose[@]}" up -d
+    "${compose[@]}" ps
+    readiness
+    ;;
+  ps) "${compose[@]}" ps -a ;;
+  logs) "${compose[@]}" logs --tail=100 ;;
+  bootstrap) "${compose[@]}" run --no-deps --rm policy-bootstrap ;;
+  inspect) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.api.runtime_snapshot ;;
+  config-plan) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.system_config.plan ;;
+  config-apply) "${compose[@]}" run --no-deps --rm config-sync ;;
+  policy-export)
+    temporary_policy="$(mktemp "$ROOT/config/.policy.yaml.XXXXXX")"
+    trap 'rm -f "$temporary_policy"' EXIT
+    "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.policy.export_current_base64 \
+      | tr -d '\r\n' | base64 --decode >"$temporary_policy"
+    uv run python -m letron_api.policy validate --path "$temporary_policy"
+    mv -f "$temporary_policy" "$POLICY"
+    trap - EXIT
+    echo "Exported native ERPNext business policy to $POLICY"
+    ;;
+  policy-plan) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.policy.plan ;;
+  policy-apply) "${compose[@]}" run --no-deps --rm policy-sync ;;
+  backup) "${compose[@]}" run --rm -e BACKUP_ENABLED=True -e BACKUP_ONCE=True backup ;;
+  backup-verify) "${compose[@]}" --profile operations run --rm --no-deps backup-verify ;;
+  verify) readiness ;;
+  *)
+    echo "Usage: ./erpctl {config|up|down|restart|ps|logs|bootstrap|inspect|verify|backup|backup-verify|config-plan|config-apply|policy-export|policy-plan|policy-apply}" >&2
+    exit 2
+    ;;
+esac

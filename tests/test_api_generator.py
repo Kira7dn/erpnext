@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -5,6 +6,7 @@ import pytest
 
 from lib.api_generator.cli import collect, expand_typed_modules
 from lib.api_generator.contract import load_contract
+from lib.api_generator.handoff import build_control_plane
 from lib.api_generator.openapi import build_openapi
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,15 +39,34 @@ def test_openapi_contains_frappe_contract_paths():
         "/api/v1/accounts/sales-invoices",
         "/api/v1/accounts/purchase-invoices",
         "/api/v1/accounts/payment-entries",
+        "/api/v1/accounts/banks",
+        "/api/v1/accounts/bank-accounts",
+        "/api/v1/accounts/modes-of-payment",
+        "/api/v1/accounts/cost-centers",
+        "/api/v1/accounts/journal-entries",
+        "/api/v1/accounts/payment-requests",
         "/api/v1/buying/suppliers",
         "/api/v1/buying/purchase-orders",
         "/api/v1/stock/items",
         "/api/v1/stock/warehouses",
+        "/api/v1/contacts/addresses",
+        "/api/v1/contacts/contacts",
+        "/api/v1/stock/material-requests",
+        "/api/v1/stock/purchase-receipts",
+        "/api/v1/stock/stock-entries",
+        "/api/v1/stock/item-prices",
     }
     assert expected.issubset(spec["paths"])
     assert "/api/v1/accounts/purchase-invoices/{name}/cancel" in spec["paths"]
     assert "/api/v1/selling/sales-orders/{name}/submit" in spec["paths"]
     assert "/api/v1/buying/purchase-orders/{name}/cancel" in spec["paths"]
+    assert "/api/v1/stock/material-requests/{name}/submit" in spec["paths"]
+    assert "/api/v1/stock/purchase-receipts/{name}/cancel" in spec["paths"]
+    assert "/api/v1/stock/stock-entries/{name}/submit" in spec["paths"]
+    assert "/api/v1/accounts/journal-entries/{name}/submit" in spec["paths"]
+    assert "/api/v1/accounts/payment-requests/{name}/cancel" in spec["paths"]
+    assert not any("dynamic-links" in path for path in spec["paths"])
+    assert not any("stock-reconciliations" in path for path in spec["paths"])
     assert "token api_key:api_secret" in spec["components"]["securitySchemes"]["frappeToken"]["description"]
     list_parameters = spec["paths"]["/api/v1/stock/items"]["get"]["parameters"]
     assert {item.get("name") for item in list_parameters if "name" in item} >= {
@@ -60,14 +81,33 @@ def test_openapi_contains_frappe_contract_paths():
         for verb, operation in path_item.items()
         if verb in {"get", "post", "put", "patch", "delete"}
     ]
-    assert len(operations) == 67
-    assert all(operation["x-test-status"] == "passed" for operation in operations)
+    assert len(contract["runtime"]["public_resources"]) == 23
+    assert {
+        item.module
+        for item in doctypes
+        if item.name in {resource["doctype"] for resource in contract["runtime"]["public_resources"]}
+    } == {"Accounts", "Buying", "Contacts", "Selling", "Stock"}
+    assert len(operations) == 137
+    status_counts = {
+        status: sum(operation["x-test-status"] == status for operation in operations)
+        for status in ("passed", "partial", "not-tested", "blocked")
+    }
+    assert status_counts == {"passed": 137, "partial": 0, "not-tested": 0, "blocked": 0}
     assert all(operation["x-test-level"] == "docker-runtime" for operation in operations)
     assert all(operation["x-test-evidence"]["test"] for operation in operations)
-    assert spec["x-acceptance-summary"] == {"passed": 67, "partial": 0, "not-tested": 0, "blocked": 0}
+    assert spec["x-acceptance-summary"] == status_counts
     assert spec["paths"]["/api/v1/accounts/sales-invoices"]["post"]["x-test-status"] == "passed"
     assert spec["paths"]["/api/v1/accounts/purchase-invoices"]["get"]["x-test-status"] == "passed"
     assert spec["paths"]["/api/v1/accounts/payment-entries/{name}"]["put"]["x-test-status"] == "passed"
+    expected_errors = {"400", "401", "403", "404", "409", "417", "429", "500"}
+    assert expected_errors.issubset(
+        spec["paths"]["/api/v1/accounts/journal-entries"]["post"]["responses"]
+    )
+    list_headers = spec["paths"]["/api/v1/stock/items"]["get"]["parameters"]
+    create_headers = spec["paths"]["/api/v1/stock/items"]["post"]["parameters"]
+    assert not any(item.get("$ref", "").endswith("IdempotencyKey") for item in list_headers)
+    assert any(item.get("$ref", "").endswith("IdempotencyKey") for item in create_headers)
+    assert spec["paths"]["/api/method/letron_api.api.health"]["get"]["responses"]["200"]["content"]["application/json"]["schema"] == {"$ref": "#/components/schemas/HealthResponse"}
 
     aggregate_status = {
         operation["operationId"]: (
@@ -114,3 +154,24 @@ def test_contract_rejects_wrong_transport_type():
         path.write_text(source, encoding="utf-8")
         with pytest.raises(TypeError, match="transport.webhook"):
             load_contract(path)
+
+
+def test_control_plane_is_typed_and_separate_from_business_operations():
+    spec = build_control_plane("http://127.0.0.1:8080")
+
+    assert set(spec["paths"]) == {
+        "/api/method/letron_api.config_control.get_configuration",
+        "/api/method/letron_api.config_control.put_configuration",
+    }
+    put = spec["paths"]["/api/method/letron_api.config_control.put_configuration"]["put"]
+    assert put["requestBody"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/PutConfigurationRequest"
+    }
+    assert {"409", "417", "500"}.issubset(put["responses"])
+
+
+def test_committed_handoff_manifest_keeps_business_and_control_counts_separate():
+    manifest = json.loads((ROOT / "contracts" / "openapi" / "manifest.json").read_text(encoding="utf-8"))
+
+    assert manifest["artifacts"]["public"]["operations"] == 137
+    assert manifest["artifacts"]["control-plane"]["operations"] == 2

@@ -1,0 +1,175 @@
+openapi: 3.1.0
+info:
+  title: Letron ERPNext Configuration Control Plane
+  version: 1.0.0
+  description: Administrative fixed-path API. This is not part of the 137-operation
+    business contract.
+servers:
+- url: http://127.0.0.1:8080
+security:
+- frappeToken: []
+paths:
+  /api/method/letron_api.config_control.get_configuration:
+    get:
+      operationId: getConfiguration
+      tags:
+      - Configuration control
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - name: kind
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/ConfigurationKind'
+      responses:
+        '200':
+          description: Current validated YAML source
+          content:
+            application/json:
+              schema: &id001
+                $ref: '#/components/schemas/ConfigurationResponse'
+        '400': &id002
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeError'
+        '401': &id003
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeError'
+        '403': &id004
+          description: System Manager required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeError'
+        '409': &id005
+          description: Source hash or immutable bootstrap conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeError'
+        '417': &id006
+          description: YAML, invariant, or native validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeError'
+        '500': &id007
+          description: Apply and rollback failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeError'
+  /api/method/letron_api.config_control.put_configuration:
+    put:
+      operationId: putConfiguration
+      tags:
+      - Configuration control
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutConfigurationRequest'
+      responses:
+        '200':
+          description: Applied and verified desired state
+          content:
+            application/json:
+              schema: *id001
+        '400': *id002
+        '401': *id003
+        '403': *id004
+        '409': *id005
+        '417': *id006
+        '500': *id007
+components:
+  securitySchemes:
+    frappeToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'Frappe token authentication: token api_key:api_secret; System
+        Manager required'
+  parameters:
+    RequestId:
+      name: X-Request-Id
+      in: header
+      schema:
+        type: string
+  schemas:
+    ConfigurationKind:
+      type: string
+      enum:
+      - config
+      - policy
+    PutConfigurationRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - kind
+      - content
+      - expected_source_sha256
+      properties:
+        kind:
+          $ref: '#/components/schemas/ConfigurationKind'
+        content:
+          type: string
+          maxLength: 2097152
+          description: UTF-8 YAML; resolved secrets are forbidden
+        expected_source_sha256:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        apply_now:
+          type: boolean
+          default: true
+          description: False is restricted to developer test sites
+    ConfigurationState:
+      type: object
+      required:
+      - kind
+      - source_sha256
+      - state_sha256
+      properties:
+        ok:
+          type: boolean
+        kind:
+          $ref: '#/components/schemas/ConfigurationKind'
+        content:
+          type: string
+        source_sha256:
+          type: string
+        state_sha256:
+          type: string
+        applied:
+          type: integer
+        drift_count:
+          type:
+          - integer
+          - 'null'
+        restart_required:
+          type: boolean
+    ConfigurationResponse:
+      type: object
+      required:
+      - message
+      properties:
+        message:
+          $ref: '#/components/schemas/ConfigurationState'
+    FrappeError:
+      type: object
+      properties:
+        exc_type:
+          type: string
+        exception:
+          type: string
+        _server_messages:
+          type: string
+        request_id:
+          type: string
