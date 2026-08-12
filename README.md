@@ -53,12 +53,16 @@ Trạng thái sản phẩm hiện tại:
 
 | Hạng mục | Trạng thái |
 |---|---|
-| Business API Phase 1–7 | `COMPLETE` — 5 module, 23 resource, 137 operation |
-| Phase 8 policy wrapper | `IN_PROGRESS` — nền policy pass; còn controller-effect acceptance |
+| Business API Phase 1–10 | `COMPLETE` — 5 module, 29 resource, 175 operation |
+| Phase 10 CRM pre-order | `COMPLETE` — 4 resource, 20 operation đã `passed` |
+| Phase 11 Stock traceability | `COMPLETE` — 8 resource, 40 CRUD operation contract mở; runtime status hiện tại `215 passed / 0 not-tested` |
+| Phase 8 policy wrapper | `COMPLETE` — 56 source registry-driven, controller effect và rollback pass |
 | Managed production policy | 14 native document thật; conditional coverage dùng disposable fixture |
-| Windows/Docker baseline | `VERIFIED` |
+| Windows/Docker baseline | `VERIFIED` — backup integrity và restore drill pass ngày 2026-08-12 |
 | Phase 8 host signature | `WINDOWS_DOCKER` — Ubuntu không thuộc gate Phase 8 |
-| Project completion | `NOT COMPLETE` |
+| Phase 9 Accounts reconciliation | `COMPLETE` — registry policy full node và Accounts acceptance pass trên cùng revision |
+| Phase 12 Final production handoff | `IN_PROGRESS` — cần chạy gate release theo kế hoạch |
+| Project completion | `NOT COMPLETE` — Phase 9–12 còn mở |
 
 Target boundary: `config.yaml` sở hữu system/runtime; `policy.yaml` sở hữu
 Company bootstrap, country, currency và business policy; `.env` giữ secret;
@@ -73,6 +77,7 @@ Tài liệu chính:
 - [Integration handbook](docs/Integration_Handbook.md)
 - [Inventory policy trong phạm vi sản phẩm](docs/Configuration_Inventory.md)
 - [Audit bàn giao API/config/policy](docs/ERP_PRD.md#audit-bàn-giao-api-config-và-policy)
+- [Phase 12 handoff playbook](docs/Phase12_Handover.md)
 
 ## Cấu trúc monorepo
 
@@ -161,7 +166,8 @@ PUT nhận `kind`, nội dung UTF-8 `content`, `expected_source_sha256` và
 `apply_now`. Production luôn apply ngay; thay Company identity bị từ chối 409.
 Nếu native apply lỗi, API phục hồi cả YAML và runtime cũ rồi xác nhận readback.
 API này không phải public business contract,
-vì vậy catalog vẫn đúng 23 resource/137 operation. Thay đổi cần recreate
+vì vậy catalog vẫn đúng public contract hiện tại (37 resource, 215 operation).
+Tất cả 215 operations đều đang `passed`. Thay đổi cần recreate
 container được trả về bằng `restart_required`; operator chạy lại
 `.\docker-start.ps1` hoặc `./erpctl`, không cần truyền action.
 
