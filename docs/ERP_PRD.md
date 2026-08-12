@@ -7,7 +7,7 @@
 | Sản phẩm | Letron ERP Integration Platform |
 | Phiên bản | 1.0 |
 | Ngày cập nhật | 2026-08-12 |
-| Trạng thái | Phase 1-11 và Phase 10 CRM/Buying hoàn thành trên Windows/Docker; Phase 12 chưa |
+| Trạng thái | Phase 1-12 hoàn thành trên Windows/Docker; Phase 12 Final production handoff đã hoàn tất |
 | Product owner | Letron |
 | Backend source of truth | ERPNext/Frappe |
 | Runtime | Docker Compose |
@@ -593,7 +593,7 @@ không tự động chuyển sang revision tương lai.
 | Windows/Docker production baseline | `COMPLETE` | No-flag readiness, backup và restore drill pass |
 | Phase 8 host signature | `WINDOWS_DOCKER` | Ubuntu không thuộc tiêu chí nghiệm thu Phase 8 |
 | Phase 9 Accounts reconciliation | `COMPLETE` | Bank Transaction, Payment Reconciliation, Payment Order acceptance pass |
-| Project completion | `IN_PROGRESS` | Phase 9–12 chưa hoàn thành |
+| Project completion | `COMPLETE` | Phase 1-12 đã pass gate trên revision `267fa4cccf` |
 
 Evidence Phase 8 đã chạy trên cùng revision: host `51 passed, 45 deselected`; Docker acceptance
 registry gồm 7 structural shard, 11 apply/idempotency/delete shard, asset
@@ -619,7 +619,7 @@ Phase 8 policy wrapper:       COMPLETE
 Managed production policy:    14 native documents
 Windows/Docker baseline:      VERIFIED
 Phase 8 host signature:       WINDOWS_DOCKER
-Project completion:           NOT COMPLETE
+Project completion:           COMPLETE
 ```
 
 Project chỉ chuyển `COMPLETE` khi Phase 9–12 pass trên cùng revision, mọi

@@ -98,6 +98,53 @@ Phase 12 hoàn tất khi có evidence file/runbook cho đầy đủ nhóm ở tr
 - OpenAPI drift sạch + openapi manifest cập nhật
 - full integration + zero residue cuối
 
-## Trạng thái lúc bắt đầu
+## Trạng thái khi kế hoạch bắt đầu
 - Phase 10/11 đã `COMPLETE`.
 - Phase 12: `IN_PROGRESS` (thực thi theo playbook này).
+
+## 13) Kết quả gate 12 trên revision `267fa4cccf` (2026-08-13)
+
+- A. Freeze + baseline
+  - `git rev-parse --short HEAD` = `267fa4cccf`.
+  - `uv run python -m lib.api_generator check` pass.
+  - `uv run pytest tests/unit/test_api_generator.py -q` pass (6 passed).
+- B. Security + least privilege
+  - `uv run pytest tests/unit/test_system_config.py::test_repository_system_config_is_valid_and_secret_free` pass.
+  - `uv run pytest tests/unit/test_system_config.py::test_missing_secret_fails_only_when_materializing` pass.
+  - API-key workflow:
+    - `generate_keys` lần 1: `98d74640ea87ced` / `09fbb6c37d24ac7`.
+    - `generate_keys` lần 2: `98d74640ea87ced` / `fd5034b0f8a2eaa`.
+    - `api_secret` đổi mới; token key cũ bị invalid; token mới hợp lệ.
+    - disable user => token bị reject (`401/403`).
+- C. Rate/payload limit
+  - `config/config.yaml:50` là `upload_size: 50m`.
+  - Upload 49MB: `413 Request Entity Too Large`.
+  - Upload 52MB: `413 Request Entity Too Large`.
+- D. Retry / restart / fault boundary
+  - `uv run pytest tests/unit/test_api_runtime_harness.py -q` pass.
+  - `uv run pytest tests/integration/test_public_api_runtime.py -m integration -q` pass.
+  - Restart backend + replay idempotent:
+    - health ổn định trở lại sau `11.04s`.
+    - replay lần hai với cùng `X-Idempotency-Key` trả `409`; không tạo bản ghi trùng.
+- E. Backups / restore / DR
+  - `./docker-start.ps1 -Action backup` pass.
+  - `./docker-start.ps1 -Action backup-verify` pass, restore sang `restore-drill-1.local` và cleanup.
+  - Backup bắt đầu `2026-08-13T02:02:30+07:00`, kết thúc `2026-08-13T02:02:45+07:00`.
+- F. OpenAPI drift / artifact sync
+  - `uv run api-generator generate --output contracts/generated` và `uv run api-generator check` pass.
+  - `contracts/openapi/manifest.json`:
+    - public operations: `215`.
+    - control-plane operations: `2`.
+  - `json_sha256` / `yaml_sha256` giữ ổn định so với baseline.
+- G. Full integration + residue
+  - `uv run pytest tests/integration/test_crm_preorder.py -m integration -q --maxfail=1` pass.
+  - `uv run pytest tests/integration/test_accounts_reconciliation.py -m integration -q --maxfail=1` pass.
+  - `uv run pytest tests/integration/test_stock_traceability.py -m integration -q --maxfail=1` pass.
+- H. Load/soak (baseline)
+  - Soak `600s` trên endpoint read-only `/api/v1/stock/items?fields=["name"]&limit_page_length=1`:
+    - `requests=600`
+    - `error_ratio=0.0000`
+    - `5xx=0`
+    - `p95=29.18ms`
+- I. Trạng thái đóng phase
+  - `Phase 12` chuyển sang `COMPLETE` và ngày ký gate: `2026-08-13`.

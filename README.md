@@ -61,8 +61,8 @@ Trạng thái sản phẩm hiện tại:
 | Windows/Docker baseline | `VERIFIED` — backup integrity và restore drill pass ngày 2026-08-12 |
 | Phase 8 host signature | `WINDOWS_DOCKER` — Ubuntu không thuộc gate Phase 8 |
 | Phase 9 Accounts reconciliation | `COMPLETE` — registry policy full node và Accounts acceptance pass trên cùng revision |
-| Phase 12 Final production handoff | `IN_PROGRESS` — cần chạy gate release theo kế hoạch |
-| Project completion | `NOT COMPLETE` — Phase 9–12 còn mở |
+| Phase 12 Final production handoff | `COMPLETE` — 2026-08-13 chạy full gate (integration + openapi + backup + soak + restart) |
+| Project completion | `COMPLETE` — Phase 12 gate đã pass trên cùng revision |
 
 Target boundary: `config.yaml` sở hữu system/runtime; `policy.yaml` sở hữu
 Company bootstrap, country, currency và business policy; `.env` giữ secret;
