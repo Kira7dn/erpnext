@@ -129,7 +129,11 @@ switch ($Action) {
     }
     'policy-plan' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.policy.plan') }
     'policy-apply' { Invoke-Compose @('run','--no-deps','--rm','policy-sync') }
-    'backup' { Invoke-Compose @('run','--rm','-e','BACKUP_ENABLED=True','-e','BACKUP_ONCE=True','backup') }
+    # Run the one-shot backup independently of the long-lived scheduled
+    # service.  The scheduled service intentionally sleeps forever when
+    # backup.enabled is false; waiting on that dependency here made the
+    # acceptance gate appear hung instead of producing a backup result.
+    'backup' { Invoke-Compose @('run','--rm','--no-deps','-e','BACKUP_ENABLED=True','-e','BACKUP_ONCE=True','backup') }
     'backup-verify' { Invoke-Compose @('--profile','operations','run','--rm','--no-deps','backup-verify') }
     'verify' { Invoke-Readiness }
 }

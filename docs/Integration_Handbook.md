@@ -6,52 +6,34 @@ controller và lifecycle. `config/config.yaml` và `config/policy.yaml` là hai 
 được version-control trên compute; `letron_api` reconcile chúng vào runtime và
 các DocType native. Không gọi database trực tiếp cho nghiệp vụ.
 
-## Trạng thái runtime
+## Contract được hỗ trợ
 
-Tám blocker implementation đã được đóng và Windows/Docker Linux production
-smoke đã pass bằng lệnh không flag. Clean Ubuntu checkout vẫn cần chạy lại để
-ký evidence bàn giao đa nền tảng. Trạng thái và gate nằm trong mục
-[Audit bàn giao API, config và policy](ERP_PRD.md#audit-bàn-giao-api-config-và-policy)
-của PRD. Team tích hợp phải đọc mục này trước khi sinh SDK hoặc xây quy trình
-production.
+Contract hiện hành có 5 module, 23 resource và 137 business operation; tất cả
+đều có `x-test-status: passed`. Control plane cấu hình có 2 operation riêng và
+không được tính vào business operation count. Team tích hợp chỉ sinh SDK từ
+artifact committed trong `contracts/openapi/`, không từ runtime catalog.
 
-## Tiến độ contract
+Roadmap, tiến độ và evidence bàn giao chỉ có một SOT tại
+[ERP PRD](ERP_PRD.md). Classification policy nằm tại
+[Configuration Inventory](Configuration_Inventory.md). Handbook này chỉ mô tả
+capability đã dùng được; nội dung `PLANNED` không được trình bày như API hiện có.
 
-Cập nhật 2026-08-12: curated API có 23 resource và đúng 137 operation. Phase 7
-Accounts operational core đã thêm Bank, Bank Account, Mode of Payment, Cost
-Center, Journal Entry và Payment Request. Docker acceptance đã pass auth token,
-system APIs, upload, Unicode/list controls, business flow, lifecycle và durable outbox.
-Webhook/realtime acceptance đã pass với durable staging consumer chạy trong
-Docker; credential local được sinh tạm và không ghi vào artifact.
-
-Phase 7 kết thúc ở `{passed: 137, partial: 0, not-tested: 0, blocked: 0}`; 34
-operation mới chỉ được chuyển từ `not-tested` sang `passed` sau khi full Docker
-integration gần nhất đạt `5 passed, 49 deselected` và cleanup không còn fixture, ledger,
-outbox hay consumer event residue.
-
-Sau Phase 7, thứ tự dự kiến là Accounts banking/reconciliation, CRM/Buying
-trước đơn hàng, rồi Stock control/traceability. Assets/Maintenance,
-Projects/Timesheet và Support/Warranty chỉ mở theo nhu cầu tích hợp cụ thể.
-Manufacturing không thuộc roadmap public API hiện tại.
-
-## Config và policy YAML SOT
+## Config và policy control
 
 Lệnh triển khai production duy nhất trên Windows là `.\docker-start.ps1`
 (Ubuntu: `./erpctl`). Không truyền action; launcher tự chạy validate, migrate,
 bootstrap, sync và reload runtime. Các lệnh `-Action` trong tài liệu này chỉ là
 test/chẩn đoán nội bộ.
 
-File `config/config.yaml` là nguồn chuẩn cho system/runtime. File
-`config/policy.yaml` hiện là nguồn chuẩn cho bootstrap Company và 15 document
-native: 12 Settings cùng Sales/Purchase/Item Tax Template Việt Nam 10% do
-country fixture mặc định của ERPNext tạo. Default Role/User/Fiscal
-Year/Workflow vocabulary và Settings của
-module chưa dùng không còn bị dump vào YAML. Các rule/template có giá trị cụ thể như tax,
-payment terms, pricing, shipping và Workflow hoàn chỉnh chưa nằm trong bundle.
-Inventory đầy đủ và đường dẫn source native được ghi tại
-[`Configuration_Inventory.md`](Configuration_Inventory.md).
-11 Single DocType dạng Desk tool tạm thời được kiểm kê và loại trừ rõ ràng vì
-dữ liệu của chúng là input/result theo phiên, không phải policy.
+`config/config.yaml` quản lý system/runtime. Target owner của Company bootstrap,
+country, currency và business policy là `config/policy.yaml`. Production policy
+hiện có 14 native document thật; conditional coverage không được materialize
+vào production YAML mà dùng disposable acceptance fixture.
+
+Country/currency không còn mirror trong `config.yaml`; launcher lấy bootstrap
+input từ policy. Sau bootstrap, Company identity không được đổi qua PUT thông thường.
+User, Employee, API key, user-role assignment và User Permission theo cá nhân
+thuộc Identity API/DB, không thuộc policy.
 
 `letron_api` không diễn giải lại nghiệp vụ. YAML giữ nguyên field và child row
 native; wrapper chỉ export, validate, diff, apply bằng controller Frappe và đọc
@@ -116,7 +98,7 @@ Ví dụ update có optimistic lock:
 Client phải GET lại khi nhận 409. Với 417, sửa YAML/invariant thay vì retry;
 với 500 rollback failure, dừng write và gọi health/runtime snapshot.
 
-## Phase 7 — Accounts operational core
+## Accounts operational core
 
 Các route đã công bố:
 
@@ -140,47 +122,9 @@ of Payment dùng Company/account mapping thật, không tạo authorization ho�
 ledger song song.
 
 Account, GL Entry và Payment Ledger Entry vẫn là source-of-truth nội bộ và
-không có public CRUD. Bank Transaction, reconciliation, Payment Order, Budget,
-POS và Subscription không thuộc Phase 7; các capability đó cần contract action
-hoặc read-only riêng ở increment Accounts tiếp theo.
-
-Increment Accounts tiếp theo được ưu tiên trước mọi module khác, gồm Bank
-Transaction, Payment Reconciliation, Payment Order và action đối soát. Account,
-GL Entry và Payment Ledger Entry chỉ có thể được thiết kế read-only; không mở
-CRUD. Sau đó mới cân nhắc Lead, Opportunity, Request for Quotation, Supplier
-Quotation và nhóm Stock traceability. Không mở BOM, Production Plan, Work Order
-hoặc Job Card trong roadmap hiện tại.
-
-## Phase 5 — API coverage và delivery
-
-Phase 5 test có chọn lọc các API nghiệp vụ quan trọng. P0 gồm token auth,
-`health`/`runtime_info`/`runtime_snapshot`, curated resource API, upload file và
-chuỗi Quotation → Sales Order → Sales Invoice. P1 gồm pagination/filter/schema,
-Unicode URL, validation/error envelope, concurrent idempotency và
-read-after-timeout reconciliation.
-
-Phase 5 không coi toàn bộ catalog DocType metadata là runtime scope. Webhook và
-realtime chỉ được acceptance khi staging consumer cố định reachable và ký nhận,
-retry, dedupe, reconnect đều pass.
-
-Kiểm tra bằng Docker:
-
-```text
-site: frontend
-apps: frappe, erpnext, letron_api
-frontend: lấy từ `runtime.server_url` trong contract và `project.http_port` trong `config/config.yaml`
-health: GET /api/method/letron_api.api.health
-```
-
-Kiểm tra lại bất cứ lúc nào:
-
-```powershell
-.\docker-start.ps1 -Action verify
-.\docker-start.ps1 -Action inspect
-```
-
-`verify` kiểm tra runtime snapshot và HTTP health. `inspect` lấy DocType
-metadata, permission và danh sách app trực tiếp trong Frappe container.
+không có public CRUD. Capability chưa xuất hiện trong committed OpenAPI không
+được gọi qua generic fallback. Kế hoạch mở rộng nằm trong PRD, không thuộc
+handbook contract hiện hành.
 
 ## Authentication và headers
 
@@ -273,7 +217,7 @@ Alias này được app `letron_api` rewrite vào Document API native của Frap
 
 `Dynamic Link` chỉ xuất hiện trong `Address.links` và `Contact.links`; không có
 CRUD riêng. Stock Reconciliation, Serial No, Batch, Bin và Stock Ledger Entry
-chưa public trong phase này.
+không thuộc contract hiện hành.
 
 Các chuỗi tích hợp chính:
 
@@ -333,8 +277,8 @@ controller đảm nhiệm việc đó.
 
 ## Catalog và OpenAPI curated
 
-`contracts/generated/catalog.json` là inventory đầy đủ của runtime: toàn bộ DocType và
-whitelisted method được phát hiện, kể cả method chưa public trong contract.
+`contracts/generated/catalog.json` là catalog metadata runtime: toàn bộ DocType
+và whitelisted method được phát hiện, kể cả method chưa public trong contract.
 `contracts/generated/openapi.yaml`/`.json` là bản tái sinh để kiểm tra. Artifact
 bàn giao bền vững nằm tại `contracts/openapi/public.yaml`/`.json`; control plane
 nằm tại `contracts/openapi/control-plane.yaml`/`.json`, và manifest giữ checksum.
@@ -515,4 +459,13 @@ Catalog/module artifact trong `contracts/generated/` bị Git ignore; artifact
 bàn giao trong `contracts/openapi/` được version-control và không chứa
 credential. Frappe còn có thể
 ghi cảnh báo tương thích DuckDB `cleanup_old_syncs`; cảnh báo này không làm
-health API hoặc startup fail.
+health API hoặc startup fail. Phase 8 xác nhận không có `Scheduled Job Type`
+tên này, nên đây là known upstream migrate/restore warning.
+
+Phase 8 foundation đã pass trên Windows/Docker ngày 2026-08-12: 56 source dùng
+registry-driven disposable acceptance, native apply lần hai zero-change,
+asset public/private rollback byte-clean, runtime zero drift và restore drill
+database/public/private files pass. Phase vẫn `IN_PROGRESS` cho tới khi tax/GL,
+commercial, Stock/Buying, workflow/permission/cross-cutting effect và failure
+injection matrix pass. Production `config/policy.yaml` vẫn chỉ giữ 14 document
+thật và không chứa acceptance fixture.

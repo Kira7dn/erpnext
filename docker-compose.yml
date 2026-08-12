@@ -17,6 +17,7 @@ x-frappe-defaults: &frappe_defaults
     - backups:/home/frappe/backups
     - ./apps/erpnext:/home/frappe/frappe-bench/apps/erpnext:ro
     - ./apps/letron_api:/home/frappe/frappe-bench/apps/${INTEGRATION_APP}:ro
+    - ./contracts:/home/frappe/frappe-bench/contracts:ro
     - type: bind
       source: ${LETRON_CONFIG_HOST_DIR:-./config}
       target: /etc/letron/config
@@ -255,9 +256,15 @@ services:
           exec sleep infinity;
         fi;
         while true; do
+          staging="/home/frappe/backups/.staging";
+          mkdir -p "$${staging}";
+          rm -f "$${staging}"/*;
           files_flag="";
           if [ "$${BACKUP_WITH_FILES}" = "True" ] || [ "$${BACKUP_WITH_FILES}" = "true" ]; then files_flag="--with-files --compress"; fi;
-          bench --site "$${SITE_NAME}" backup $$files_flag --backup-path /home/frappe/backups;
+          bench --site "$${SITE_NAME}" backup $$files_flag --backup-path "$${staging}";
+          db_backup="$$(ls -1t "$${staging}"/*-database.sql.gz | sed -n '1p')";
+          gzip -t "$${db_backup}";
+          for backup_file in "$${staging}"/*; do mv "$${backup_file}" /home/frappe/backups/; done;
           find /home/frappe/backups -type f -mtime +"$${BACKUP_RETENTION_DAYS}" -delete;
           if [ "$${BACKUP_ONCE}" = "True" ] || [ "$${BACKUP_ONCE}" = "true" ]; then exit 0; fi;
           sleep "$$(($${BACKUP_INTERVAL_HOURS} * 3600))";
@@ -280,7 +287,11 @@ services:
     command:
       - >-
         set -e;
-        sql="$$(ls -1t /home/frappe/backups/*-database.sql.gz | head -1)";
+        sql="";
+        for candidate in $$(ls -1t /home/frappe/backups/*-database.sql.gz); do
+          if gzip -t "$${candidate}" >/dev/null 2>&1; then sql="$${candidate}"; break; fi;
+        done;
+        test -n "$${sql}";
         prefix="$${sql%-database.sql.gz}";
         public="$${prefix}-files.tgz";
         private="$${prefix}-private-files.tgz";

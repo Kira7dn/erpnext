@@ -26,6 +26,6 @@ business API surface.
 
 The current policy bundle manages Company bootstrap plus 15 native ERPNext
 documents. It must not be described as complete coverage of every ERPNext
-setting. Exact managed, conditional and excluded sources are recorded in
+setting. Exact source classifications and implementation gaps are recorded in
 [`Configuration_Inventory.md`](../../docs/Configuration_Inventory.md), and the
 handoff verdict is recorded in [`ERP_PRD.md`](../../docs/ERP_PRD.md).

@@ -14,7 +14,7 @@ def test_repository_system_config_is_valid_and_secret_free() -> None:
 
     assert validation["sha256"] == system_config.config_sha256(config)
     assert validation["system_settings"] == 6
-    assert config["version"] == 2
+    assert config["version"] == 3
     assert config["runtime"]["environment"] == "production-like"
     assert config["credentials"]["production_like"] is True
     assert config["developer"] == {"mode": False, "allow_tests": False, "request_timeout": 120}
@@ -65,7 +65,7 @@ def test_config_resolves_only_exact_environment_references(
 @pytest.mark.parametrize(
     ("replacement", "message"),
     [
-        ("version: 2", "Duplicate YAML key"),
+        ("version: 3", "Duplicate YAML key"),
         ("root_password: plaintext", "must be an environment reference"),
         ("environment: unknown", "must be local or production-like"),
     ],
@@ -74,8 +74,8 @@ def test_invalid_system_config_fails_closed(
     tmp_path: Path, replacement: str, message: str
 ) -> None:
     content = system_config.config_path().read_text(encoding="utf-8")
-    if replacement == "version: 2":
-        content = "version: 2\n" + content
+    if replacement == "version: 3":
+        content = "version: 3\n" + content
     elif replacement.startswith("root_password"):
         content = content.replace("root_password: ${DB_ROOT_PASSWORD}", replacement)
     else:
@@ -101,7 +101,7 @@ def test_missing_secret_fails_only_when_materializing(
     ):
         monkeypatch.delenv(name, raising=False)
 
-    assert system_config.load_config(candidate)["version"] == 2
+    assert system_config.load_config(candidate)["version"] == 3
     with pytest.raises(system_config.ConfigError, match="Missing required secret"):
         system_config.load_config(candidate, resolve_secrets=True)
 
@@ -122,24 +122,16 @@ def test_repository_config_and_policy_invariants_match() -> None:
     assert result["company"] == "Letron Việt Nam"
 
 
-@pytest.mark.parametrize(
-    ("old", "new", "mismatch"),
-    [
-        ("country: Vietnam", "country: Singapore", "country/bootstrap"),
-        ("currency: VND", "currency: USD", "currency/bootstrap"),
-        ("timezone: Asia/Ho_Chi_Minh", "timezone: UTC", "timezone/system_settings"),
-        ("language: vi", "language: en", "language/system_settings"),
-    ],
-)
-def test_cross_file_invariants_fail_closed(
-    tmp_path: Path, old: str, new: str, mismatch: str
-) -> None:
+def test_cross_file_invariants_fail_closed(tmp_path: Path) -> None:
     candidate = tmp_path / "config.yaml"
     content = system_config.config_path().read_text(encoding="utf-8")
-    candidate.write_text(content.replace(old, new, 1), encoding="utf-8")
+    candidate.write_text(content, encoding="utf-8")
 
-    with pytest.raises(system_config.ConfigError, match=mismatch):
-        system_config.validate_bundle(candidate, system_config.policy_path())
+    policy_path = tmp_path / "policy.yaml"
+    policy_content = system_config.policy_path().read_text(encoding="utf-8")
+    policy_path.write_text(policy_content.replace("country: Vietnam", "country: Singapore", 1), encoding="utf-8")
+    with pytest.raises(system_config.ConfigError, match="country/global_defaults"):
+        system_config.validate_bundle(candidate, policy_path)
 
 
 def test_launchers_use_only_the_two_fixed_yaml_sources() -> None:
@@ -171,6 +163,9 @@ def test_production_compose_excludes_acceptance_consumer_and_has_backup() -> Non
     assert "  backup:" in compose
     assert "  backup-verify:" in compose
     assert "bench --site \"$${SITE_NAME}\" backup" in compose
+    assert 'staging="/home/frappe/backups/.staging"' in compose
+    assert 'gzip -t "$${db_backup}"' in compose
+    assert 'if gzip -t "$${candidate}"' in compose
 
 
 def test_default_launchers_wait_for_readiness() -> None:

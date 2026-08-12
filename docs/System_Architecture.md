@@ -125,12 +125,16 @@ ERPNext/Frappe runtime
 
 OpenAPI business contract và control plane cấu hình là hai boundary tách biệt:
 
-```text
-config/config.yaml  -> system/runtime reconcile
-config/policy.yaml  -> Company bootstrap + native business policy reconcile
-.env                -> secret resolution only
-ERPNext MariaDB     -> entity, master, transaction, ledger và runtime state
-```
+| Loại | Owner/SOT |
+|---|---|
+| Docker, database, Redis, worker, backup, endpoint | `config/config.yaml` |
+| Language, timezone, date/number format, system runtime | `config/config.yaml` |
+| Company bootstrap, country, currency, business policy | `config/policy.yaml` |
+| Secret thật | `.env` hoặc secret store |
+| Identity theo cá nhân | Identity API và ERPNext DB |
+| Entity, master, transaction, ledger | Business API và ERPNext DB |
+| Executable customization/migration | Source/fixture của `letron_api` |
+| Metadata/catalog/OpenAPI sinh ra | Artifact, không phải SOT |
 
 Một Docker project/Frappe site tương ứng một tenant và đúng một Company.
 `letron_api` chỉ điều phối native controller/DocType; không tạo business
@@ -139,32 +143,36 @@ sửa đúng hai YAML bind-mounted qua fixed-path control API. Production deploy
 chỉ chạy `.\docker-start.ps1` trên Windows hoặc `./erpctl` trên Ubuntu, không
 truyền action.
 
-## 9. Trạng thái kiến trúc
+Luồng mutation cấu hình duy nhất:
 
-- OpenAPI curated gồm 5 module, 23 resource và 137 operation đã qua Docker
-  acceptance.
-- Runtime catalog là discovery artifact đầy đủ.
-- Các module được công bố tăng dần theo nhu cầu tích hợp.
-- Webhook, realtime hoặc consumer cụ thể chỉ thuộc OpenAPI contract khi
-  capability delivery tương ứng đã được xác định và công bố rõ.
-- Phase 5 dùng `Letron Event Outbox` làm durable boundary: business transaction
-  chỉ ghi queued state; worker gửi webhook/realtime sau commit, retry có giới hạn,
-  và consumer deduplicate theo event ID. REST tiếp tục là source of truth.
+```text
+System Manager -> fixed-path control API -> validate/hash check
+               -> atomic YAML replace -> native apply/readback
+               -> health + zero-drift acknowledgement
+```
 
-Business boundary và production implementation đã đóng các gap về artifact
-OpenAPI bền vững, control-plane typed contract, error contract, rollback
-YAML/DB, invariant liên file và production runtime profile. Ubuntu clean-host
-evidence còn được theo dõi trong mục
-[Audit bàn giao API, config và policy](ERP_PRD.md#audit-bàn-giao-api-config-và-policy)
-của PRD.
+Direct mutation managed policy qua Desk/generic resource API bị chặn hoặc làm
+readiness fail-closed. Company identity là ngoại lệ bootstrap trong policy;
+Account, Cost Center, Warehouse và entity do controller Company tạo vẫn thuộc
+DB, policy chỉ tham chiếu chúng.
 
-Evidence 2026-08-12: host `52 passed, 5 deselected`, Docker integration
-`5 passed, 49 deselected`, public contract 137/137 operation `passed`, control
-plane 2 operation, backup/restore drill và Windows no-flag readiness đều pass.
-Policy runtime zero drift chỉ chứng minh 15 native document đã khai báo; không
-được suy diễn thành bao phủ toàn bộ setting ERPNext. Ubuntu clean-checkout vẫn
-là gate chưa có evidence.
+Policy inventory chỉ bao phủ module public và Frappe policy dùng chung trực tiếp
+cho chúng. Module mới phải mở rộng inventory trước khi được public. User,
+Employee, API key, user-role assignment và User Permission theo cá nhân thuộc
+identity API/DB, không thuộc policy YAML.
 
-Các quyết định về business workflow, identity provider, data storage và cơ chế
-triển khai phải được ghi ở tài liệu chuyên biệt, không đưa vào kiến trúc
-OpenAPI interaction boundary này.
+## 9. Invariant và trạng thái triển khai
+
+1. Một field chỉ có một owner; secret không xuất hiện trong YAML hoặc artifact.
+2. Business write luôn qua permission, validation và controller native.
+3. Runtime catalog không tự mở rộng curated contract.
+4. Event outbox được ghi cùng business transaction; worker gửi sau commit và
+   consumer deduplicate theo event ID. REST vẫn là source of truth.
+5. Country/currency chỉ có owner là `policy.yaml`; launcher lấy bootstrap input
+   từ policy và `config.yaml` không giữ mirror business jurisdiction.
+6. Phase 8 foundation đã pass trên Windows/Docker: production policy có 14
+   document thật; 56 source managed/conditional được chứng minh bằng disposable
+   fixture, schema fingerprint, native readback, idempotency và cleanup. Phase
+   còn `IN_PROGRESS` tới khi controller-effect và failure-injection matrix pass.
+   Completeness thuộc [PRD](ERP_PRD.md), classification chi tiết thuộc
+   [Configuration Inventory](Configuration_Inventory.md).

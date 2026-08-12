@@ -1,0 +1,1100 @@
+scope_version: 1
+kind: letron-policy-scope
+runtime:
+  frappe_version: 16.30.0
+  erpnext_version: 16.31.1
+public_modules:
+- Accounts
+- Buying
+- Contacts
+- Selling
+- Stock
+public_resources:
+- Customer
+- Quotation
+- Sales Order
+- Delivery Note
+- Sales Invoice
+- Purchase Invoice
+- Payment Entry
+- Bank
+- Bank Account
+- Mode of Payment
+- Cost Center
+- Journal Entry
+- Payment Request
+- Supplier
+- Purchase Order
+- Item
+- Warehouse
+- Address
+- Contact
+- Material Request
+- Purchase Receipt
+- Stock Entry
+- Item Price
+classification_defaults:
+  public_resource: entity
+  public_module_candidate: conditional
+  out_of_scope: excluded
+standard_records:
+  Letter Head:
+  - Company Letterhead
+  - Company Letterhead - Grey
+  Print Format:
+  - IRS 1099 Form
+  Notification:
+  - Material Request Receipt Notification
+sources:
+- name: Role
+  classification: managed
+  source_type: frappe
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: a77df84dffc4755b66b845392fd32329767b81b5b8273268b664d79c9631f4e6
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Role
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Role
+- name: Role Profile
+  classification: conditional
+  source_type: frappe
+  owner: policy
+  selector: name
+  dependency:
+  - Role
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 89ed5152804743a6a52d35a51cf9554a2c99c045a637f71eff9ecf1de91bf214
+  standard_record_rule: scope-registry-and-native-standard-flag
+  acceptance:
+    fixture_builder: native-document:Role Profile
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites:
+    - Role
+    controller_effect_assertion: native-controller:Role Profile
+- name: Workflow State
+  classification: conditional
+  source_type: frappe
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 461e9c8fef83d4200b7993684f4bbc23edc73f8e6ee3da5821113db29f90c9ba
+  standard_record_rule: scope-registry-and-native-standard-flag
+  acceptance:
+    fixture_builder: native-document:Workflow State
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Workflow State
+- name: Workflow Action Master
+  classification: conditional
+  source_type: frappe
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: c375d66e87b4e3cef226b0e3d298825ee425aa95f47201c4f3a365790615547e
+  standard_record_rule: scope-registry-and-native-standard-flag
+  acceptance:
+    fixture_builder: native-document:Workflow Action Master
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Workflow Action Master
+- name: Company
+  classification: managed
+  source_type: frappe
+  owner: bootstrap
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 24266723b240b9d6102d2233be6f8d906787ccd746b1e2cf9e78c6b8785c3357
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Company
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Company
+- name: Fiscal Year
+  classification: managed
+  source_type: frappe
+  owner: policy
+  selector: name
+  dependency:
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 6053ed653378a7361364b182839111b1b1683098d9d5a2a2fb0caecd5c2ba080
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Fiscal Year
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites:
+    - Company
+    controller_effect_assertion: native-controller:Fiscal Year
+- name: Accounting Dimension
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency:
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: e5d22f0534209d69b6884a1a60d219fccc495e8a7b7361b5a89fb206577da5c5
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Accounting Dimension
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites:
+    - Company
+    controller_effect_assertion: native-controller:Accounting Dimension
+- name: Accounting Dimension Filter
+  classification: conditional
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency:
+  - Accounting Dimension
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 61e1bef565d21c98a043f8bce4bfd5e677e48db21e93f4289271197174600a91
+  standard_record_rule: scope-registry-and-native-standard-flag
+  acceptance:
+    fixture_builder: native-document:Accounting Dimension Filter
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites:
+    - Accounting Dimension
+    controller_effect_assertion: native-controller:Accounting Dimension Filter
+- name: Accounting Period
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency:
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 96af80830437931ce23e8b650d12d269d68449767195e7844ffaaa4bfd732d9c
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Accounting Period
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites:
+    - Company
+    controller_effect_assertion: native-controller:Accounting Period
+- name: Accounts Settings
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: b71ed8993022fe5999f259034863d87cddb3f967c8e197f5d715b1f575d80860
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-single:Accounts Settings
+    structural_test: single-readback-update-restore
+    cleanup_handler: restore-single-snapshot
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Accounts Settings
+- name: Appointment Booking Settings
+  classification: excluded
+  source_type: erpnext
+  owner: none
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: f4813c3c8953541a145f229f84cb95b25c0c7d6562619f75d1b40bdd46094bbb
+  standard_record_rule: none
+- name: Buying Settings
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: cb5ed8c0fa0b3385f43754348b8532f063c306fe65fdd7c943968b14cf6e275f
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-single:Buying Settings
+    structural_test: single-readback-update-restore
+    cleanup_handler: restore-single-snapshot
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Buying Settings
+- name: CRM Settings
+  classification: excluded
+  source_type: erpnext
+  owner: none
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 3de6603c7845e1ca478b68b3c97edac83ef6b22871c34d409a1c1b86c1f7e75d
+  standard_record_rule: none
+- name: Currency Exchange Settings
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 0f80fbf56adf4a5644f68dc6008f7b1fa2cae95a2278f103158aba167b8dd002
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-single:Currency Exchange Settings
+    structural_test: single-readback-update-restore
+    cleanup_handler: restore-single-snapshot
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Currency Exchange Settings
+- name: Delivery Settings
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 0d8f963e943f524c33b097d816f732eb6ae300d3bc56fb4cc5c9342bf9426745
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-single:Delivery Settings
+    structural_test: single-readback-update-restore
+    cleanup_handler: restore-single-snapshot
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Delivery Settings
+- name: Item Variant Settings
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 9ab7733b54dc4a9cdd2da302c82069ca32795258fb51ef6e765701b936c6edf3
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-single:Item Variant Settings
+    structural_test: single-readback-update-restore
+    cleanup_handler: restore-single-snapshot
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Item Variant Settings
+- name: Ledger Health Monitor
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 53ce096066ad283ffcf0bce632c0766aaa5c46ae6f47ef069930b49b3bb27990
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-single:Ledger Health Monitor
+    structural_test: single-readback-update-restore
+    cleanup_handler: restore-single-snapshot
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Ledger Health Monitor
+- name: Manufacturing Settings
+  classification: excluded
+  source_type: erpnext
+  owner: none
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 2d7a7d8dfc04986f463b868eedf9579afd2d583440a2a577d08608e0fc283047
+  standard_record_rule: none
+- name: Pegged Currencies
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: cc3d454ded7d84fc82f098475f23a82318c0a1e6f3c78f167cfee340121e590b
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-single:Pegged Currencies
+    structural_test: single-readback-update-restore
+    cleanup_handler: restore-single-snapshot
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Pegged Currencies
+- name: Plaid Settings
+  classification: secret
+  source_type: erpnext
+  owner: none
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 48856661e88edbcb9e3c7823401e87fcc33e3b8af4219a929eda04cb55030f49
+  standard_record_rule: none
+- name: Projects Settings
+  classification: excluded
+  source_type: erpnext
+  owner: none
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 7ece401b816c5751a9cfa759024db8bc17669a9d60f400ed8e808e1eb42c58e7
+  standard_record_rule: none
+- name: Selling Settings
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 59449dc3acc64f9fe2ab43c67d3da8f97415df1b53824dcc827fbff3c7a23d70
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-single:Selling Settings
+    structural_test: single-readback-update-restore
+    cleanup_handler: restore-single-snapshot
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Selling Settings
+- name: Stock Settings
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 0d1ab842aa8df81bf57f371255c8d48fd3be9d7dc3a4bbcf3c2ee9c9fbcb242a
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-single:Stock Settings
+    structural_test: single-readback-update-restore
+    cleanup_handler: restore-single-snapshot
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Stock Settings
+- name: Stock Reposting Settings
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 3a523b250f57fb8de32618e65bc8875b449ca95f3e7faaea5ff5986dbb0ae552
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-single:Stock Reposting Settings
+    structural_test: single-readback-update-restore
+    cleanup_handler: restore-single-snapshot
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Stock Reposting Settings
+- name: Subscription Settings
+  classification: excluded
+  source_type: erpnext
+  owner: none
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 6b0e981fb6343843c8e9380d6bc40c41addd28a8d823507d0c649592a990c185
+  standard_record_rule: none
+- name: Support Settings
+  classification: excluded
+  source_type: erpnext
+  owner: none
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 560407d3f3b90347874a847bef8d68c906fae900e2c1d2ce4bd8df0e2a4d996d
+  standard_record_rule: none
+- name: Video Settings
+  classification: secret
+  source_type: erpnext
+  owner: none
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 2905541854904abac444416d9d2134c6484a484859d9abf11c6c2cb4526d6517
+  standard_record_rule: none
+- name: Global Defaults
+  classification: managed
+  source_type: frappe
+  owner: policy
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 2d5c01dea4f034c5f1f88de218912827f15f7457f7b9329ae41014a378de0592
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-single:Global Defaults
+    structural_test: single-readback-update-restore
+    cleanup_handler: restore-single-snapshot
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Global Defaults
+- name: Bank Transaction Rule
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: &id001
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 1b49ad68a3d2fc7185ef668587e0121d3d7466d5a6717ef42c851ca7e46f6b82
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Bank Transaction Rule
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id001
+    controller_effect_assertion: native-controller:Bank Transaction Rule
+- name: Supplier Scorecard
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: &id002 []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 1bfcdbe853304501f8a0cf9736f2f83cfc9f7df53c7d30d6232367c96e999842
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Supplier Scorecard
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id002
+    controller_effect_assertion: native-controller:Supplier Scorecard
+- name: Inventory Dimension
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: &id003 []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: b70480304a78094cd6a5b909d8a3d3e0b020f3c6f55507e967fde0f93c305e61
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Inventory Dimension
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id003
+    controller_effect_assertion: native-controller:Inventory Dimension
+- name: Putaway Rule
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: &id004
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 67fe17bcec9c5587d198eaa151342ce845bf8ed1ec7faf9f78d56176fa02a6d5
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Putaway Rule
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id004
+    controller_effect_assertion: native-controller:Putaway Rule
+- name: Quality Inspection Template
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 631f01d3f5f5015ce50c16a5e8ab8c2671d9e616f09b645b6bf944102045606e
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Quality Inspection Template
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Quality Inspection Template
+- name: Shipment Parcel Template
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: acdcb41c1e48793399744866c00afd8e12136d19c406c6d89c17a67375fab986
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Shipment Parcel Template
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Shipment Parcel Template
+- name: Stock Entry Type
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 4a5263cdb50519621429ed2d2e7f2c86da59fa699247921e57e70283e92000d6
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Stock Entry Type
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Stock Entry Type
+- name: Budget
+  classification: excluded
+  source_type: erpnext
+  owner: none
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 2870bbefcaabaf1a72b550680ec9c62a092a50b673e6bbf1fa4c49053162cabb
+  standard_record_rule: none
+- name: Cheque Print Template
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 01d33f90e1be9c60ddf8c8c6a1155029bf82dc1e890645b97cc5118b098eb5ae
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Cheque Print Template
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Cheque Print Template
+- name: Cost Center Allocation
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency:
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: d91c99326a6610776304364a11b03e4e9486c8368029cae13eb7efb560efc20c
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Cost Center Allocation
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites:
+    - Company
+    controller_effect_assertion: native-controller:Cost Center Allocation
+- name: Dunning Type
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: &id005
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 71a696b86346411a62ce6e56c8e70a739b3cfef4c36679d1f811da0b2bbc8787
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Dunning Type
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id005
+    controller_effect_assertion: native-controller:Dunning Type
+- name: Financial Report Template
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 897d15cb5e63785e0a8b26944f497e9fa015938af60b79c397e964fb18db966c
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Financial Report Template
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Financial Report Template
+- name: Item Tax Template
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency:
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 6b27da3af9c558def90213c063a3fc3af725ef5408801899becd7fc0e2a87046
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Item Tax Template
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites:
+    - Company
+    controller_effect_assertion: native-controller:Item Tax Template
+- name: Journal Entry Template
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: &id006
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 5a9bc236b4af86b003bb5355bad7eac08e1f1005be6ff7db2e899caeb407534d
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Journal Entry Template
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id006
+    controller_effect_assertion: native-controller:Journal Entry Template
+- name: Loyalty Program
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency:
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 8a1dec4578195f03bbfebfa930142967beb157ad940c191fa33ef9fff6eb2ef3
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Loyalty Program
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites:
+    - Company
+    controller_effect_assertion: native-controller:Loyalty Program
+- name: Monthly Distribution
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 3bd9aa59bcaa0bee6f3434e92c44490c0bbe9bcb600633f658671b11bec31ef5
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Monthly Distribution
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Monthly Distribution
+- name: Payment Term
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 15d46c7ec03316aef43169f805ec1439208b733e06c303b164d79fa9f95763a9
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Payment Term
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Payment Term
+- name: Payment Terms Template
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: &id007
+  - Payment Term
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: e2847c370c9b6a5ee71e0120655659d59e6c946ad58c8046258a048fe81b69f8
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Payment Terms Template
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id007
+    controller_effect_assertion: native-controller:Payment Terms Template
+- name: POS Profile
+  classification: excluded
+  source_type: erpnext
+  owner: none
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: aa6b7d77a2d850f627696e1566fa5dc5e08c10f8f8647e18266d6076dde124b8
+  standard_record_rule: none
+- name: Pricing Rule
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: e3b75808764cc97dbb0934f8b4b2e0ba73bc16403d66263136669f123ea08f67
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Pricing Rule
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Pricing Rule
+- name: Promotional Scheme
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: &id008
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 5207449392ac6c107a93ff52e0d80fe158d589b0df206de1ee39bc737e5e072c
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Promotional Scheme
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id008
+    controller_effect_assertion: native-controller:Promotional Scheme
+- name: Purchase Taxes and Charges Template
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency:
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 9c3333c20219dda95fec36b53975e25cc376782d068db7f0281104af7e7c8840
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Purchase Taxes and Charges Template
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites:
+    - Company
+    controller_effect_assertion: native-controller:Purchase Taxes and Charges Template
+- name: Sales Taxes and Charges Template
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency:
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 1b6a7be3aeb0341f1fb45ac94b64ed092da5105263b81fce1c362c53a669acbc
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Sales Taxes and Charges Template
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites:
+    - Company
+    controller_effect_assertion: native-controller:Sales Taxes and Charges Template
+- name: Shipping Rule
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: &id009
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 93d4f1f4e04bf910c4af1c77ce81d8badc6b1edcd3167dc7f484666b59720c72
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Shipping Rule
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id009
+    controller_effect_assertion: native-controller:Shipping Rule
+- name: Subscription Plan
+  classification: excluded
+  source_type: erpnext
+  owner: none
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 6325490183e4099642ec888ee7e9f947a0889d2ad618f605130e41c4c1a5b5e0
+  standard_record_rule: none
+- name: Tax Category
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: d01a7514d4346d9538a36e6249306b8e49e307e4ba7639cfe05e9758b0c14db1
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Tax Category
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Tax Category
+- name: Tax Rule
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: &id010
+  - Tax Category
+  - Sales Taxes and Charges Template
+  - Purchase Taxes and Charges Template
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 0bfba48125607c418ca517d7f127374bcbd6992b234a5036d82acc44d02d83f6
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Tax Rule
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id010
+    controller_effect_assertion: native-controller:Tax Rule
+- name: Tax Withholding Category
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: &id011
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 102abe61829efa4ff691e9adc9d57f621398be21f830ac29025647e74178549b
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Tax Withholding Category
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id011
+    controller_effect_assertion: native-controller:Tax Withholding Category
+- name: Tax Withholding Group
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: cb6be1732bd83a47ffda6fcb75352f960a902697c734c2c1273338a35ac7616c
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Tax Withholding Group
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Tax Withholding Group
+- name: Terms and Conditions
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: ea6094360d7185cd7a9733ea8eebe1ed34a4b40c0758ccc477c193da8166dffb
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Terms and Conditions
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Terms and Conditions
+- name: Custom DocPerm
+  classification: conditional
+  source_type: frappe
+  owner: policy
+  selector: name
+  dependency: &id012
+  - Role
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 7c80bfe8c0c57885d3887437dc1d8a516cca16a740bd87e3999b7e58b9d9b04b
+  standard_record_rule: scope-registry-and-native-standard-flag
+  acceptance:
+    fixture_builder: native-document:Custom DocPerm
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id012
+    controller_effect_assertion: native-controller:Custom DocPerm
+- name: Assignment Rule
+  classification: conditional
+  source_type: frappe
+  owner: policy
+  selector: document_type
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 0e8ce24dddb34d6805deff0271c0577ad47179faf9f100474a0ad8665d8a4cf7
+  standard_record_rule: scope-registry-and-native-standard-flag
+  acceptance:
+    fixture_builder: native-document:Assignment Rule
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Assignment Rule
+- name: Document Naming Rule
+  classification: conditional
+  source_type: frappe
+  owner: policy
+  selector: doc_type
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 59522203ab2fb0d1f719d61e8f28bf69d235e794cecc5803790b3b54c97cf784
+  standard_record_rule: scope-registry-and-native-standard-flag
+  acceptance:
+    fixture_builder: native-document:Document Naming Rule
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Document Naming Rule
+- name: Print Settings
+  classification: managed
+  source_type: frappe
+  owner: policy
+  selector: single
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: a82619191fe4e58fd4ba68ebac4c86a2c6434233b47d807e50422ec5677fe10e
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-single:Print Settings
+    structural_test: single-readback-update-restore
+    cleanup_handler: restore-single-snapshot
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Print Settings
+- name: Print Format
+  classification: conditional
+  source_type: frappe
+  owner: policy
+  selector: doc_type
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 7d5ccea80489bbe8732023d5611cd93dd417958648e08f4e0f33deb1c9a8bf36
+  standard_record_rule: scope-registry-and-native-standard-flag
+  acceptance:
+    fixture_builder: native-document:Print Format
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Print Format
+- name: Letter Head
+  classification: managed
+  source_type: frappe
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: bca30393cfaf5accff47522c4207d176b70a7759adb8c93c86a004fd72ec63f9
+  standard_record_rule: scope-registry-and-native-standard-flag
+  acceptance:
+    fixture_builder: native-document:Letter Head
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Letter Head
+- name: Email Template
+  classification: managed
+  source_type: frappe
+  owner: policy
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: ac352aa1216bb9656040146a66c10fb9f61463ea8007b9876ce5a811b4651a8f
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Email Template
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: []
+    controller_effect_assertion: native-controller:Email Template
+- name: Notification
+  classification: conditional
+  source_type: frappe
+  owner: policy
+  selector: document_type
+  dependency: &id013
+  - Role
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: be2393a043e31bd2ed081af8bed34f1755d037c39049b538b58cceaa3032b8e1
+  standard_record_rule: scope-registry-and-native-standard-flag
+  acceptance:
+    fixture_builder: native-document:Notification
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id013
+    controller_effect_assertion: native-controller:Notification
+- name: Authorization Rule
+  classification: excluded
+  source_type: frappe
+  owner: none
+  selector: name
+  dependency: []
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 04b6f8c3dd07bfea8d3049692d3442db79c7e106c8713bec2a83ec80306f2a78
+  standard_record_rule: none
+- name: Workflow
+  classification: conditional
+  source_type: frappe
+  owner: policy
+  selector: document_type
+  dependency: &id014
+  - Role
+  - Workflow State
+  - Workflow Action Master
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: 37633fca9922b2f5a460182afbeef61d0bfdbe50560edb6f5acde9d5c068b8b4
+  standard_record_rule: scope-registry-and-native-standard-flag
+  acceptance:
+    fixture_builder: native-document:Workflow
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites: *id014
+    controller_effect_assertion: native-controller:Workflow

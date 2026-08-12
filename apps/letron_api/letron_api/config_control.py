@@ -104,6 +104,9 @@ def get_configuration(kind: str) -> dict[str, Any]:
         "content": content,
         "source_sha256": _source_sha256(content),
         "state_sha256": validation["sha256"],
+        "schema_version": validation["schema_version"],
+        "scope_version": validation.get("scope_version", policy.POLICY_SCOPE_VERSION if kind == "policy" else None),
+        "completeness": validation.get("completeness", {}),
     }
 
 
@@ -181,6 +184,9 @@ def put_configuration(
         "kind": kind,
         "source_sha256": _source_sha256(updated),
         "state_sha256": validation["sha256"],
+        "schema_version": validation["schema_version"],
+        "scope_version": validation.get("scope_version", policy.POLICY_SCOPE_VERSION if kind == "policy" else None),
+        "completeness": validation.get("completeness", {}),
         "applied": reconciliation.get("applied", 0),
         "drift_count": reconciliation.get("drift_count"),
         "restart_required": bool(reconciliation.get("restart_required", False)),

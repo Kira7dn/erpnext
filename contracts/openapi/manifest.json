@@ -8,8 +8,8 @@
     },
     "control-plane": {
       "operations": 2,
-      "json_sha256": "aca7b84e82c94595f3cdcc213081220ec8c9119df2cc26bfe275b87817dc5873",
-      "yaml_sha256": "c73da6fa3430f9e5f6b07187a3a8fdedf92410fe386d861f19726e1dbf2d014f"
+      "json_sha256": "aa8b6382efde18e3a62aa729f6a6f47d4f6b2da71e7b983c7ba4914cd013e8ee",
+      "yaml_sha256": "41f449fc0d641c7aa154342925295691946d5f9fc8db2d218de242897420dc97"
     }
   }
 }

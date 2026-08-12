@@ -1,4 +1,4 @@
-version: 2
+version: 3
 erpnext_version: 16.31.1
 
 runtime:
@@ -38,12 +38,6 @@ site:
   header: frontend
   database_type: mariadb
   admin_password: ${ADMIN_PASSWORD}
-
-locale:
-  country: Vietnam
-  timezone: Asia/Ho_Chi_Minh
-  language: vi
-  currency: VND
 
 developer:
   mode: false

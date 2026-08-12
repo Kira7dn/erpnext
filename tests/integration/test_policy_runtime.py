@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import base64
+import json
+import os
 import subprocess
 from pathlib import Path
 
 import pytest
 import yaml
 from letron_api.policy import load_policy, policy_sha256
+from letron_api.policy_acceptance import DOCUMENT_BUILDERS, SINGLE_BUILDERS
 from letron_api.system_config import load_config
 
 from .api_runtime_harness import ApiClient, RuntimeUnavailable, response_data
@@ -18,40 +21,53 @@ pytestmark = pytest.mark.integration
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def bench_execute(method: str) -> str:
-    config = load_config(ROOT / "config" / "config.yaml")
+def bench_execute(method: str, kwargs: dict[str, object] | None = None) -> str:
+    config = load_config(_runtime_config_path())
+    command = [
+        "docker",
+        "exec",
+        f"{config['project']['name']}-backend-1",
+        "bench",
+        "--site",
+        config["site"]["name"],
+        "execute",
+        method,
+    ]
+    if kwargs:
+        command.extend(["--kwargs", json.dumps(kwargs)])
     result = subprocess.run(
-        [
-            "docker",
-            "exec",
-            f"{config['project']['name']}-backend-1",
-            "bench",
-            "--site",
-            config["site"]["name"],
-            "execute",
-            method,
-        ],
+        command,
         cwd=ROOT,
         check=True,
         capture_output=True,
         text=True,
-        timeout=120,
+        timeout=55,
     )
     return result.stdout
 
 
-def test_policy_bundle_matches_and_protects_native_configuration() -> None:
+def _runtime_config_path() -> Path:
+    acceptance_dir = os.environ.get("LETRON_ACCEPTANCE_CONFIG_DIR")
+    return Path(acceptance_dir) / "config.yaml" if acceptance_dir else ROOT / "config" / "config.yaml"
+
+
+def _logged_in_client() -> ApiClient:
     client = ApiClient()
     try:
         client.health_and_login()
     except RuntimeUnavailable as error:
         pytest.fail(f"blocked runtime: {error}")
+    return client
 
-    bundle = load_policy()
+
+def test_policy_bundle_matches_native_configuration() -> None:
+    client = _logged_in_client()
+
+    bundle = load_policy(_runtime_config_path().parent / "policy.yaml")
     expected_hash = policy_sha256(bundle)
     exported = yaml.safe_load(base64.b64decode(bench_execute("letron_api.policy.export_current_base64")))
     assert exported == bundle
-    assert len(bundle["documents"]) == 15
+    assert len(bundle["documents"]) == 14
     snapshot = client.request("GET", "/api/method/letron_api.api.runtime_snapshot", expected={200})
     bootstrap = snapshot.data["message"]["bootstrap"]
     assert bootstrap["ok"] is True
@@ -65,11 +81,21 @@ def test_policy_bundle_matches_and_protects_native_configuration() -> None:
     runtime_policy = snapshot.data["message"]["policy"]
     assert runtime_policy == {
         "ok": True,
-        "version": 1,
+        "version": 2,
+        "schema_version": 2,
+        "scope_version": 1,
         "erpnext_version": bundle["erpnext_version"],
         "sha256": expected_hash,
         "documents": len(bundle["documents"]),
         "drift_count": 0,
+        "completeness": {
+            "unclassified_sources": 0,
+            "managed_entries_without_acceptance": 0,
+            "schema_drift": 0,
+            "unmanaged_policy_records": 0,
+            "runtime_drift": 0,
+            "roundtrip_diff": 0,
+        },
         "status": "in-sync",
     }
 
@@ -85,6 +111,14 @@ def test_policy_bundle_matches_and_protects_native_configuration() -> None:
     assert [row["document_type"] for row in native["repost_allowed_types"]] == [
         row["document_type"] for row in accounts_entry["fields"]["repost_allowed_types"]
     ]
+
+
+def test_policy_bundle_protects_native_configuration() -> None:
+    client = _logged_in_client()
+    bundle = load_policy(_runtime_config_path().parent / "policy.yaml")
+    native = response_data(
+        client.document("GET", "Accounts Settings", "Accounts Settings", expected={200})
+    )
 
     original = native["check_supplier_invoice_uniqueness"]
     client.document(
@@ -110,6 +144,9 @@ def test_policy_bundle_matches_and_protects_native_configuration() -> None:
     # Policy is deployment configuration, not another public business API.
     client.request("GET", "/api/v1/config/business-policies", expected={404})
 
+
+def test_policy_drift_and_idempotent_restore() -> None:
+    client = _logged_in_client()
     try:
         bench_execute("letron_api.policy.acceptance_force_drift")
         drifted = client.request(
@@ -307,3 +344,87 @@ def test_compute_yaml_control_api_is_fixed_path_and_idempotent() -> None:
         "/api/method/letron_api.config_control.get_configuration?kind=arbitrary-file",
         expected={400, 417},
     )
+
+
+REGISTRY_SOURCES = sorted(SINGLE_BUILDERS | DOCUMENT_BUILDERS.keys())
+STRUCTURAL_SHARDS = [
+    REGISTRY_SOURCES[index : index + 8]
+    for index in range(0, len(REGISTRY_SOURCES), 8)
+]
+DOCUMENT_SOURCES = sorted(DOCUMENT_BUILDERS)
+APPLY_SHARDS = [
+    DOCUMENT_SOURCES[index : index + 4]
+    for index in range(0, len(DOCUMENT_SOURCES), 4)
+]
+
+
+@pytest.mark.parametrize("doctypes", STRUCTURAL_SHARDS)
+def test_registry_driven_native_structural_group(doctypes: list[str]) -> None:
+    result = json.loads(
+        bench_execute(
+            "letron_api.policy_acceptance.probe_structural_sources",
+            {"doctypes": doctypes},
+        )
+    )
+    assert result["ok"] is True
+    assert result["passed"] == len(doctypes)
+
+
+@pytest.mark.parametrize("doctypes", APPLY_SHARDS)
+def test_registry_driven_policy_apply_roundtrip(doctypes: list[str]) -> None:
+    apply_result = json.loads(
+        bench_execute(
+            "letron_api.policy_acceptance.probe_policy_apply_registry",
+            {"doctypes": doctypes},
+        )
+    )
+    assert apply_result["ok"] is True
+    assert apply_result["sources"] == len(doctypes)
+    assert apply_result["first_applied"] > 0
+    assert apply_result["second_applied"] == 0
+    assert apply_result["removed"] > 0
+    assert apply_result["roundtrip_diff"] == 0
+
+
+def test_registry_driven_asset_lifecycle() -> None:
+    asset_result = json.loads(
+        bench_execute("letron_api.policy_acceptance.probe_asset_lifecycle")
+    )
+    assert asset_result["ok"] is True
+    assert asset_result["public_private"] == 2
+    assert asset_result["checksum_conflict"] == "rejected"
+    assert asset_result["traversal"] == "rejected"
+    assert asset_result["collision"] == "rejected"
+    assert asset_result["rollback"] == "byte-clean"
+
+    cleanup = json.loads(
+        bench_execute("letron_api.policy_acceptance.cleanup_registry_residue")
+
+
+@pytest.mark.parametrize("rate", [0, 5, 8, 10])
+def test_policy_tax_invoice_gl_effect(rate: int) -> None:
+    result = json.loads(
+        bench_execute(
+            "letron_api.policy_acceptance.probe_tax_effect_rate", {"rate": rate}
+        )
+    )
+    assert result["ok"] is True
+    assert result["rate"] == rate
+    assert result["tax"] == 1000 * rate
+    assert result["sales_gl"] == result["tax"]
+    assert result["purchase_gl"] == result["tax"]
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        "letron_api.policy_acceptance.probe_payment_terms_effect",
+        "letron_api.policy_acceptance.probe_pricing_shipping_effects",
+        "letron_api.policy_acceptance.probe_stock_buying_effects",
+    ],
+)
+def test_policy_controller_effect_group(method: str) -> None:
+    result = json.loads(bench_execute(method))
+    assert result["ok"] is True
+    )
+    assert cleanup["ok"] is True

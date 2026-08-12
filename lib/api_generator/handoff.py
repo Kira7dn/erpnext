@@ -97,13 +97,16 @@ def build_control_plane(server_url: str) -> dict[str, Any]:
                 },
                 "ConfigurationState": {
                     "type": "object",
-                    "required": ["kind", "source_sha256", "state_sha256"],
+                    "required": ["kind", "source_sha256", "state_sha256", "schema_version", "scope_version"],
                     "properties": {
                         "ok": {"type": "boolean"},
                         "kind": {"$ref": "#/components/schemas/ConfigurationKind"},
                         "content": {"type": "string"},
                         "source_sha256": {"type": "string"},
                         "state_sha256": {"type": "string"},
+                        "schema_version": {"type": "integer", "minimum": 2, "maximum": 3},
+                        "scope_version": {"type": "integer", "const": 1},
+                        "completeness": {"type": "object", "additionalProperties": {"type": "integer"}},
                         "applied": {"type": "integer"},
                         "drift_count": {"type": ["integer", "null"]},
                         "restart_required": {"type": "boolean"},

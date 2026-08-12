@@ -49,45 +49,30 @@ Mỗi project/site là một tenant và đúng một Company. Chỉnh system/run
 `config/policy.yaml`, giữ secret thật trong `.env`. Không sửa managed policy
 qua ERPNext Desk hoặc generic `/api/resource`.
 
-Trạng thái cập nhật 2026-08-12: Phase 7 Accounts operational core đã hoàn thành.
-Curated API có 23 resource thuộc Selling/Accounts/Buying/Contacts/Stock và đúng
-137 operation; Docker acceptance đã pass toàn bộ CRUD, lifecycle, permission,
-delivery staging và cleanup residue. Bank, Bank Account, Mode of Payment, Cost
-Center, Journal Entry và Payment Request dùng permission/controller native;
-Journal Entry chỉ sinh GL qua submit và Payment Request Outward liên kết
-Purchase Invoice đã submit.
+Trạng thái sản phẩm hiện tại:
 
-Compute có đúng hai nguồn cấu hình UTF-8 được version-control:
-`config/config.yaml` là SOT cho system/runtime. `config/policy.yaml` hiện là SOT
-cho bootstrap Company và 15 document native: 12 Settings cùng ba tax template
-Việt Nam mặc định của ERPNext (Sales, Purchase, Item, đều 10%); chưa bao phủ
-toàn bộ tax, payment, pricing, shipping, workflow và template policy của tenant.
-`letron_api` chỉ export/validate/diff/apply document native; controller,
-permission và Workflow native vẫn là execution engine. Secret không nằm trong
-YAML mà được tham chiếu bằng `${ENV_NAME}` tới file `.env` bị Git ignore. Docker
-chỉ khởi động backend sau `config-sync` và `policy-sync`; `verify` yêu cầu phạm
-vi đã khai báo zero drift.
+| Hạng mục | Trạng thái |
+|---|---|
+| Business API Phase 1–7 | `COMPLETE` — 5 module, 23 resource, 137 operation |
+| Phase 8 policy wrapper | `IN_PROGRESS` — nền policy pass; còn controller-effect acceptance |
+| Managed production policy | 14 native document thật; conditional coverage dùng disposable fixture |
+| Windows/Docker baseline | `VERIFIED` |
+| Phase 8 host signature | `WINDOWS_DOCKER` — Ubuntu không thuộc gate Phase 8 |
+| Project completion | `NOT COMPLETE` |
 
-Account, GL Entry và Payment Ledger Entry không có public CRUD. Sau Phase 7
-tiếp tục hoàn thiện banking/reconciliation của Accounts trước khi
-mở CRM/Buying và Stock traceability. Manufacturing không thuộc roadmap public
-API hiện tại.
+Target boundary: `config.yaml` sở hữu system/runtime; `policy.yaml` sở hữu
+Company bootstrap, country, currency và business policy; `.env` giữ secret;
+entity/transaction/ledger nằm trong ERPNext DB. Country/currency hiện còn mirror
+được launcher lấy từ `policy.bootstrap.company`; `config.yaml` không còn mirror business jurisdiction
+lâu dài.
 
 Tài liệu chính:
 
 - [ERP PRD](docs/ERP_PRD.md)
 - [ERPNext integration contract](contracts/erpnext-integration.yml)
 - [Integration handbook](docs/Integration_Handbook.md)
-- [Inventory cấu hình nghiệp vụ ERPNext](docs/Configuration_Inventory.md)
+- [Inventory policy trong phạm vi sản phẩm](docs/Configuration_Inventory.md)
 - [Audit bàn giao API/config/policy](docs/ERP_PRD.md#audit-bàn-giao-api-config-và-policy)
-
-Trạng thái bàn giao: implementation production đã đóng tám blocker P0 trên
-Windows/Docker Linux, gồm rollback, artifact OpenAPI, production profile,
-backup/restore và startup readiness. Clean-checkout acceptance trực tiếp trên
-máy Ubuntu thật vẫn là evidence còn thiếu trước khi ký bàn giao đa nền tảng.
-Evidence trên revision hiện tại: host `52 passed, 5 deselected`, Docker
-integration `5 passed, 49 deselected`, 137/137 business operation `passed`,
-Ruff/ty/OpenAPI validation và runtime zero-drift health đều pass.
 
 ## Cấu trúc monorepo
 

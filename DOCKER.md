@@ -77,23 +77,16 @@ Production Compose không chạy staging event consumer. Acceptance dùng riêng
 giờ, retention 14 ngày. `backup-verify` restore vào site/database dùng một lần
 rồi tự cleanup, không ghi đè site `frontend`.
 
-## Evidence runtime hiện tại
+## Readiness và release evidence
 
-Cập nhật 2026-08-12 trên revision bàn giao hiện tại:
+Launcher chỉ trả exit code `0` sau khi config/policy validate, bootstrap/sync
+hoàn tất, runtime zero drift, `restart_required: false` và HTTP health pass.
+`backup-verify` phải restore vào site/database dùng một lần rồi cleanup; không
+được ghi đè site production.
 
-- `docker-start.ps1` không flag đã hoàn tất production readiness;
-- config và policy cùng `in-sync`, `drift_count: 0`, đúng một Company
-  `Letron Việt Nam`;
-- HTTP health pass và `restart_required: false`;
-- Docker integration đạt `5 passed, 49 deselected`; cleanup fail-closed không
-  còn fixture, File, outbox, GL/Payment/Stock Ledger hoặc consumer event của run;
-- backup gồm config, database, public/private files và restore drill đã pass;
-- production profile không chạy staging event consumer.
-
-`erpctl` đã được kiểm tra cú pháp Bash trong Linux container. Việc chạy toàn bộ
-clean-checkout acceptance trên máy Ubuntu thật vẫn là evidence bắt buộc trước
-khi ký bàn giao đa nền tảng; tài liệu không coi kiểm tra cú pháp là Ubuntu
-production acceptance.
+Kết quả chạy cụ thể, trạng thái Ubuntu và quyết định bàn giao chỉ được ghi tại
+[audit trong PRD](docs/ERP_PRD.md#audit-bàn-giao-api-config-và-policy). Runbook
+này chỉ định nghĩa cách vận hành, không phải SOT tiến độ sản phẩm.
 
 ## Kiểm tra API runtime
 

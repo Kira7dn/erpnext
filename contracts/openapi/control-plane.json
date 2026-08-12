@@ -264,7 +264,9 @@
         "required": [
           "kind",
           "source_sha256",
-          "state_sha256"
+          "state_sha256",
+          "schema_version",
+          "scope_version"
         ],
         "properties": {
           "ok": {
@@ -281,6 +283,21 @@
           },
           "state_sha256": {
             "type": "string"
+          },
+          "schema_version": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 3
+          },
+          "scope_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "completeness": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
           },
           "applied": {
             "type": "integer"

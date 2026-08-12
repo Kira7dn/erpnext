@@ -35,6 +35,21 @@ def _assert_native_defaults(company: str) -> dict[str, int]:
     return counts
 
 
+def _ensure_company_prerequisites() -> None:
+    """Seed only the native prerequisite required by ERPNext's Company hook.
+
+    A fresh ERPNext site does not always contain the standard ``Transit``
+    Warehouse Type, while ``Company.on_update`` uses it when creating default
+    warehouses.  This is a controller prerequisite, not a policy-owned
+    business record, and is idempotent on existing tenant sites.
+    """
+
+    if not frappe.db.exists("Warehouse Type", "Transit"):
+        frappe.get_doc({"doctype": "Warehouse Type", "name": "Transit"}).insert(
+            ignore_permissions=True
+        )
+
+
 def status() -> dict[str, object]:
     desired = policy.load_policy()
     configured = desired.get("bootstrap", {}).get("company", {})
@@ -94,6 +109,7 @@ def run() -> dict[str, object]:
     previous_flag = getattr(frappe.flags, "in_letron_bootstrap", False)
     try:
         frappe.flags.in_letron_bootstrap = True
+        _ensure_company_prerequisites()
         company = frappe.get_doc(
             {
                 "doctype": "Company",

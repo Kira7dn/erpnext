@@ -7,7 +7,7 @@
 | Sản phẩm | Letron ERP Integration Platform |
 | Phiên bản | 1.0 |
 | Ngày cập nhật | 2026-08-12 |
-| Trạng thái | Phase 1-7 và production implementation hoàn thành; Ubuntu clean-checkout evidence còn chờ |
+| Trạng thái | Phase 1-8 hoàn thành trên Windows/Docker; Phase 9-12 chưa triển khai |
 | Product owner | Letron |
 | Backend source of truth | ERPNext/Frappe |
 | Runtime | Docker Compose |
@@ -65,8 +65,8 @@ OpenAPI theo module và handbook có ví dụ sử dụng.
 6. Cho phép đồng bộ phiên bản ERPNext fork bằng Git subtree.
 7. Khởi tạo đầy đủ một tenant/Company qua API để business API dùng được ngay,
    không phụ thuộc Desk/setup wizard.
-8. Quản lý toàn bộ business configuration native của ERPNext/Frappe bằng
-   `config/policy.yaml`, có completeness và drift gate fail-closed.
+8. Quản lý toàn bộ business configuration native thuộc phạm vi sản phẩm được
+   hỗ trợ bằng `config/policy.yaml`, có completeness và drift gate fail-closed.
 
 ### 4.2. Không phải mục tiêu
 
@@ -125,12 +125,14 @@ POST /api/v1/accounts/sales-invoices/{name}/cancel
 
 ### Ngoài phạm vi phiên bản hiện tại
 
-- Các workflow nghiệp vụ Letron chưa được mô tả cụ thể.
-- Action `amend` chưa có contract/runtime implementation riêng.
-- Webhook delivery consumer production.
-- Realtime consumer production.
-- SSO/JWT production.
-- Contract test đầy đủ cho mọi DocType và mọi permission role.
+- Public API cho Manufacturing, POS, Subscription, Budget,
+  Assets/Maintenance, Projects và Support.
+- Policy source của module chưa public, trừ policy Frappe dùng chung trực tiếp
+  cho resource public.
+- CRUD trực tiếp cho Account, GL Entry, Payment Ledger Entry, Stock Ledger Entry
+  hoặc bảng ledger khác.
+- ERPNext Desk/setup wizard, SSO/JWT và action `amend` chưa có contract riêng.
+- Contract test dàn trải cho mọi DocType ERPNext ngoài allowlist sản phẩm.
 
 ## 7. Nguyên tắc sản phẩm
 
@@ -147,11 +149,15 @@ POST /api/v1/accounts/sales-invoices/{name}/cancel
    hỗ trợ multi-company.
 10. Không có UI fallback: chức năng chỉ hoàn thành khi có API/bootstrap path và
     acceptance chạy được hoàn toàn headless.
-11. `config/config.yaml` chỉ quản lý system/runtime; entity và transaction nằm
-    trong ERPNext DB; secret nằm trong `.env`; mọi business configuration native
-    thuộc `config/policy.yaml`.
-12. Policy coverage phải fail-closed: DocType, field hoặc nguồn fixture/config
-    upstream chưa phân loại không được âm thầm bỏ qua.
+11. `config/config.yaml` quản lý system/runtime; `config/policy.yaml` quản lý
+    Company bootstrap và business policy; entity/transaction nằm trong ERPNext
+    DB; secret nằm trong `.env` hoặc secret store.
+12. Country và currency có target owner duy nhất là `policy.yaml`. Việc chúng
+    vẫn xuất hiện như mirror trong `config.yaml` là migration gap của Phase 8.0,
+    không phải boundary đích.
+13. Policy completeness chỉ áp dụng cho module public và policy Frappe dùng
+    chung trực tiếp cho chúng. Nguồn trong phạm vi chưa phân loại không được âm
+    thầm bỏ qua.
 
 ## 8. Yêu cầu chức năng
 
@@ -259,11 +265,13 @@ sàng.
 
 ### FR-10 — Full native policy wrapper
 
-`config/policy.yaml` phải là desired-state SOT cho toàn bộ business
-configuration native của ERPNext/Frappe sau bootstrap. Wrapper chỉ điều phối
-native DocType/controller; không tạo policy engine hoặc bảng dữ liệu song song.
+`config/policy.yaml` phải là desired-state SOT cho business configuration native
+thuộc module public và policy Frappe dùng chung trực tiếp cho các module đó.
+Wrapper chỉ điều phối native DocType/controller; không tạo policy engine hoặc
+bảng dữ liệu song song.
 
-Coverage không được chỉ quét `doctype/*.json`. Inventory phải bao gồm tối thiểu:
+Trong phạm vi trên, coverage không được chỉ quét `doctype/*.json`. Inventory
+phải bao gồm tối thiểu:
 
 - DocType và child-DocType metadata của Frappe/ERPNext;
 - persistent Single settings và non-Single rule/template/workflow/permission;
@@ -328,8 +336,8 @@ monorepo.
 
 Business API chỉ được báo ready khi site có đúng một Company, bootstrap đã hoàn
 tất, policy compatibility khớp phiên bản ghim và policy drift bằng 0. Thiếu
-Company, có nhiều Company, thiếu prerequisite hoặc có config chưa phân loại đều
-phải trả trạng thái không sẵn sàng với lỗi có thể audit.
+Company, có nhiều Company, thiếu prerequisite hoặc có config trong phạm vi chưa
+phân loại đều phải trả trạng thái không sẵn sàng với lỗi có thể audit.
 
 ### NFR-07 — Tái lập tenant
 
@@ -405,8 +413,9 @@ không đánh dấu capability đó là production-complete.
 
 ### Policy completeness
 
-- Inventory bao phủ DocType metadata, child tables, setup-wizard country data,
-  Chart-of-Accounts templates, regional fixtures/hooks và effective DB records.
+- Inventory bao phủ metadata/child table của module public, policy Frappe dùng
+  chung, setup-wizard country data, Chart-of-Accounts template, regional hook
+  liên quan và effective DB records.
 - `unclassified_sources`, `unclassified_doctypes`, `unclassified_fields`,
   `unmanaged_policy_records`, `schema_drift`, `runtime_drift` và
   `roundtrip_diff` đều bằng `0`.
@@ -420,7 +429,8 @@ không đánh dấu capability đó là production-complete.
 
 ### Contract/generator
 
-- Generate tạo đủ catalog (814 DocTypes, 1327 whitelisted methods) và OpenAPI.
+- Generate tạo catalog runtime và OpenAPI từ source phiên bản đang ghim; số
+  DocType/method được kiểm tra bằng artifact regeneration thay vì hard-code vào PRD.
 - OpenAPI 3.1 validator pass với curated resource allowlist.
 - Không có dynamic fallback path trong module spec.
 - Aggregate chỉ có các operation được allowlist rõ ràng.
@@ -442,301 +452,130 @@ không đánh dấu capability đó là production-complete.
 
 ## 12. Roadmap
 
-### Phase 1 — Runtime nền tảng — Hoàn thành
+### 12.1. Trạng thái tổng hợp
 
-- Docker/site/configurator.
-- Custom Frappe app.
-- Health, runtime info và runtime snapshot.
-- Verify/inspect runtime.
-
-### Phase 2 — Catalog và metadata — Hoàn thành
-
-- Inspector DocType/method.
-- Field/link/child-table metadata.
-- Catalog đầy đủ.
-- Contract validation.
-
-### Phase 3 — OpenAPI và handbook — Hoàn thành
-
-- Aggregate OpenAPI.
-- Public module OpenAPI cho Accounts, Buying, Contacts, Selling và Stock.
-- Clean module routes.
-- Typed schema và public allowlist có ranh giới rõ.
-- Handbook integration.
-
-### Phase 4 — Nghiệm thu integration — Hoàn thành
-
-- Contract test trên Docker cho Customer, Quotation, Sales Order và Sales Invoice.
-- CRUD, native Link/child table, permission/error matrix và Invoice submit/cancel.
-- Request ID, idempotency, retry/reconciliation và fixture cleanup.
-- Runtime snapshot, OpenAPI artifacts và host quality gates đã pass.
-
-### Phase 5 — Mở rộng test API quan trọng — Hoàn thành
-
-Mục tiêu là tăng runtime coverage cho các capability đã có trong contract nhưng
-chưa thuộc curated business resources của Phase 4; không test dàn trải toàn bộ
-metadata ERPNext.
-
-P0:
-
-- Authentication bằng `Authorization: token api_key:api_secret`, gồm token đúng,
-  token sai và thiếu token.
-- `health`, `runtime_info`, `runtime_snapshot` và quyền guest/authenticated.
-- Curated `/api/v1/...` với list filter/pagination/order/fields,
-  detail, create/update/delete và lỗi Link/required/read-only/404.
-- `POST /api/method/upload_file` với upload hợp lệ, thiếu file, auth và cleanup.
-- Chain nghiệp vụ Quotation → Sales Order → Sales Invoice, gồm Link validation
-  và native lifecycle.
-
-P1:
-
-- Unicode/URL encoding, response schema list/detail và error envelope.
-- Idempotency retry sau validation error và concurrent duplicate write.
-- Read-after-timeout theo business key/name và reconciliation evidence.
-- Permission matrix cho từng nhóm resource và action.
-
-Acceptance Phase 5:
-
-- Tất cả P0 pass trên Docker runtime qua native Frappe API.
-- Không có fixture, file upload, stale Link hoặc credential trong artifact.
-- OpenAPI aggregate/module paths khớp runtime; catalog không suy giảm.
-- `pytest`, Ruff, ty, `git diff --check` và runtime verify pass.
-- Webhook/realtime đã pass với staging consumer Docker, HMAC, dedupe, reconnect
-  và delivery polling tối đa 180 giây.
-
-### Phase 6 — Contacts và Stock core — Hoàn thành
-
-- Public CRUD cho Address, Contact, Material Request, Purchase Receipt, Stock
-  Entry và Item Price; `Dynamic Link` chỉ là child schema.
-- Customer/Supplier → Address/Contact; Material Request → Purchase Order →
-  Purchase Receipt; Stock Entry receipt/issue/transfer; Item → Item Price.
-- Material Request, Purchase Receipt và Stock Entry dùng submit/cancel native;
-  Purchase Receipt liên kết Purchase Order đã submit và stock ledger chỉ phát
-  sinh qua controller ERPNext.
-- Docker acceptance xác nhận persistence, delete→404, list controls, auth,
-  permission, Link/required validation, Unicode, delivery và cleanup fail-closed.
-- OpenAPI kết thúc ở `{passed: 103, partial: 0, not-tested: 0, blocked: 0}`.
-
-### Phase 7 — Accounts operational core — Hoàn thành
-
-Mục tiêu là hoàn thiện lớp chứng từ và master vận hành Accounts trước khi mở
-CRM, Buying hoặc các module nghiệp vụ khác. Mọi write tiếp tục đi qua Document
-controller native; không tạo API ghi trực tiếp ledger. Manufacturing không
-thuộc roadmap public API hiện tại.
-
-Public resource mới:
-
-| Resource | Route | Phạm vi |
+| Phase | Kết quả bắt buộc | Trạng thái |
 |---|---|---|
-| Bank | `/api/v1/accounts/banks` | list/create/detail/update/delete |
-| Bank Account | `/api/v1/accounts/bank-accounts` | list/create/detail/update/delete |
-| Mode of Payment | `/api/v1/accounts/modes-of-payment` | list/create/detail/update/delete |
-| Cost Center | `/api/v1/accounts/cost-centers` | CRUD parent; giữ invariant tree native |
-| Journal Entry | `/api/v1/accounts/journal-entries` | CRUD và submit/cancel native |
-| Payment Request | `/api/v1/accounts/payment-requests` | CRUD và submit/cancel native |
+| 1 — Runtime | Docker/site/app, health và inspection | `COMPLETE` |
+| 2 — Catalog | Metadata, catalog và contract validation | `COMPLETE` |
+| 3 — OpenAPI | Curated aggregate/module contract và handbook | `COMPLETE` |
+| 4 — Integration core | Selling flow, lifecycle, permission và cleanup | `COMPLETE` |
+| 5 — API hardening/delivery | Auth, idempotency, upload, HMAC, retry và dedupe | `COMPLETE` |
+| 6 — Contacts/Stock core | Address, Contact và Stock operational resources | `COMPLETE` |
+| 7 — Accounts operational core | Bank, payment master, Cost Center, Journal Entry và Payment Request | `COMPLETE` |
+| 8 — Full native policy wrapper | Boundary, inventory, native coverage và round-trip | `IN_PROGRESS` |
+| 9 — Accounts reconciliation | Bank Transaction, reconciliation và Payment Order | `PLANNED` |
+| 10 — CRM/Buying pre-order | Lead, Opportunity, RFQ và Supplier Quotation | `PLANNED` |
+| 11 — Stock traceability | Reconciliation, serial/batch, quality, shipment và reservation | `PLANNED` |
+| 12 — Final production handoff | Security, load, DR, residue và clean Ubuntu release | `PLANNED` |
 
-Contract đã tăng 34 operation: 30 CRUD operation và bốn lifecycle action.
-Aggregate và module Accounts có cùng evidence, tổng đúng 137 operation với
-`{passed: 137, partial: 0, not-tested: 0, blocked: 0}`. Các operation mới khởi
-đầu ở `not-tested` và chỉ được chuyển `passed` sau Docker acceptance.
+Phase 1–7 hiện công bố 5 module, 23 resource và 137 business operation. Trạng
+thái contract là `{passed: 137, partial: 0, not-tested: 0, blocked: 0}`. Child
+table không có CRUD riêng; ledger chỉ phát sinh qua controller native.
 
-Luồng acceptance chính:
+### 12.2. Phase 8 — Full native policy wrapper
 
-- Bank → Bank Account, liên kết Company và Account thật khi payload sử dụng
-  company ledger account.
-- Mode of Payment → child account mapping theo Company.
-- Cost Center tạo parent/child, update/readback và xóa leaf trước root; không
-  phá invariant NestedSet.
-- Journal Entry dùng account thật, tổng debit bằng tổng credit; draft update và
-  delete tách khỏi fixture submit/cancel.
-- Payment Request loại `Outward` liên kết Purchase Invoice đã submit; draft,
-  delete và lifecycle dùng ba Purchase Invoice riêng.
-- Tất cả list kiểm tra `fields`, `filters`, `order_by`, `limit_start` và
-  `limit_page_length`; mọi delete dùng fixture disposable và GET sau delete trả
-  `404`.
-- Kiểm tra guest `401/403`, role permission native, required field, invalid
-  Link/Dynamic Link, imbalance Journal Entry, Unicode/URL và idempotency.
-- Webhook/realtime polling tối đa 180 giây; mọi outbox của run phải `Delivered`.
+| Milestone | Kết quả | Trạng thái |
+|---|---|---|
+| 8.0 Boundary migration | Country/currency chỉ còn một owner là `policy.yaml`; không có field hai SOT | `COMPLETE` |
+| 8.1 Inventory closure | Mọi source trong phạm vi có classification; `unknown = 0` | `COMPLETE` |
+| 8.2 Runtime foundation | Bootstrap, export, validate, plan, apply, readback, drift và rollback | `COMPLETE` |
+| 8.3 Native coverage | Policy của module public và Frappe cross-cutting có typed schema/dependency | `COMPLETE` |
+| 8.4 Control plane | Fixed-path API, optimistic hash, atomic apply, audit và rollback cho schema 8.3 | `COMPLETE` trên Windows acceptance |
+| 8.5 Acceptance | Structural/apply/assets pass; còn effect matrix và failure injection từng bước | `IN_PROGRESS` |
+| 8.6 Windows/Docker signature | Chỉ ký sau full controller-effect gate cùng revision; Ubuntu không thuộc scope | `IN_PROGRESS` |
 
-Evidence gần nhất: launcher production không flag và `verify` pass; toàn bộ integration đạt
-`5 passed, 49 deselected`; host đạt `52 passed, 5 deselected`; Ruff, ty,
-contract validation, OpenAPI generate/validate và `git diff --check` pass.
-Journal Entry submit tạo GL active và cancel xóa toàn bộ GL active; Payment
-Request xác nhận `docstatus` 1→2 và `Initiated`→`Cancelled` bằng permission
-submit native của Accounts Manager.
+Production policy giữ 14 native document thật. Native coverage bổ sung không
+materialize dữ liệu giả vào production YAML: 56 source managed/conditional dùng
+disposable fixture, dependency closure và cleanup reverse-order trong acceptance.
 
-Cleanup và hard gates:
+Phase 8 triển khai theo thứ tự Accounts/tax → payment/commercial → stock/quality
+→ workflow/permission → naming/print/email/notification. Phạm vi inventory chỉ
+gồm module public và Frappe policy tác động trực tiếp tới chúng. Khi Phase 10
+public CRM, inventory phải mở rộng và pass trước khi contract CRM được công bố.
 
-- Cancel chứng từ submitted trước delete; dọn GL Entry, Payment Ledger Entry,
-  outbox, consumer event và Cost Center tree theo prefix.
-- Audit fail-closed không còn `ACCEPTANCE-LOCAL-*`, File, Journal Entry, Payment
-  Request, Cost Center, GL/Payment Ledger hoặc consumer event residue.
-- Chạy `pytest`, Ruff, ty, contract validation, OpenAPI generate/validate,
-  `git diff --check`, launcher `config/up/verify` và toàn bộ Docker integration.
+### 12.3. Phase 9–11 — Mở rộng business API
 
-Không thuộc Phase 7:
+- Phase 9 thêm Bank Transaction, Bank Transaction Rule, Payment Reconciliation,
+  Payment Order và action đối soát; không public write trực tiếp ledger.
+- Phase 10 thêm Lead, Opportunity, Request for Quotation và Supplier Quotation,
+  cùng native lifecycle cần thiết.
+- Phase 11 thêm Stock Reconciliation, Serial No, Batch, Quality Inspection,
+  Pick List, Shipment, Landed Cost Voucher và Stock Reservation Entry.
 
-- Không public CRUD cho Account, GL Entry, Payment Ledger Entry hoặc bất kỳ
-  ledger table nào.
-- Bank Transaction, Bank/Payment Reconciliation, Payment Order, Budget, POS,
-  Subscription và báo cáo read-only được thiết kế ở increment Accounts kế tiếp.
-- Không dùng generic resource/RPC fallback và không sửa source ERPNext.
+Mỗi operation mới bắt đầu ở `not-tested`, chỉ chuyển `passed` sau Docker
+acceptance có native permission/controller, readback hoặc delete→404, negative
+case, delivery và cleanup residue. Số module/resource/operation chỉ cập nhật sau
+khi contract và acceptance trên cùng revision pass.
 
-### Headless single-tenant bootstrap và policy SOT — Native baseline hoàn thành
+### 12.4. Phase 12 — Final production handoff
 
-`config/config.yaml` là SOT UTF-8 cho system/runtime và `config/policy.yaml` là
-SOT UTF-8 cho policy; cả hai được version-control và tồn tại sẵn trên compute.
-Mô hình đích bắt buộc một Docker project/Frappe site bằng đúng một tenant và
-một Company. Sản phẩm không có Desk/setup wizard; bootstrap và mọi thay đổi
-policy phải có API/one-shot path của `letron_api`.
+Chạy lại trên revision cuối: least-privilege/API-key rotation, secret scan,
+rate/payload limits, load/soak, retry/restart, backup off-host, restore/RPO/RTO,
+full integration, OpenAPI drift và residue cleanup trên host Windows/Docker. Các
+evidence Windows/Docker hiện tại là baseline, không thay thế final release gate.
 
-ERPNext upstream đã có native country bootstrap cho Việt Nam tại
-`erpnext/setup/setup_wizard/data/country_wise_tax.json`, hiện định nghĩa
-`Vietnam Tax`, account `VAT`, `tax_rate: 10`. `Company.on_update` gọi native
-country fixture và tax setup khi tạo Company/Chart of Accounts. Letron phải tái
-sử dụng đúng server-side controller này trong headless bootstrap, rồi quản lý
-effective configuration sinh ra bằng `policy.yaml`; không yêu cầu UI và không
-tự dựng tax record shadow.
+### 12.5. Ngoài roadmap được duyệt
 
-Native baseline hiện đã đạt: `policy-bootstrap` đọc Company từ `policy.yaml`,
-tạo đúng một Company bằng controller native với Standard Chart of Accounts và
-country fixture Việt Nam, rồi materialize ba tax template native vào cùng
-bundle. Runtime readback có Sales/Purchase/Item Tax Template `Vietnam Tax -
-LTVN` ở mức 10%; chạy bootstrap lần hai không tạo thêm dữ liệu. Site có nhiều
-Company hoặc Company khác YAML bị từ chối. JSON inventory chỉ quét
-`doctype/*.json` vẫn không đủ để chứng minh full coverage vì bỏ sót
-country/setup-wizard data.
-
-Wrapper `letron_api.policy` thực hiện bootstrap bundle, export, validate, plan,
-apply và readback. Phạm vi dữ liệu thực tế gồm 15 document: 12 Single DocType
-Settings và ba tax template native của Việt Nam. Default Role/User/Fiscal
-Year/Workflow vocabulary và Settings
-module chưa dùng không được auto-export. Workflow, Custom DocPerm, User Permission,
-Authorization Rule, Accounting Dimension và các business rule/template native
-đã được wrapper allowlist nhưng runtime hiện có 0 record. Tax rule/template, payment terms, pricing, shipping, SLA và
-print/email/notification policy chưa được gom. Inventory source/storage được
-chốt tại `docs/Configuration_Inventory.md`.
-Password, API secret, metadata phát sinh và business transaction/master không
-được đưa vào bundle.
-
-Secret thật nằm trong `.env` bị Git ignore; YAML chỉ chứa `${ENV_NAME}`. Docker
-chạy one-shot `policy-bootstrap`, `config-sync`, rồi `policy-sync` sau migrate
-và trước backend/workers.
-Managed field không được sửa trực tiếp qua Desk hoặc generic resource API;
-migration được phép chạy rồi YAML được apply lại. Health/runtime snapshot công bố version, SHA-256 và
-drift count; scheduler audit và launcher `verify` fail-closed khi database lệch
-SOT. System Manager có control-plane API fixed-path để đọc/ghi atomic đúng một
-trong hai YAML với optimistic hash và apply/readback; API không resolve secret,
-không cho chọn path tùy ý và không thuộc public business contract. Vì vậy
-contract vẫn đúng 23 resource/137 operation.
-
-Acceptance đã chứng minh đúng một Company, native Vietnam tax 10% ở cả ba
-template, native readback khớp YAML, direct edit bị từ chối, drift trực tiếp
-được phát hiện, apply phục hồi zero drift và apply lần hai trả `applied: 0`
-trong phạm vi 15 document; evidence này chưa chứng minh full policy coverage.
-Toàn bộ Phase 7
-CRUD/lifecycle/delivery/cleanup vẫn pass và không được dùng để thay thế các gate
-bootstrap/policy mới ở mục 11.
-
-### Thứ tự sau Phase 7
-
-1. Full policy coverage: inventory mọi native config source, classification
-   không còn unknown, typed round-trip và atomic Policy API.
-2. Accounts banking/reconciliation: Bank Transaction, Payment Reconciliation,
-   Payment Order và các action đối soát có contract riêng. Account, GL Entry và
-   Payment Ledger Entry chỉ được cân nhắc read-only; tuyệt đối không public CRUD.
-3. CRM/Buying trước đơn hàng: Lead, Opportunity, Request for Quotation và
-   Supplier Quotation.
-4. Stock control/traceability: Stock Reconciliation, Serial No, Batch, Quality
-   Inspection, Pick List, Shipment, Landed Cost Voucher và Stock Reservation
-   Entry; ledger vẫn chỉ phát sinh qua controller native.
-5. Assets/Maintenance, Projects/Timesheet và Support/Warranty chỉ mở theo nhu
-   cầu tích hợp đã được xác nhận.
-
-Manufacturing, gồm BOM, Production Plan, Work Order và Job Card, bị loại khỏi
-roadmap hiện tại. Budget, POS và Subscription cũng chưa được ưu tiên; mỗi nhóm
-chỉ được đưa vào phase mới khi có use case và acceptance contract riêng.
+Manufacturing, POS, Subscription, Budget, Assets/Maintenance, Projects và
+Support không tự động trở thành public API hoặc policy scope. Bổ sung chúng là
+thay đổi product scope và cần phase, contract cùng acceptance riêng.
 
 ## 13. Audit bàn giao API, config và policy
 
-### Kết luận audit
+Ngày audit: 2026-08-12. Evidence dưới đây chỉ áp dụng cho revision hiện tại và
+không tự động chuyển sang revision tương lai.
 
-Ngày audit: 2026-08-12.
-
-Business API và production implementation **đã đủ điều kiện bàn giao trên
-Windows/Docker Linux đã kiểm chứng**. Tám blocker P0 đã được đóng bằng code và
-test. Trạng thái đa nền tảng chưa ký hoàn tất vì chưa chạy clean-checkout
-acceptance trực tiếp trên máy Ubuntu thật.
-
-| Hạng mục | Kết quả |
-|---|---|
-| Curated business API | Đạt trong phạm vi 5 module, 23 resource, 137 operation |
-| Acceptance | `{passed: 137, partial: 0, not-tested: 0, blocked: 0}` |
-| Native permission/controller/lifecycle | Đạt trong phạm vi công bố |
-| Config và policy SOT | Đạt: invariant liên file, immutable Company và rollback bù |
-| OpenAPI handoff | Đạt: public/control-plane artifact có checksum |
-| Launcher/runtime profile | Đạt trên Windows/Docker Linux; Ubuntu host còn chờ evidence |
-| Tài liệu tích hợp | Đạt: onboarding, role matrix, config-control và webhook runbook |
-
-Phạm vi đã xác nhận gồm explicit `/api/v1` allowlist, không có generic
-resource/RPC fallback, write qua controller native, Accounts operational core,
-durable outbox với HMAC/retry/dedupe và hai YAML SOT không chứa secret.
-Kết quả này chỉ xác nhận policy đã khai báo, không chứng minh `policy.yaml` đã
-bao phủ toàn bộ policy native của ERPNext.
-
-### Kết quả đóng blocker P0
-
-| ID | Kết quả implementation | Trạng thái |
+| Hạng mục | Trạng thái | Evidence hoặc gap |
 |---|---|---|
-| P0-1 | `contracts/openapi/` giữ public/control-plane YAML+JSON và manifest checksum; generator có `check` | Đóng |
-| P0-2 | Control-plane spec typed riêng, không làm tăng 137 business operation | Đóng |
-| P0-3 | Công bố 400/401/403/404/409/417/429/500, typed error; idempotency chỉ trên write | Đóng |
-| P0-4 | PUT rollback chính xác YAML/runtime; Docker negative test xác nhận hash và zero drift | Đóng |
-| P0-5 | `bootstrap.company` immutable sau initialization, conflict trả 409 | Đóng |
-| P0-6 | Combined validator chạy ở launcher, control API, bootstrap, sync và health | Đóng |
-| P0-7 | Config v2 production-like, MariaDB-only, staging override riêng, delivery enable thật, backup/restore native | Đóng |
-| P0-8 | Launcher không flag chờ tối đa 180 giây, zero drift, health và restart acknowledgement | Code đóng; Windows pass, Ubuntu host chờ chạy |
+| Business API Phase 1–7 | `COMPLETE` | 5 module, 23 resource, 137/137 operation `passed` |
+| Native controller/permission/lifecycle | `COMPLETE` trong allowlist | Docker acceptance và cleanup fail-closed |
+| Policy runtime foundation | `COMPLETE` | 14 document thật, zero drift, rollback và idempotent apply |
+| Full policy coverage | `COMPLETE` | 56 source registry-driven; native asset và full acceptance pass |
+| Config/policy ownership | `COMPLETE` cho boundary migration | Country/currency chỉ còn ở `policy.bootstrap.company` |
+| OpenAPI handoff | `COMPLETE` | Public 137 operation, control plane 2 operation, manifest checksum |
+| Windows/Docker production baseline | `COMPLETE` | No-flag readiness, backup và restore drill pass |
+| Phase 8 host signature | `WINDOWS_DOCKER` | Ubuntu không thuộc tiêu chí nghiệm thu Phase 8 |
+| Project completion | `IN_PROGRESS` | Phase 9–12 chưa hoàn thành |
 
-### Kết quả P1 cho team tích hợp tự phục vụ
+Evidence Phase 8 đã chạy: host `50 passed, 26 deselected`; Docker acceptance
+registry gồm 7 structural shard, 11 apply/idempotency/delete shard, asset
+lifecycle, policy/control-plane; Ruff/ty pass; hai OpenAPI validate; scanner
+`unknown=0`, `schema_drift=0`; backup gồm database/public/private files và
+restore drill health/cleanup thành công. Mỗi test có hard timeout 55 giây.
 
-1. Handbook đã có issue/rotate/revoke API key và role khởi điểm theo module.
-2. Control-plane có typed request/response, conflict và rollback semantics.
-3. Webhook có runbook HMAC, dedupe, replay và pull reconciliation.
-4. Container preflight đã chứng minh bind mount atomic-writable; Ubuntu checkout
-   sạch vẫn là bước evidence ngoài môi trường Windows hiện tại.
-5. Health typed, idempotency chỉ trên write, discovery được tách khỏi public.
-6. Bootstrap production dùng `letron_api.tenant_bootstrap`; tên seed cũ đã bỏ.
+Các invariant đã xác nhận gồm explicit `/api/v1` allowlist, không có generic
+business fallback, write qua controller native, immutable Company sau
+bootstrap, config-control optimistic hash/rollback, durable outbox với
+HMAC/retry/dedupe và secret không nằm trong YAML/artifact.
 
-### Điều kiện đổi trạng thái sang production ready
-
-- P0-1 đến P0-8 có implementation và test.
-- Curated OpenAPI artifact/version dùng được mà không cần kiến thức nội bộ.
-- Clean Ubuntu deployment bằng một lệnh chỉ thành công sau zero drift và HTTP
-  health.
-- Negative test config-control chứng minh rollback cả file và DB.
-- Integration-user/role và webhook recovery runbook đã được diễn tập.
-- Host gates, Docker integration, OpenAPI validation và residue cleanup pass
-  trên đúng revision bàn giao.
-
-Evidence thực tế trên revision hiện tại:
-
-- host: `52 passed, 5 deselected`; Ruff và ty pass;
-- Docker integration: `5 passed, 49 deselected`;
-- OpenAPI public/control-plane đều validate, manifest lần lượt 137 và 2 operation;
-- backup tạo config/DB/public/private và restore drill pass, site tạm cleanup;
-- `docker-start.ps1` không flag pass production health, zero drift và loại staging consumer.
-
-Trạng thái chính thức tại thời điểm audit:
+Trạng thái phát hành hiện tại:
 
 ```text
-Business API integration:                 READY
-Production implementation on Windows:    READY
-Cross-platform Ubuntu handoff signature: PENDING CLEAN-HOST EVIDENCE
+Business API Phase 1-7:       COMPLETE
+Phase 8 policy wrapper:       IN_PROGRESS
+Managed production policy:    14 native documents
+Windows/Docker baseline:      VERIFIED
+Phase 8 host signature:       WINDOWS_DOCKER
+Project completion:           NOT COMPLETE
 ```
 
-## 14. Tài liệu liên quan
+Project chỉ chuyển `COMPLETE` khi Phase 9–12 pass trên cùng revision, mọi
+operation công bố có test status `passed`, inventory trong phạm vi có
+`unknown = 0`, residue bằng 0 và Windows/Docker deployment hoàn tất.
 
-- [Integration contract](../contracts/erpnext-integration.yml)
-- [Integration handbook](Integration_Handbook.md)
-- [README — ERPNext trong monorepo](../README.md)
-- [System architecture](System_Architecture.md)
+## 14. Governance tài liệu
+
+| Tài liệu | Nội dung sở hữu |
+|---|---|
+| PRD này | Phạm vi, requirement, roadmap, tiến độ, definition of done và audit |
+| [System Architecture](System_Architecture.md) | Boundary, ownership, data flow và invariant |
+| [Configuration Inventory](Configuration_Inventory.md) | Policy source, classification, implementation/test status |
+| [Integration Handbook](Integration_Handbook.md) | Cách consumer sử dụng capability đã công bố |
+| [Docker runbook](../DOCKER.md) | Deploy, readiness, backup, restore và troubleshooting |
+| [README](../README.md) | Entry point, quick start và trạng thái tóm tắt |
+| [Integration contract](../contracts/erpnext-integration.yml) | Allowlist nguồn cho public API contract |
+
+Khi có mâu thuẫn, sửa tài liệu sở hữu nội dung trước rồi cập nhật các tài liệu
+khác bằng liên kết hoặc summary. Không sao chép roadmap, inventory hoặc evidence
+chi tiết sang handbook, architecture hay runbook.

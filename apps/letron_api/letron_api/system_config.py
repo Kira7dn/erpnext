@@ -21,7 +21,7 @@ from typing import Any
 import yaml
 from yaml.resolver import BaseResolver
 
-CONFIG_VERSION = 2
+CONFIG_VERSION = 3
 CONFIG_DIR_ENV = "LETRON_CONFIG_DIR"
 CONFIG_STATUS_CACHE_KEY = "letron:system-config:status"
 SECRET_REFERENCE_FIELDS = {
@@ -58,10 +58,6 @@ REQUIRED_PATHS = {
     "site.header",
     "site.database_type",
     "site.admin_password",
-    "locale.country",
-    "locale.timezone",
-    "locale.language",
-    "locale.currency",
     "developer.mode",
     "developer.allow_tests",
     "developer.request_timeout",
@@ -104,7 +100,6 @@ ALLOWED_TOP_LEVEL = {
     "database",
     "redis",
     "site",
-    "locale",
     "developer",
     "frontend",
     "workers",
@@ -285,6 +280,8 @@ def validate_file(path: str | Path | None = None) -> dict[str, Any]:
         "ok": True,
         "path": str(source),
         "version": config["version"],
+        "schema_version": config["version"],
+        "scope_version": 1,
         "erpnext_version": config["erpnext_version"],
         "sha256": config_sha256(config),
         "system_settings": len(config["system_settings"]),
@@ -310,21 +307,8 @@ def validate_bundle(
     global_defaults = documents.get(("Global Defaults", "Global Defaults"), {}).get("fields", {})
     expected = {
         "erpnext_version": (config["erpnext_version"], policy["erpnext_version"]),
-        "country/bootstrap": (config["locale"]["country"], company["country"]),
-        "currency/bootstrap": (config["locale"]["currency"], company["currency"]),
-        "country/global_defaults": (config["locale"]["country"], global_defaults.get("country")),
-        "currency/global_defaults": (
-            config["locale"]["currency"],
-            global_defaults.get("default_currency"),
-        ),
-        "language/system_settings": (
-            config["locale"]["language"],
-            config["system_settings"].get("language"),
-        ),
-        "timezone/system_settings": (
-            config["locale"]["timezone"],
-            config["system_settings"].get("time_zone"),
-        ),
+        "country/global_defaults": (company["country"], global_defaults.get("country")),
+        "currency/global_defaults": (company["currency"], global_defaults.get("default_currency")),
     }
     default_company = global_defaults.get("default_company")
     if default_company is not None:
@@ -342,6 +326,10 @@ def validate_bundle(
 
 def launcher_environment(path: str | Path | None = None) -> dict[str, str]:
     config = load_config(path, resolve_secrets=True)
+    from letron_api.policy import load_policy
+
+    policy = load_policy(config_path(path).parent / "policy.yaml")
+    company = policy["bootstrap"]["company"]
     if config["credentials"]["production_like"]:
         if config["developer"]["mode"] or config["developer"]["allow_tests"]:
             raise ConfigError("Production-like configuration forbids developer mode and allow_tests")
@@ -381,10 +369,10 @@ def launcher_environment(path: str | Path | None = None) -> dict[str, str]:
         "DEVELOPER_MODE": config["developer"]["mode"],
         "ALLOW_TESTS": config["developer"]["allow_tests"],
         "REQUEST_TIMEOUT": config["developer"]["request_timeout"],
-        "COUNTRY": config["locale"]["country"],
-        "TIMEZONE": config["locale"]["timezone"],
-        "LANGUAGE": config["locale"]["language"],
-        "CURRENCY": config["locale"]["currency"],
+        "COUNTRY": company["country"],
+        "TIMEZONE": config["system_settings"]["time_zone"],
+        "LANGUAGE": config["system_settings"]["language"],
+        "CURRENCY": company["currency"],
         "FRONTEND_BACKEND": config["frontend"]["backend"],
         "FRONTEND_WEBSOCKET": config["frontend"]["websocket"],
         "FRONTEND_UPLOAD_SIZE": config["frontend"]["upload_size"],
@@ -431,6 +419,9 @@ def _runtime_erpnext_version() -> str:
 
 
 def _common_desired(config: Mapping[str, Any]) -> dict[str, Any]:
+    from letron_api.policy import load_policy
+
+    company = load_policy(policy_path())["bootstrap"]["company"]
     return {
         "letron_config_sha256": config_sha256(config),
         "db_host": config["database"]["host"],
@@ -442,10 +433,10 @@ def _common_desired(config: Mapping[str, Any]) -> dict[str, Any]:
         "developer_mode": config["developer"]["mode"],
         "allow_tests": config["developer"]["allow_tests"],
         "request_timeout": config["developer"]["request_timeout"],
-        "country": config["locale"]["country"],
-        "time_zone": config["locale"]["timezone"],
-        "lang": config["locale"]["language"],
-        "currency": config["locale"]["currency"],
+        "country": company["country"],
+        "time_zone": config["system_settings"]["time_zone"],
+        "lang": config["system_settings"]["language"],
+        "currency": company["currency"],
         "chromium_path": "/usr/bin/chromium-headless-shell",
     }
 

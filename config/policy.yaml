@@ -1,3 +1,7 @@
+version: 2
+scope_version: 1
+erpnext_version: 16.31.1
+assets: {}
 bootstrap:
   company:
     abbreviation: LTVN
@@ -173,14 +177,6 @@ documents:
       pegged_exchange_rate: '3.75'
       source_currency: SAR
   name: Pegged Currencies
-  state: present
-- doctype: POS Settings
-  fields:
-    invoice_fields: []
-    invoice_type: Sales Invoice
-    pos_search_fields: []
-    post_change_gl_entries: 0
-  name: POS Settings
   state: present
 - doctype: Selling Settings
   fields:
@@ -373,5 +369,3 @@ documents:
     title: Vietnam Tax
   name: Vietnam Tax - LTVN
   state: present
-erpnext_version: 16.31.1
-version: 1

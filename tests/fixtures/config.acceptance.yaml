@@ -1,4 +1,4 @@
-version: 2
+version: 3
 erpnext_version: 16.31.1
 runtime: {environment: local, image: "frappe/erpnext:v16.31.1", platform: linux/amd64, restart_policy: unless-stopped}
 project: {name: erpnext, http_port: 8080}
@@ -19,7 +19,6 @@ redis:
   cache_image: redis:6.2-alpine
   queue_image: redis:6.2-alpine
 site: {name: frontend, header: frontend, database_type: mariadb, admin_password: "${ADMIN_PASSWORD}"}
-locale: {country: Vietnam, timezone: Asia/Ho_Chi_Minh, language: vi, currency: VND}
 developer: {mode: true, allow_tests: true, request_timeout: 120}
 frontend: {backend: "backend:8000", websocket: "websocket:9000", upload_size: 50m, proxy_timeout: 120}
 workers:
