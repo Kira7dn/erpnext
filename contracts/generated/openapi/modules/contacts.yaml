@@ -1,0 +1,1103 @@
+openapi: 3.1.0
+info:
+  title: Letron ERPNext Contacts API
+  version: 0.1.0
+servers:
+- url: http://127.0.0.1:8080
+tags:
+- name: Typed Resource API
+- name: Whitelisted methods
+- name: Metadata
+- name: Files
+- name: 'Module: Contacts'
+- name: 'Module: Core'
+security:
+- frappeToken: []
+paths:
+  /api/v1/contacts/addresses:
+    get:
+      tags:
+      - 'Module: Contacts'
+      summary: List Address records
+      description: List typed Address documents.
+      operationId: listAddress
+      parameters:
+      - &id002
+        $ref: '#/components/parameters/RequestId'
+      - &id015
+        name: fields
+        in: query
+        schema:
+          type: string
+        description: JSON field-name array
+      - &id016
+        name: filters
+        in: query
+        schema:
+          type: string
+        description: JSON Frappe filters
+      - &id017
+        name: order_by
+        in: query
+        schema:
+          type: string
+      - &id018
+        name: limit_page_length
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - &id019
+        name: limit_start
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id003
+                      $ref: '#/components/schemas/Address'
+                  message: {}
+                required:
+                - data
+        '400': &id004
+          description: Invalid request
+          content: &id001
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeError'
+        '401': &id005
+          description: Authentication required
+          content: *id001
+        '403': &id006
+          description: Permission denied
+          content: *id001
+        '404': &id007
+          description: Resource not found
+          content: *id001
+        '409': &id008
+          description: Idempotency or optimistic concurrency conflict
+          content: *id001
+        '417': &id009
+          description: Native Frappe validation failure
+          content: *id001
+        '429': &id010
+          description: Rate limited
+          content: *id001
+        '500': &id011
+          description: Server or rollback failure
+          content: *id001
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    post:
+      tags:
+      - 'Module: Contacts'
+      summary: Create Address
+      description: Create a Address using the runtime DocType schema.
+      operationId: createAddress
+      parameters: &id020
+      - *id002
+      - &id012
+        $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id013
+              type: object
+              properties:
+                name: &id024
+                  type: string
+                address_details: &id025
+                  type: string
+                  x-frappe-options: fa fa-map-marker
+                address_title: &id026
+                  type: string
+                address_type: &id027
+                  type: string
+                  enum:
+                  - Billing
+                  - Shipping
+                  - Office
+                  - Personal
+                  - Plant
+                  - Postal
+                  - Shop
+                  - Subsidiary
+                  - Warehouse
+                  - Current
+                  - Permanent
+                  - Other
+                address_line1: &id028
+                  type: string
+                address_line2: &id029
+                  type: string
+                city: &id030
+                  type: string
+                county: &id031
+                  type: string
+                state: &id032
+                  type: string
+                country: &id033
+                  type: string
+                  x-frappe-target-doctype: Country
+                pincode: &id034
+                  type: string
+                column_break0: &id035
+                  type: string
+                email_id: &id036
+                  type: string
+                  x-frappe-options: Email
+                phone: &id037
+                  type: string
+                  x-frappe-options: Phone
+                fax: &id038
+                  type: string
+                is_primary_address: &id039
+                  type: boolean
+                is_shipping_address: &id040
+                  type: boolean
+                disabled: &id041
+                  type: boolean
+                linked_with: &id042
+                  type: string
+                  x-frappe-options: fa fa-pushpin
+                links: &id043
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DynamicLink'
+              required:
+              - address_line1
+              - address_type
+              - city
+              - country
+              - name
+              additionalProperties: true
+              x-module: Contacts
+            example:
+              address_type: ''
+              address_line1: ''
+              city: ''
+              country: ''
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id003
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  /api/v1/contacts/addresses/{name}:
+    get:
+      tags:
+      - 'Module: Contacts'
+      operationId: getAddress
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id003
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    put:
+      tags:
+      - 'Module: Contacts'
+      operationId: updateAddress
+      parameters: &id014
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id013
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id003
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    delete:
+      tags:
+      - 'Module: Contacts'
+      operationId: deleteAddress
+      parameters: *id014
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  /api/v1/contacts/contacts:
+    get:
+      tags:
+      - 'Module: Contacts'
+      summary: List Contact records
+      description: List typed Contact documents.
+      operationId: listContact
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id021
+                      $ref: '#/components/schemas/Contact'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    post:
+      tags:
+      - 'Module: Contacts'
+      summary: Create Contact
+      description: Create a Contact using the runtime DocType schema.
+      operationId: createContact
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id022
+              type: object
+              properties:
+                name: &id044
+                  type: string
+                contact_section: &id045
+                  type: string
+                  x-frappe-options: fa fa-user
+                first_name: &id046
+                  type: string
+                last_name: &id047
+                  type: string
+                user: &id048
+                  type: string
+                  x-frappe-target-doctype: User
+                cb00: &id049
+                  type: string
+                status: &id050
+                  type: string
+                  enum:
+                  - Passive
+                  - Open
+                  - Replied
+                salutation: &id051
+                  type: string
+                  x-frappe-target-doctype: Salutation
+                gender: &id052
+                  type: string
+                  x-frappe-target-doctype: Gender
+                image: &id053
+                  type: string
+                  writeOnly: true
+                contact_details: &id054
+                  type: string
+                  x-frappe-options: fa fa-pushpin
+                is_primary_contact: &id055
+                  type: boolean
+                links: &id056
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DynamicLink'
+                more_info: &id057
+                  type: string
+                  x-frappe-options: fa fa-file-text
+                department: &id058
+                  type: string
+                designation: &id059
+                  type: string
+                unsubscribed: &id060
+                  type: boolean
+                middle_name: &id061
+                  type: string
+                sb_00: &id062
+                  type: string
+                email_ids: &id063
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ContactEmail'
+                address: &id064
+                  type: string
+                  x-frappe-target-doctype: Address
+                phone_nos: &id065
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ContactPhone'
+                sync_with_google_contacts: &id066
+                  type: boolean
+                google_contacts: &id067
+                  type: string
+                  x-frappe-target-doctype: Google Contacts
+                cb_00: &id068
+                  type: string
+                sb_01: &id069
+                  type: string
+                company_name: &id070
+                  type: string
+              required:
+              - name
+              additionalProperties: true
+              x-module: Contacts
+            example: {}
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id021
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  /api/v1/contacts/contacts/{name}:
+    get:
+      tags:
+      - 'Module: Contacts'
+      operationId: getContact
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id021
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    put:
+      tags:
+      - 'Module: Contacts'
+      operationId: updateContact
+      parameters: &id023
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id022
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id021
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    delete:
+      tags:
+      - 'Module: Contacts'
+      operationId: deleteContact
+      parameters: *id023
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+components:
+  securitySchemes:
+    frappeToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'Frappe token authentication: token api_key:api_secret'
+  parameters:
+    RequestId:
+      name: X-Request-Id
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: X-Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+  schemas:
+    Address:
+      type: object
+      properties:
+        name: *id024
+        address_details: *id025
+        address_title: *id026
+        address_type: *id027
+        address_line1: *id028
+        address_line2: *id029
+        city: *id030
+        county: *id031
+        state: *id032
+        country: *id033
+        pincode: *id034
+        column_break0: *id035
+        email_id: *id036
+        phone: *id037
+        fax: *id038
+        is_primary_address: *id039
+        is_shipping_address: *id040
+        disabled: *id041
+        linked_with: *id042
+        links: *id043
+      required:
+      - address_line1
+      - address_type
+      - city
+      - country
+      - name
+      additionalProperties: true
+      x-module: Contacts
+    Contact:
+      type: object
+      properties:
+        name: *id044
+        contact_section: *id045
+        first_name: *id046
+        last_name: *id047
+        email_id:
+          type: string
+          x-frappe-options: Email
+          readOnly: true
+        user: *id048
+        cb00: *id049
+        status: *id050
+        salutation: *id051
+        gender: *id052
+        phone:
+          type: string
+          x-frappe-options: Phone
+          readOnly: true
+        image: *id053
+        contact_details: *id054
+        is_primary_contact: *id055
+        links: *id056
+        more_info: *id057
+        department: *id058
+        designation: *id059
+        unsubscribed: *id060
+        middle_name: *id061
+        sb_00: *id062
+        email_ids: *id063
+        address: *id064
+        phone_nos: *id065
+        mobile_no:
+          type: string
+          x-frappe-options: Phone
+          readOnly: true
+        pulled_from_google_contacts:
+          type: boolean
+          readOnly: true
+        sync_with_google_contacts: *id066
+        google_contacts: *id067
+        cb_00: *id068
+        sb_01: *id069
+        google_contacts_id:
+          type: string
+          readOnly: true
+        company_name: *id070
+        full_name:
+          type: string
+          readOnly: true
+          writeOnly: true
+      required:
+      - name
+      additionalProperties: true
+      x-module: Contacts
+    ContactEmail:
+      type: object
+      properties:
+        name:
+          type: string
+        email_id:
+          type: string
+          x-frappe-options: Email
+        is_primary:
+          type: boolean
+      required:
+      - email_id
+      - name
+      additionalProperties: true
+      x-module: Contacts
+    ContactPhone:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+          x-frappe-options: Phone
+        is_primary_phone:
+          type: boolean
+        is_primary_mobile_no:
+          type: boolean
+      required:
+      - name
+      - phone
+      additionalProperties: true
+      x-module: Contacts
+    DynamicLink:
+      type: object
+      properties:
+        name:
+          type: string
+        link_doctype:
+          type: string
+          x-frappe-target-doctype: DocType
+        link_name:
+          type: string
+          x-frappe-options: link_doctype
+        link_title:
+          type: string
+          readOnly: true
+      required:
+      - link_doctype
+      - link_name
+      - name
+      additionalProperties: true
+      x-module: Core
+    FrappeResponse:
+      type: object
+      properties:
+        message: {}
+      required:
+      - message
+    FrappeError:
+      type: object
+      properties:
+        exc_type:
+          type: string
+        exception:
+          type: string
+        _server_messages:
+          type: string
+        request_id:
+          type: string
+    ResourceListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        message: {}
+    FileUploadResponse:
+      type: object
+      properties:
+        file_url:
+          type: string
+        file_name:
+          type: string
+        message: {}
+    PageInfo:
+      type: object
+      properties:
+        limit_start:
+          type: integer
+        limit_page_length:
+          type: integer
+    RuntimeStatus:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        status:
+          type: string
+        version:
+          type: integer
+        erpnext_version:
+          type: string
+        sha256:
+          type: string
+        drift_count:
+          type: integer
+      required:
+      - ok
+    HealthResponse:
+      type: object
+      properties:
+        message:
+          type: object
+          properties:
+            ok:
+              type: boolean
+            app:
+              type: string
+            site:
+              type: string
+            frappe_version:
+              type:
+              - string
+              - 'null'
+            installed_apps:
+              type: array
+              items:
+                type: string
+            bootstrap:
+              $ref: '#/components/schemas/RuntimeStatus'
+            config:
+              $ref: '#/components/schemas/RuntimeStatus'
+            policy:
+              $ref: '#/components/schemas/RuntimeStatus'
+            configuration_bundle:
+              $ref: '#/components/schemas/RuntimeStatus'
+          required:
+          - ok
+          - app
+          - bootstrap
+          - config
+          - policy
+          - configuration_bundle
+      required:
+      - message
+    BankTransactionAllocation:
+      type: object
+      properties:
+        payment_document:
+          type: string
+          enum:
+          - Payment Entry
+          - Journal Entry
+        payment_entry:
+          type: string
+        allocated_amount:
+          type: number
+          minimum: 0
+      required:
+      - payment_document
+      - payment_entry
+      additionalProperties: false
+    BankTransactionReconcileRequest:
+      type: object
+      properties:
+        allocations:
+          type: array
+          items:
+            $ref: '#/components/schemas/BankTransactionAllocation'
+          minItems: 1
+      required:
+      - allocations
+      additionalProperties: false
+x-contract:
+  runtime:
+    source_of_truth: erpnext
+    api_style: frappe-native
+    openapi_version: 3.1.0
+    server_url: http://127.0.0.1:8080
+    group_by: module
+    public_module_routes: true
+    include_whitelisted_methods: true
+    include_doctype_metadata: false
+    typed_doctypes:
+    - Address
+    - Contact
+    - Contact Email
+    - Contact Phone
+    - Dynamic Link
+    typed_modules:
+    - Accounts
+    - Assets
+    - Automation
+    - Bulk Transaction
+    - Buying
+    - CRM
+    - Communication
+    - Contacts
+    - Core
+    - Custom
+    - Desk
+    - EDI
+    - ERPNext Integrations
+    - Email
+    - Geo
+    - Integrations
+    - Maintenance
+    - Manufacturing
+    - Printing
+    - Projects
+    - Quality Management
+    - Regional
+    - Selling
+    - Setup
+    - Stock
+    - Subcontracting
+    - Support
+    - Telephony
+    - Utilities
+    - Website
+    - Workflow
+    public_modules:
+    - Accounts
+    - Buying
+    - CRM
+    - Contacts
+    - Selling
+    - Stock
+    document_actions:
+    - doctype: Sales Invoice
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Purchase Invoice
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Sales Order
+      module: Selling
+      actions:
+      - submit
+      - cancel
+    - doctype: Purchase Order
+      module: Buying
+      actions:
+      - submit
+      - cancel
+    - doctype: Material Request
+      module: Stock
+      actions:
+      - submit
+      - cancel
+    - doctype: Purchase Receipt
+      module: Stock
+      actions:
+      - submit
+      - cancel
+    - doctype: Stock Entry
+      module: Stock
+      actions:
+      - submit
+      - cancel
+    - doctype: Journal Entry
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Payment Request
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Payment Order
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Payment Entry
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Bank Transaction
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    custom_actions:
+    - doctype: Bank Transaction
+      module: Accounts
+      action: reconcile
+      operation_id: reconcileBankTransaction
+      path_suffix: reconcile
+      handler: letron_api.accounts_reconciliation.reconcile_bank_transaction
+    - doctype: Bank Transaction
+      module: Accounts
+      action: unreconcile
+      operation_id: unreconcileBankTransaction
+      path_suffix: unreconcile
+      handler: letron_api.accounts_reconciliation.unreconcile_bank_transaction
+    include_methods:
+    - letron_api.api.health
+    - letron_api.api.runtime_info
+    - letron_api.api.runtime_snapshot
+    public_resources:
+    - doctype: Lead
+      path: /api/v1/crm/leads
+    - doctype: Opportunity
+      path: /api/v1/crm/opportunities
+    - doctype: Request for Quotation
+      path: /api/v1/crm/request-for-quotations
+    - doctype: Supplier Quotation
+      path: /api/v1/crm/supplier-quotations
+    - doctype: Customer
+      path: /api/v1/selling/customers
+    - doctype: Quotation
+      path: /api/v1/selling/quotations
+    - doctype: Sales Order
+      path: /api/v1/selling/sales-orders
+    - doctype: Delivery Note
+      path: /api/v1/selling/delivery-notes
+    - doctype: Sales Invoice
+      path: /api/v1/accounts/sales-invoices
+    - doctype: Purchase Invoice
+      path: /api/v1/accounts/purchase-invoices
+    - doctype: Payment Entry
+      path: /api/v1/accounts/payment-entries
+    - doctype: Bank
+      path: /api/v1/accounts/banks
+    - doctype: Bank Account
+      path: /api/v1/accounts/bank-accounts
+    - doctype: Mode of Payment
+      path: /api/v1/accounts/modes-of-payment
+    - doctype: Cost Center
+      path: /api/v1/accounts/cost-centers
+    - doctype: Journal Entry
+      path: /api/v1/accounts/journal-entries
+    - doctype: Payment Request
+      path: /api/v1/accounts/payment-requests
+    - doctype: Bank Transaction
+      path: /api/v1/accounts/bank-transactions
+    - doctype: Payment Order
+      path: /api/v1/accounts/payment-orders
+    - doctype: Supplier
+      path: /api/v1/buying/suppliers
+    - doctype: Purchase Order
+      path: /api/v1/buying/purchase-orders
+    - doctype: Item
+      path: /api/v1/stock/items
+    - doctype: Warehouse
+      path: /api/v1/stock/warehouses
+    - doctype: Address
+      path: /api/v1/contacts/addresses
+    - doctype: Contact
+      path: /api/v1/contacts/contacts
+    - doctype: Material Request
+      path: /api/v1/stock/material-requests
+    - doctype: Purchase Receipt
+      path: /api/v1/stock/purchase-receipts
+    - doctype: Stock Entry
+      path: /api/v1/stock/stock-entries
+    - doctype: Item Price
+      path: /api/v1/stock/item-prices
+    - doctype: Stock Reconciliation
+      path: /api/v1/stock/stock-reconciliations
+    - doctype: Serial No
+      path: /api/v1/stock/serial-nos
+    - doctype: Batch
+      path: /api/v1/stock/batches
+    - doctype: Quality Inspection
+      path: /api/v1/stock/quality-inspections
+    - doctype: Pick List
+      path: /api/v1/stock/pick-lists
+    - doctype: Shipment
+      path: /api/v1/stock/shipments
+    - doctype: Landed Cost Voucher
+      path: /api/v1/stock/landed-cost-vouchers
+    - doctype: Stock Reservation Entry
+      path: /api/v1/stock/stock-reservation-entries
+  transport:
+    rest: true
+    webhook: true
+    realtime: true
+  headers:
+    request_id: X-Request-Id
+    idempotency_key: X-Idempotency-Key
+x-capabilities:
+  webhook:
+    declared: true
+    delivery_implemented: true
+    delivery: durable-outbox
+    signature: hmac-sha256
+    max_attempts: 3
+  realtime:
+    declared: true
+    delivery_implemented: true
+    delivery: durable-outbox
+    source_of_truth: false
+x-acceptance-summary:
+  passed: 10
+  partial: 0
+  not-tested: 0
+  blocked: 0
+x-module: Contacts
+x-module-index:
+  Contacts:
+  - Address
+  - Contact
+  - Contact Email
+  - Contact Phone
+  Core:
+  - Dynamic Link

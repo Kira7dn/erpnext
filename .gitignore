@@ -13,4 +13,3 @@ dist/
 build/
 .pytest_cache/
 backups/
-contracts/generated/

@@ -239,7 +239,7 @@ documents:
     do_not_update_serial_batch_on_creation_of_auto_bundle: 1
     do_not_use_batchwise_valuation: 0
     enable_serial_and_batch_no_for_item: 0
-    enable_stock_reservation: 0
+    enable_stock_reservation: 1
     item_group: null
     item_naming_by: Item Code
     mr_qty_allowance: 0.0

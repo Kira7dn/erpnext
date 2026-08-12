@@ -26,10 +26,17 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def _config() -> dict[str, Any]:
     acceptance_dir = os.environ.get("LETRON_ACCEPTANCE_CONFIG_DIR")
-    source = Path(acceptance_dir) / "config.yaml" if acceptance_dir else ROOT / "config" / "config.yaml"
+    if acceptance_dir:
+        acceptance_root = Path(acceptance_dir)
+        source = acceptance_root / "config.yaml"
+        if not source.is_file():
+            source = acceptance_root / "config.acceptance.yaml"
+    else:
+        source = ROOT / "config" / "config.yaml"
     config = load_config(source, resolve_secrets=True)
     delivery = config["delivery"]
     values = {
+        "LETRON_DELIVERY_ENABLED": delivery["enabled"],
         "LETRON_WEBHOOK_URL": delivery["webhook_url"],
         "LETRON_WEBHOOK_SECRET": delivery["webhook_secret"],
         "LETRON_WEBHOOK_TIMEOUT_MS": delivery["webhook_timeout_ms"],
@@ -45,6 +52,8 @@ def _config() -> dict[str, Any]:
 def cleanup_consumer_events(prefix: str, event_ids: list[str] | None = None) -> None:
     """Delete one run's durable consumer events and require a stable zero."""
 
+    if str(os.environ.get("LETRON_DELIVERY_ENABLED", "false")).lower() not in {"1", "true", "yes"}:
+        return
     realtime_url = os.environ.get("LETRON_REALTIME_URL")
     realtime_token = os.environ.get("LETRON_REALTIME_TOKEN")
     if not realtime_url or not realtime_token:
@@ -304,6 +313,14 @@ def cleanup(client: ApiClient, created: list[tuple[str, str]], prefix: str) -> N
         ("Stock Ledger Entry", [["company", "like", f"{prefix}%"]]),
         ("GL Entry", [["company", "like", f"{prefix}%"]]),
         ("Payment Ledger Entry", [["company", "like", f"{prefix}%"]]),
+        ("Stock Reconciliation", [["name", "like", f"{prefix}%"]]),
+        ("Serial No", [["name", "like", f"{prefix}%"]]),
+        ("Batch", [["name", "like", f"{prefix}%"]]),
+        ("Quality Inspection", [["name", "like", f"{prefix}%"]]),
+        ("Pick List", [["name", "like", f"{prefix}%"]]),
+        ("Shipment", [["name", "like", f"{prefix}%"]]),
+        ("Landed Cost Voucher", [["name", "like", f"{prefix}%"]]),
+        ("Stock Reservation Entry", [["name", "like", f"{prefix}%"]]),
     )
     for doctype, filters in residue_queries:
         query = quote(json.dumps(filters))

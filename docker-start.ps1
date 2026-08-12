@@ -10,7 +10,6 @@ $root = $PSScriptRoot
 $compose = Join-Path $root 'docker-compose.yml'
 $configPath = Join-Path $root 'config/config.yaml'
 $policyPath = Join-Path $root 'config/policy.yaml'
-$acceptanceCompose = Join-Path $root 'docker-compose.acceptance.yml'
 if ($env:LETRON_ACCEPTANCE -eq '1') {
     if (-not $env:LETRON_ACCEPTANCE_CONFIG_DIR) { throw 'LETRON_ACCEPTANCE_CONFIG_DIR is required in acceptance mode' }
     $configPath = Join-Path $env:LETRON_ACCEPTANCE_CONFIG_DIR 'config.yaml'
@@ -55,7 +54,6 @@ Write-Host $bundleValidation
 Write-Host "Configuration valid: project=$env:PROJECT_NAME, image=$env:ERPNEXT_IMAGE (secrets omitted)"
 
 $composeArgs = @('compose','--project-name',$env:PROJECT_NAME,'-f',$compose)
-if ($env:LETRON_ACCEPTANCE -eq '1') { $composeArgs += @('-f',$acceptanceCompose) }
 function Invoke-Compose([string[]]$extra) {
     & docker @composeArgs @extra
     if ($LASTEXITCODE -ne 0) { throw "Docker Compose failed with exit code $LASTEXITCODE" }

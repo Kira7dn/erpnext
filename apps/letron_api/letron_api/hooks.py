@@ -3,7 +3,10 @@ import uuid
 from threading import Lock
 from typing import Any, cast
 
+from letron_api.frappe_compat import install_scheduler_compatibility
 from letron_api.policy import POLICY_DOCTYPES
+
+install_scheduler_compatibility()
 
 app_name = "letron_api"
 app_title = "Letron API"
@@ -21,6 +24,10 @@ PUBLIC_RESOURCE_ROUTES = {
     ("selling", "quotations"): "Quotation",
     ("selling", "sales-orders"): "Sales Order",
     ("selling", "delivery-notes"): "Delivery Note",
+    ("crm", "leads"): "Lead",
+    ("crm", "opportunities"): "Opportunity",
+    ("crm", "request-for-quotations"): "Request for Quotation",
+    ("crm", "supplier-quotations"): "Supplier Quotation",
     ("accounts", "sales-invoices"): "Sales Invoice",
     ("accounts", "purchase-invoices"): "Purchase Invoice",
     ("accounts", "payment-entries"): "Payment Entry",
@@ -30,6 +37,8 @@ PUBLIC_RESOURCE_ROUTES = {
     ("accounts", "cost-centers"): "Cost Center",
     ("accounts", "journal-entries"): "Journal Entry",
     ("accounts", "payment-requests"): "Payment Request",
+    ("accounts", "bank-transactions"): "Bank Transaction",
+    ("accounts", "payment-orders"): "Payment Order",
     ("buying", "suppliers"): "Supplier",
     ("buying", "purchase-orders"): "Purchase Order",
     ("stock", "items"): "Item",
@@ -40,6 +49,14 @@ PUBLIC_RESOURCE_ROUTES = {
     ("stock", "purchase-receipts"): "Purchase Receipt",
     ("stock", "stock-entries"): "Stock Entry",
     ("stock", "item-prices"): "Item Price",
+    ("stock", "stock-reconciliations"): "Stock Reconciliation",
+    ("stock", "serial-nos"): "Serial No",
+    ("stock", "batches"): "Batch",
+    ("stock", "quality-inspections"): "Quality Inspection",
+    ("stock", "pick-lists"): "Pick List",
+    ("stock", "shipments"): "Shipment",
+    ("stock", "landed-cost-vouchers"): "Landed Cost Voucher",
+    ("stock", "stock-reservation-entries"): "Stock Reservation Entry",
 }
 DOCUMENT_ACTIONS = {
     ("accounts", "sales-invoices"): {"submit", "cancel"},
@@ -51,6 +68,13 @@ DOCUMENT_ACTIONS = {
     ("stock", "stock-entries"): {"submit", "cancel"},
     ("accounts", "journal-entries"): {"submit", "cancel"},
     ("accounts", "payment-requests"): {"submit", "cancel"},
+    ("accounts", "payment-orders"): {"submit", "cancel"},
+    ("accounts", "payment-entries"): {"submit", "cancel"},
+    ("accounts", "bank-transactions"): {"submit", "cancel"},
+}
+CUSTOM_ACTIONS = {
+    ("accounts", "bank-transactions", "reconcile"): "letron_api.accounts_reconciliation.reconcile_bank_transaction",
+    ("accounts", "bank-transactions", "unreconcile"): "letron_api.accounts_reconciliation.unreconcile_bank_transaction",
 }
 
 
@@ -86,11 +110,17 @@ def rewrite_public_routes() -> None:
         return
     if len(parts) == 6:
         name, action = parts[4:6]
-        if action not in DOCUMENT_ACTIONS.get((module_slug, doctype_slug), set()):
+        document_action = action in DOCUMENT_ACTIONS.get((module_slug, doctype_slug), set())
+        custom_action = (module_slug, doctype_slug, action) in CUSTOM_ACTIONS
+        if not document_action and not custom_action:
             return
         from urllib.parse import urlencode
 
-        target = "/api/method/letron_api.api.document_action"
+        target = (
+            f"/api/method/{CUSTOM_ACTIONS[(module_slug, doctype_slug, action)]}"
+            if custom_action
+            else "/api/method/letron_api.api.document_action"
+        )
         query = urlencode({"doctype": doctype, "name": name, "action": action})
         request.environ["QUERY_STRING"] = query
         # Frappe builds form_dict before running before_request hooks, so also

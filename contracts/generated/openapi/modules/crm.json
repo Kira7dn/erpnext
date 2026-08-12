@@ -1,0 +1,3863 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Letron ERPNext CRM API",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8080"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Typed Resource API"
+    },
+    {
+      "name": "Whitelisted methods"
+    },
+    {
+      "name": "Metadata"
+    },
+    {
+      "name": "Files"
+    },
+    {
+      "name": "Module: CRM"
+    }
+  ],
+  "security": [
+    {
+      "frappeToken": []
+    }
+  ],
+  "paths": {
+    "/api/v1/crm/leads": {
+      "get": {
+        "tags": [
+          "Module: CRM"
+        ],
+        "summary": "List Lead records",
+        "description": "List typed Lead documents.",
+        "operationId": "listLead",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON field-name array"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON Frappe filters"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Lead"
+                      }
+                    },
+                    "message": {}
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "passed",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "crm-preorder",
+          "test": "tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle"
+        }
+      },
+      "post": {
+        "tags": [
+          "Module: CRM"
+        ],
+        "summary": "Create Lead",
+        "description": "Create a Lead using the runtime DocType schema.",
+        "operationId": "createLead",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "naming_series": {
+                    "type": "string",
+                    "enum": [
+                      "CRM-LEAD-.YYYY.-"
+                    ]
+                  },
+                  "company_name": {
+                    "type": "string"
+                  },
+                  "email_id": {
+                    "type": "string",
+                    "x-frappe-options": "Email"
+                  },
+                  "col_break123": {
+                    "type": "string"
+                  },
+                  "lead_owner": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "User"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Lead",
+                      "Open",
+                      "Replied",
+                      "Opportunity",
+                      "Quotation",
+                      "Lost Quotation",
+                      "Interested",
+                      "Converted",
+                      "Do Not Contact"
+                    ]
+                  },
+                  "salutation": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Salutation"
+                  },
+                  "gender": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Gender"
+                  },
+                  "customer": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Customer"
+                  },
+                  "image": {
+                    "type": "string",
+                    "writeOnly": true
+                  },
+                  "contact_info_tab": {
+                    "type": "string"
+                  },
+                  "column_break2": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "x-frappe-options": "Phone"
+                  },
+                  "mobile_no": {
+                    "type": "string",
+                    "x-frappe-options": "Phone"
+                  },
+                  "fax": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "Client",
+                      "Channel Partner",
+                      "Consultant"
+                    ]
+                  },
+                  "market_segment": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Market Segment"
+                  },
+                  "industry": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Industry Type"
+                  },
+                  "request_type": {
+                    "type": "string",
+                    "enum": [
+                      "Product Enquiry",
+                      "Request for Information",
+                      "Suggestions",
+                      "Other"
+                    ]
+                  },
+                  "company": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Company"
+                  },
+                  "website": {
+                    "type": "string"
+                  },
+                  "territory": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Territory"
+                  },
+                  "unsubscribed": {
+                    "type": "boolean"
+                  },
+                  "blog_subscriber": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Language"
+                  },
+                  "first_name": {
+                    "type": "string"
+                  },
+                  "middle_name": {
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "type": "string"
+                  },
+                  "no_of_employees": {
+                    "type": "string",
+                    "enum": [
+                      "1-10",
+                      "11-50",
+                      "51-200",
+                      "201-500",
+                      "501-1000",
+                      "1000+"
+                    ]
+                  },
+                  "column_break_22": {
+                    "type": "string"
+                  },
+                  "whatsapp_no": {
+                    "type": "string",
+                    "x-frappe-options": "Phone"
+                  },
+                  "column_break_50": {
+                    "type": "string"
+                  },
+                  "column_break_16": {
+                    "type": "string"
+                  },
+                  "phone_ext": {
+                    "type": "string"
+                  },
+                  "qualification_tab": {
+                    "type": "string"
+                  },
+                  "notes_tab": {
+                    "type": "string"
+                  },
+                  "other_info_tab": {
+                    "type": "string"
+                  },
+                  "column_break_1": {
+                    "type": "string"
+                  },
+                  "qualified_by": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "User"
+                  },
+                  "qualified_on": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "qualification_status": {
+                    "type": "string",
+                    "enum": [
+                      "Unqualified",
+                      "In Process",
+                      "Qualified"
+                    ]
+                  },
+                  "address_section": {
+                    "type": "string"
+                  },
+                  "column_break_64": {
+                    "type": "string"
+                  },
+                  "column_break_20": {
+                    "type": "string"
+                  },
+                  "job_title": {
+                    "type": "string"
+                  },
+                  "annual_revenue": {
+                    "type": "number"
+                  },
+                  "activities_tab": {
+                    "type": "string"
+                  },
+                  "organization_section": {
+                    "type": "string"
+                  },
+                  "column_break_28": {
+                    "type": "string"
+                  },
+                  "column_break_31": {
+                    "type": "string"
+                  },
+                  "notes_html": {
+                    "type": "string"
+                  },
+                  "open_activities_html": {
+                    "type": "string"
+                  },
+                  "all_activities_section": {
+                    "type": "string"
+                  },
+                  "all_activities_html": {
+                    "type": "string"
+                  },
+                  "notes": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/CRMNote"
+                    },
+                    "writeOnly": true
+                  },
+                  "disabled": {
+                    "type": "boolean"
+                  },
+                  "column_break_38": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Country"
+                  },
+                  "dashboard_tab": {
+                    "type": "string"
+                  },
+                  "column_break_gkxo": {
+                    "type": "string"
+                  },
+                  "utm_content": {
+                    "type": "string"
+                  },
+                  "utm_source": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "UTM Source"
+                  },
+                  "utm_medium": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "UTM Medium"
+                  },
+                  "utm_campaign": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "UTM Campaign"
+                  },
+                  "utm_analytics_section": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "status"
+                ],
+                "additionalProperties": true,
+                "x-module": "CRM"
+              },
+              "example": {
+                "status": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Lead"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "passed",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "crm-preorder",
+          "test": "tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/crm/leads/{name}": {
+      "get": {
+        "tags": [
+          "Module: CRM"
+        ],
+        "operationId": "getLead",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Lead"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "passed",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "crm-preorder",
+          "test": "tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle"
+        }
+      },
+      "put": {
+        "tags": [
+          "Module: CRM"
+        ],
+        "operationId": "updateLead",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "naming_series": {
+                    "type": "string",
+                    "enum": [
+                      "CRM-LEAD-.YYYY.-"
+                    ]
+                  },
+                  "company_name": {
+                    "type": "string"
+                  },
+                  "email_id": {
+                    "type": "string",
+                    "x-frappe-options": "Email"
+                  },
+                  "col_break123": {
+                    "type": "string"
+                  },
+                  "lead_owner": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "User"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Lead",
+                      "Open",
+                      "Replied",
+                      "Opportunity",
+                      "Quotation",
+                      "Lost Quotation",
+                      "Interested",
+                      "Converted",
+                      "Do Not Contact"
+                    ]
+                  },
+                  "salutation": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Salutation"
+                  },
+                  "gender": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Gender"
+                  },
+                  "customer": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Customer"
+                  },
+                  "image": {
+                    "type": "string",
+                    "writeOnly": true
+                  },
+                  "contact_info_tab": {
+                    "type": "string"
+                  },
+                  "column_break2": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "x-frappe-options": "Phone"
+                  },
+                  "mobile_no": {
+                    "type": "string",
+                    "x-frappe-options": "Phone"
+                  },
+                  "fax": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "Client",
+                      "Channel Partner",
+                      "Consultant"
+                    ]
+                  },
+                  "market_segment": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Market Segment"
+                  },
+                  "industry": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Industry Type"
+                  },
+                  "request_type": {
+                    "type": "string",
+                    "enum": [
+                      "Product Enquiry",
+                      "Request for Information",
+                      "Suggestions",
+                      "Other"
+                    ]
+                  },
+                  "company": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Company"
+                  },
+                  "website": {
+                    "type": "string"
+                  },
+                  "territory": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Territory"
+                  },
+                  "unsubscribed": {
+                    "type": "boolean"
+                  },
+                  "blog_subscriber": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Language"
+                  },
+                  "first_name": {
+                    "type": "string"
+                  },
+                  "middle_name": {
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "type": "string"
+                  },
+                  "no_of_employees": {
+                    "type": "string",
+                    "enum": [
+                      "1-10",
+                      "11-50",
+                      "51-200",
+                      "201-500",
+                      "501-1000",
+                      "1000+"
+                    ]
+                  },
+                  "column_break_22": {
+                    "type": "string"
+                  },
+                  "whatsapp_no": {
+                    "type": "string",
+                    "x-frappe-options": "Phone"
+                  },
+                  "column_break_50": {
+                    "type": "string"
+                  },
+                  "column_break_16": {
+                    "type": "string"
+                  },
+                  "phone_ext": {
+                    "type": "string"
+                  },
+                  "qualification_tab": {
+                    "type": "string"
+                  },
+                  "notes_tab": {
+                    "type": "string"
+                  },
+                  "other_info_tab": {
+                    "type": "string"
+                  },
+                  "column_break_1": {
+                    "type": "string"
+                  },
+                  "qualified_by": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "User"
+                  },
+                  "qualified_on": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "qualification_status": {
+                    "type": "string",
+                    "enum": [
+                      "Unqualified",
+                      "In Process",
+                      "Qualified"
+                    ]
+                  },
+                  "address_section": {
+                    "type": "string"
+                  },
+                  "column_break_64": {
+                    "type": "string"
+                  },
+                  "column_break_20": {
+                    "type": "string"
+                  },
+                  "job_title": {
+                    "type": "string"
+                  },
+                  "annual_revenue": {
+                    "type": "number"
+                  },
+                  "activities_tab": {
+                    "type": "string"
+                  },
+                  "organization_section": {
+                    "type": "string"
+                  },
+                  "column_break_28": {
+                    "type": "string"
+                  },
+                  "column_break_31": {
+                    "type": "string"
+                  },
+                  "notes_html": {
+                    "type": "string"
+                  },
+                  "open_activities_html": {
+                    "type": "string"
+                  },
+                  "all_activities_section": {
+                    "type": "string"
+                  },
+                  "all_activities_html": {
+                    "type": "string"
+                  },
+                  "notes": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/CRMNote"
+                    },
+                    "writeOnly": true
+                  },
+                  "disabled": {
+                    "type": "boolean"
+                  },
+                  "column_break_38": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Country"
+                  },
+                  "dashboard_tab": {
+                    "type": "string"
+                  },
+                  "column_break_gkxo": {
+                    "type": "string"
+                  },
+                  "utm_content": {
+                    "type": "string"
+                  },
+                  "utm_source": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "UTM Source"
+                  },
+                  "utm_medium": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "UTM Medium"
+                  },
+                  "utm_campaign": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "UTM Campaign"
+                  },
+                  "utm_analytics_section": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "status"
+                ],
+                "additionalProperties": true,
+                "x-module": "CRM"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Lead"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "passed",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "crm-preorder",
+          "test": "tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle"
+        }
+      },
+      "delete": {
+        "tags": [
+          "Module: CRM"
+        ],
+        "operationId": "deleteLead",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "passed",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "crm-preorder",
+          "test": "tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/crm/opportunities": {
+      "get": {
+        "tags": [
+          "Module: CRM"
+        ],
+        "summary": "List Opportunity records",
+        "description": "List typed Opportunity documents.",
+        "operationId": "listOpportunity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON field-name array"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON Frappe filters"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Opportunity"
+                      }
+                    },
+                    "message": {}
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "passed",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "crm-preorder",
+          "test": "tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle"
+        }
+      },
+      "post": {
+        "tags": [
+          "Module: CRM"
+        ],
+        "summary": "Create Opportunity",
+        "description": "Create a Opportunity using the runtime DocType schema.",
+        "operationId": "createOpportunity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "naming_series": {
+                    "type": "string",
+                    "enum": [
+                      "CRM-OPP-.YYYY.-"
+                    ]
+                  },
+                  "opportunity_from": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "DocType"
+                  },
+                  "party_name": {
+                    "type": "string",
+                    "x-frappe-options": "opportunity_from"
+                  },
+                  "column_break0": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string",
+                    "writeOnly": true
+                  },
+                  "opportunity_type": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Opportunity Type"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Open",
+                      "Quotation",
+                      "Converted",
+                      "Lost",
+                      "Replied",
+                      "Closed"
+                    ]
+                  },
+                  "expected_closing": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "section_break_14": {
+                    "type": "string"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Currency"
+                  },
+                  "opportunity_amount": {
+                    "type": "number",
+                    "x-frappe-options": "currency"
+                  },
+                  "column_break_17": {
+                    "type": "string"
+                  },
+                  "sales_stage": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Sales Stage"
+                  },
+                  "probability": {
+                    "type": "number"
+                  },
+                  "items_section": {
+                    "type": "string",
+                    "x-frappe-options": "fa fa-shopping-cart"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/OpportunityItem"
+                    }
+                  },
+                  "contact_info": {
+                    "type": "string",
+                    "x-frappe-options": "fa fa-bullhorn"
+                  },
+                  "customer_address": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Address",
+                    "writeOnly": true
+                  },
+                  "territory": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Territory"
+                  },
+                  "customer_group": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Customer Group"
+                  },
+                  "column_break3": {
+                    "type": "string"
+                  },
+                  "contact_person": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Contact"
+                  },
+                  "contact_email": {
+                    "type": "string",
+                    "x-frappe-options": "Email"
+                  },
+                  "contact_mobile": {
+                    "type": "string",
+                    "x-frappe-options": "Phone"
+                  },
+                  "more_info": {
+                    "type": "string",
+                    "x-frappe-options": "fa fa-file-text"
+                  },
+                  "column_break1": {
+                    "type": "string"
+                  },
+                  "company": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Company"
+                  },
+                  "transaction_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "language": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Language"
+                  },
+                  "section_break_32": {
+                    "type": "string"
+                  },
+                  "conversion_rate": {
+                    "type": "number"
+                  },
+                  "column_break_33": {
+                    "type": "string"
+                  },
+                  "lost_detail_section": {
+                    "type": "string"
+                  },
+                  "column_break_56": {
+                    "type": "string"
+                  },
+                  "column_break_10": {
+                    "type": "string"
+                  },
+                  "organization_details_section": {
+                    "type": "string"
+                  },
+                  "no_of_employees": {
+                    "type": "string",
+                    "enum": [
+                      "1-10",
+                      "11-50",
+                      "51-200",
+                      "201-500",
+                      "501-1000",
+                      "1000+"
+                    ]
+                  },
+                  "annual_revenue": {
+                    "type": "number"
+                  },
+                  "industry": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Industry Type"
+                  },
+                  "market_segment": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Market Segment"
+                  },
+                  "column_break_23": {
+                    "type": "string"
+                  },
+                  "address_contact_section": {
+                    "type": "string"
+                  },
+                  "column_break_36": {
+                    "type": "string"
+                  },
+                  "opportunity_owner": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "User"
+                  },
+                  "website": {
+                    "type": "string"
+                  },
+                  "column_break_22": {
+                    "type": "string"
+                  },
+                  "whatsapp": {
+                    "type": "string",
+                    "x-frappe-options": "Phone"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "x-frappe-options": "Phone"
+                  },
+                  "phone_ext": {
+                    "type": "string"
+                  },
+                  "column_break_31": {
+                    "type": "string"
+                  },
+                  "primary_contact_section": {
+                    "type": "string"
+                  },
+                  "column_break_54": {
+                    "type": "string"
+                  },
+                  "dashboard_tab": {
+                    "type": "string"
+                  },
+                  "notes_tab": {
+                    "type": "string"
+                  },
+                  "notes_html": {
+                    "type": "string"
+                  },
+                  "activities_tab": {
+                    "type": "string"
+                  },
+                  "job_title": {
+                    "type": "string"
+                  },
+                  "address_html": {
+                    "type": "string"
+                  },
+                  "contact_html": {
+                    "type": "string"
+                  },
+                  "open_activities_html": {
+                    "type": "string"
+                  },
+                  "all_activities_section": {
+                    "type": "string"
+                  },
+                  "all_activities_html": {
+                    "type": "string"
+                  },
+                  "notes": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/CRMNote"
+                    },
+                    "writeOnly": true
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Country"
+                  },
+                  "column_break_emai": {
+                    "type": "string"
+                  },
+                  "utm_source": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "UTM Source"
+                  },
+                  "utm_campaign": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "UTM Campaign"
+                  },
+                  "utm_medium": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "UTM Medium"
+                  },
+                  "utm_content": {
+                    "type": "string"
+                  },
+                  "utm_analytics_section": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "company",
+                  "name",
+                  "naming_series",
+                  "opportunity_from",
+                  "party_name",
+                  "status",
+                  "transaction_date"
+                ],
+                "additionalProperties": true,
+                "x-module": "CRM"
+              },
+              "example": {
+                "naming_series": "",
+                "opportunity_from": "",
+                "party_name": "",
+                "status": "",
+                "company": "",
+                "transaction_date": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Opportunity"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "passed",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "crm-preorder",
+          "test": "tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/crm/opportunities/{name}": {
+      "get": {
+        "tags": [
+          "Module: CRM"
+        ],
+        "operationId": "getOpportunity",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Opportunity"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "passed",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "crm-preorder",
+          "test": "tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle"
+        }
+      },
+      "put": {
+        "tags": [
+          "Module: CRM"
+        ],
+        "operationId": "updateOpportunity",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "naming_series": {
+                    "type": "string",
+                    "enum": [
+                      "CRM-OPP-.YYYY.-"
+                    ]
+                  },
+                  "opportunity_from": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "DocType"
+                  },
+                  "party_name": {
+                    "type": "string",
+                    "x-frappe-options": "opportunity_from"
+                  },
+                  "column_break0": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string",
+                    "writeOnly": true
+                  },
+                  "opportunity_type": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Opportunity Type"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Open",
+                      "Quotation",
+                      "Converted",
+                      "Lost",
+                      "Replied",
+                      "Closed"
+                    ]
+                  },
+                  "expected_closing": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "section_break_14": {
+                    "type": "string"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Currency"
+                  },
+                  "opportunity_amount": {
+                    "type": "number",
+                    "x-frappe-options": "currency"
+                  },
+                  "column_break_17": {
+                    "type": "string"
+                  },
+                  "sales_stage": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Sales Stage"
+                  },
+                  "probability": {
+                    "type": "number"
+                  },
+                  "items_section": {
+                    "type": "string",
+                    "x-frappe-options": "fa fa-shopping-cart"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/OpportunityItem"
+                    }
+                  },
+                  "contact_info": {
+                    "type": "string",
+                    "x-frappe-options": "fa fa-bullhorn"
+                  },
+                  "customer_address": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Address",
+                    "writeOnly": true
+                  },
+                  "territory": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Territory"
+                  },
+                  "customer_group": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Customer Group"
+                  },
+                  "column_break3": {
+                    "type": "string"
+                  },
+                  "contact_person": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Contact"
+                  },
+                  "contact_email": {
+                    "type": "string",
+                    "x-frappe-options": "Email"
+                  },
+                  "contact_mobile": {
+                    "type": "string",
+                    "x-frappe-options": "Phone"
+                  },
+                  "more_info": {
+                    "type": "string",
+                    "x-frappe-options": "fa fa-file-text"
+                  },
+                  "column_break1": {
+                    "type": "string"
+                  },
+                  "company": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Company"
+                  },
+                  "transaction_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "language": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Language"
+                  },
+                  "section_break_32": {
+                    "type": "string"
+                  },
+                  "conversion_rate": {
+                    "type": "number"
+                  },
+                  "column_break_33": {
+                    "type": "string"
+                  },
+                  "lost_detail_section": {
+                    "type": "string"
+                  },
+                  "column_break_56": {
+                    "type": "string"
+                  },
+                  "column_break_10": {
+                    "type": "string"
+                  },
+                  "organization_details_section": {
+                    "type": "string"
+                  },
+                  "no_of_employees": {
+                    "type": "string",
+                    "enum": [
+                      "1-10",
+                      "11-50",
+                      "51-200",
+                      "201-500",
+                      "501-1000",
+                      "1000+"
+                    ]
+                  },
+                  "annual_revenue": {
+                    "type": "number"
+                  },
+                  "industry": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Industry Type"
+                  },
+                  "market_segment": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Market Segment"
+                  },
+                  "column_break_23": {
+                    "type": "string"
+                  },
+                  "address_contact_section": {
+                    "type": "string"
+                  },
+                  "column_break_36": {
+                    "type": "string"
+                  },
+                  "opportunity_owner": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "User"
+                  },
+                  "website": {
+                    "type": "string"
+                  },
+                  "column_break_22": {
+                    "type": "string"
+                  },
+                  "whatsapp": {
+                    "type": "string",
+                    "x-frappe-options": "Phone"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "x-frappe-options": "Phone"
+                  },
+                  "phone_ext": {
+                    "type": "string"
+                  },
+                  "column_break_31": {
+                    "type": "string"
+                  },
+                  "primary_contact_section": {
+                    "type": "string"
+                  },
+                  "column_break_54": {
+                    "type": "string"
+                  },
+                  "dashboard_tab": {
+                    "type": "string"
+                  },
+                  "notes_tab": {
+                    "type": "string"
+                  },
+                  "notes_html": {
+                    "type": "string"
+                  },
+                  "activities_tab": {
+                    "type": "string"
+                  },
+                  "job_title": {
+                    "type": "string"
+                  },
+                  "address_html": {
+                    "type": "string"
+                  },
+                  "contact_html": {
+                    "type": "string"
+                  },
+                  "open_activities_html": {
+                    "type": "string"
+                  },
+                  "all_activities_section": {
+                    "type": "string"
+                  },
+                  "all_activities_html": {
+                    "type": "string"
+                  },
+                  "notes": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/CRMNote"
+                    },
+                    "writeOnly": true
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Country"
+                  },
+                  "column_break_emai": {
+                    "type": "string"
+                  },
+                  "utm_source": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "UTM Source"
+                  },
+                  "utm_campaign": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "UTM Campaign"
+                  },
+                  "utm_medium": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "UTM Medium"
+                  },
+                  "utm_content": {
+                    "type": "string"
+                  },
+                  "utm_analytics_section": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "company",
+                  "name",
+                  "naming_series",
+                  "opportunity_from",
+                  "party_name",
+                  "status",
+                  "transaction_date"
+                ],
+                "additionalProperties": true,
+                "x-module": "CRM"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Opportunity"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "passed",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "crm-preorder",
+          "test": "tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle"
+        }
+      },
+      "delete": {
+        "tags": [
+          "Module: CRM"
+        ],
+        "operationId": "deleteOpportunity",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "passed",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "crm-preorder",
+          "test": "tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle"
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "frappeToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Frappe token authentication: token api_key:api_secret"
+      }
+    },
+    "parameters": {
+      "RequestId": {
+        "name": "X-Request-Id",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "IdempotencyKey": {
+        "name": "X-Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "schemas": {
+      "CRMNote": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "added_by": {
+            "type": "string",
+            "x-frappe-target-doctype": "User"
+          },
+          "added_on": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": true,
+        "x-module": "CRM"
+      },
+      "Lead": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "naming_series": {
+            "type": "string",
+            "enum": [
+              "CRM-LEAD-.YYYY.-"
+            ]
+          },
+          "lead_name": {
+            "type": "string",
+            "readOnly": true
+          },
+          "company_name": {
+            "type": "string"
+          },
+          "email_id": {
+            "type": "string",
+            "x-frappe-options": "Email"
+          },
+          "col_break123": {
+            "type": "string"
+          },
+          "lead_owner": {
+            "type": "string",
+            "x-frappe-target-doctype": "User"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Lead",
+              "Open",
+              "Replied",
+              "Opportunity",
+              "Quotation",
+              "Lost Quotation",
+              "Interested",
+              "Converted",
+              "Do Not Contact"
+            ]
+          },
+          "salutation": {
+            "type": "string",
+            "x-frappe-target-doctype": "Salutation"
+          },
+          "gender": {
+            "type": "string",
+            "x-frappe-target-doctype": "Gender"
+          },
+          "customer": {
+            "type": "string",
+            "x-frappe-target-doctype": "Customer"
+          },
+          "image": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "contact_info_tab": {
+            "type": "string"
+          },
+          "address_html": {
+            "type": "string",
+            "readOnly": true
+          },
+          "column_break2": {
+            "type": "string"
+          },
+          "contact_html": {
+            "type": "string",
+            "readOnly": true
+          },
+          "phone": {
+            "type": "string",
+            "x-frappe-options": "Phone"
+          },
+          "mobile_no": {
+            "type": "string",
+            "x-frappe-options": "Phone"
+          },
+          "fax": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Client",
+              "Channel Partner",
+              "Consultant"
+            ]
+          },
+          "market_segment": {
+            "type": "string",
+            "x-frappe-target-doctype": "Market Segment"
+          },
+          "industry": {
+            "type": "string",
+            "x-frappe-target-doctype": "Industry Type"
+          },
+          "request_type": {
+            "type": "string",
+            "enum": [
+              "Product Enquiry",
+              "Request for Information",
+              "Suggestions",
+              "Other"
+            ]
+          },
+          "company": {
+            "type": "string",
+            "x-frappe-target-doctype": "Company"
+          },
+          "website": {
+            "type": "string"
+          },
+          "territory": {
+            "type": "string",
+            "x-frappe-target-doctype": "Territory"
+          },
+          "unsubscribed": {
+            "type": "boolean"
+          },
+          "blog_subscriber": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "string",
+            "readOnly": true,
+            "writeOnly": true
+          },
+          "language": {
+            "type": "string",
+            "x-frappe-target-doctype": "Language"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "middle_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "no_of_employees": {
+            "type": "string",
+            "enum": [
+              "1-10",
+              "11-50",
+              "51-200",
+              "201-500",
+              "501-1000",
+              "1000+"
+            ]
+          },
+          "column_break_22": {
+            "type": "string"
+          },
+          "whatsapp_no": {
+            "type": "string",
+            "x-frappe-options": "Phone"
+          },
+          "column_break_50": {
+            "type": "string"
+          },
+          "column_break_16": {
+            "type": "string"
+          },
+          "phone_ext": {
+            "type": "string"
+          },
+          "qualification_tab": {
+            "type": "string"
+          },
+          "notes_tab": {
+            "type": "string"
+          },
+          "other_info_tab": {
+            "type": "string"
+          },
+          "column_break_1": {
+            "type": "string"
+          },
+          "qualified_by": {
+            "type": "string",
+            "x-frappe-target-doctype": "User"
+          },
+          "qualified_on": {
+            "type": "string",
+            "format": "date"
+          },
+          "qualification_status": {
+            "type": "string",
+            "enum": [
+              "Unqualified",
+              "In Process",
+              "Qualified"
+            ]
+          },
+          "address_section": {
+            "type": "string"
+          },
+          "column_break_64": {
+            "type": "string"
+          },
+          "column_break_20": {
+            "type": "string"
+          },
+          "job_title": {
+            "type": "string"
+          },
+          "annual_revenue": {
+            "type": "number"
+          },
+          "activities_tab": {
+            "type": "string"
+          },
+          "organization_section": {
+            "type": "string"
+          },
+          "column_break_28": {
+            "type": "string"
+          },
+          "column_break_31": {
+            "type": "string"
+          },
+          "notes_html": {
+            "type": "string"
+          },
+          "open_activities_html": {
+            "type": "string"
+          },
+          "all_activities_section": {
+            "type": "string"
+          },
+          "all_activities_html": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CRMNote"
+            },
+            "writeOnly": true
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "column_break_38": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string",
+            "x-frappe-target-doctype": "Country"
+          },
+          "dashboard_tab": {
+            "type": "string"
+          },
+          "column_break_gkxo": {
+            "type": "string"
+          },
+          "utm_content": {
+            "type": "string"
+          },
+          "utm_source": {
+            "type": "string",
+            "x-frappe-target-doctype": "UTM Source"
+          },
+          "utm_medium": {
+            "type": "string",
+            "x-frappe-target-doctype": "UTM Medium"
+          },
+          "utm_campaign": {
+            "type": "string",
+            "x-frappe-target-doctype": "UTM Campaign"
+          },
+          "utm_analytics_section": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "status"
+        ],
+        "additionalProperties": true,
+        "x-module": "CRM"
+      },
+      "Opportunity": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "naming_series": {
+            "type": "string",
+            "enum": [
+              "CRM-OPP-.YYYY.-"
+            ]
+          },
+          "opportunity_from": {
+            "type": "string",
+            "x-frappe-target-doctype": "DocType"
+          },
+          "party_name": {
+            "type": "string",
+            "x-frappe-options": "opportunity_from"
+          },
+          "customer_name": {
+            "type": "string",
+            "readOnly": true,
+            "writeOnly": true
+          },
+          "column_break0": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "opportunity_type": {
+            "type": "string",
+            "x-frappe-target-doctype": "Opportunity Type"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Open",
+              "Quotation",
+              "Converted",
+              "Lost",
+              "Replied",
+              "Closed"
+            ]
+          },
+          "order_lost_reason": {
+            "type": "string",
+            "readOnly": true
+          },
+          "expected_closing": {
+            "type": "string",
+            "format": "date"
+          },
+          "section_break_14": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "x-frappe-target-doctype": "Currency"
+          },
+          "opportunity_amount": {
+            "type": "number",
+            "x-frappe-options": "currency"
+          },
+          "column_break_17": {
+            "type": "string"
+          },
+          "sales_stage": {
+            "type": "string",
+            "x-frappe-target-doctype": "Sales Stage"
+          },
+          "probability": {
+            "type": "number"
+          },
+          "items_section": {
+            "type": "string",
+            "x-frappe-options": "fa fa-shopping-cart"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpportunityItem"
+            }
+          },
+          "contact_info": {
+            "type": "string",
+            "x-frappe-options": "fa fa-bullhorn"
+          },
+          "customer_address": {
+            "type": "string",
+            "x-frappe-target-doctype": "Address",
+            "writeOnly": true
+          },
+          "address_display": {
+            "type": "string",
+            "readOnly": true,
+            "writeOnly": true
+          },
+          "territory": {
+            "type": "string",
+            "x-frappe-target-doctype": "Territory"
+          },
+          "customer_group": {
+            "type": "string",
+            "x-frappe-target-doctype": "Customer Group"
+          },
+          "column_break3": {
+            "type": "string"
+          },
+          "contact_person": {
+            "type": "string",
+            "x-frappe-target-doctype": "Contact"
+          },
+          "contact_display": {
+            "type": "string",
+            "readOnly": true
+          },
+          "contact_email": {
+            "type": "string",
+            "x-frappe-options": "Email"
+          },
+          "contact_mobile": {
+            "type": "string",
+            "x-frappe-options": "Phone"
+          },
+          "more_info": {
+            "type": "string",
+            "x-frappe-options": "fa fa-file-text"
+          },
+          "column_break1": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string",
+            "x-frappe-target-doctype": "Company"
+          },
+          "transaction_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "amended_from": {
+            "type": "string",
+            "x-frappe-target-doctype": "Opportunity",
+            "readOnly": true
+          },
+          "lost_reasons": {
+            "type": "string",
+            "x-frappe-options": "Opportunity Lost Reason Detail",
+            "readOnly": true
+          },
+          "first_response_time": {
+            "type": "number",
+            "readOnly": true
+          },
+          "language": {
+            "type": "string",
+            "x-frappe-target-doctype": "Language"
+          },
+          "base_opportunity_amount": {
+            "type": "number",
+            "x-frappe-options": "Company:company:default_currency",
+            "readOnly": true
+          },
+          "section_break_32": {
+            "type": "string"
+          },
+          "base_total": {
+            "type": "number",
+            "x-frappe-options": "Company:company:default_currency",
+            "readOnly": true
+          },
+          "total": {
+            "type": "number",
+            "x-frappe-options": "currency",
+            "readOnly": true
+          },
+          "conversion_rate": {
+            "type": "number"
+          },
+          "column_break_33": {
+            "type": "string"
+          },
+          "lost_detail_section": {
+            "type": "string"
+          },
+          "column_break_56": {
+            "type": "string"
+          },
+          "competitors": {
+            "type": "string",
+            "x-frappe-options": "Competitor Detail",
+            "readOnly": true
+          },
+          "column_break_10": {
+            "type": "string"
+          },
+          "organization_details_section": {
+            "type": "string"
+          },
+          "no_of_employees": {
+            "type": "string",
+            "enum": [
+              "1-10",
+              "11-50",
+              "51-200",
+              "201-500",
+              "501-1000",
+              "1000+"
+            ]
+          },
+          "annual_revenue": {
+            "type": "number"
+          },
+          "industry": {
+            "type": "string",
+            "x-frappe-target-doctype": "Industry Type"
+          },
+          "market_segment": {
+            "type": "string",
+            "x-frappe-target-doctype": "Market Segment"
+          },
+          "column_break_23": {
+            "type": "string"
+          },
+          "address_contact_section": {
+            "type": "string"
+          },
+          "column_break_36": {
+            "type": "string"
+          },
+          "opportunity_owner": {
+            "type": "string",
+            "x-frappe-target-doctype": "User"
+          },
+          "website": {
+            "type": "string"
+          },
+          "column_break_22": {
+            "type": "string"
+          },
+          "whatsapp": {
+            "type": "string",
+            "x-frappe-options": "Phone"
+          },
+          "phone": {
+            "type": "string",
+            "x-frappe-options": "Phone"
+          },
+          "phone_ext": {
+            "type": "string"
+          },
+          "column_break_31": {
+            "type": "string"
+          },
+          "primary_contact_section": {
+            "type": "string"
+          },
+          "column_break_54": {
+            "type": "string"
+          },
+          "dashboard_tab": {
+            "type": "string"
+          },
+          "notes_tab": {
+            "type": "string"
+          },
+          "notes_html": {
+            "type": "string"
+          },
+          "activities_tab": {
+            "type": "string"
+          },
+          "job_title": {
+            "type": "string"
+          },
+          "address_html": {
+            "type": "string"
+          },
+          "contact_html": {
+            "type": "string"
+          },
+          "open_activities_html": {
+            "type": "string"
+          },
+          "all_activities_section": {
+            "type": "string"
+          },
+          "all_activities_html": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CRMNote"
+            },
+            "writeOnly": true
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string",
+            "x-frappe-target-doctype": "Country"
+          },
+          "column_break_emai": {
+            "type": "string"
+          },
+          "utm_source": {
+            "type": "string",
+            "x-frappe-target-doctype": "UTM Source"
+          },
+          "utm_campaign": {
+            "type": "string",
+            "x-frappe-target-doctype": "UTM Campaign"
+          },
+          "utm_medium": {
+            "type": "string",
+            "x-frappe-target-doctype": "UTM Medium"
+          },
+          "utm_content": {
+            "type": "string"
+          },
+          "utm_analytics_section": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "company",
+          "name",
+          "naming_series",
+          "opportunity_from",
+          "party_name",
+          "status",
+          "transaction_date"
+        ],
+        "additionalProperties": true,
+        "x-module": "CRM"
+      },
+      "OpportunityItem": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "item_code": {
+            "type": "string",
+            "x-frappe-target-doctype": "Item"
+          },
+          "col_break1": {
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "item_group": {
+            "type": "string",
+            "x-frappe-target-doctype": "Item Group",
+            "writeOnly": true
+          },
+          "brand": {
+            "type": "string",
+            "x-frappe-target-doctype": "Brand",
+            "writeOnly": true
+          },
+          "section_break_6": {
+            "type": "string"
+          },
+          "uom": {
+            "type": "string",
+            "x-frappe-target-doctype": "UOM"
+          },
+          "item_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "column_break_8": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "image_view": {
+            "type": "string",
+            "x-frappe-options": "image"
+          },
+          "rate": {
+            "type": "number",
+            "x-frappe-options": "currency"
+          },
+          "quantity_and_rate_section": {
+            "type": "string"
+          },
+          "base_amount": {
+            "type": "number",
+            "x-frappe-options": "Company:company:default_currency",
+            "readOnly": true
+          },
+          "column_break_16": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "x-frappe-options": "currency",
+            "readOnly": true
+          },
+          "base_rate": {
+            "type": "number",
+            "x-frappe-options": "Company:company:default_currency",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "amount",
+          "base_amount",
+          "base_rate",
+          "name",
+          "rate"
+        ],
+        "additionalProperties": true,
+        "x-module": "CRM"
+      },
+      "FrappeResponse": {
+        "type": "object",
+        "properties": {
+          "message": {}
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "FrappeError": {
+        "type": "object",
+        "properties": {
+          "exc_type": {
+            "type": "string"
+          },
+          "exception": {
+            "type": "string"
+          },
+          "_server_messages": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ResourceListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "message": {}
+        }
+      },
+      "FileUploadResponse": {
+        "type": "object",
+        "properties": {
+          "file_url": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "message": {}
+        }
+      },
+      "PageInfo": {
+        "type": "object",
+        "properties": {
+          "limit_start": {
+            "type": "integer"
+          },
+          "limit_page_length": {
+            "type": "integer"
+          }
+        }
+      },
+      "RuntimeStatus": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "erpnext_version": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "drift_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "app": {
+                "type": "string"
+              },
+              "site": {
+                "type": "string"
+              },
+              "frappe_version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "installed_apps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "bootstrap": {
+                "$ref": "#/components/schemas/RuntimeStatus"
+              },
+              "config": {
+                "$ref": "#/components/schemas/RuntimeStatus"
+              },
+              "policy": {
+                "$ref": "#/components/schemas/RuntimeStatus"
+              },
+              "configuration_bundle": {
+                "$ref": "#/components/schemas/RuntimeStatus"
+              }
+            },
+            "required": [
+              "ok",
+              "app",
+              "bootstrap",
+              "config",
+              "policy",
+              "configuration_bundle"
+            ]
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "BankTransactionAllocation": {
+        "type": "object",
+        "properties": {
+          "payment_document": {
+            "type": "string",
+            "enum": [
+              "Payment Entry",
+              "Journal Entry"
+            ]
+          },
+          "payment_entry": {
+            "type": "string"
+          },
+          "allocated_amount": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "payment_document",
+          "payment_entry"
+        ],
+        "additionalProperties": false
+      },
+      "BankTransactionReconcileRequest": {
+        "type": "object",
+        "properties": {
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BankTransactionAllocation"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "allocations"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "x-contract": {
+    "runtime": {
+      "source_of_truth": "erpnext",
+      "api_style": "frappe-native",
+      "openapi_version": "3.1.0",
+      "server_url": "http://127.0.0.1:8080",
+      "group_by": "module",
+      "public_module_routes": true,
+      "include_whitelisted_methods": true,
+      "include_doctype_metadata": false,
+      "typed_doctypes": [
+        "CRM Note",
+        "Lead",
+        "Opportunity",
+        "Opportunity Item"
+      ],
+      "typed_modules": [
+        "Accounts",
+        "Assets",
+        "Automation",
+        "Bulk Transaction",
+        "Buying",
+        "CRM",
+        "Communication",
+        "Contacts",
+        "Core",
+        "Custom",
+        "Desk",
+        "EDI",
+        "ERPNext Integrations",
+        "Email",
+        "Geo",
+        "Integrations",
+        "Maintenance",
+        "Manufacturing",
+        "Printing",
+        "Projects",
+        "Quality Management",
+        "Regional",
+        "Selling",
+        "Setup",
+        "Stock",
+        "Subcontracting",
+        "Support",
+        "Telephony",
+        "Utilities",
+        "Website",
+        "Workflow"
+      ],
+      "public_modules": [
+        "Accounts",
+        "Buying",
+        "CRM",
+        "Contacts",
+        "Selling",
+        "Stock"
+      ],
+      "document_actions": [
+        {
+          "doctype": "Sales Invoice",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Purchase Invoice",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Sales Order",
+          "module": "Selling",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Purchase Order",
+          "module": "Buying",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Material Request",
+          "module": "Stock",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Purchase Receipt",
+          "module": "Stock",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Stock Entry",
+          "module": "Stock",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Journal Entry",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Payment Request",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Payment Order",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Payment Entry",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Bank Transaction",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        }
+      ],
+      "custom_actions": [
+        {
+          "doctype": "Bank Transaction",
+          "module": "Accounts",
+          "action": "reconcile",
+          "operation_id": "reconcileBankTransaction",
+          "path_suffix": "reconcile",
+          "handler": "letron_api.accounts_reconciliation.reconcile_bank_transaction"
+        },
+        {
+          "doctype": "Bank Transaction",
+          "module": "Accounts",
+          "action": "unreconcile",
+          "operation_id": "unreconcileBankTransaction",
+          "path_suffix": "unreconcile",
+          "handler": "letron_api.accounts_reconciliation.unreconcile_bank_transaction"
+        }
+      ],
+      "include_methods": [
+        "letron_api.api.health",
+        "letron_api.api.runtime_info",
+        "letron_api.api.runtime_snapshot"
+      ],
+      "public_resources": [
+        {
+          "doctype": "Lead",
+          "path": "/api/v1/crm/leads"
+        },
+        {
+          "doctype": "Opportunity",
+          "path": "/api/v1/crm/opportunities"
+        },
+        {
+          "doctype": "Request for Quotation",
+          "path": "/api/v1/crm/request-for-quotations"
+        },
+        {
+          "doctype": "Supplier Quotation",
+          "path": "/api/v1/crm/supplier-quotations"
+        },
+        {
+          "doctype": "Customer",
+          "path": "/api/v1/selling/customers"
+        },
+        {
+          "doctype": "Quotation",
+          "path": "/api/v1/selling/quotations"
+        },
+        {
+          "doctype": "Sales Order",
+          "path": "/api/v1/selling/sales-orders"
+        },
+        {
+          "doctype": "Delivery Note",
+          "path": "/api/v1/selling/delivery-notes"
+        },
+        {
+          "doctype": "Sales Invoice",
+          "path": "/api/v1/accounts/sales-invoices"
+        },
+        {
+          "doctype": "Purchase Invoice",
+          "path": "/api/v1/accounts/purchase-invoices"
+        },
+        {
+          "doctype": "Payment Entry",
+          "path": "/api/v1/accounts/payment-entries"
+        },
+        {
+          "doctype": "Bank",
+          "path": "/api/v1/accounts/banks"
+        },
+        {
+          "doctype": "Bank Account",
+          "path": "/api/v1/accounts/bank-accounts"
+        },
+        {
+          "doctype": "Mode of Payment",
+          "path": "/api/v1/accounts/modes-of-payment"
+        },
+        {
+          "doctype": "Cost Center",
+          "path": "/api/v1/accounts/cost-centers"
+        },
+        {
+          "doctype": "Journal Entry",
+          "path": "/api/v1/accounts/journal-entries"
+        },
+        {
+          "doctype": "Payment Request",
+          "path": "/api/v1/accounts/payment-requests"
+        },
+        {
+          "doctype": "Bank Transaction",
+          "path": "/api/v1/accounts/bank-transactions"
+        },
+        {
+          "doctype": "Payment Order",
+          "path": "/api/v1/accounts/payment-orders"
+        },
+        {
+          "doctype": "Supplier",
+          "path": "/api/v1/buying/suppliers"
+        },
+        {
+          "doctype": "Purchase Order",
+          "path": "/api/v1/buying/purchase-orders"
+        },
+        {
+          "doctype": "Item",
+          "path": "/api/v1/stock/items"
+        },
+        {
+          "doctype": "Warehouse",
+          "path": "/api/v1/stock/warehouses"
+        },
+        {
+          "doctype": "Address",
+          "path": "/api/v1/contacts/addresses"
+        },
+        {
+          "doctype": "Contact",
+          "path": "/api/v1/contacts/contacts"
+        },
+        {
+          "doctype": "Material Request",
+          "path": "/api/v1/stock/material-requests"
+        },
+        {
+          "doctype": "Purchase Receipt",
+          "path": "/api/v1/stock/purchase-receipts"
+        },
+        {
+          "doctype": "Stock Entry",
+          "path": "/api/v1/stock/stock-entries"
+        },
+        {
+          "doctype": "Item Price",
+          "path": "/api/v1/stock/item-prices"
+        },
+        {
+          "doctype": "Stock Reconciliation",
+          "path": "/api/v1/stock/stock-reconciliations"
+        },
+        {
+          "doctype": "Serial No",
+          "path": "/api/v1/stock/serial-nos"
+        },
+        {
+          "doctype": "Batch",
+          "path": "/api/v1/stock/batches"
+        },
+        {
+          "doctype": "Quality Inspection",
+          "path": "/api/v1/stock/quality-inspections"
+        },
+        {
+          "doctype": "Pick List",
+          "path": "/api/v1/stock/pick-lists"
+        },
+        {
+          "doctype": "Shipment",
+          "path": "/api/v1/stock/shipments"
+        },
+        {
+          "doctype": "Landed Cost Voucher",
+          "path": "/api/v1/stock/landed-cost-vouchers"
+        },
+        {
+          "doctype": "Stock Reservation Entry",
+          "path": "/api/v1/stock/stock-reservation-entries"
+        }
+      ]
+    },
+    "transport": {
+      "rest": true,
+      "webhook": true,
+      "realtime": true
+    },
+    "headers": {
+      "request_id": "X-Request-Id",
+      "idempotency_key": "X-Idempotency-Key"
+    }
+  },
+  "x-capabilities": {
+    "webhook": {
+      "declared": true,
+      "delivery_implemented": true,
+      "delivery": "durable-outbox",
+      "signature": "hmac-sha256",
+      "max_attempts": 3
+    },
+    "realtime": {
+      "declared": true,
+      "delivery_implemented": true,
+      "delivery": "durable-outbox",
+      "source_of_truth": false
+    }
+  },
+  "x-acceptance-summary": {
+    "passed": 10,
+    "partial": 0,
+    "not-tested": 0,
+    "blocked": 0
+  },
+  "x-module": "CRM",
+  "x-module-index": {
+    "CRM": [
+      "CRM Note",
+      "Lead",
+      "Opportunity",
+      "Opportunity Item"
+    ]
+  }
+}

@@ -170,9 +170,13 @@ identity API/DB, không thuộc policy YAML.
    consumer deduplicate theo event ID. REST vẫn là source of truth.
 5. Country/currency chỉ có owner là `policy.yaml`; launcher lấy bootstrap input
    từ policy và `config.yaml` không giữ mirror business jurisdiction.
-6. Phase 8 foundation đã pass trên Windows/Docker: production policy có 14
-   document thật; 56 source managed/conditional được chứng minh bằng disposable
-   fixture, schema fingerprint, native readback, idempotency và cleanup. Phase
-   còn `IN_PROGRESS` tới khi controller-effect và failure-injection matrix pass.
+6. Phase 8 `COMPLETE` trên Windows/Docker: production policy có 14 document thật;
+   56 source managed/conditional được chứng minh bằng disposable fixture, schema
+   fingerprint, native readback, controller effect, idempotency, rollback từng
+   mutation boundary và cleanup zero-residue.
+7. Phase 9 chỉ được mở rộng public contract sau khi có typed API/OpenAPI cho
+   Bank Transaction, reconciliation và Payment Order cùng native controller
+   evidence. `Bank Transaction Rule` có thể thuộc policy; transaction và ledger
+   luôn là runtime entity, không được đưa vào policy YAML.
    Completeness thuộc [PRD](ERP_PRD.md), classification chi tiết thuộc
    [Configuration Inventory](Configuration_Inventory.md).

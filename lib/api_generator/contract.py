@@ -47,6 +47,24 @@ def validate_contract(data: dict[str, Any], doctypes: list[Any] | None = None, m
             raise ValueError("runtime.document_actions actions must contain submit or cancel")
         if item["module"] not in runtime.get("public_modules", []):
             raise ValueError(f"runtime.document_actions module must be public: {item['module']}")
+    custom_actions = runtime.get("custom_actions", [])
+    if not isinstance(custom_actions, list) or any(not isinstance(item, dict) for item in custom_actions):
+        raise TypeError("runtime.custom_actions must be a list of mappings")
+    custom_action_keys: set[tuple[str, str]] = set()
+    custom_operation_ids: set[str] = set()
+    for item in custom_actions:
+        required_custom = ("doctype", "module", "action", "operation_id", "path_suffix", "handler")
+        if any(not isinstance(item.get(key), str) or not item[key].strip() for key in required_custom):
+            raise ValueError("runtime.custom_actions require doctype, module, action, operation_id, path_suffix and handler")
+        key = (item["doctype"], item["action"])
+        if key in custom_action_keys:
+            raise ValueError(f"runtime.custom_actions collision: {item['doctype']} {item['action']}")
+        if item["operation_id"] in custom_operation_ids:
+            raise ValueError(f"runtime.custom_actions operation collision: {item['operation_id']}")
+        if item["module"] not in runtime.get("public_modules", []):
+            raise ValueError(f"runtime.custom_actions module must be public: {item['module']}")
+        custom_action_keys.add(key)
+        custom_operation_ids.add(item["operation_id"])
     for key in ("include_doctype_metadata",):
         if not isinstance(runtime.get(key), bool):
             raise TypeError(f"runtime.{key} must be boolean")
@@ -90,6 +108,9 @@ def validate_contract(data: dict[str, Any], doctypes: list[Any] | None = None, m
         unknown_actions = sorted({item["doctype"] for item in runtime.get("document_actions", [])} - available)
         if unknown_actions:
             raise ValueError(f"runtime.document_actions contains unknown DocType: {', '.join(unknown_actions)}")
+        unknown_custom = sorted({item["doctype"] for item in custom_actions} - available)
+        if unknown_custom:
+            raise ValueError(f"runtime.custom_actions contains unknown DocType: {', '.join(unknown_custom)}")
         names: dict[str, str] = {}
         for item in doctypes:
             if item.name not in runtime["typed_doctypes"]:

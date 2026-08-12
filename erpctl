@@ -5,7 +5,6 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG="$ROOT/config/config.yaml"
 POLICY="$ROOT/config/policy.yaml"
 COMPOSE="$ROOT/docker-compose.yml"
-ACCEPTANCE_COMPOSE="$ROOT/docker-compose.acceptance.yml"
 ACTION="${1:-up}"
 
 if [[ "${LETRON_ACCEPTANCE:-0}" == "1" ]]; then
@@ -33,7 +32,6 @@ uv run python -m letron_api.system_config bundle-validate --config "$CONFIG" --p
 eval "$(uv run python -m letron_api.system_config env --path "$CONFIG" --format posix)"
 
 compose=(docker compose --project-name "$PROJECT_NAME" -f "$COMPOSE")
-if [[ "${LETRON_ACCEPTANCE:-0}" == "1" ]]; then compose+=(-f "$ACCEPTANCE_COMPOSE"); fi
 
 readiness() {
   local deadline=$((SECONDS + 180))

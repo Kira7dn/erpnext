@@ -184,6 +184,8 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
         "PageInfo": {"type": "object", "properties": {"limit_start": {"type": "integer"}, "limit_page_length": {"type": "integer"}}},
         "RuntimeStatus": {"type": "object", "properties": {"ok": {"type": "boolean"}, "status": {"type": "string"}, "version": {"type": "integer"}, "erpnext_version": {"type": "string"}, "sha256": {"type": "string"}, "drift_count": {"type": "integer"}}, "required": ["ok"]},
         "HealthResponse": {"type": "object", "properties": {"message": {"type": "object", "properties": {"ok": {"type": "boolean"}, "app": {"type": "string"}, "site": {"type": "string"}, "frappe_version": {"type": ["string", "null"]}, "installed_apps": {"type": "array", "items": {"type": "string"}}, "bootstrap": {"$ref": "#/components/schemas/RuntimeStatus"}, "config": {"$ref": "#/components/schemas/RuntimeStatus"}, "policy": {"$ref": "#/components/schemas/RuntimeStatus"}, "configuration_bundle": {"$ref": "#/components/schemas/RuntimeStatus"}}, "required": ["ok", "app", "bootstrap", "config", "policy", "configuration_bundle"]}}, "required": ["message"]},
+        "BankTransactionAllocation": {"type": "object", "properties": {"payment_document": {"type": "string", "enum": ["Payment Entry", "Journal Entry"]}, "payment_entry": {"type": "string"}, "allocated_amount": {"type": "number", "minimum": 0}}, "required": ["payment_document", "payment_entry"], "additionalProperties": False},
+        "BankTransactionReconcileRequest": {"type": "object", "properties": {"allocations": {"type": "array", "items": {"$ref": "#/components/schemas/BankTransactionAllocation"}, "minItems": 1}}, "required": ["allocations"], "additionalProperties": False},
     })
     error_schema = {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/FrappeError"}}}}
     error = {
@@ -253,6 +255,23 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
         }
         for action in next((item["actions"] for item in runtime.get("document_actions", []) if item["doctype"] == dt.name), []):
             paths[f"{detail_route}/{action}"] = {"post": {"tags": [f"Module: {dt.module or 'Uncategorized'}", "Document actions"], "operationId": f"{action}{names[dt.name]}", "parameters": detail_write_parameters, "responses": {**_response(f"{action.title()} document", _document_response(typed_schema, "message")), **error}, "x-frappe-action": action}}
+        for custom in runtime.get("custom_actions", []):
+            if custom["doctype"] != dt.name:
+                continue
+            action_path = f"{detail_route}/{custom['path_suffix']}"
+            action_body = {"$ref": "#/components/schemas/BankTransactionReconcileRequest"} if custom["operation_id"] == "reconcileBankTransaction" else {"type": "object", "additionalProperties": False, "description": f"Payload for {custom['action']} {dt.name}."}
+            paths[action_path] = {
+                "post": {
+                    "tags": [f"Module: {dt.module or 'Uncategorized'}", "Business actions"],
+                    "summary": f"{custom['action'].title()} {dt.name}",
+                    "operationId": custom["operation_id"],
+                    "parameters": detail_write_parameters,
+                    "requestBody": _json_body(action_body),
+                    "responses": {**_response(f"{custom['action'].title()} {dt.name}", _document_response(typed_schema)), **error},
+                    "x-frappe-handler": custom["handler"],
+                    "x-native-action": custom["action"],
+                }
+            }
     if module_name is None:
         paths["/api/method/upload_file"] = {"post": {"tags": ["Files"], "operationId": "uploadFile", "parameters": write_headers, "requestBody": {"required": True, "content": {"multipart/form-data": {"schema": {"type": "object", "required": ["file"], "properties": {"file": {"type": "string", "format": "binary"}, "is_private": {"type": "boolean"}, "doctype": {"type": "string"}, "docname": {"type": "string"}}}}}}, "responses": {**_response("Uploaded file", {"$ref": "#/components/schemas/FileUploadResponse"}), **error}}}
     server = os.environ.get("ERPNEXT_API_URL") or runtime["server_url"]

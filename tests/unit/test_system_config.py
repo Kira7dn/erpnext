@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from letron_api import system_config
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_repository_system_config_is_valid_and_secret_free() -> None:
@@ -60,6 +60,52 @@ def test_config_resolves_only_exact_environment_references(
 
     assert resolved["database"]["root_password"] == "db-secret"
     assert resolved["delivery"]["realtime_token"] == "realtime-secret"
+
+
+def test_config_prefers_local_dotenv_when_present(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "config" / "config.yaml"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text(system_config.config_path().read_text(encoding="utf-8"), encoding="utf-8")
+    (tmp_path / ".env").write_text(
+        "DB_ROOT_PASSWORD=db-secret\n"
+        "ADMIN_PASSWORD=admin-secret\n"
+        "SMTP_PASSWORD=smtp-secret\n"
+        "LETRON_WEBHOOK_SECRET=webhook-secret\n"
+        "LETRON_REALTIME_TOKEN=realtime-secret\n"
+        "LETRON_WEBHOOK_TIMEOUT_MS=5000\n"
+        "LETRON_WEBHOOK_URL=http://default.local/webhook\n"
+        "LETRON_REALTIME_URL=http://default.local/realtime\n",
+        encoding="utf-8",
+    )
+    (tmp_path / ".env.local").write_text(
+        "DB_ROOT_PASSWORD=db-secret-local\n"
+        "ADMIN_PASSWORD=admin-secret-local\n"
+        "SMTP_PASSWORD=smtp-secret-local\n"
+        "LETRON_WEBHOOK_SECRET=webhook-secret-local\n"
+        "LETRON_REALTIME_TOKEN=realtime-secret-local\n",
+        encoding="utf-8",
+    )
+    for name in (
+        "DB_ROOT_PASSWORD",
+        "ADMIN_PASSWORD",
+        "SMTP_PASSWORD",
+        "LETRON_WEBHOOK_SECRET",
+        "LETRON_REALTIME_TOKEN",
+        "LETRON_WEBHOOK_TIMEOUT_MS",
+        "LETRON_WEBHOOK_URL",
+        "LETRON_REALTIME_URL",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+    resolved = system_config.load_config(source, resolve_secrets=True)
+
+    assert resolved["database"]["root_password"] == "db-secret-local"
+    assert resolved["site"]["admin_password"] == "admin-secret-local"
+    assert resolved["email"]["password"] == "smtp-secret-local"
+    assert resolved["delivery"]["webhook_secret"] == "webhook-secret-local"
+    assert resolved["delivery"]["realtime_token"] == "realtime-secret-local"
 
 
 @pytest.mark.parametrize(
@@ -153,12 +199,10 @@ def test_launchers_use_only_the_two_fixed_yaml_sources() -> None:
         assert content.index("policy-validate") < content.index(environment_marker)
 
 
-def test_production_compose_excludes_acceptance_consumer_and_has_backup() -> None:
+def test_production_compose_has_no_acceptance_overlay_and_has_backup() -> None:
     compose = (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
-    acceptance = (ROOT / "docker-compose.acceptance.yml").read_text(encoding="utf-8")
 
-    assert "  event-consumer:" not in compose
-    assert "  event-consumer:" in acceptance
+    assert "event-consumer" not in compose
     assert "  backup-init:" in compose
     assert "  backup:" in compose
     assert "  backup-verify:" in compose

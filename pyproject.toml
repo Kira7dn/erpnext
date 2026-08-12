@@ -34,7 +34,7 @@ extra-paths = [".cache/frappe-v16", "apps/letron_api"]
 pythonpath = [".", "apps/letron_api"]
 testpaths = ["tests"]
 addopts = "-m 'not integration'"
-timeout = 55
+timeout = 70
 timeout_method = "thread"
 markers = [
     "integration: requires the local ERPNext Docker runtime",

@@ -19,7 +19,7 @@ from contextlib import contextmanager
 from datetime import date, datetime
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 from yaml.resolver import BaseResolver
@@ -346,16 +346,19 @@ def _load_scope(policy_path: Path) -> dict[str, Any]:
         raise PolicyError(f"Invalid policy scope YAML: {error}") from error
     if not isinstance(value, dict) or value.get("scope_version") != POLICY_SCOPE_VERSION:
         raise PolicyError(f"Policy scope version must be {POLICY_SCOPE_VERSION}")
-    entries = value.get("sources")
-    if not isinstance(entries, list):
+    raw_entries = value.get("sources")
+    if not isinstance(raw_entries, list):
         raise PolicyError("policy scope sources must be a list")
+    entries: list[dict[str, Any]] = []
+    for index, raw_item in enumerate(raw_entries):
+        if not isinstance(raw_item, dict) or not raw_item.get("name"):
+            raise PolicyError(f"policy scope source[{index}] must have a name")
+        entries.append(cast(dict[str, Any], raw_item))
     allowed = {str(item.get("name")): item.get("classification") for item in entries if isinstance(item, dict)}
     if len(allowed) != len(entries):
         raise PolicyError("policy scope source names must be unique")
     required = {"managed", "conditional"}
-    for index, item in enumerate(entries):
-        if not isinstance(item, dict) or not item.get("name"):
-            raise PolicyError(f"policy scope source[{index}] must have a name")
+    for item in entries:
         missing_fields = SCOPE_REQUIRED_FIELDS - set(item)
         if missing_fields:
             raise PolicyError(
@@ -374,9 +377,10 @@ def _load_scope(policy_path: Path) -> dict[str, Any]:
         ):
             raise PolicyError(f"policy scope source {item['name']} lacks schema fingerprint")
         if classification in required:
-            acceptance = item.get("acceptance")
-            if not isinstance(acceptance, dict) or SCOPE_ACCEPTANCE_FIELDS - set(acceptance):
+            raw_acceptance = item.get("acceptance")
+            if not isinstance(raw_acceptance, dict) or SCOPE_ACCEPTANCE_FIELDS - set(raw_acceptance):
                 raise PolicyError(f"policy scope source {item['name']} lacks acceptance mapping")
+            acceptance = cast(dict[str, Any], raw_acceptance)
             if any(
                 not isinstance(acceptance[field], str) or not acceptance[field].strip()
                 for field in SCOPE_ACCEPTANCE_FIELDS - {"dependency_prerequisites"}
@@ -634,14 +638,19 @@ def load_policy(path: str | Path | None = None) -> dict[str, Any]:
         unknown = set(entry) - {"doctype", "name", "state", "fields"}
         if unknown:
             raise PolicyError(f"documents[{index}] has unsupported keys: {', '.join(sorted(unknown))}")
-        doctype = entry.get("doctype")
-        name = entry.get("name")
-        state = entry.get("state", "present")
+        raw_doctype = entry.get("doctype")
+        raw_name = entry.get("name")
+        raw_state = entry.get("state", "present")
         fields = entry.get("fields", {})
-        if doctype not in POLICY_DOCTYPES:
-            raise PolicyError(f"documents[{index}] uses unsupported DocType: {doctype}")
-        if not isinstance(name, str) or not name:
+        if not isinstance(raw_doctype, str) or raw_doctype not in POLICY_DOCTYPES:
+            raise PolicyError(f"documents[{index}] uses unsupported DocType: {raw_doctype}")
+        if not isinstance(raw_name, str) or not raw_name:
             raise PolicyError(f"documents[{index}].name must be a non-empty string")
+        if not isinstance(raw_state, str):
+            raise PolicyError(f"documents[{index}].state must be present or absent")
+        doctype = raw_doctype
+        name = raw_name
+        state = raw_state
         if doctype in SINGLE_DOCTYPES and name != doctype:
             raise PolicyError(f"Single DocType {doctype} must use name {doctype}")
         if state not in {"present", "absent"}:
@@ -998,6 +1007,7 @@ def apply(
     *,
     commit: bool = True,
     require_convergence: bool = True,
+    _failure_step: str | None = None,
 ) -> dict[str, Any]:
     frappe = _frappe()
     policy = load_policy(path)
@@ -1038,6 +1048,7 @@ def apply(
                 _policy_path(path),
                 policy.get("assets", {}),
             )
+            _inject_acceptance_failure(_failure_step, "after-assets")
             for entry in _sorted_entries(present, path=path):
                 doctype = str(entry["doctype"])
                 name = str(entry["name"])
@@ -1060,6 +1071,7 @@ def apply(
                 else:
                     doc.save(ignore_permissions=True)
                 applied += 1
+            _inject_acceptance_failure(_failure_step, "after-documents")
 
             for entry in _sorted_entries(absent, reverse=True, path=path):
                 doctype = str(entry["doctype"])
@@ -1070,6 +1082,12 @@ def apply(
                     frappe.delete_doc(doctype, name, ignore_permissions=True)
                     applied += 1
             asset_transaction.delete_stale()
+            _inject_acceptance_failure(_failure_step, "after-deletes")
+        # Cache invalidation and canonical readback are part of the transaction
+        # boundary.  They must succeed before commit so a failure can still
+        # roll back native documents and compensate materialized files.
+        _inject_acceptance_failure(_failure_step, "before-cache")
+        frappe.clear_cache()
         after = plan(path)
         if after["changes"] and require_convergence:
             summary = "; ".join(
@@ -1079,9 +1097,9 @@ def apply(
             raise PolicyError(
                 f"Policy readback still has {after['drift_count']} drift entries: {summary}"
             )
+        _inject_acceptance_failure(_failure_step, "before-commit")
         if commit:
             frappe.db.commit()
-        frappe.clear_cache()
         result = {**after, "applied": applied + asset_transaction.applied}
         _cache_status(result)
         return result
@@ -1093,6 +1111,16 @@ def apply(
         else:
             cache.set_value(POLICY_STATUS_CACHE_KEY, previous_policy_cache, expires_in_sec=3600)
         raise
+
+
+def _inject_acceptance_failure(actual: str | None, expected: str) -> None:
+    """Private, test-runtime-only transaction boundary fault injection."""
+
+    if actual != expected:
+        return
+    if not _is_test_runtime():
+        raise PolicyError("Policy failure injection requires an acceptance runtime")
+    raise PolicyError(f"Injected policy acceptance failure: {expected}")
 
 
 def status(path: str | Path | None = None) -> dict[str, Any]:

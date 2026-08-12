@@ -1,0 +1,3880 @@
+openapi: 3.1.0
+info:
+  title: Letron ERPNext Buying API
+  version: 0.1.0
+servers:
+- url: http://127.0.0.1:8080
+tags:
+- name: Typed Resource API
+- name: Whitelisted methods
+- name: Metadata
+- name: Files
+- name: 'Module: Accounts'
+- name: 'Module: Buying'
+- name: 'Module: Utilities'
+security:
+- frappeToken: []
+paths:
+  /api/v1/buying/purchase-orders:
+    get:
+      tags:
+      - 'Module: Buying'
+      summary: List Purchase Order records
+      description: List typed Purchase Order documents.
+      operationId: listPurchaseOrder
+      parameters:
+      - &id002
+        $ref: '#/components/parameters/RequestId'
+      - &id015
+        name: fields
+        in: query
+        schema:
+          type: string
+        description: JSON field-name array
+      - &id016
+        name: filters
+        in: query
+        schema:
+          type: string
+        description: JSON Frappe filters
+      - &id017
+        name: order_by
+        in: query
+        schema:
+          type: string
+      - &id018
+        name: limit_page_length
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - &id019
+        name: limit_start
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id003
+                      $ref: '#/components/schemas/PurchaseOrder'
+                  message: {}
+                required:
+                - data
+        '400': &id004
+          description: Invalid request
+          content: &id001
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeError'
+        '401': &id005
+          description: Authentication required
+          content: *id001
+        '403': &id006
+          description: Permission denied
+          content: *id001
+        '404': &id007
+          description: Resource not found
+          content: *id001
+        '409': &id008
+          description: Idempotency or optimistic concurrency conflict
+          content: *id001
+        '417': &id009
+          description: Native Frappe validation failure
+          content: *id001
+        '429': &id010
+          description: Rate limited
+          content: *id001
+        '500': &id011
+          description: Server or rollback failure
+          content: *id001
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    post:
+      tags:
+      - 'Module: Buying'
+      summary: Create Purchase Order
+      description: Create a Purchase Order using the runtime DocType schema.
+      operationId: createPurchaseOrder
+      parameters: &id020
+      - *id002
+      - &id012
+        $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id013
+              type: object
+              properties:
+                name: &id030
+                  type: string
+                supplier_section: &id031
+                  type: string
+                  x-frappe-options: fa fa-user
+                naming_series: &id032
+                  type: string
+                  enum:
+                  - PUR-ORD-.YYYY.-
+                supplier: &id033
+                  type: string
+                  x-frappe-target-doctype: Supplier
+                company: &id034
+                  type: string
+                  x-frappe-target-doctype: Company
+                column_break1: &id035
+                  type: string
+                transaction_date: &id036
+                  type: string
+                  format: date
+                schedule_date: &id037
+                  type: string
+                  format: date
+                order_confirmation_no: &id038
+                  type: string
+                order_confirmation_date: &id039
+                  type: string
+                  format: date
+                drop_ship: &id040
+                  type: string
+                column_break_19: &id041
+                  type: string
+                customer_contact_person: &id042
+                  type: string
+                  x-frappe-target-doctype: Contact
+                customer_contact_display: &id043
+                  type: string
+                customer_contact_mobile: &id044
+                  type: string
+                  x-frappe-options: Phone
+                  writeOnly: true
+                customer_contact_email: &id045
+                  type: string
+                  x-frappe-options: Email
+                  writeOnly: true
+                section_addresses: &id046
+                  type: string
+                supplier_address: &id047
+                  type: string
+                  x-frappe-target-doctype: Address
+                contact_person: &id048
+                  type: string
+                  x-frappe-target-doctype: Contact
+                col_break_address: &id049
+                  type: string
+                shipping_address: &id050
+                  type: string
+                  x-frappe-target-doctype: Address
+                currency_and_price_list: &id051
+                  type: string
+                  x-frappe-options: fa fa-tag
+                currency: &id052
+                  type: string
+                  x-frappe-target-doctype: Currency
+                conversion_rate: &id053
+                  type: number
+                cb_price_list: &id054
+                  type: string
+                buying_price_list: &id055
+                  type: string
+                  x-frappe-target-doctype: Price List
+                plc_conversion_rate: &id056
+                  type: number
+                ignore_pricing_rule: &id057
+                  type: boolean
+                set_warehouse: &id058
+                  type: string
+                  x-frappe-target-doctype: Warehouse
+                is_subcontracted: &id059
+                  type: boolean
+                supplier_warehouse: &id060
+                  type: string
+                  x-frappe-target-doctype: Warehouse
+                items_section: &id061
+                  type: string
+                  x-frappe-options: fa fa-shopping-cart
+                scan_barcode: &id062
+                  type: string
+                  x-frappe-options: Barcode
+                items: &id063
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PurchaseOrderItem'
+                section_break_48: &id064
+                  type: string
+                raw_material_details: &id065
+                  type: string
+                sb_last_purchase: &id066
+                  type: string
+                column_break_26: &id067
+                  type: string
+                taxes_section: &id068
+                  type: string
+                  x-frappe-options: fa fa-money
+                taxes_and_charges: &id069
+                  type: string
+                  x-frappe-target-doctype: Purchase Taxes and Charges Template
+                column_break_50: &id070
+                  type: string
+                shipping_rule: &id071
+                  type: string
+                  x-frappe-target-doctype: Shipping Rule
+                section_break_52: &id072
+                  type: string
+                taxes: &id073
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PurchaseTaxesandCharges'
+                sec_tax_breakup: &id074
+                  type: string
+                totals: &id075
+                  type: string
+                  x-frappe-options: fa fa-money
+                column_break_39: &id076
+                  type: string
+                discount_section: &id077
+                  type: string
+                apply_discount_on: &id078
+                  type: string
+                  enum:
+                  - Grand Total
+                  - Net Total
+                column_break_45: &id079
+                  type: string
+                additional_discount_percentage: &id080
+                  type: number
+                discount_amount: &id081
+                  type: number
+                  x-frappe-options: currency
+                totals_section: &id082
+                  type: string
+                column_break4: &id083
+                  type: string
+                disable_rounded_total: &id084
+                  type: boolean
+                payment_schedule_section: &id085
+                  type: string
+                payment_terms_template: &id086
+                  type: string
+                  x-frappe-target-doctype: Payment Terms Template
+                payment_schedule: &id087
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PaymentSchedule'
+                terms_section_break: &id088
+                  type: string
+                  x-frappe-options: fa fa-legal
+                tc_name: &id089
+                  type: string
+                  x-frappe-target-doctype: Terms and Conditions
+                terms: &id090
+                  type: string
+                column_break_74: &id091
+                  type: string
+                column_break5: &id092
+                  type: string
+                letter_head: &id093
+                  type: string
+                  x-frappe-target-doctype: Letter Head
+                select_print_heading: &id094
+                  type: string
+                  x-frappe-target-doctype: Print Heading
+                column_break_86: &id095
+                  type: string
+                group_same_items: &id096
+                  type: boolean
+                language: &id097
+                  type: string
+                from_date: &id098
+                  type: string
+                  format: date
+                to_date: &id099
+                  type: string
+                  format: date
+                column_break_97: &id100
+                  type: string
+                update_auto_repeat_reference: &id101
+                  type: string
+                tax_category: &id102
+                  type: string
+                  x-frappe-target-doctype: Tax Category
+                set_reserve_warehouse: &id103
+                  type: string
+                  x-frappe-target-doctype: Warehouse
+                tracking_section: &id104
+                  type: string
+                column_break_75: &id105
+                  type: string
+                billing_address: &id106
+                  type: string
+                  x-frappe-target-doctype: Address
+                before_items_section: &id107
+                  type: string
+                items_col_break: &id108
+                  type: string
+                accounting_dimensions_section: &id109
+                  type: string
+                cost_center: &id110
+                  type: string
+                  x-frappe-target-doctype: Cost Center
+                dimension_col_break: &id111
+                  type: string
+                project: &id112
+                  type: string
+                  x-frappe-target-doctype: Project
+                set_from_warehouse: &id113
+                  type: string
+                  x-frappe-target-doctype: Warehouse
+                terms_tab: &id114
+                  type: string
+                more_info_tab: &id115
+                  type: string
+                column_break_7: &id116
+                  type: string
+                column_break_40: &id117
+                  type: string
+                column_break_53: &id118
+                  type: string
+                address_and_contact_tab: &id119
+                  type: string
+                company_billing_address_section: &id120
+                  type: string
+                additional_info_section: &id121
+                  type: string
+                column_break_99: &id122
+                  type: string
+                column_break_103: &id123
+                  type: string
+                incoterm: &id124
+                  type: string
+                  x-frappe-target-doctype: Incoterm
+                named_place: &id125
+                  type: string
+                shipping_address_section: &id126
+                  type: string
+                connections_tab: &id127
+                  type: string
+                advance_payment_status: &id128
+                  type: string
+                  enum:
+                  - Not Initiated
+                  - Initiated
+                  - Partially Paid
+                  - Fully Paid
+                  writeOnly: true
+                has_unit_price_items: &id129
+                  type: boolean
+                  writeOnly: true
+                dispatch_address: &id130
+                  type: string
+                  x-frappe-target-doctype: Address
+                supplier_group: &id131
+                  type: string
+                  x-frappe-target-doctype: Supplier Group
+                  writeOnly: true
+                last_scanned_warehouse: &id132
+                  type: string
+                item_wise_tax_details: &id133
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ItemWiseTaxDetail'
+                  writeOnly: true
+                column_break_jkoz: &id134
+                  type: string
+                base_totals_section: &id135
+                  type: string
+                  x-frappe-options: Company:company:default_currency
+                section_break_tnkm: &id136
+                  type: string
+                transaction_time: &id137
+                  type: string
+                  format: time
+                auto_repeat_section: &id138
+                  type: string
+                title: &id139
+                  type: string
+              required:
+              - company
+              - conversion_rate
+              - currency
+              - items
+              - name
+              - naming_series
+              - supplier
+              - transaction_date
+              additionalProperties: true
+              x-module: Buying
+            example:
+              naming_series: ''
+              supplier: ''
+              company: ''
+              transaction_date: ''
+              currency: ''
+              conversion_rate: 0
+              items: []
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id003
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  /api/v1/buying/purchase-orders/{name}:
+    get:
+      tags:
+      - 'Module: Buying'
+      operationId: getPurchaseOrder
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id003
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    put:
+      tags:
+      - 'Module: Buying'
+      operationId: updatePurchaseOrder
+      parameters: &id014
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id013
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id003
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    delete:
+      tags:
+      - 'Module: Buying'
+      operationId: deletePurchaseOrder
+      parameters: *id014
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  /api/v1/buying/purchase-orders/{name}/submit:
+    post:
+      tags:
+      - 'Module: Buying'
+      - Document actions
+      operationId: submitPurchaseOrder
+      parameters: *id014
+      responses:
+        '200':
+          description: Submit document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: *id003
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-action: submit
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  /api/v1/buying/purchase-orders/{name}/cancel:
+    post:
+      tags:
+      - 'Module: Buying'
+      - Document actions
+      operationId: cancelPurchaseOrder
+      parameters: *id014
+      responses:
+        '200':
+          description: Cancel document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: *id003
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-action: cancel
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  /api/v1/crm/request-for-quotations:
+    get:
+      tags:
+      - 'Module: Buying'
+      summary: List Request for Quotation records
+      description: List typed Request for Quotation documents.
+      operationId: listRequestforQuotation
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id021
+                      $ref: '#/components/schemas/RequestforQuotation'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: Buying'
+      summary: Create Request for Quotation
+      description: Create a Request for Quotation using the runtime DocType schema.
+      operationId: createRequestforQuotation
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id022
+              type: object
+              properties:
+                name: &id140
+                  type: string
+                naming_series: &id141
+                  type: string
+                  enum:
+                  - PUR-RFQ-.YYYY.-
+                company: &id142
+                  type: string
+                  x-frappe-target-doctype: Company
+                column_break1: &id143
+                  type: string
+                transaction_date: &id144
+                  type: string
+                  format: date
+                suppliers_section: &id145
+                  type: string
+                suppliers: &id146
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RequestforQuotationSupplier'
+                items_section: &id147
+                  type: string
+                  x-frappe-options: fa fa-shopping-cart
+                items: &id148
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RequestforQuotationItem'
+                supplier_response_section: &id149
+                  type: string
+                email_template: &id150
+                  type: string
+                  x-frappe-target-doctype: Email Template
+                message_for_supplier: &id151
+                  type: string
+                terms_section_break: &id152
+                  type: string
+                  x-frappe-options: fa fa-legal
+                tc_name: &id153
+                  type: string
+                  x-frappe-target-doctype: Terms and Conditions
+                terms: &id154
+                  type: string
+                printing_settings: &id155
+                  type: string
+                select_print_heading: &id156
+                  type: string
+                  x-frappe-target-doctype: Print Heading
+                letter_head: &id157
+                  type: string
+                  x-frappe-target-doctype: Letter Head
+                more_info: &id158
+                  type: string
+                  x-frappe-options: fa fa-file-text
+                col_break_email_1: &id159
+                  type: string
+                preview: &id160
+                  type: string
+                sec_break_email_2: &id161
+                  type: string
+                schedule_date: &id162
+                  type: string
+                  format: date
+                incoterm: &id163
+                  type: string
+                  x-frappe-target-doctype: Incoterm
+                named_place: &id164
+                  type: string
+                send_attached_files: &id165
+                  type: boolean
+                send_document_print: &id166
+                  type: boolean
+                billing_address: &id167
+                  type: string
+                  x-frappe-target-doctype: Address
+                has_unit_price_items: &id168
+                  type: boolean
+                  writeOnly: true
+                subject: &id169
+                  type: string
+                mfs_html: &id170
+                  type: string
+                use_html: &id171
+                  type: boolean
+                  writeOnly: true
+                address_and_contact_tab: &id172
+                  type: string
+                column_break_czul: &id173
+                  type: string
+                shipping_address: &id174
+                  type: string
+                  x-frappe-target-doctype: Address
+                title: &id175
+                  type: string
+              required:
+              - company
+              - items
+              - name
+              - naming_series
+              - subject
+              - suppliers
+              - transaction_date
+              additionalProperties: true
+              x-module: Buying
+            example:
+              naming_series: ''
+              company: ''
+              transaction_date: ''
+              suppliers: []
+              items: []
+              subject: ''
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id021
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+  /api/v1/crm/request-for-quotations/{name}:
+    get:
+      tags:
+      - 'Module: Buying'
+      operationId: getRequestforQuotation
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id021
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    put:
+      tags:
+      - 'Module: Buying'
+      operationId: updateRequestforQuotation
+      parameters: &id023
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id022
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id021
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    delete:
+      tags:
+      - 'Module: Buying'
+      operationId: deleteRequestforQuotation
+      parameters: *id023
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+  /api/v1/buying/suppliers:
+    get:
+      tags:
+      - 'Module: Buying'
+      summary: List Supplier records
+      description: List typed Supplier documents.
+      operationId: listSupplier
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id024
+                      $ref: '#/components/schemas/Supplier'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    post:
+      tags:
+      - 'Module: Buying'
+      summary: Create Supplier
+      description: Create a Supplier using the runtime DocType schema.
+      operationId: createSupplier
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id025
+              type: object
+              properties:
+                name: &id176
+                  type: string
+                naming_series: &id177
+                  type: string
+                  enum:
+                  - SUP-.YYYY.-
+                supplier_name: &id178
+                  type: string
+                alias: &id179
+                  type: string
+                country: &id180
+                  type: string
+                  x-frappe-target-doctype: Country
+                default_bank_account: &id181
+                  type: string
+                  x-frappe-target-doctype: Bank Account
+                tax_id: &id182
+                  type: string
+                tax_category: &id183
+                  type: string
+                  x-frappe-target-doctype: Tax Category
+                tax_withholding_category: &id184
+                  type: string
+                  x-frappe-target-doctype: Tax Withholding Category
+                is_transporter: &id185
+                  type: boolean
+                is_internal_supplier: &id186
+                  type: boolean
+                represents_company: &id187
+                  type: string
+                  x-frappe-target-doctype: Company
+                image: &id188
+                  type: string
+                  writeOnly: true
+                column_break0: &id189
+                  type: string
+                supplier_group: &id190
+                  type: string
+                  x-frappe-target-doctype: Supplier Group
+                supplier_type: &id191
+                  type: string
+                  enum:
+                  - Company
+                  - Individual
+                  - Partnership
+                language: &id192
+                  type: string
+                  x-frappe-target-doctype: Language
+                disabled: &id193
+                  type: boolean
+                companies: &id194
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AllowedToTransactWith'
+                default_currency: &id195
+                  type: string
+                  x-frappe-target-doctype: Currency
+                column_break_10: &id196
+                  type: string
+                default_price_list: &id197
+                  type: string
+                  x-frappe-target-doctype: Price List
+                payment_terms: &id198
+                  type: string
+                  x-frappe-target-doctype: Payment Terms Template
+                on_hold: &id199
+                  type: boolean
+                hold_type: &id200
+                  type: string
+                  enum:
+                  - All
+                  - Invoices
+                  - Payments
+                release_date: &id201
+                  type: string
+                  format: date
+                address_contacts: &id202
+                  type: string
+                  x-frappe-options: fa fa-map-marker
+                column_break1: &id203
+                  type: string
+                accounts: &id204
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PartyAccount'
+                column_break2: &id205
+                  type: string
+                website: &id206
+                  type: string
+                supplier_details: &id207
+                  type: string
+                column_break_30: &id208
+                  type: string
+                is_frozen: &id209
+                  type: boolean
+                allow_purchase_invoice_creation_without_purchase_order: &id210
+                  type: boolean
+                allow_purchase_invoice_creation_without_purchase_receipt: &id211
+                  type: boolean
+                primary_address_and_contact_detail_section: &id212
+                  type: string
+                supplier_primary_contact: &id213
+                  type: string
+                  x-frappe-target-doctype: Contact
+                mobile_no: &id214
+                  type: string
+                email_id: &id215
+                  type: string
+                supplier_primary_address: &id216
+                  type: string
+                  x-frappe-target-doctype: Address
+                dashboard_tab: &id217
+                  type: string
+                settings_tab: &id218
+                  type: string
+                contact_and_address_tab: &id219
+                  type: string
+                accounting_tab: &id220
+                  type: string
+                defaults_section: &id221
+                  type: string
+                tax_tab: &id222
+                  type: string
+                internal_supplier_section: &id223
+                  type: string
+                column_break_16: &id224
+                  type: string
+                column_break_27: &id225
+                  type: string
+                column_break_54: &id226
+                  type: string
+                block_supplier_section: &id227
+                  type: string
+                default_accounts_section: &id228
+                  type: string
+                portal_users_tab: &id229
+                  type: string
+                portal_users: &id230
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PortalUser'
+                column_break_mglr: &id231
+                  type: string
+                customer_numbers: &id232
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CustomerNumberAtSupplier'
+                tax_withholding_group: &id233
+                  type: string
+                  x-frappe-target-doctype: Tax Withholding Group
+                gender: &id234
+                  type: string
+                  x-frappe-target-doctype: Gender
+                rfq_and_purchase_order_settings_section: &id235
+                  type: string
+                  writeOnly: true
+                column_break_oxjw: &id236
+                  type: string
+                taxation_section: &id237
+                  type: string
+                invoice_settings_section: &id238
+                  type: string
+                more_info_tab: &id239
+                  type: string
+                section_break_jqla: &id240
+                  type: string
+                section_break_pgad: &id241
+                  type: string
+              required:
+              - name
+              - supplier_name
+              - supplier_type
+              additionalProperties: true
+              x-module: Buying
+            example:
+              supplier_name: ''
+              supplier_type: ''
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id024
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  /api/v1/buying/suppliers/{name}:
+    get:
+      tags:
+      - 'Module: Buying'
+      operationId: getSupplier
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id024
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    put:
+      tags:
+      - 'Module: Buying'
+      operationId: updateSupplier
+      parameters: &id026
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id025
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id024
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    delete:
+      tags:
+      - 'Module: Buying'
+      operationId: deleteSupplier
+      parameters: *id026
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  /api/v1/crm/supplier-quotations:
+    get:
+      tags:
+      - 'Module: Buying'
+      summary: List Supplier Quotation records
+      description: List typed Supplier Quotation documents.
+      operationId: listSupplierQuotation
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id027
+                      $ref: '#/components/schemas/SupplierQuotation'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: Buying'
+      summary: Create Supplier Quotation
+      description: Create a Supplier Quotation using the runtime DocType schema.
+      operationId: createSupplierQuotation
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id028
+              type: object
+              properties:
+                name: &id242
+                  type: string
+                supplier_section: &id243
+                  type: string
+                  x-frappe-options: fa fa-user
+                title: &id244
+                  type: string
+                naming_series: &id245
+                  type: string
+                  enum:
+                  - PUR-SQTN-.YYYY.-
+                supplier: &id246
+                  type: string
+                  x-frappe-target-doctype: Supplier
+                column_break1: &id247
+                  type: string
+                transaction_date: &id248
+                  type: string
+                  format: date
+                company: &id249
+                  type: string
+                  x-frappe-target-doctype: Company
+                supplier_address: &id250
+                  type: string
+                  x-frappe-target-doctype: Address
+                contact_person: &id251
+                  type: string
+                  x-frappe-target-doctype: Contact
+                currency_and_price_list: &id252
+                  type: string
+                  x-frappe-options: fa fa-tag
+                currency: &id253
+                  type: string
+                  x-frappe-target-doctype: Currency
+                conversion_rate: &id254
+                  type: number
+                cb_price_list: &id255
+                  type: string
+                buying_price_list: &id256
+                  type: string
+                  x-frappe-target-doctype: Price List
+                plc_conversion_rate: &id257
+                  type: number
+                ignore_pricing_rule: &id258
+                  type: boolean
+                items_section: &id259
+                  type: string
+                  x-frappe-options: fa fa-shopping-cart
+                items: &id260
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SupplierQuotationItem'
+                pricing_rule_details: &id261
+                  type: string
+                section_break_22: &id262
+                  type: string
+                column_break_24: &id263
+                  type: string
+                taxes_section: &id264
+                  type: string
+                  x-frappe-options: fa fa-money
+                tax_category: &id265
+                  type: string
+                  x-frappe-target-doctype: Tax Category
+                column_break_36: &id266
+                  type: string
+                shipping_rule: &id267
+                  type: string
+                  x-frappe-target-doctype: Shipping Rule
+                section_break_38: &id268
+                  type: string
+                taxes_and_charges: &id269
+                  type: string
+                  x-frappe-target-doctype: Purchase Taxes and Charges Template
+                taxes: &id270
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PurchaseTaxesandCharges'
+                tax_breakup: &id271
+                  type: string
+                totals: &id272
+                  type: string
+                  x-frappe-options: fa fa-money
+                column_break_37: &id273
+                  type: string
+                section_break_41: &id274
+                  type: string
+                apply_discount_on: &id275
+                  type: string
+                  enum:
+                  - Grand Total
+                  - Net Total
+                column_break_43: &id276
+                  type: string
+                additional_discount_percentage: &id277
+                  type: number
+                discount_amount: &id278
+                  type: number
+                  x-frappe-options: currency
+                section_break_46: &id279
+                  type: string
+                column_break4: &id280
+                  type: string
+                disable_rounded_total: &id281
+                  type: boolean
+                tc_name: &id282
+                  type: string
+                  x-frappe-target-doctype: Terms and Conditions
+                terms: &id283
+                  type: string
+                printing_settings: &id284
+                  type: string
+                select_print_heading: &id285
+                  type: string
+                  x-frappe-target-doctype: Print Heading
+                group_same_items: &id286
+                  type: boolean
+                column_break_72: &id287
+                  type: string
+                letter_head: &id288
+                  type: string
+                  x-frappe-target-doctype: Letter Head
+                update_auto_repeat_reference: &id289
+                  type: string
+                more_info: &id290
+                  type: string
+                  x-frappe-options: fa fa-file-text
+                column_break_57: &id291
+                  type: string
+                is_subcontracted: &id292
+                  type: boolean
+                valid_till: &id293
+                  type: string
+                  format: date
+                quotation_number: &id294
+                  type: string
+                address_and_contact_tab: &id295
+                  type: string
+                terms_tab: &id296
+                  type: string
+                more_info_tab: &id297
+                  type: string
+                connections_tab: &id298
+                  type: string
+                column_break_26: &id299
+                  type: string
+                column_break_34: &id300
+                  type: string
+                column_break_85: &id301
+                  type: string
+                incoterm: &id302
+                  type: string
+                  x-frappe-target-doctype: Incoterm
+                named_place: &id303
+                  type: string
+                shipping_address: &id304
+                  type: string
+                  x-frappe-target-doctype: Address
+                column_break_zjaq: &id305
+                  type: string
+                shipping_address_section: &id306
+                  type: string
+                supplier_address_section: &id307
+                  type: string
+                company_billing_address_section: &id308
+                  type: string
+                billing_address: &id309
+                  type: string
+                  x-frappe-target-doctype: Address
+                column_break_gcth: &id310
+                  type: string
+                cost_center: &id311
+                  type: string
+                  x-frappe-target-doctype: Cost Center
+                project: &id312
+                  type: string
+                  x-frappe-target-doctype: Project
+                dimension_col_break: &id313
+                  type: string
+                accounting_dimensions_section: &id314
+                  type: string
+                has_unit_price_items: &id315
+                  type: boolean
+                  writeOnly: true
+                item_wise_tax_details: &id316
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ItemWiseTaxDetail'
+                  writeOnly: true
+                auto_repeat_section: &id317
+                  type: string
+              required:
+              - company
+              - conversion_rate
+              - currency
+              - items
+              - name
+              - naming_series
+              - supplier
+              - transaction_date
+              additionalProperties: true
+              x-module: Buying
+            example:
+              naming_series: ''
+              supplier: ''
+              transaction_date: ''
+              company: ''
+              currency: ''
+              conversion_rate: 0
+              items: []
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id027
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+  /api/v1/crm/supplier-quotations/{name}:
+    get:
+      tags:
+      - 'Module: Buying'
+      operationId: getSupplierQuotation
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id027
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    put:
+      tags:
+      - 'Module: Buying'
+      operationId: updateSupplierQuotation
+      parameters: &id029
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id028
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id027
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    delete:
+      tags:
+      - 'Module: Buying'
+      operationId: deleteSupplierQuotation
+      parameters: *id029
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+components:
+  securitySchemes:
+    frappeToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'Frappe token authentication: token api_key:api_secret'
+  parameters:
+    RequestId:
+      name: X-Request-Id
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: X-Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+  schemas:
+    AllowedToTransactWith:
+      type: object
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+      required:
+      - company
+      - name
+      additionalProperties: true
+      x-module: Accounts
+    CustomerNumberAtSupplier:
+      type: object
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        customer_number:
+          type: string
+      required:
+      - name
+      additionalProperties: true
+      x-module: Buying
+    ItemWiseTaxDetail:
+      type: object
+      properties:
+        name:
+          type: string
+        item_row:
+          type: string
+        tax_row:
+          type: string
+        rate:
+          type: number
+        amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+        taxable_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+      required:
+      - item_row
+      - name
+      - tax_row
+      additionalProperties: true
+      x-module: Accounts
+    PartyAccount:
+      type: object
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        account:
+          type: string
+          x-frappe-target-doctype: Account
+        advance_account:
+          type: string
+          x-frappe-target-doctype: Account
+      required:
+      - company
+      - name
+      additionalProperties: true
+      x-module: Accounts
+    PaymentSchedule:
+      type: object
+      properties:
+        name:
+          type: string
+        payment_term:
+          type: string
+          x-frappe-target-doctype: Payment Term
+        description:
+          type: string
+        due_date:
+          type: string
+          format: date
+        invoice_portion:
+          type: number
+        payment_amount:
+          type: number
+          x-frappe-options: currency
+        mode_of_payment:
+          type: string
+          x-frappe-target-doctype: Mode of Payment
+        paid_amount:
+          type: number
+          x-frappe-options: currency
+        column_break_3:
+          type: string
+        discounted_amount:
+          type: number
+          readOnly: true
+        outstanding:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        column_break_5:
+          type: string
+        discount_date:
+          type: string
+          format: date
+        discount_type:
+          type: string
+          enum:
+          - Percentage
+          - Amount
+        discount:
+          type: number
+        section_break_9:
+          type: string
+        section_break_15:
+          type: string
+        section_break_6:
+          type: string
+        column_break_9:
+          type: string
+        section_break_4:
+          type: string
+        base_payment_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+        base_outstanding:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_paid_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        due_date_based_on:
+          type: string
+          enum:
+          - Day(s) after invoice date
+          - Day(s) after the end of the invoice month
+          - Month(s) after the end of the invoice month
+          readOnly: true
+        credit_days:
+          type: integer
+          readOnly: true
+        credit_months:
+          type: integer
+          readOnly: true
+        discount_validity_based_on:
+          type: string
+          enum:
+          - Day(s) after invoice date
+          - Day(s) after the end of the invoice month
+          - Month(s) after the end of the invoice month
+          readOnly: true
+        discount_validity:
+          type: integer
+          readOnly: true
+      required:
+      - due_date
+      - name
+      - payment_amount
+      additionalProperties: true
+      x-module: Accounts
+    PortalUser:
+      type: object
+      properties:
+        name:
+          type: string
+        user:
+          type: string
+          x-frappe-target-doctype: User
+      required:
+      - name
+      - user
+      additionalProperties: true
+      x-module: Utilities
+    PricingRuleDetail:
+      type: object
+      properties:
+        name:
+          type: string
+        pricing_rule:
+          type: string
+          x-frappe-target-doctype: Pricing Rule
+          readOnly: true
+        item_code:
+          type: string
+          readOnly: true
+        margin_type:
+          type: string
+          readOnly: true
+          writeOnly: true
+        rate_or_discount:
+          type: string
+          readOnly: true
+          writeOnly: true
+        child_docname:
+          type: string
+          readOnly: true
+          writeOnly: true
+        rule_applied:
+          type: boolean
+          readOnly: true
+      required:
+      - name
+      additionalProperties: true
+      x-module: Accounts
+    PurchaseOrder:
+      type: object
+      properties:
+        name: *id030
+        supplier_section: *id031
+        naming_series: *id032
+        supplier: *id033
+        supplier_name:
+          type: string
+          readOnly: true
+        company: *id034
+        column_break1: *id035
+        transaction_date: *id036
+        schedule_date: *id037
+        order_confirmation_no: *id038
+        order_confirmation_date: *id039
+        amended_from:
+          type: string
+          x-frappe-target-doctype: Purchase Order
+          readOnly: true
+        drop_ship: *id040
+        customer:
+          type: string
+          x-frappe-target-doctype: Customer
+          readOnly: true
+        customer_name:
+          type: string
+          readOnly: true
+        column_break_19: *id041
+        customer_contact_person: *id042
+        customer_contact_display: *id043
+        customer_contact_mobile: *id044
+        customer_contact_email: *id045
+        section_addresses: *id046
+        supplier_address: *id047
+        contact_person: *id048
+        address_display:
+          type: string
+          readOnly: true
+        contact_display:
+          type: string
+          readOnly: true
+        contact_mobile:
+          type: string
+          x-frappe-options: Phone
+          readOnly: true
+        contact_email:
+          type: string
+          x-frappe-options: Email
+          readOnly: true
+        col_break_address: *id049
+        shipping_address: *id050
+        shipping_address_display:
+          type: string
+          readOnly: true
+        currency_and_price_list: *id051
+        currency: *id052
+        conversion_rate: *id053
+        cb_price_list: *id054
+        buying_price_list: *id055
+        price_list_currency:
+          type: string
+          x-frappe-target-doctype: Currency
+          readOnly: true
+        plc_conversion_rate: *id056
+        ignore_pricing_rule: *id057
+        set_warehouse: *id058
+        is_subcontracted: *id059
+        supplier_warehouse: *id060
+        items_section: *id061
+        scan_barcode: *id062
+        items: *id063
+        section_break_48: *id064
+        pricing_rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/PricingRuleDetail'
+          readOnly: true
+        raw_material_details: *id065
+        supplied_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseOrderItemSupplied'
+          readOnly: true
+        sb_last_purchase: *id066
+        total_qty:
+          type: number
+          readOnly: true
+        base_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_net_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_26: *id067
+        total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        net_total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        total_net_weight:
+          type: number
+          readOnly: true
+        taxes_section: *id068
+        taxes_and_charges: *id069
+        column_break_50: *id070
+        shipping_rule: *id071
+        section_break_52: *id072
+        taxes: *id073
+        sec_tax_breakup: *id074
+        other_charges_calculation:
+          type: string
+          readOnly: true
+        totals: *id075
+        base_taxes_and_charges_added:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_taxes_and_charges_deducted:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_total_taxes_and_charges:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_39: *id076
+        taxes_and_charges_added:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        taxes_and_charges_deducted:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        total_taxes_and_charges:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        discount_section: *id077
+        apply_discount_on: *id078
+        base_discount_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_45: *id079
+        additional_discount_percentage: *id080
+        discount_amount: *id081
+        totals_section: *id082
+        base_grand_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_rounding_adjustment:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_in_words:
+          type: string
+          readOnly: true
+        base_rounded_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break4: *id083
+        grand_total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        rounding_adjustment:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        rounded_total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        disable_rounded_total: *id084
+        in_words:
+          type: string
+          readOnly: true
+        advance_paid:
+          type: number
+          x-frappe-options: party_account_currency
+          readOnly: true
+        payment_schedule_section: *id085
+        payment_terms_template: *id086
+        payment_schedule: *id087
+        terms_section_break: *id088
+        tc_name: *id089
+        terms: *id090
+        status:
+          type: string
+          enum:
+          - Draft
+          - On Hold
+          - To Receive and Bill
+          - To Bill
+          - To Receive
+          - Completed
+          - Cancelled
+          - Closed
+          - Delivered
+          readOnly: true
+        ref_sq:
+          type: string
+          x-frappe-target-doctype: Supplier Quotation
+          readOnly: true
+        party_account_currency:
+          type: string
+          x-frappe-target-doctype: Currency
+          readOnly: true
+          writeOnly: true
+        inter_company_order_reference:
+          type: string
+          x-frappe-target-doctype: Sales Order
+          readOnly: true
+        column_break_74: *id091
+        per_received:
+          type: number
+          readOnly: true
+        per_billed:
+          type: number
+          readOnly: true
+        column_break5: *id092
+        letter_head: *id093
+        select_print_heading: *id094
+        column_break_86: *id095
+        group_same_items: *id096
+        language: *id097
+        from_date: *id098
+        to_date: *id099
+        column_break_97: *id100
+        auto_repeat:
+          type: string
+          x-frappe-target-doctype: Auto Repeat
+          readOnly: true
+        update_auto_repeat_reference: *id101
+        tax_category: *id102
+        set_reserve_warehouse: *id103
+        tracking_section: *id104
+        column_break_75: *id105
+        billing_address: *id106
+        billing_address_display:
+          type: string
+          readOnly: true
+        before_items_section: *id107
+        items_col_break: *id108
+        is_internal_supplier:
+          type: boolean
+          readOnly: true
+        represents_company:
+          type: string
+          x-frappe-target-doctype: Company
+          readOnly: true
+        accounting_dimensions_section: *id109
+        cost_center: *id110
+        dimension_col_break: *id111
+        project: *id112
+        is_old_subcontracting_flow:
+          type: boolean
+          readOnly: true
+          writeOnly: true
+        set_from_warehouse: *id113
+        terms_tab: *id114
+        more_info_tab: *id115
+        column_break_7: *id116
+        column_break_40: *id117
+        column_break_53: *id118
+        address_and_contact_tab: *id119
+        company_billing_address_section: *id120
+        additional_info_section: *id121
+        column_break_99: *id122
+        column_break_103: *id123
+        incoterm: *id124
+        named_place: *id125
+        shipping_address_section: *id126
+        connections_tab: *id127
+        advance_payment_status: *id128
+        has_unit_price_items: *id129
+        dispatch_address: *id130
+        dispatch_address_display:
+          type: string
+          readOnly: true
+        supplier_group: *id131
+        last_scanned_warehouse: *id132
+        mps:
+          type: string
+          x-frappe-target-doctype: Master Production Schedule
+          readOnly: true
+        item_wise_tax_details: *id133
+        column_break_jkoz: *id134
+        base_totals_section: *id135
+        section_break_tnkm: *id136
+        transaction_time: *id137
+        auto_repeat_section: *id138
+        title: *id139
+      required:
+      - company
+      - conversion_rate
+      - currency
+      - items
+      - name
+      - naming_series
+      - status
+      - supplier
+      - transaction_date
+      additionalProperties: true
+      x-module: Buying
+    PurchaseOrderItem:
+      type: object
+      properties:
+        name:
+          type: string
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
+        supplier_part_no:
+          type: string
+          readOnly: true
+          writeOnly: true
+        item_name:
+          type: string
+        column_break_4:
+          type: string
+        schedule_date:
+          type: string
+          format: date
+        expected_delivery_date:
+          type: string
+          format: date
+        section_break_5:
+          type: string
+        description:
+          type: string
+        col_break1:
+          type: string
+        image:
+          type: string
+          writeOnly: true
+        image_view:
+          type: string
+          x-frappe-options: image
+        quantity_and_rate:
+          type: string
+        qty:
+          type: number
+        stock_uom:
+          type: string
+          x-frappe-target-doctype: UOM
+          readOnly: true
+        col_break2:
+          type: string
+        uom:
+          type: string
+          x-frappe-target-doctype: UOM
+        conversion_factor:
+          type: number
+        sec_break1:
+          type: string
+        price_list_rate:
+          type: number
+          x-frappe-options: currency
+        discount_percentage:
+          type: number
+        discount_amount:
+          type: number
+          x-frappe-options: currency
+        col_break3:
+          type: string
+        last_purchase_rate:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        base_price_list_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        sec_break2:
+          type: string
+        rate:
+          type: number
+          x-frappe-options: currency
+        amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        col_break4:
+          type: string
+        base_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        pricing_rules:
+          type: string
+          readOnly: true
+          writeOnly: true
+        is_free_item:
+          type: boolean
+          readOnly: true
+        section_break_29:
+          type: string
+        net_rate:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        net_amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        column_break_32:
+          type: string
+        base_net_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_net_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        item_weight_details:
+          type: string
+        weight_per_unit:
+          type: number
+          readOnly: true
+        total_weight:
+          type: number
+          readOnly: true
+        column_break_40:
+          type: string
+        weight_uom:
+          type: string
+          x-frappe-target-doctype: UOM
+          readOnly: true
+        warehouse_and_reference:
+          type: string
+        warehouse:
+          type: string
+          x-frappe-target-doctype: Warehouse
+        project:
+          type: string
+          x-frappe-target-doctype: Project
+        material_request:
+          type: string
+          x-frappe-target-doctype: Material Request
+          readOnly: true
+        material_request_item:
+          type: string
+          readOnly: true
+          writeOnly: true
+        sales_order:
+          type: string
+          x-frappe-target-doctype: Sales Order
+        sales_order_item:
+          type: string
+          readOnly: true
+          writeOnly: true
+        supplier_quotation:
+          type: string
+          x-frappe-target-doctype: Supplier Quotation
+          readOnly: true
+        supplier_quotation_item:
+          type: string
+          x-frappe-target-doctype: Supplier Quotation Item
+          readOnly: true
+          writeOnly: true
+        delivered_by_supplier:
+          type: boolean
+          readOnly: true
+        blanket_order:
+          type: string
+          x-frappe-target-doctype: Blanket Order
+        blanket_order_rate:
+          type: number
+          readOnly: true
+        col_break5:
+          type: string
+        item_group:
+          type: string
+          x-frappe-target-doctype: Item Group
+          readOnly: true
+          writeOnly: true
+        brand:
+          type: string
+          x-frappe-target-doctype: Brand
+          readOnly: true
+          writeOnly: true
+        bom:
+          type: string
+          x-frappe-target-doctype: BOM
+          readOnly: true
+        include_exploded_items:
+          type: boolean
+        section_break_56:
+          type: string
+        stock_qty:
+          type: number
+          readOnly: true
+        received_qty:
+          type: number
+          readOnly: true
+        returned_qty:
+          type: number
+          readOnly: true
+        column_break_60:
+          type: string
+        billed_amt:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        item_tax_rate:
+          type: string
+          readOnly: true
+          writeOnly: true
+        accounting_details:
+          type: string
+        expense_account:
+          type: string
+          x-frappe-target-doctype: Account
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        page_break:
+          type: boolean
+        item_tax_template:
+          type: string
+          x-frappe-target-doctype: Item Tax Template
+        section_break_72:
+          type: string
+        accounting_dimensions_section:
+          type: string
+        dimension_col_break:
+          type: string
+        manufacture_details:
+          type: string
+        manufacturer:
+          type: string
+          x-frappe-target-doctype: Manufacturer
+        column_break_14:
+          type: string
+        manufacturer_part_no:
+          type: string
+        against_blanket_order:
+          type: boolean
+        is_fixed_asset:
+          type: boolean
+          readOnly: true
+        more_info_section_break:
+          type: string
+        stock_uom_rate:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        actual_qty:
+          type: number
+          readOnly: true
+        company_total_stock:
+          type: number
+          readOnly: true
+        discount_and_margin_section:
+          type: string
+        margin_type:
+          type: string
+          enum:
+          - Percentage
+          - Amount
+        margin_rate_or_amount:
+          type: number
+        rate_with_margin:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        column_break_28:
+          type: string
+        base_rate_with_margin:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        production_plan:
+          type: string
+          x-frappe-target-doctype: Production Plan
+          readOnly: true
+        production_plan_item:
+          type: string
+          readOnly: true
+          writeOnly: true
+        production_plan_sub_assembly_item:
+          type: string
+          readOnly: true
+          writeOnly: true
+        product_bundle:
+          type: string
+          x-frappe-target-doctype: Product Bundle
+          readOnly: true
+        sales_order_packed_item:
+          type: string
+        fg_item:
+          type: string
+          x-frappe-target-doctype: Item
+        fg_item_qty:
+          type: number
+        from_warehouse:
+          type: string
+          x-frappe-target-doctype: Warehouse
+        references_section:
+          type: string
+        column_break_54:
+          type: string
+        wip_composite_asset:
+          type: string
+          x-frappe-target-doctype: Asset
+        column_break_fyqr:
+          type: string
+        column_break_pjyo:
+          type: string
+        job_card:
+          type: string
+          x-frappe-target-doctype: Job Card
+          readOnly: true
+        distributed_discount_amount:
+          type: number
+          x-frappe-options: currency
+        subcontracted_qty:
+          type: number
+          readOnly: true
+      required:
+      - base_amount
+      - base_rate
+      - conversion_factor
+      - item_code
+      - item_name
+      - name
+      - qty
+      - schedule_date
+      - stock_uom
+      - uom
+      additionalProperties: true
+      x-module: Buying
+    PurchaseOrderItemSupplied:
+      type: object
+      properties:
+        name:
+          type: string
+        main_item_code:
+          type: string
+          x-frappe-target-doctype: Item
+          readOnly: true
+        rm_item_code:
+          type: string
+          x-frappe-target-doctype: Item
+          readOnly: true
+        required_qty:
+          type: number
+          readOnly: true
+        rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+        amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_6:
+          type: string
+        bom_detail_no:
+          type: string
+          readOnly: true
+        reference_name:
+          type: string
+          readOnly: true
+        conversion_factor:
+          type: number
+          readOnly: true
+          writeOnly: true
+        stock_uom:
+          type: string
+          x-frappe-target-doctype: UOM
+          readOnly: true
+        reserve_warehouse:
+          type: string
+          x-frappe-target-doctype: Warehouse
+        supplied_qty:
+          type: number
+          readOnly: true
+        section_break1:
+          type: string
+        col_break1:
+          type: string
+        section_break2:
+          type: string
+        col_break2:
+          type: string
+        consumed_qty:
+          type: number
+          readOnly: true
+        returned_qty:
+          type: number
+          readOnly: true
+        total_supplied_qty:
+          type: number
+          readOnly: true
+          writeOnly: true
+        column_break_3:
+          type: string
+      required:
+      - name
+      additionalProperties: true
+      x-module: Buying
+    PurchaseTaxesandCharges:
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+          enum:
+          - Valuation and Total
+          - Valuation
+          - Total
+        add_deduct_tax:
+          type: string
+          enum:
+          - Add
+          - Deduct
+        charge_type:
+          type: string
+          enum:
+          - Actual
+          - On Net Total
+          - On Previous Row Amount
+          - On Previous Row Total
+          - On Item Quantity
+        row_id:
+          type: string
+        allocate_full_amount_to_stock_items:
+          type: boolean
+        included_in_print_rate:
+          type: boolean
+        col_break1:
+          type: string
+        account_head:
+          type: string
+          x-frappe-target-doctype: Account
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        description:
+          type: string
+        section_break_10:
+          type: string
+        rate:
+          type: number
+        section_break_9:
+          type: string
+        tax_amount:
+          type: number
+          x-frappe-options: currency
+        tax_amount_after_discount_amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        column_break_14:
+          type: string
+        base_tax_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          writeOnly: true
+        base_tax_amount_after_discount_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        accounting_dimensions_section:
+          type: string
+        dimension_col_break:
+          type: string
+        project:
+          type: string
+          x-frappe-target-doctype: Project
+        included_in_paid_amount:
+          type: boolean
+        account_currency:
+          type: string
+          x-frappe-target-doctype: Currency
+          readOnly: true
+        is_tax_withholding_account:
+          type: boolean
+          readOnly: true
+        net_amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        base_net_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        set_by_item_tax_template:
+          type: boolean
+          readOnly: true
+          writeOnly: true
+        dont_recompute_tax:
+          type: boolean
+          readOnly: true
+          writeOnly: true
+        section_break_mvae:
+          type: string
+        column_break_odzz:
+          type: string
+      required:
+      - account_head
+      - add_deduct_tax
+      - category
+      - charge_type
+      - description
+      - name
+      additionalProperties: true
+      x-module: Accounts
+    RequestforQuotation:
+      type: object
+      properties:
+        name: *id140
+        naming_series: *id141
+        company: *id142
+        vendor:
+          type: string
+          x-frappe-target-doctype: Supplier
+          readOnly: true
+          writeOnly: true
+        column_break1: *id143
+        transaction_date: *id144
+        suppliers_section: *id145
+        suppliers: *id146
+        items_section: *id147
+        items: *id148
+        supplier_response_section: *id149
+        email_template: *id150
+        message_for_supplier: *id151
+        terms_section_break: *id152
+        tc_name: *id153
+        terms: *id154
+        printing_settings: *id155
+        select_print_heading: *id156
+        letter_head: *id157
+        more_info: *id158
+        opportunity:
+          type: string
+          x-frappe-target-doctype: Opportunity
+          readOnly: true
+        status:
+          type: string
+          enum:
+          - Draft
+          - Submitted
+          - Cancelled
+          readOnly: true
+        amended_from:
+          type: string
+          x-frappe-target-doctype: Request for Quotation
+          readOnly: true
+        col_break_email_1: *id159
+        preview: *id160
+        sec_break_email_2: *id161
+        schedule_date: *id162
+        incoterm: *id163
+        named_place: *id164
+        html_llwp:
+          type: string
+          x-frappe-options: "<p>In your <b>Email Template</b>, you can use the following\
+            \ special variables:\n</p>\n<ul>\n        <li>\n            <code>{{ update_password_link\
+            \ }}</code>: A link where your supplier can set a new password to log\
+            \ into your portal.\n        </li>\n        <li>\n            <code>{{\
+            \ portal_link }}</code>: A link to this RFQ in your supplier portal.\n\
+            \        </li>\n        <li>\n            <code>{{ supplier_name }}</code>:\
+            \ The company name of your supplier.\n        </li>\n        <li>\n  \
+            \          <code>{{ contact.salutation }} {{ contact.last_name }}</code>:\
+            \ The contact person of your supplier.\n        </li><li>\n          \
+            \  <code>{{ user_fullname }}</code>: Your full name.\n        </li>\n\
+            \    </ul>\n<p></p>\n<p>Apart from these, you can access all values in\
+            \ this RFQ, like <code>{{ message_for_supplier }}</code> or <code>{{ terms\
+            \ }}</code>.</p>"
+          readOnly: true
+        send_attached_files: *id165
+        send_document_print: *id166
+        billing_address: *id167
+        billing_address_display:
+          type: string
+          readOnly: true
+        has_unit_price_items: *id168
+        subject: *id169
+        mfs_html: *id170
+        use_html: *id171
+        address_and_contact_tab: *id172
+        column_break_czul: *id173
+        shipping_address: *id174
+        shipping_address_display:
+          type: string
+          readOnly: true
+        title: *id175
+      required:
+      - company
+      - items
+      - name
+      - naming_series
+      - status
+      - subject
+      - suppliers
+      - transaction_date
+      additionalProperties: true
+      x-module: Buying
+    RequestforQuotationItem:
+      type: object
+      properties:
+        name:
+          type: string
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
+        supplier_part_no:
+          type: string
+          readOnly: true
+          writeOnly: true
+        column_break_3:
+          type: string
+        item_name:
+          type: string
+        section_break_5:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+          writeOnly: true
+        image_view:
+          type: string
+          x-frappe-options: image
+        quantity:
+          type: string
+        qty:
+          type: number
+        col_break2:
+          type: string
+        schedule_date:
+          type: string
+          format: date
+        uom:
+          type: string
+          x-frappe-target-doctype: UOM
+        warehouse_and_reference:
+          type: string
+        warehouse:
+          type: string
+          x-frappe-target-doctype: Warehouse
+        project_name:
+          type: string
+          x-frappe-target-doctype: Project
+        material_request:
+          type: string
+          x-frappe-target-doctype: Material Request
+          readOnly: true
+        col_break4:
+          type: string
+        material_request_item:
+          type: string
+          writeOnly: true
+        brand:
+          type: string
+          x-frappe-target-doctype: Brand
+          readOnly: true
+        item_group:
+          type: string
+          x-frappe-target-doctype: Item Group
+          readOnly: true
+        page_break:
+          type: boolean
+        image_section:
+          type: string
+        section_break_23:
+          type: string
+        stock_uom:
+          type: string
+          x-frappe-target-doctype: UOM
+          readOnly: true
+        conversion_factor:
+          type: number
+          readOnly: true
+        stock_qty:
+          type: number
+          readOnly: true
+        section_break_24:
+          type: string
+      required:
+      - conversion_factor
+      - item_code
+      - name
+      - qty
+      - schedule_date
+      - stock_uom
+      - uom
+      additionalProperties: true
+      x-module: Buying
+    RequestforQuotationSupplier:
+      type: object
+      properties:
+        name:
+          type: string
+        send_email:
+          type: boolean
+        email_sent:
+          type: boolean
+          readOnly: true
+        supplier:
+          type: string
+          x-frappe-target-doctype: Supplier
+        contact:
+          type: string
+          x-frappe-target-doctype: Contact
+        quote_status:
+          type: string
+          enum:
+          - Pending
+          - Received
+          readOnly: true
+        column_break_3:
+          type: string
+        supplier_name:
+          type: string
+        email_id:
+          type: string
+      required:
+      - name
+      - supplier
+      additionalProperties: true
+      x-module: Buying
+    Supplier:
+      type: object
+      properties:
+        name: *id176
+        naming_series: *id177
+        supplier_name: *id178
+        alias: *id179
+        country: *id180
+        default_bank_account: *id181
+        tax_id: *id182
+        tax_category: *id183
+        tax_withholding_category: *id184
+        is_transporter: *id185
+        is_internal_supplier: *id186
+        represents_company: *id187
+        image: *id188
+        column_break0: *id189
+        supplier_group: *id190
+        supplier_type: *id191
+        language: *id192
+        disabled: *id193
+        warn_rfqs:
+          type: boolean
+          readOnly: true
+          writeOnly: true
+        warn_pos:
+          type: boolean
+          readOnly: true
+          writeOnly: true
+        prevent_rfqs:
+          type: boolean
+          readOnly: true
+          writeOnly: true
+        prevent_pos:
+          type: boolean
+          readOnly: true
+          writeOnly: true
+        companies: *id194
+        default_currency: *id195
+        column_break_10: *id196
+        default_price_list: *id197
+        payment_terms: *id198
+        on_hold: *id199
+        hold_type: *id200
+        release_date: *id201
+        address_contacts: *id202
+        address_html:
+          type: string
+          readOnly: true
+        column_break1: *id203
+        contact_html:
+          type: string
+          readOnly: true
+        accounts: *id204
+        column_break2: *id205
+        website: *id206
+        supplier_details: *id207
+        column_break_30: *id208
+        is_frozen: *id209
+        allow_purchase_invoice_creation_without_purchase_order: *id210
+        allow_purchase_invoice_creation_without_purchase_receipt: *id211
+        primary_address_and_contact_detail_section: *id212
+        supplier_primary_contact: *id213
+        mobile_no: *id214
+        email_id: *id215
+        primary_address:
+          type: string
+          readOnly: true
+        supplier_primary_address: *id216
+        dashboard_tab: *id217
+        settings_tab: *id218
+        contact_and_address_tab: *id219
+        accounting_tab: *id220
+        defaults_section: *id221
+        tax_tab: *id222
+        internal_supplier_section: *id223
+        column_break_16: *id224
+        column_break_27: *id225
+        column_break_54: *id226
+        block_supplier_section: *id227
+        default_accounts_section: *id228
+        portal_users_tab: *id229
+        portal_users: *id230
+        column_break_mglr: *id231
+        customer_numbers: *id232
+        tax_withholding_group: *id233
+        gender: *id234
+        rfq_and_purchase_order_settings_section: *id235
+        column_break_oxjw: *id236
+        taxation_section: *id237
+        invoice_settings_section: *id238
+        more_info_tab: *id239
+        section_break_jqla: *id240
+        section_break_pgad: *id241
+      required:
+      - name
+      - supplier_name
+      - supplier_type
+      additionalProperties: true
+      x-module: Buying
+    SupplierQuotation:
+      type: object
+      properties:
+        name: *id242
+        supplier_section: *id243
+        title: *id244
+        naming_series: *id245
+        supplier: *id246
+        supplier_name:
+          type: string
+          readOnly: true
+        column_break1: *id247
+        transaction_date: *id248
+        amended_from:
+          type: string
+          x-frappe-target-doctype: Supplier Quotation
+          readOnly: true
+          writeOnly: true
+        company: *id249
+        supplier_address: *id250
+        contact_person: *id251
+        address_display:
+          type: string
+          readOnly: true
+        contact_display:
+          type: string
+          readOnly: true
+        contact_mobile:
+          type: string
+          x-frappe-options: Phone
+          readOnly: true
+        contact_email:
+          type: string
+          x-frappe-options: Email
+          readOnly: true
+        currency_and_price_list: *id252
+        currency: *id253
+        conversion_rate: *id254
+        cb_price_list: *id255
+        buying_price_list: *id256
+        price_list_currency:
+          type: string
+          x-frappe-target-doctype: Currency
+          readOnly: true
+        plc_conversion_rate: *id257
+        ignore_pricing_rule: *id258
+        items_section: *id259
+        items: *id260
+        pricing_rule_details: *id261
+        pricing_rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/PricingRuleDetail'
+          readOnly: true
+        section_break_22: *id262
+        total_qty:
+          type: number
+          readOnly: true
+        base_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_net_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_24: *id263
+        total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        net_total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        total_net_weight:
+          type: number
+          readOnly: true
+        taxes_section: *id264
+        tax_category: *id265
+        column_break_36: *id266
+        shipping_rule: *id267
+        section_break_38: *id268
+        taxes_and_charges: *id269
+        taxes: *id270
+        tax_breakup: *id271
+        other_charges_calculation:
+          type: string
+          readOnly: true
+        totals: *id272
+        base_taxes_and_charges_added:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_taxes_and_charges_deducted:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_total_taxes_and_charges:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_37: *id273
+        taxes_and_charges_added:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        taxes_and_charges_deducted:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        total_taxes_and_charges:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        section_break_41: *id274
+        apply_discount_on: *id275
+        base_discount_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_43: *id276
+        additional_discount_percentage: *id277
+        discount_amount: *id278
+        section_break_46: *id279
+        base_grand_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_rounding_adjustment:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_in_words:
+          type: string
+          readOnly: true
+        base_rounded_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break4: *id280
+        grand_total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        rounding_adjustment:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        rounded_total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        in_words:
+          type: string
+          readOnly: true
+        disable_rounded_total: *id281
+        tc_name: *id282
+        terms: *id283
+        printing_settings: *id284
+        select_print_heading: *id285
+        group_same_items: *id286
+        column_break_72: *id287
+        letter_head: *id288
+        language:
+          type: string
+          readOnly: true
+        auto_repeat:
+          type: string
+          x-frappe-target-doctype: Auto Repeat
+          readOnly: true
+        update_auto_repeat_reference: *id289
+        more_info: *id290
+        status:
+          type: string
+          enum:
+          - Draft
+          - Submitted
+          - Stopped
+          - Cancelled
+          - Expired
+          readOnly: true
+        column_break_57: *id291
+        is_subcontracted: *id292
+        opportunity:
+          type: string
+          x-frappe-target-doctype: Opportunity
+          readOnly: true
+        valid_till: *id293
+        quotation_number: *id294
+        address_and_contact_tab: *id295
+        terms_tab: *id296
+        more_info_tab: *id297
+        connections_tab: *id298
+        column_break_26: *id299
+        column_break_34: *id300
+        column_break_85: *id301
+        incoterm: *id302
+        named_place: *id303
+        shipping_address: *id304
+        column_break_zjaq: *id305
+        shipping_address_display:
+          type: string
+          readOnly: true
+        shipping_address_section: *id306
+        supplier_address_section: *id307
+        company_billing_address_section: *id308
+        billing_address: *id309
+        column_break_gcth: *id310
+        billing_address_display:
+          type: string
+          readOnly: true
+        cost_center: *id311
+        project: *id312
+        dimension_col_break: *id313
+        accounting_dimensions_section: *id314
+        has_unit_price_items: *id315
+        item_wise_tax_details: *id316
+        auto_repeat_section: *id317
+      required:
+      - company
+      - conversion_rate
+      - currency
+      - items
+      - name
+      - naming_series
+      - status
+      - supplier
+      - transaction_date
+      additionalProperties: true
+      x-module: Buying
+    SupplierQuotationItem:
+      type: object
+      properties:
+        name:
+          type: string
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
+        supplier_part_no:
+          type: string
+          readOnly: true
+          writeOnly: true
+        item_name:
+          type: string
+        column_break_3:
+          type: string
+        lead_time_days:
+          type: integer
+        section_break_5:
+          type: string
+        description:
+          type: string
+        col_break1:
+          type: string
+        image:
+          type: string
+          writeOnly: true
+        image_view:
+          type: string
+          x-frappe-options: image
+        quantity_and_rate:
+          type: string
+        qty:
+          type: number
+        stock_uom:
+          type: string
+          x-frappe-target-doctype: UOM
+          readOnly: true
+        price_list_rate:
+          type: number
+          x-frappe-options: currency
+        discount_percentage:
+          type: number
+        discount_amount:
+          type: number
+          x-frappe-options: currency
+        col_break2:
+          type: string
+        uom:
+          type: string
+          x-frappe-target-doctype: UOM
+        conversion_factor:
+          type: number
+          readOnly: true
+        stock_qty:
+          type: number
+          readOnly: true
+        base_price_list_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        sec_break1:
+          type: string
+        rate:
+          type: number
+          x-frappe-options: currency
+        amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        col_break3:
+          type: string
+        base_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        pricing_rules:
+          type: string
+          readOnly: true
+          writeOnly: true
+        section_break_24:
+          type: string
+        net_rate:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        net_amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        column_break_27:
+          type: string
+        base_net_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_net_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        item_weight_details:
+          type: string
+        weight_per_unit:
+          type: number
+          readOnly: true
+        total_weight:
+          type: number
+          readOnly: true
+        column_break_23:
+          type: string
+        weight_uom:
+          type: string
+          x-frappe-target-doctype: UOM
+          readOnly: true
+        warehouse_and_reference:
+          type: string
+        warehouse:
+          type: string
+          x-frappe-target-doctype: Warehouse
+        project:
+          type: string
+          x-frappe-target-doctype: Project
+        prevdoc_doctype:
+          type: string
+          readOnly: true
+          writeOnly: true
+        material_request:
+          type: string
+          x-frappe-target-doctype: Material Request
+          readOnly: true
+        sales_order:
+          type: string
+          x-frappe-target-doctype: Sales Order
+          readOnly: true
+        request_for_quotation:
+          type: string
+          x-frappe-target-doctype: Request for Quotation
+          readOnly: true
+        col_break4:
+          type: string
+        item_tax_template:
+          type: string
+          x-frappe-target-doctype: Item Tax Template
+        material_request_item:
+          type: string
+          readOnly: true
+          writeOnly: true
+        request_for_quotation_item:
+          type: string
+          readOnly: true
+          writeOnly: true
+        brand:
+          type: string
+          x-frappe-target-doctype: Brand
+          readOnly: true
+        item_group:
+          type: string
+          x-frappe-target-doctype: Item Group
+          readOnly: true
+        item_tax_rate:
+          type: string
+          readOnly: true
+          writeOnly: true
+        section_break_44:
+          type: string
+        page_break:
+          type: boolean
+        manufacture_details:
+          type: string
+        manufacturer:
+          type: string
+          x-frappe-target-doctype: Manufacturer
+        manufacturer_part_no:
+          type: string
+        column_break_15:
+          type: string
+        sec_break_price_list:
+          type: string
+        ad_sec_break:
+          type: string
+        is_free_item:
+          type: boolean
+          readOnly: true
+        expected_delivery_date:
+          type: string
+          format: date
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        dimension_col_break:
+          type: string
+        distributed_discount_amount:
+          type: number
+          x-frappe-options: currency
+        margin_type:
+          type: string
+          enum:
+          - Percentage
+          - Amount
+        margin_rate_or_amount:
+          type: number
+        discount_and_margin_section:
+          type: string
+        rate_with_margin:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        col_break_6:
+          type: string
+      required:
+      - base_amount
+      - base_rate
+      - conversion_factor
+      - item_code
+      - name
+      - qty
+      - stock_uom
+      - uom
+      additionalProperties: true
+      x-module: Buying
+    FrappeResponse:
+      type: object
+      properties:
+        message: {}
+      required:
+      - message
+    FrappeError:
+      type: object
+      properties:
+        exc_type:
+          type: string
+        exception:
+          type: string
+        _server_messages:
+          type: string
+        request_id:
+          type: string
+    ResourceListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        message: {}
+    FileUploadResponse:
+      type: object
+      properties:
+        file_url:
+          type: string
+        file_name:
+          type: string
+        message: {}
+    PageInfo:
+      type: object
+      properties:
+        limit_start:
+          type: integer
+        limit_page_length:
+          type: integer
+    RuntimeStatus:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        status:
+          type: string
+        version:
+          type: integer
+        erpnext_version:
+          type: string
+        sha256:
+          type: string
+        drift_count:
+          type: integer
+      required:
+      - ok
+    HealthResponse:
+      type: object
+      properties:
+        message:
+          type: object
+          properties:
+            ok:
+              type: boolean
+            app:
+              type: string
+            site:
+              type: string
+            frappe_version:
+              type:
+              - string
+              - 'null'
+            installed_apps:
+              type: array
+              items:
+                type: string
+            bootstrap:
+              $ref: '#/components/schemas/RuntimeStatus'
+            config:
+              $ref: '#/components/schemas/RuntimeStatus'
+            policy:
+              $ref: '#/components/schemas/RuntimeStatus'
+            configuration_bundle:
+              $ref: '#/components/schemas/RuntimeStatus'
+          required:
+          - ok
+          - app
+          - bootstrap
+          - config
+          - policy
+          - configuration_bundle
+      required:
+      - message
+    BankTransactionAllocation:
+      type: object
+      properties:
+        payment_document:
+          type: string
+          enum:
+          - Payment Entry
+          - Journal Entry
+        payment_entry:
+          type: string
+        allocated_amount:
+          type: number
+          minimum: 0
+      required:
+      - payment_document
+      - payment_entry
+      additionalProperties: false
+    BankTransactionReconcileRequest:
+      type: object
+      properties:
+        allocations:
+          type: array
+          items:
+            $ref: '#/components/schemas/BankTransactionAllocation'
+          minItems: 1
+      required:
+      - allocations
+      additionalProperties: false
+x-contract:
+  runtime:
+    source_of_truth: erpnext
+    api_style: frappe-native
+    openapi_version: 3.1.0
+    server_url: http://127.0.0.1:8080
+    group_by: module
+    public_module_routes: true
+    include_whitelisted_methods: true
+    include_doctype_metadata: false
+    typed_doctypes:
+    - Allowed To Transact With
+    - Customer Number At Supplier
+    - Item Wise Tax Detail
+    - Party Account
+    - Payment Schedule
+    - Portal User
+    - Pricing Rule Detail
+    - Purchase Order
+    - Purchase Order Item
+    - Purchase Order Item Supplied
+    - Purchase Taxes and Charges
+    - Request for Quotation
+    - Request for Quotation Item
+    - Request for Quotation Supplier
+    - Supplier
+    - Supplier Quotation
+    - Supplier Quotation Item
+    typed_modules:
+    - Accounts
+    - Assets
+    - Automation
+    - Bulk Transaction
+    - Buying
+    - CRM
+    - Communication
+    - Contacts
+    - Core
+    - Custom
+    - Desk
+    - EDI
+    - ERPNext Integrations
+    - Email
+    - Geo
+    - Integrations
+    - Maintenance
+    - Manufacturing
+    - Printing
+    - Projects
+    - Quality Management
+    - Regional
+    - Selling
+    - Setup
+    - Stock
+    - Subcontracting
+    - Support
+    - Telephony
+    - Utilities
+    - Website
+    - Workflow
+    public_modules:
+    - Accounts
+    - Buying
+    - CRM
+    - Contacts
+    - Selling
+    - Stock
+    document_actions:
+    - doctype: Sales Invoice
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Purchase Invoice
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Sales Order
+      module: Selling
+      actions:
+      - submit
+      - cancel
+    - doctype: Purchase Order
+      module: Buying
+      actions:
+      - submit
+      - cancel
+    - doctype: Material Request
+      module: Stock
+      actions:
+      - submit
+      - cancel
+    - doctype: Purchase Receipt
+      module: Stock
+      actions:
+      - submit
+      - cancel
+    - doctype: Stock Entry
+      module: Stock
+      actions:
+      - submit
+      - cancel
+    - doctype: Journal Entry
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Payment Request
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Payment Order
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Payment Entry
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Bank Transaction
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    custom_actions:
+    - doctype: Bank Transaction
+      module: Accounts
+      action: reconcile
+      operation_id: reconcileBankTransaction
+      path_suffix: reconcile
+      handler: letron_api.accounts_reconciliation.reconcile_bank_transaction
+    - doctype: Bank Transaction
+      module: Accounts
+      action: unreconcile
+      operation_id: unreconcileBankTransaction
+      path_suffix: unreconcile
+      handler: letron_api.accounts_reconciliation.unreconcile_bank_transaction
+    include_methods:
+    - letron_api.api.health
+    - letron_api.api.runtime_info
+    - letron_api.api.runtime_snapshot
+    public_resources:
+    - doctype: Lead
+      path: /api/v1/crm/leads
+    - doctype: Opportunity
+      path: /api/v1/crm/opportunities
+    - doctype: Request for Quotation
+      path: /api/v1/crm/request-for-quotations
+    - doctype: Supplier Quotation
+      path: /api/v1/crm/supplier-quotations
+    - doctype: Customer
+      path: /api/v1/selling/customers
+    - doctype: Quotation
+      path: /api/v1/selling/quotations
+    - doctype: Sales Order
+      path: /api/v1/selling/sales-orders
+    - doctype: Delivery Note
+      path: /api/v1/selling/delivery-notes
+    - doctype: Sales Invoice
+      path: /api/v1/accounts/sales-invoices
+    - doctype: Purchase Invoice
+      path: /api/v1/accounts/purchase-invoices
+    - doctype: Payment Entry
+      path: /api/v1/accounts/payment-entries
+    - doctype: Bank
+      path: /api/v1/accounts/banks
+    - doctype: Bank Account
+      path: /api/v1/accounts/bank-accounts
+    - doctype: Mode of Payment
+      path: /api/v1/accounts/modes-of-payment
+    - doctype: Cost Center
+      path: /api/v1/accounts/cost-centers
+    - doctype: Journal Entry
+      path: /api/v1/accounts/journal-entries
+    - doctype: Payment Request
+      path: /api/v1/accounts/payment-requests
+    - doctype: Bank Transaction
+      path: /api/v1/accounts/bank-transactions
+    - doctype: Payment Order
+      path: /api/v1/accounts/payment-orders
+    - doctype: Supplier
+      path: /api/v1/buying/suppliers
+    - doctype: Purchase Order
+      path: /api/v1/buying/purchase-orders
+    - doctype: Item
+      path: /api/v1/stock/items
+    - doctype: Warehouse
+      path: /api/v1/stock/warehouses
+    - doctype: Address
+      path: /api/v1/contacts/addresses
+    - doctype: Contact
+      path: /api/v1/contacts/contacts
+    - doctype: Material Request
+      path: /api/v1/stock/material-requests
+    - doctype: Purchase Receipt
+      path: /api/v1/stock/purchase-receipts
+    - doctype: Stock Entry
+      path: /api/v1/stock/stock-entries
+    - doctype: Item Price
+      path: /api/v1/stock/item-prices
+    - doctype: Stock Reconciliation
+      path: /api/v1/stock/stock-reconciliations
+    - doctype: Serial No
+      path: /api/v1/stock/serial-nos
+    - doctype: Batch
+      path: /api/v1/stock/batches
+    - doctype: Quality Inspection
+      path: /api/v1/stock/quality-inspections
+    - doctype: Pick List
+      path: /api/v1/stock/pick-lists
+    - doctype: Shipment
+      path: /api/v1/stock/shipments
+    - doctype: Landed Cost Voucher
+      path: /api/v1/stock/landed-cost-vouchers
+    - doctype: Stock Reservation Entry
+      path: /api/v1/stock/stock-reservation-entries
+  transport:
+    rest: true
+    webhook: true
+    realtime: true
+  headers:
+    request_id: X-Request-Id
+    idempotency_key: X-Idempotency-Key
+x-capabilities:
+  webhook:
+    declared: true
+    delivery_implemented: true
+    delivery: durable-outbox
+    signature: hmac-sha256
+    max_attempts: 3
+  realtime:
+    declared: true
+    delivery_implemented: true
+    delivery: durable-outbox
+    source_of_truth: false
+x-acceptance-summary:
+  passed: 22
+  partial: 0
+  not-tested: 0
+  blocked: 0
+x-module: Buying
+x-module-index:
+  Accounts:
+  - Allowed To Transact With
+  - Item Wise Tax Detail
+  - Party Account
+  - Payment Schedule
+  - Pricing Rule Detail
+  - Purchase Taxes and Charges
+  Buying:
+  - Customer Number At Supplier
+  - Purchase Order
+  - Purchase Order Item
+  - Purchase Order Item Supplied
+  - Request for Quotation
+  - Request for Quotation Item
+  - Request for Quotation Supplier
+  - Supplier
+  - Supplier Quotation
+  - Supplier Quotation Item
+  Utilities:
+  - Portal User

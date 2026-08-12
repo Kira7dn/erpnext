@@ -168,10 +168,21 @@ def _value_at(data: Mapping[str, Any], dotted: str) -> Any:
 
 
 def _dotenv_path(source: Path) -> Path:
+    candidates = (".env.local", ".env")
     if os.environ.get("LETRON_ACCEPTANCE") == "1":
-        return workspace_root() / ".env"
+        root = workspace_root()
+        for name in candidates:
+            candidate = root / name
+            if candidate.is_file():
+                return candidate
+        return root / ".env"
     parent = source.parent
-    return parent.parent / ".env" if parent.name == "config" else parent / ".env"
+    root = parent.parent if parent.name == "config" else parent
+    for name in candidates:
+        candidate = root / name
+        if candidate.is_file():
+            return candidate
+    return root / ".env"
 
 
 def _load_dotenv(source: Path) -> None:

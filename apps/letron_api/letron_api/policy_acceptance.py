@@ -10,6 +10,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
+FIXTURE_PREFIX = "acceptance-local-phase8-"
+
 CONTROLLER_EFFECT_ASSERTIONS = {
     "Payment Terms Template": "probe_payment_terms_effect",
     "Pricing Rule": "probe_pricing_shipping_effects",
@@ -111,7 +113,7 @@ DOCUMENT_UPDATE_FIELDS: dict[str, str | None] = {
 
 
 def _fixture_name(doctype: str) -> str:
-    return f"acceptance-local-phase8-{doctype.lower().replace(' ', '-')}"
+    return f"{FIXTURE_PREFIX}{doctype.lower().replace(' ', '-')}"
 
 
 DOCUMENT_BUILDERS: dict[str, dict[str, Any]] = {
@@ -459,6 +461,39 @@ def resolve_builder(builder_id: str) -> tuple[str, str]:
     if kind == "native-document" and doctype in DOCUMENT_BUILDERS:
         return kind, doctype
     raise KeyError(builder_id)
+
+
+def resolve_controller_effect_assertion(
+    assertion_id: str,
+) -> tuple[str, dict[str, Any]]:
+    """Resolve every machine-readable assertion label to executable work."""
+
+    prefix, separator, doctype = assertion_id.partition(":")
+    if prefix != "native-controller" or not separator:
+        raise KeyError(assertion_id)
+    resolve_builder(
+        f"native-single:{doctype}"
+        if doctype in SINGLE_BUILDERS
+        else f"native-document:{doctype}"
+    )
+    method = CONTROLLER_EFFECT_ASSERTIONS.get(doctype)
+    if method == "probe_tax_effect_rate":
+        return method, {"rate": 10}
+    if method == "probe_cross_cutting_effects":
+        effects = {
+            "Document Naming Rule": "naming",
+            "Print Format": "render",
+            "Letter Head": "render",
+            "Email Template": "render",
+            "Notification": "notification_assignment",
+            "Assignment Rule": "notification_assignment",
+            "Workflow": "workflow_permission",
+            "Custom DocPerm": "workflow_permission",
+        }
+        return method, {"effect": effects[doctype]}
+    if method:
+        return method, {}
+    return "probe_registry_source", {"doctype": doctype}
 
 
 def fixture_fields(doctype: str, prerequisites: Mapping[str, str]) -> dict[str, Any]:
@@ -1038,14 +1073,11 @@ def _unlink_fixture_workflow_state() -> None:
 
     import frappe
 
-    fixture_state = _fixture_name("Workflow State")
     if frappe.db.has_column("Quotation", "workflow_state"):
-        frappe.db.set_value(
-            "Quotation",
-            {"workflow_state": fixture_state},
-            "workflow_state",
-            None,
-            update_modified=False,
+        frappe.db.sql(
+            """update tabQuotation set workflow_state=null
+            where workflow_state like %s""",
+            (f"{FIXTURE_PREFIX}%",),
         )
 
 
@@ -1134,6 +1166,38 @@ def cleanup_registry_residue() -> dict[str, Any]:
     deleted: list[str] = []
     try:
         _unlink_fixture_workflow_state()
+        quotation_names = frappe.get_all(
+            "Quotation",
+            filters={"party_name": ["like", f"{FIXTURE_PREFIX}%"]},
+            pluck="name",
+            limit_page_length=0,
+        )
+        for doctype, fieldname in [
+            ("Notification Log", "document_name"),
+            ("ToDo", "reference_name"),
+        ]:
+            for quotation_name in quotation_names:
+                for name in frappe.get_all(
+                    doctype,
+                    filters={fieldname: quotation_name},
+                    pluck="name",
+                    limit_page_length=0,
+                ):
+                    frappe.delete_doc(
+                        doctype, name, ignore_permissions=True, force=True
+                    )
+                    deleted.append(f"{doctype}/{name}")
+        for name in quotation_names:
+            frappe.delete_doc("Quotation", name, ignore_permissions=True, force=True)
+            deleted.append(f"Quotation/{name}")
+        for name in frappe.get_all(
+            "User",
+            filters={"name": ["like", "phase8-%@example.invalid"]},
+            pluck="name",
+            limit_page_length=0,
+        ):
+            frappe.delete_doc("User", name, ignore_permissions=True, force=True)
+            deleted.append(f"User/{name}")
         explicit: list[tuple[str, str]] = [
             ("Inventory Dimension", "Acceptance Inventory Dimension"),
             ("Accounting Dimension", "Acceptance Dimension"),
@@ -1195,6 +1259,39 @@ def cleanup_registry_residue() -> dict[str, Any]:
     finally:
         frappe.flags.in_letron_policy_apply = previous_apply_flag
         frappe.clear_cache()
+
+
+def acceptance_residue_summary() -> dict[str, Any]:
+    """Return exact Phase 8 fixture residue counters without mutating state."""
+
+    import frappe
+
+    queries: dict[str, dict[str, Any]] = {
+        "File": {"file_name": ["like", "phase8-%"]},
+        "User": {"name": ["like", "phase8-%@example.invalid"]},
+        "Quotation": {"party_name": ["like", f"{FIXTURE_PREFIX}%"]},
+        "Sales Invoice": {"customer": ["like", f"{FIXTURE_PREFIX}%"]},
+        "Purchase Invoice": {"supplier": ["like", f"{FIXTURE_PREFIX}%"]},
+        "GL Entry": {"party": ["like", f"{FIXTURE_PREFIX}%"]},
+        "Stock Ledger Entry": {"item_code": ["like", f"{FIXTURE_PREFIX}%"]},
+        "Letron Event Outbox": {"payload": ["like", f"%{FIXTURE_PREFIX}%"]},
+    }
+    counts = {
+        doctype: frappe.db.count(doctype, filters=filters)
+        for doctype, filters in queries.items()
+    }
+    for doctype in DOCUMENT_BUILDERS:
+        counts[doctype] = frappe.db.count(
+            doctype, filters={"name": ["like", f"{FIXTURE_PREFIX}%"]}
+        )
+    counts["File"] += frappe.db.count(
+        "File", filters={"folder": "Home/Letron Policy Assets", "is_folder": 0}
+    )
+    return {
+        "ok": not any(counts.values()),
+        "acceptance_residue": sum(counts.values()),
+        "counts": {key: value for key, value in counts.items() if value},
+    }
 
 
 def probe_asset_lifecycle() -> dict[str, Any]:
@@ -1355,7 +1452,7 @@ def probe_asset_lifecycle() -> dict[str, Any]:
         failure_rejected = False
         try:
             policy.apply(write_bundle(failure, "rollback"))
-        except policy.PolicyError, frappe.ValidationError:
+        except (policy.PolicyError, frappe.ValidationError):
             failure_rejected = True
         else:
             raise AssertionError("controller failure injection did not fail")
@@ -1407,6 +1504,7 @@ def probe_payment_terms_effect() -> dict[str, Any]:
     )._is_test_runtime():
         raise RuntimeError("controller-effect probes require an acceptance runtime")
     prerequisites = _runtime_prerequisites()
+    previous_in_test = frappe.in_test
     try:
         _ensure_probe_prerequisites(prerequisites)
         template = _fixture_name("Payment Terms Template")
@@ -1416,7 +1514,7 @@ def probe_payment_terms_effect() -> dict[str, Any]:
                 **fixture_fields("Payment Terms Template", prerequisites),
             }
         ).insert(ignore_permissions=True)
-        order = frappe.get_doc(
+        order: Any = frappe.get_doc(
             {
                 "doctype": "Sales Order",
                 "company": prerequisites["company"],
@@ -1441,6 +1539,142 @@ def probe_payment_terms_effect() -> dict[str, Any]:
         return {"ok": True, "rows": 1, "portion": 100, "amount": 125000}
     finally:
         frappe.db.rollback()
+        frappe.in_test = previous_in_test
+        cleanup_registry_residue()
+
+
+def probe_failure_rollback(step: str) -> dict[str, Any]:
+    """Inject one apply-boundary failure and prove transaction compensation."""
+
+    import copy
+    import hashlib
+    from pathlib import Path
+
+    import frappe
+
+    from letron_api import policy
+
+    supported = {
+        "after-assets",
+        "after-documents",
+        "after-deletes",
+        "before-cache",
+        "before-commit",
+    }
+    if step not in supported:
+        raise ValueError(f"unsupported failure step: {step}")
+    if not policy._is_test_runtime():
+        raise RuntimeError("failure rollback probe requires an acceptance runtime")
+
+    source_path = policy._policy_path()
+    source_bytes = source_path.read_bytes()
+    source = policy.load_policy()
+    policy_dir = source_path.parent
+    asset_source = policy_dir / "assets" / "phase8-public.txt"
+    filename = "phase8-policy-rollback.txt"
+    fixture_name = _fixture_name("Payment Term")
+    temporary_paths: list[Path] = []
+    cache = policy._frappe().cache()
+    previous_cache = cache.get_value(policy.POLICY_STATUS_CACHE_KEY)
+    expected_cache = previous_cache
+
+    def bundle(state: str) -> dict[str, Any]:
+        value = copy.deepcopy(source)
+        value["assets"] = (
+            {
+                "rollback": {
+                    "source": asset_source.name,
+                    "filename": filename,
+                    "privacy": "public",
+                    "sha256": hashlib.sha256(asset_source.read_bytes()).hexdigest(),
+                }
+            }
+            if state == "present"
+            else {}
+        )
+        value["documents"].append(
+            {
+                "doctype": "Payment Term",
+                "name": fixture_name,
+                "state": state,
+                "fields": (
+                    fixture_fields("Payment Term", {}) if state == "present" else {}
+                ),
+            }
+        )
+        return value
+
+    def write_bundle(value: Mapping[str, Any], suffix: str) -> Path:
+        path = policy_dir / f".phase8-rollback-{suffix}.yaml"
+        path.write_text(policy.dump_policy(value), encoding="utf-8", newline="\n")
+        temporary_paths.append(path)
+        return path
+
+    def state() -> tuple[bool, bool, bytes | None]:
+        document_exists = bool(frappe.db.exists("Payment Term", fixture_name))
+        file_name = frappe.db.get_value(
+            "File",
+            {"folder": policy.POLICY_ASSET_FOLDER, "file_name": filename},
+            "name",
+        )
+        if not file_name:
+            return document_exists, False, None
+        file_doc = frappe.get_doc("File", file_name)
+        return document_exists, True, policy._file_content_bytes(file_doc)
+
+    expected = (False, False, None)
+    try:
+        cleanup_registry_residue()
+        if step == "after-deletes":
+            policy.apply(write_bundle(bundle("present"), "delete-setup"))
+            expected = state()
+            expected_cache = cache.get_value(policy.POLICY_STATUS_CACHE_KEY)
+            target = write_bundle(bundle("absent"), "delete")
+        else:
+            target = write_bundle(bundle("present"), step)
+        try:
+            policy.apply(target, _failure_step=step)
+        except policy.PolicyError as error:
+            if "Injected policy acceptance failure" not in str(error):
+                raise
+        else:
+            raise AssertionError(f"failure injection did not fire at {step}")
+
+        actual = state()
+        if actual != expected:
+            raise AssertionError(
+                f"rollback mismatch at {step}: expected={expected[:2]} actual={actual[:2]}"
+            )
+        if source_path.read_bytes() != source_bytes:
+            raise AssertionError("production policy YAML changed during rollback probe")
+        if cache.get_value(policy.POLICY_STATUS_CACHE_KEY) != expected_cache:
+            raise AssertionError("policy status cache was not restored byte-equivalent")
+        return {
+            "ok": True,
+            "step": step,
+            "document_restored": actual[0] == expected[0],
+            "asset_restored": actual[1:] == expected[1:],
+            "yaml_unchanged": True,
+            "cache_restored": True,
+        }
+    finally:
+        frappe.db.rollback()
+        if frappe.db.exists("Payment Term", fixture_name):
+            frappe.delete_doc(
+                "Payment Term", fixture_name, ignore_permissions=True, force=True
+            )
+        for file_name in frappe.get_all(
+            "File",
+            filters={"folder": policy.POLICY_ASSET_FOLDER, "file_name": filename},
+            pluck="name",
+            limit_page_length=0,
+        ):
+            frappe.delete_doc("File", file_name, ignore_permissions=True, force=True)
+        public_path = Path(frappe.get_site_path("public", "files", filename))
+        public_path.unlink(missing_ok=True)
+        frappe.db.commit()
+        for path in temporary_paths:
+            path.unlink(missing_ok=True)
         cleanup_registry_residue()
 
 
@@ -1448,7 +1682,9 @@ def probe_pricing_shipping_effects() -> dict[str, Any]:
     """Prove native pricing lookup and shipping charge materialization."""
 
     import frappe
-    from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
+    from erpnext.accounts.doctype.pricing_rule.pricing_rule import (  # ty: ignore[unresolved-import]
+        apply_pricing_rule,
+    )
 
     prerequisites = _runtime_prerequisites()
     try:
@@ -1491,10 +1727,10 @@ def probe_pricing_shipping_effects() -> dict[str, Any]:
             )
 
         shipping_fields = fixture_fields("Shipping Rule", prerequisites)
-        shipping = frappe.get_doc(
+        shipping: Any = frappe.get_doc(
             {"doctype": "Shipping Rule", **shipping_fields}
         ).insert(ignore_permissions=True)
-        order = frappe.get_doc(
+        order: Any = frappe.get_doc(
             {
                 "doctype": "Sales Order",
                 "company": prerequisites["company"],
@@ -1527,6 +1763,8 @@ def probe_stock_buying_effects() -> dict[str, Any]:
     import frappe
 
     prerequisites = _runtime_prerequisites()
+    previous_in_test = frappe.in_test
+    frappe.in_test = True  # ty: ignore[invalid-assignment]
     try:
         _ensure_probe_prerequisites(prerequisites)
         stock_type = frappe.get_doc(
@@ -1536,7 +1774,7 @@ def probe_stock_buying_effects() -> dict[str, Any]:
                 **fixture_fields("Stock Entry Type", prerequisites),
             }
         ).insert(ignore_permissions=True)
-        stock_entry = frappe.get_doc(
+        stock_entry: Any = frappe.get_doc(
             {"doctype": "Stock Entry", "stock_entry_type": stock_type.name}
         )
         stock_entry.set_purpose_for_stock_entry()
@@ -1549,7 +1787,7 @@ def probe_stock_buying_effects() -> dict[str, Any]:
                 **fixture_fields("Quality Inspection Template", prerequisites),
             }
         ).insert(ignore_permissions=True)
-        inspection = frappe.get_doc(
+        inspection: Any = frappe.get_doc(
             {
                 "doctype": "Quality Inspection",
                 "inspection_type": "Incoming",
@@ -1566,7 +1804,7 @@ def probe_stock_buying_effects() -> dict[str, Any]:
             raise AssertionError(
                 "Quality Inspection Template did not populate readings"
             )
-        scorecard = frappe.get_doc(
+        scorecard: Any = frappe.get_doc(
             {
                 "doctype": "Supplier Scorecard",
                 **fixture_fields("Supplier Scorecard", prerequisites),
@@ -1584,6 +1822,7 @@ def probe_stock_buying_effects() -> dict[str, Any]:
         }
     finally:
         frappe.db.rollback()
+        frappe.in_test = previous_in_test
         cleanup_registry_residue()
 
 
@@ -1591,7 +1830,9 @@ def probe_tax_effect_rate(rate: int = 10) -> dict[str, Any]:
     """Calculate and post Sales/Purchase tax through native invoice controllers."""
 
     import frappe
-    from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template
+    from erpnext.accounts.doctype.tax_rule.tax_rule import (  # ty: ignore[unresolved-import]
+        get_tax_template,
+    )
 
     if rate not in {0, 5, 8, 10}:
         raise ValueError("tax acceptance rate must be one of 0, 5, 8, 10")
@@ -1637,7 +1878,7 @@ def probe_tax_effect_rate(rate: int = 10) -> dict[str, Any]:
                 ],
             }
         ).insert(ignore_permissions=True)
-        item_template = frappe.get_doc(
+        item_template: Any = frappe.get_doc(
             {
                 "doctype": "Item Tax Template",
                 "title": f"Acceptance Item Tax {suffix}",
@@ -1681,7 +1922,7 @@ def probe_tax_effect_rate(rate: int = 10) -> dict[str, Any]:
                 f"Tax Rule selected {selected!r}, expected {sales.name!r}"
             )
 
-        sales_invoice = frappe.get_doc(
+        sales_invoice: Any = frappe.get_doc(
             {
                 "doctype": "Sales Invoice",
                 "company": prerequisites["company"],
@@ -1724,7 +1965,7 @@ def probe_tax_effect_rate(rate: int = 10) -> dict[str, Any]:
         if float(sales_tax_gl or 0) != expected_tax:
             raise AssertionError("Sales Invoice tax GL mismatch")
 
-        purchase_invoice = frappe.get_doc(
+        purchase_invoice: Any = frappe.get_doc(
             {
                 "doctype": "Purchase Invoice",
                 "company": prerequisites["company"],
@@ -1824,6 +2065,8 @@ def probe_cross_cutting_effects(effect: str = "render") -> dict[str, Any]:
     import frappe
 
     prerequisites = _runtime_prerequisites()
+    previous_in_test = frappe.in_test
+    frappe.in_test = True  # ty: ignore[invalid-assignment]
     try:
         _ensure_probe_prerequisites(prerequisites)
         if effect == "render":
@@ -1844,7 +2087,7 @@ def probe_cross_cutting_effects(effect: str = "render") -> dict[str, Any]:
                     **fixture_fields("Letter Head", prerequisites),
                 }
             ).insert(ignore_permissions=True)
-            email_template = frappe.get_doc(
+            email_template: Any = frappe.get_doc(
                 {
                     "doctype": "Email Template",
                     "name": _fixture_name("Email Template"),
@@ -1877,7 +2120,9 @@ def probe_cross_cutting_effects(effect: str = "render") -> dict[str, Any]:
 
         if effect == "naming":
             prefix = f"P8-{frappe.generate_hash(length=5).upper()}-"
-            series_before = frappe.db.get_value("Series", prefix, "current")
+            series_before = frappe.db.sql(
+                "select current from tabSeries where name=%s", (prefix,), pluck=True
+            )
             rule_fields = fixture_fields("Document Naming Rule", prerequisites)
             rule_fields.update({"prefix": prefix, "disabled": 0})
             rule = frappe.get_doc(
@@ -1889,7 +2134,9 @@ def probe_cross_cutting_effects(effect: str = "render") -> dict[str, Any]:
             )
             if not str(quotation.name).startswith(prefix):
                 raise AssertionError("Document Naming Rule did not generate the prefix")
-            series_after = frappe.db.get_value("Series", prefix, "current")
+            series_after = frappe.db.sql(
+                "select current from tabSeries where name=%s", (prefix,), pluck=True
+            )
             if series_after != series_before:
                 raise AssertionError(
                     "Document Naming Rule unexpectedly changed tabSeries"
@@ -1901,8 +2148,248 @@ def probe_cross_cutting_effects(effect: str = "render") -> dict[str, Any]:
                 "rule": str(rule.name),
                 "tab_series_unchanged": True,
             }
+        if effect == "notification_assignment":
+            notification_user = (
+                f"phase8-notify-{frappe.generate_hash(length=6)}@example.invalid"
+            )
+            frappe.get_doc(
+                {
+                    "doctype": "User",
+                    "email": notification_user,
+                    "first_name": "Phase8 Notification",
+                    "enabled": 1,
+                    "send_welcome_email": 0,
+                    "roles": [{"role": "System Manager"}],
+                }
+            ).insert(ignore_permissions=True)
+            quotation = _make_effect_quotation(prerequisites).insert(
+                ignore_permissions=True
+            )
+            assignment_fields = fixture_fields("Assignment Rule", prerequisites)
+            assignment_fields.update(
+                {
+                    "disabled": 0,
+                    "assignment_days": [
+                        {"day": frappe.utils.now_datetime().strftime("%A")}
+                    ],
+                }
+            )
+            assignment = frappe.get_doc(
+                {
+                    "doctype": "Assignment Rule",
+                    "name": _fixture_name("Assignment Rule"),
+                    **assignment_fields,
+                }
+            ).insert(ignore_permissions=True)
+            frappe.clear_cache(doctype="Assignment Rule")
+            from frappe.automation.doctype.assignment_rule.assignment_rule import (
+                apply as apply_assignment_rules,
+            )
+
+            apply_assignment_rules(doc=quotation)
+            todo = frappe.db.get_value(
+                "ToDo",
+                {
+                    "reference_type": "Quotation",
+                    "reference_name": quotation.name,
+                    "allocated_to": "Administrator",
+                    "status": "Open",
+                },
+                "name",
+            )
+            if not todo:
+                raise AssertionError("Assignment Rule did not create a native ToDo")
+
+            notification_fields = fixture_fields("Notification", prerequisites)
+            notification_fields.update(
+                {
+                    "enabled": 1,
+                    "recipients": [{"receiver_by_role": "System Manager"}],
+                }
+            )
+            notification: Any = frappe.get_doc(
+                {
+                    "doctype": "Notification",
+                    "name": _fixture_name("Notification"),
+                    **notification_fields,
+                }
+            ).insert(ignore_permissions=True)
+            notification.send(quotation)
+            notification_log = frappe.db.get_value(
+                "Notification Log",
+                {
+                    "document_type": "Quotation",
+                    "document_name": quotation.name,
+                    "for_user": notification_user,
+                },
+                "name",
+            )
+            if not notification_log:
+                raise AssertionError(
+                    "Notification did not create a native Notification Log"
+                )
+            return {
+                "ok": True,
+                "effect": effect,
+                "assignment_rule": str(assignment.name),
+                "todo": str(todo),
+                "notification": str(notification.name),
+                "notification_log": str(notification_log),
+            }
+        if effect == "workflow_permission":
+            role_name = _fixture_name("Workflow Role")
+            user = f"phase8-workflow-{frappe.generate_hash(length=6)}@example.invalid"
+            denied_user = f"phase8-workflow-denied-{frappe.generate_hash(length=6)}@example.invalid"
+            frappe.get_doc(
+                {
+                    "doctype": "Role",
+                    "name": role_name,
+                    "role_name": role_name,
+                    "is_custom": 1,
+                    "desk_access": 1,
+                }
+            ).insert(ignore_permissions=True)
+            for email, roles in [(user, [role_name]), (denied_user, [])]:
+                frappe.get_doc(
+                    {
+                        "doctype": "User",
+                        "email": email,
+                        "first_name": "Phase8 Workflow",
+                        "enabled": 1,
+                        "send_welcome_email": 0,
+                        "roles": [{"role": role} for role in roles],
+                    }
+                ).insert(ignore_permissions=True)
+            frappe.get_doc(
+                {
+                    "doctype": "Custom DocPerm",
+                    "parent": "Quotation",
+                    "parenttype": "DocType",
+                    "parentfield": "permissions",
+                    "role": role_name,
+                    "permlevel": 0,
+                    "read": 1,
+                    "write": 1,
+                    "create": 1,
+                }
+            ).insert(ignore_permissions=True)
+            for dependency_doctype in [
+                "Item",
+                "Account",
+                "Customer",
+                "Price List",
+                "UOM",
+            ]:
+                frappe.get_doc(
+                    {
+                        "doctype": "Custom DocPerm",
+                        "parent": dependency_doctype,
+                        "parenttype": "DocType",
+                        "parentfield": "permissions",
+                        "role": role_name,
+                        "permlevel": 0,
+                        "read": 1,
+                    }
+                ).insert(ignore_permissions=True)
+            frappe.clear_cache(doctype="Quotation")
+            for dependency_doctype in [
+                "Item",
+                "Account",
+                "Customer",
+                "Price List",
+                "UOM",
+            ]:
+                frappe.clear_cache(doctype=dependency_doctype)
+
+            draft_state = _fixture_name("Workflow Draft")
+            approved_state = _fixture_name("Workflow Approved")
+            action_name = _fixture_name("Workflow Approve")
+            for state in [draft_state, approved_state]:
+                frappe.get_doc(
+                    {
+                        "doctype": "Workflow State",
+                        "name": state,
+                        "workflow_state_name": state,
+                        "style": "Primary",
+                    }
+                ).insert(ignore_permissions=True)
+            frappe.get_doc(
+                {
+                    "doctype": "Workflow Action Master",
+                    "name": action_name,
+                    "workflow_action_name": action_name,
+                }
+            ).insert(ignore_permissions=True)
+            workflow = frappe.get_doc(
+                {
+                    "doctype": "Workflow",
+                    "name": _fixture_name("Workflow Effect"),
+                    "workflow_name": _fixture_name("Workflow Effect"),
+                    "document_type": "Quotation",
+                    "workflow_state_field": "workflow_state",
+                    "is_active": 1,
+                    "send_email_alert": 0,
+                    "states": [
+                        {
+                            "state": draft_state,
+                            "doc_status": "0",
+                            "allow_edit": role_name,
+                        },
+                        {
+                            "state": approved_state,
+                            "doc_status": "0",
+                            "allow_edit": role_name,
+                        },
+                    ],
+                    "transitions": [
+                        {
+                            "state": draft_state,
+                            "action": action_name,
+                            "next_state": approved_state,
+                            "allowed": role_name,
+                            "allow_self_approval": 1,
+                        }
+                    ],
+                }
+            ).insert(ignore_permissions=True)
+            frappe.clear_cache(doctype="Workflow")
+            quotation = _make_effect_quotation(prerequisites).insert(
+                ignore_permissions=True
+            )
+            if quotation.workflow_state != draft_state:
+                raise AssertionError("Workflow did not assign its initial state")
+
+            previous_user = frappe.session.user or "Administrator"
+            try:
+                frappe.set_user(denied_user)
+                denied = frappe.has_permission(
+                    "Quotation", ptype="write", doc=quotation
+                )
+                frappe.set_user(user)
+                allowed = frappe.has_permission(
+                    "Quotation", ptype="write", doc=quotation
+                )
+                from frappe.model.workflow import apply_workflow
+
+                quotation.flags.ignore_permissions = True
+                transitioned = apply_workflow(quotation, action_name)
+            finally:
+                frappe.set_user(previous_user)
+            if denied or not allowed:
+                raise AssertionError("Custom DocPerm user matrix mismatch")
+            if transitioned.workflow_state != approved_state:
+                raise AssertionError("Workflow transition did not reach approved state")
+            return {
+                "ok": True,
+                "effect": effect,
+                "workflow": str(workflow.name),
+                "denied_without_role": True,
+                "allowed_with_role": True,
+                "state": approved_state,
+            }
         raise ValueError(f"unknown cross-cutting effect: {effect}")
     finally:
         frappe.db.rollback()
         frappe.clear_cache()
+        frappe.in_test = previous_in_test
         cleanup_registry_residue()

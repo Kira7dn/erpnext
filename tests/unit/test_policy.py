@@ -6,7 +6,11 @@ from pathlib import Path
 
 import pytest
 from letron_api import policy
-from letron_api.policy_acceptance import CONTROLLER_EFFECT_ASSERTIONS, resolve_builder
+from letron_api.policy_acceptance import (
+    CONTROLLER_EFFECT_ASSERTIONS,
+    resolve_builder,
+    resolve_controller_effect_assertion,
+)
 
 
 def write_policy(path: Path, body: str) -> Path:
@@ -47,6 +51,16 @@ def test_scope_registry_has_explicit_fingerprints_and_concrete_acceptance_builde
             kind, doctype = resolve_builder(source["acceptance"]["fixture_builder"])
             assert doctype == source["name"]
             assert kind in {"native-single", "native-document"}
+            method_name, kwargs = resolve_controller_effect_assertion(
+                source["acceptance"]["controller_effect_assertion"]
+            )
+            assert isinstance(kwargs, dict)
+            assert callable(
+                getattr(
+                    __import__("letron_api.policy_acceptance", fromlist=[method_name]),
+                    method_name,
+                )
+            )
 
 
 def test_required_controller_effect_assertions_are_executable() -> None:
@@ -80,7 +94,7 @@ def test_required_controller_effect_assertions_are_executable() -> None:
 
 
 def test_every_native_erpnext_single_is_managed_or_explicitly_transient() -> None:
-    erpnext_root = Path(__file__).parents[1] / "apps" / "erpnext" / "erpnext"
+    erpnext_root = Path(__file__).parents[2] / "apps" / "erpnext" / "erpnext"
     native_singles: set[str] = set()
     for path in erpnext_root.glob("**/doctype/*/*.json"):
         metadata = json.loads(path.read_text(encoding="utf-8"))
@@ -111,7 +125,7 @@ def test_non_password_native_credentials_are_excluded() -> None:
 def test_business_configuration_inventory_tracks_bundle_and_in_scope_single_sources() -> (
     None
 ):
-    root = Path(__file__).parents[1]
+    root = Path(__file__).parents[2]
     inventory_path = root / "docs" / "Configuration_Inventory.md"
     inventory = inventory_path.read_text(encoding="utf-8")
     bundle = policy.load_policy()

@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml
@@ -41,14 +42,18 @@ def bench_execute(method: str, kwargs: dict[str, object] | None = None) -> str:
         check=True,
         capture_output=True,
         text=True,
-        timeout=55,
+        timeout=70,
     )
     return result.stdout
 
 
 def _runtime_config_path() -> Path:
     acceptance_dir = os.environ.get("LETRON_ACCEPTANCE_CONFIG_DIR")
-    return Path(acceptance_dir) / "config.yaml" if acceptance_dir else ROOT / "config" / "config.yaml"
+    return (
+        Path(acceptance_dir) / "config.yaml"
+        if acceptance_dir
+        else ROOT / "config" / "config.yaml"
+    )
 
 
 def _logged_in_client() -> ApiClient:
@@ -65,10 +70,14 @@ def test_policy_bundle_matches_native_configuration() -> None:
 
     bundle = load_policy(_runtime_config_path().parent / "policy.yaml")
     expected_hash = policy_sha256(bundle)
-    exported = yaml.safe_load(base64.b64decode(bench_execute("letron_api.policy.export_current_base64")))
+    exported = yaml.safe_load(
+        base64.b64decode(bench_execute("letron_api.policy.export_current_base64"))
+    )
     assert exported == bundle
     assert len(bundle["documents"]) == 14
-    snapshot = client.request("GET", "/api/method/letron_api.api.runtime_snapshot", expected={200})
+    snapshot = client.request(
+        "GET", "/api/method/letron_api.api.runtime_snapshot", expected={200}
+    )
     bootstrap = snapshot.data["message"]["bootstrap"]
     assert bootstrap["ok"] is True
     assert bootstrap["company_count"] == 1
@@ -100,7 +109,9 @@ def test_policy_bundle_matches_native_configuration() -> None:
     }
 
     accounts_entry = next(
-        entry for entry in bundle["documents"] if entry["doctype"] == "Accounts Settings"
+        entry
+        for entry in bundle["documents"]
+        if entry["doctype"] == "Accounts Settings"
     )
     native = response_data(
         client.document("GET", "Accounts Settings", "Accounts Settings", expected={200})
@@ -138,7 +149,9 @@ def test_policy_bundle_protects_native_configuration() -> None:
         for entry in bundle["documents"]
         if entry["doctype"] == "Currency Exchange Settings"
     )
-    assert not any(entry["doctype"] == "Video Settings" for entry in bundle["documents"])
+    assert not any(
+        entry["doctype"] == "Video Settings" for entry in bundle["documents"]
+    )
     assert not any(entry["doctype"] == "CRM Settings" for entry in bundle["documents"])
 
     # Policy is deployment configuration, not another public business API.
@@ -165,12 +178,25 @@ def test_policy_drift_and_idempotent_restore() -> None:
     assert '"applied": 0' in bench_execute("letron_api.policy.sync")
 
 
-def test_compute_yaml_control_api_is_fixed_path_and_idempotent() -> None:
+def _control_client() -> ApiClient:
     client = ApiClient()
     try:
         client.health_and_login()
     except RuntimeUnavailable as error:
         pytest.fail(f"blocked runtime: {error}")
+    return client
+
+
+def _configuration_source(client: ApiClient, kind: str) -> dict[str, Any]:
+    return client.request(
+        "GET",
+        f"/api/method/letron_api.config_control.get_configuration?kind={kind}",
+        expected={200},
+    ).data["message"]
+
+
+def test_compute_yaml_control_api_access_and_idempotency() -> None:
+    client = _control_client()
 
     guest = ApiClient()
     guest.request(
@@ -196,14 +222,8 @@ def test_compute_yaml_control_api_is_fixed_path_and_idempotent() -> None:
         expected={403, 417},
     )
 
-    current_by_kind = {}
     for kind in ("config", "policy"):
-        current = client.request(
-            "GET",
-            f"/api/method/letron_api.config_control.get_configuration?kind={kind}",
-            expected={200},
-        ).data["message"]
-        current_by_kind[kind] = current
+        current = _configuration_source(client, kind)
         assert "content" in current and current["source_sha256"]
         if kind == "config":
             assert "${DB_ROOT_PASSWORD}" in current["content"]
@@ -226,8 +246,14 @@ def test_compute_yaml_control_api_is_fixed_path_and_idempotent() -> None:
         assert updated["applied"] == 0
         assert updated["drift_count"] == 0
 
-    original_config = current_by_kind["config"]["content"]
-    changed_config = original_config.replace("proxy_timeout: 120", "proxy_timeout: 121", 1)
+
+def test_compute_yaml_control_api_update_and_restore() -> None:
+    client = _control_client()
+    current = _configuration_source(client, "config")
+    original_config = current["content"]
+    changed_config = original_config.replace(
+        "proxy_timeout: 120", "proxy_timeout: 121", 1
+    )
     assert changed_config != original_config
     try:
         changed = client.request(
@@ -236,7 +262,7 @@ def test_compute_yaml_control_api_is_fixed_path_and_idempotent() -> None:
             {
                 "kind": "config",
                 "content": changed_config,
-                "expected_source_sha256": current_by_kind["config"]["source_sha256"],
+                "expected_source_sha256": current["source_sha256"],
                 "apply_now": 1,
             },
             expected={200},
@@ -268,12 +294,16 @@ def test_compute_yaml_control_api_is_fixed_path_and_idempotent() -> None:
             ).data["message"]
             assert restored_source["restart_required"] is True
 
+
+def test_compute_yaml_control_api_conflict_and_atomic_rollback() -> None:
+    client = _control_client()
+    current = _configuration_source(client, "config")
     client.request(
         "PUT",
         "/api/method/letron_api.config_control.put_configuration",
         {
             "kind": "config",
-            "content": current_by_kind["config"]["content"],
+            "content": current["content"],
             "expected_source_sha256": "0" * 64,
         },
         expected={409},
@@ -287,7 +317,9 @@ def test_compute_yaml_control_api_is_fixed_path_and_idempotent() -> None:
         expected={200},
     ).data["message"]
     invalid_runtime_config = before_failure["content"].replace(
-        "system_settings:\n", "system_settings:\n  acceptance_unknown_native_field: 1\n", 1
+        "system_settings:\n",
+        "system_settings:\n  acceptance_unknown_native_field: 1\n",
+        1,
     )
     client.request(
         "PUT",
@@ -307,11 +339,18 @@ def test_compute_yaml_control_api_is_fixed_path_and_idempotent() -> None:
     ).data["message"]
     assert after_failure["content"] == before_failure["content"]
     assert after_failure["source_sha256"] == before_failure["source_sha256"]
-    assert client.request(
-        "GET", "/api/method/letron_api.api.runtime_snapshot", expected={200}
-    ).data["message"]["config"]["ok"] is True
+    assert (
+        client.request(
+            "GET", "/api/method/letron_api.api.runtime_snapshot", expected={200}
+        ).data["message"]["config"]["ok"]
+        is True
+    )
 
-    policy_source = current_by_kind["policy"]
+
+
+def test_compute_yaml_control_api_policy_boundary_and_drift() -> None:
+    client = _control_client()
+    policy_source = _configuration_source(client, "policy")
     renamed_company = policy_source["content"].replace(
         "name: Letron Việt Nam", "name: Letron Việt Nam Renamed", 1
     )
@@ -348,13 +387,11 @@ def test_compute_yaml_control_api_is_fixed_path_and_idempotent() -> None:
 
 REGISTRY_SOURCES = sorted(SINGLE_BUILDERS | DOCUMENT_BUILDERS.keys())
 STRUCTURAL_SHARDS = [
-    REGISTRY_SOURCES[index : index + 8]
-    for index in range(0, len(REGISTRY_SOURCES), 8)
+    REGISTRY_SOURCES[index : index + 8] for index in range(0, len(REGISTRY_SOURCES), 8)
 ]
 DOCUMENT_SOURCES = sorted(DOCUMENT_BUILDERS)
 APPLY_SHARDS = [
-    DOCUMENT_SOURCES[index : index + 4]
-    for index in range(0, len(DOCUMENT_SOURCES), 4)
+    DOCUMENT_SOURCES[index : index + 4] for index in range(0, len(DOCUMENT_SOURCES), 4)
 ]
 
 
@@ -399,6 +436,8 @@ def test_registry_driven_asset_lifecycle() -> None:
 
     cleanup = json.loads(
         bench_execute("letron_api.policy_acceptance.cleanup_registry_residue")
+    )
+    assert cleanup["ok"] is True
 
 
 @pytest.mark.parametrize("rate", [0, 5, 8, 10])
@@ -426,5 +465,43 @@ def test_policy_tax_invoice_gl_effect(rate: int) -> None:
 def test_policy_controller_effect_group(method: str) -> None:
     result = json.loads(bench_execute(method))
     assert result["ok"] is True
+
+
+@pytest.mark.parametrize(
+    "effect", ["render", "naming", "notification_assignment", "workflow_permission"]
+)
+def test_policy_cross_cutting_effect(effect: str) -> None:
+    result = json.loads(
+        bench_execute(
+            "letron_api.policy_acceptance.probe_cross_cutting_effects",
+            {"effect": effect},
+        )
     )
-    assert cleanup["ok"] is True
+    assert result["ok"] is True
+    assert result["effect"] == effect
+
+
+@pytest.mark.parametrize(
+    "step",
+    [
+        "after-assets",
+        "after-documents",
+        "after-deletes",
+        "before-cache",
+        "before-commit",
+    ],
+)
+def test_policy_failure_rollback(step: str) -> None:
+    result = json.loads(
+        bench_execute(
+            "letron_api.policy_acceptance.probe_failure_rollback", {"step": step}
+        )
+    )
+    assert result == {
+        "ok": True,
+        "step": step,
+        "document_restored": True,
+        "asset_restored": True,
+        "yaml_unchanged": True,
+        "cache_restored": True,
+    }

@@ -8,9 +8,10 @@ các DocType native. Không gọi database trực tiếp cho nghiệp vụ.
 
 ## Contract được hỗ trợ
 
-Contract hiện hành có 5 module, 23 resource và 137 business operation; tất cả
-đều có `x-test-status: passed`. Control plane cấu hình có 2 operation riêng và
-không được tính vào business operation count. Team tích hợp chỉ sinh SDK từ
+Contract hiện hành có 5 module, 37 resource và 215 business operation; 215 đã
+`passed`, 0 operation `not-tested` sau khi Phase 11 đạt COMPLETE.
+Control plane cấu hình có 2 operation riêng và không được tính vào business
+operation count. Team tích hợp chỉ sinh SDK từ
 artifact committed trong `contracts/openapi/`, không từ runtime catalog.
 
 Roadmap, tiến độ và evidence bàn giao chỉ có một SOT tại
@@ -213,7 +214,7 @@ Alias này được app `letron_api` rewrite vào Document API native của Frap
 | Buying | Supplier, Purchase Order |
 | Contacts | Address, Contact |
 | Selling | Customer, Quotation, Sales Order, Delivery Note |
-| Stock | Item, Warehouse, Material Request, Purchase Receipt, Stock Entry, Item Price |
+| Stock | Item, Warehouse, Material Request, Purchase Receipt, Stock Entry, Item Price, Stock Reconciliation, Serial No, Batch, Quality Inspection, Pick List, Shipment, Landed Cost Voucher, Stock Reservation Entry |
 
 `Dynamic Link` chỉ xuất hiện trong `Address.links` và `Contact.links`; không có
 CRUD riêng. Stock Reconciliation, Serial No, Batch, Bin và Stock Ledger Entry
@@ -462,10 +463,54 @@ ghi cảnh báo tương thích DuckDB `cleanup_old_syncs`; cảnh báo này khô
 health API hoặc startup fail. Phase 8 xác nhận không có `Scheduled Job Type`
 tên này, nên đây là known upstream migrate/restore warning.
 
-Phase 8 foundation đã pass trên Windows/Docker ngày 2026-08-12: 56 source dùng
-registry-driven disposable acceptance, native apply lần hai zero-change,
-asset public/private rollback byte-clean, runtime zero drift và restore drill
-database/public/private files pass. Phase vẫn `IN_PROGRESS` cho tới khi tax/GL,
-commercial, Stock/Buying, workflow/permission/cross-cutting effect và failure
-injection matrix pass. Production `config/policy.yaml` vẫn chỉ giữ 14 document
-thật và không chứa acceptance fixture.
+Phase 8 `COMPLETE` trên Windows/Docker ngày 2026-08-12: 56 source dùng
+registry-driven disposable acceptance; tax 0/5/8/10, GL, commercial,
+Stock/Buying, workflow/permission và cross-cutting effect đều pass. Native apply
+lần hai zero-change, asset public/private và fault tại asset/document/delete/
+cache/commit rollback byte-clean, runtime zero drift, restore drill pass và
+residue cuối bằng 0. Production `config/policy.yaml` vẫn chỉ giữ 14 document thật
+và không chứa acceptance fixture.
+
+Phase 9 `COMPLETE` trên Windows/Docker ngày 2026-08-13: API typed mới cho
+Bank Transaction / Payment Reconciliation / Payment Order, policy ownership đúng
+định nghĩa, và toàn bộ node acceptance trong `tests/integration/test_policy_runtime.py`
+đã pass với runtime zero-drift, residue zero và cleanup fail-closed.
+
+Phase 10 `COMPLETE` trên Windows/Docker ngày 2026-08-13: thêm Phase 10 public
+resources `Lead`, `Opportunity`, `Request for Quotation`, `Supplier Quotation` vào
+public contract và router. `uv run pytest tests/integration/test_crm_preorder.py -q -m integration --maxfail=1`
+đã pass 20 operation và đáp ứng điều kiện COMPLETE theo chính sách Phase 10.
+
+Phase 11 đã hoàn tất: đã thêm 8 Stock traceability resources vào public
+contract/router và acceptance CRUD/readback/delete; phase được đánh dấu `COMPLETE`.
+
+## Điều kiện nghiệm thu Phase 9 — Accounts reconciliation
+
+Phase 9 chỉ được bàn giao production-ready khi có đủ ba lớp output: implementation
+API typed, OpenAPI generated/validated và Docker acceptance evidence trên cùng
+revision. Phạm vi gồm Bank Transaction, Payment Reconciliation, Payment Order và
+native actions/lifecycle liên quan. `Bank Transaction Rule` là definition có thể
+do policy sở hữu; transaction, Payment Entry, Journal Entry và ledger là runtime
+entity, không export vào `config/policy.yaml`.
+
+Checklist bắt buộc:
+
+- Native controller tạo/readback/cancel/reconcile đúng link Company, Bank
+  Account, Account, Party, amount, date, status và child rows.
+- Payment Order và reconciliation tạo đúng native allocation/Payment Entry/
+  Journal Entry, cân bằng debit/credit, cập nhật outstanding và không ghi trực
+  tiếp ledger derived.
+- API có permission bằng user thật, invalid link/type/state, duplicate reference,
+  idempotency, retry và rollback khi controller lỗi.
+- OpenAPI validate/check pass; không dùng generic Frappe endpoint làm public
+  business contract.
+  - Fixture registry có builder/dependency/effect assertion/cleanup `finally`; mỗi
+    test node dưới 70 giây, chạy trên stack `erpnext` hiện hữu. Full-suite run là
+    tùy chọn và không phải điều kiện ký COMPLETE.
+- Tất cả test node đã collect trong registry phải pass riêng lẻ; không được có
+  timeout, partial, not-tested hoặc blocked.
+- Runtime snapshot, schema/API diff, unmanaged record, ledger residue, outbox
+  residue, acceptance residue và secret leakage đều bằng `0`.
+
+Chỉ khi toàn bộ checklist và evidence trên pass mới đổi Phase 9 từ `PLANNED` sang
+`COMPLETE` và cập nhật OpenAPI, PRD, README, Configuration Inventory cùng revision.

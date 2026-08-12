@@ -1,4 +1,4 @@
-import json
+﻿import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -9,7 +9,7 @@ from lib.api_generator.contract import load_contract
 from lib.api_generator.handoff import build_control_plane
 from lib.api_generator.openapi import build_openapi
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_catalog_discovers_erpnext_and_custom_method():
@@ -32,6 +32,10 @@ def test_openapi_contains_frappe_contract_paths():
     assert "frappeToken" in spec["components"]["securitySchemes"]
     assert "/api/v1/accounts/sales-invoices/{name}/submit" in spec["paths"]
     expected = {
+        "/api/v1/crm/leads",
+        "/api/v1/crm/opportunities",
+        "/api/v1/crm/request-for-quotations",
+        "/api/v1/crm/supplier-quotations",
         "/api/v1/selling/customers",
         "/api/v1/selling/quotations",
         "/api/v1/selling/sales-orders",
@@ -45,6 +49,8 @@ def test_openapi_contains_frappe_contract_paths():
         "/api/v1/accounts/cost-centers",
         "/api/v1/accounts/journal-entries",
         "/api/v1/accounts/payment-requests",
+        "/api/v1/accounts/bank-transactions",
+        "/api/v1/accounts/payment-orders",
         "/api/v1/buying/suppliers",
         "/api/v1/buying/purchase-orders",
         "/api/v1/stock/items",
@@ -55,6 +61,14 @@ def test_openapi_contains_frappe_contract_paths():
         "/api/v1/stock/purchase-receipts",
         "/api/v1/stock/stock-entries",
         "/api/v1/stock/item-prices",
+        "/api/v1/stock/stock-reconciliations",
+        "/api/v1/stock/serial-nos",
+        "/api/v1/stock/batches",
+        "/api/v1/stock/quality-inspections",
+        "/api/v1/stock/pick-lists",
+        "/api/v1/stock/shipments",
+        "/api/v1/stock/landed-cost-vouchers",
+        "/api/v1/stock/stock-reservation-entries",
     }
     assert expected.issubset(spec["paths"])
     assert "/api/v1/accounts/purchase-invoices/{name}/cancel" in spec["paths"]
@@ -65,8 +79,12 @@ def test_openapi_contains_frappe_contract_paths():
     assert "/api/v1/stock/stock-entries/{name}/submit" in spec["paths"]
     assert "/api/v1/accounts/journal-entries/{name}/submit" in spec["paths"]
     assert "/api/v1/accounts/payment-requests/{name}/cancel" in spec["paths"]
+    assert "/api/v1/accounts/payment-orders/{name}/submit" in spec["paths"]
+    assert "/api/v1/accounts/payment-orders/{name}/cancel" in spec["paths"]
+    assert "/api/v1/accounts/bank-transactions/{name}/reconcile" in spec["paths"]
+    assert "/api/v1/accounts/bank-transactions/{name}/unreconcile" in spec["paths"]
     assert not any("dynamic-links" in path for path in spec["paths"])
-    assert not any("stock-reconciliations" in path for path in spec["paths"])
+    assert "/api/v1/stock/stock-reconciliations" in spec["paths"]
     assert "token api_key:api_secret" in spec["components"]["securitySchemes"]["frappeToken"]["description"]
     list_parameters = spec["paths"]["/api/v1/stock/items"]["get"]["parameters"]
     assert {item.get("name") for item in list_parameters if "name" in item} >= {
@@ -81,20 +99,20 @@ def test_openapi_contains_frappe_contract_paths():
         for verb, operation in path_item.items()
         if verb in {"get", "post", "put", "patch", "delete"}
     ]
-    assert len(contract["runtime"]["public_resources"]) == 23
+    assert len(contract["runtime"]["public_resources"]) == 37
     assert {
         item.module
         for item in doctypes
         if item.name in {resource["doctype"] for resource in contract["runtime"]["public_resources"]}
-    } == {"Accounts", "Buying", "Contacts", "Selling", "Stock"}
-    assert len(operations) == 137
+    } == {"Accounts", "Buying", "Contacts", "Selling", "Stock", "CRM"}
+    assert len(operations) == 215
     status_counts = {
         status: sum(operation["x-test-status"] == status for operation in operations)
         for status in ("passed", "partial", "not-tested", "blocked")
     }
-    assert status_counts == {"passed": 137, "partial": 0, "not-tested": 0, "blocked": 0}
+    assert status_counts == {"passed": 215, "partial": 0, "not-tested": 0, "blocked": 0}
     assert all(operation["x-test-level"] == "docker-runtime" for operation in operations)
-    assert all(operation["x-test-evidence"]["test"] for operation in operations)
+    assert all(operation.get("x-test-evidence", {}).get("test") for operation in operations)
     assert spec["x-acceptance-summary"] == status_counts
     assert spec["paths"]["/api/v1/accounts/sales-invoices"]["post"]["x-test-status"] == "passed"
     assert spec["paths"]["/api/v1/accounts/purchase-invoices"]["get"]["x-test-status"] == "passed"
@@ -173,5 +191,5 @@ def test_control_plane_is_typed_and_separate_from_business_operations():
 def test_committed_handoff_manifest_keeps_business_and_control_counts_separate():
     manifest = json.loads((ROOT / "contracts" / "openapi" / "manifest.json").read_text(encoding="utf-8"))
 
-    assert manifest["artifacts"]["public"]["operations"] == 137
+    assert manifest["artifacts"]["public"]["operations"] == 215
     assert manifest["artifacts"]["control-plane"]["operations"] == 2

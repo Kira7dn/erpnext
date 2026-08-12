@@ -1059,7 +1059,12 @@ def test_extended_auth_system_resources_and_business_flows(request: pytest.Fixtu
         assert payload["request_id"] and payload["occurred_at"]
         assert payload["resource_url"].startswith("/api/v1/")
 
-    if all(os.environ.get(name) for name in DELIVERY_ENV):
+    delivery_enabled = str(os.environ.get("LETRON_DELIVERY_ENABLED", "false")).lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+    if delivery_enabled and all(os.environ.get(name) for name in DELIVERY_ENV):
         deadline = time.monotonic() + 180
         while time.monotonic() < deadline:
             outbox = client.request("GET", f"/api/resource/Letron%20Event%20Outbox?{outbox_query}", expected={200}).data["data"]

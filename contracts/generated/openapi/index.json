@@ -1,0 +1,28 @@
+{
+  "modules": {
+    "Accounts": {
+      "json": "contracts/generated/openapi/modules/accounts.json",
+      "yaml": "contracts/generated/openapi/modules/accounts.yaml"
+    },
+    "Buying": {
+      "json": "contracts/generated/openapi/modules/buying.json",
+      "yaml": "contracts/generated/openapi/modules/buying.yaml"
+    },
+    "CRM": {
+      "json": "contracts/generated/openapi/modules/crm.json",
+      "yaml": "contracts/generated/openapi/modules/crm.yaml"
+    },
+    "Contacts": {
+      "json": "contracts/generated/openapi/modules/contacts.json",
+      "yaml": "contracts/generated/openapi/modules/contacts.yaml"
+    },
+    "Selling": {
+      "json": "contracts/generated/openapi/modules/selling.json",
+      "yaml": "contracts/generated/openapi/modules/selling.yaml"
+    },
+    "Stock": {
+      "json": "contracts/generated/openapi/modules/stock.json",
+      "yaml": "contracts/generated/openapi/modules/stock.yaml"
+    }
+  }
+}

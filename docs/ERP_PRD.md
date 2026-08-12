@@ -7,7 +7,7 @@
 | Sản phẩm | Letron ERP Integration Platform |
 | Phiên bản | 1.0 |
 | Ngày cập nhật | 2026-08-12 |
-| Trạng thái | Phase 1-8 hoàn thành trên Windows/Docker; Phase 9-12 chưa triển khai |
+| Trạng thái | Phase 1-11 và Phase 10 CRM/Buying hoàn thành trên Windows/Docker; Phase 12 chưa |
 | Product owner | Letron |
 | Backend source of truth | ERPNext/Frappe |
 | Runtime | Docker Compose |
@@ -463,14 +463,15 @@ không đánh dấu capability đó là production-complete.
 | 5 — API hardening/delivery | Auth, idempotency, upload, HMAC, retry và dedupe | `COMPLETE` |
 | 6 — Contacts/Stock core | Address, Contact và Stock operational resources | `COMPLETE` |
 | 7 — Accounts operational core | Bank, payment master, Cost Center, Journal Entry và Payment Request | `COMPLETE` |
-| 8 — Full native policy wrapper | Boundary, inventory, native coverage và round-trip | `IN_PROGRESS` |
+| 8 — Full native policy wrapper | Boundary, inventory, native coverage và round-trip | `COMPLETE` |
 | 9 — Accounts reconciliation | Bank Transaction, reconciliation và Payment Order | `PLANNED` |
-| 10 — CRM/Buying pre-order | Lead, Opportunity, RFQ và Supplier Quotation | `PLANNED` |
-| 11 — Stock traceability | Reconciliation, serial/batch, quality, shipment và reservation | `PLANNED` |
+| 10 — CRM/Buying pre-order | Lead, Opportunity, RFQ và Supplier Quotation | `COMPLETE` |
+| 11 — Stock traceability | Reconciliation, serial/batch, quality, shipment và reservation | `COMPLETE` |
 | 12 — Final production handoff | Security, load, DR, residue và clean Ubuntu release | `PLANNED` |
 
-Phase 1–7 hiện công bố 5 module, 23 resource và 137 business operation. Trạng
-thái contract là `{passed: 137, partial: 0, not-tested: 0, blocked: 0}`. Child
+Phase 1–10 hiện công bố 5 module, 29 resource và 175 business operation. Phase
+11 mới thêm 8 resource, 40 CRUD operation vào contract/runtime; status hiện là
+`{passed: 215, partial: 0, not-tested: 0, blocked: 0}`. Child
 table không có CRUD riêng; ledger chỉ phát sinh qua controller native.
 
 ### 12.2. Phase 8 — Full native policy wrapper
@@ -482,8 +483,8 @@ table không có CRUD riêng; ledger chỉ phát sinh qua controller native.
 | 8.2 Runtime foundation | Bootstrap, export, validate, plan, apply, readback, drift và rollback | `COMPLETE` |
 | 8.3 Native coverage | Policy của module public và Frappe cross-cutting có typed schema/dependency | `COMPLETE` |
 | 8.4 Control plane | Fixed-path API, optimistic hash, atomic apply, audit và rollback cho schema 8.3 | `COMPLETE` trên Windows acceptance |
-| 8.5 Acceptance | Structural/apply/assets pass; còn effect matrix và failure injection từng bước | `IN_PROGRESS` |
-| 8.6 Windows/Docker signature | Chỉ ký sau full controller-effect gate cùng revision; Ubuntu không thuộc scope | `IN_PROGRESS` |
+| 8.5 Acceptance | Structural/apply/assets, controller-effect và failure injection từng bước pass | `COMPLETE` |
+| 8.6 Windows/Docker signature | Full gate pass; Ubuntu không thuộc scope | `COMPLETE` |
 
 Production policy giữ 14 native document thật. Native coverage bổ sung không
 materialize dữ liệu giả vào production YAML: 56 source managed/conditional dùng
@@ -502,6 +503,61 @@ public CRM, inventory phải mở rộng và pass trước khi contract CRM đư
   cùng native lifecycle cần thiết.
 - Phase 11 thêm Stock Reconciliation, Serial No, Batch, Quality Inspection,
   Pick List, Shipment, Landed Cost Voucher và Stock Reservation Entry.
+
+#### Điều kiện hoàn thành Phase 9 — Accounts reconciliation
+
+Phase 9 chỉ được chuyển từ `PLANNED` sang `COMPLETE` khi toàn bộ điều kiện sau
+pass trên cùng revision Windows/Docker:
+
+1. **Business API và OpenAPI**
+   - Có typed route/schema/action cho Bank Transaction, Payment Reconciliation
+     và Payment Order; OpenAPI generated/check/validator đều pass.
+   - Có lifecycle rõ ràng: create/import, readback, reconcile/unreconcile hoặc
+     cancel theo native ERPNext controller; không dùng generic Frappe route làm
+     public business contract.
+   - Có permission matrix bằng user thật, authentication, negative cases và
+     error schema cho invalid account, bank account, party, amount, date,
+     duplicate reference và invalid state transition.
+
+2. **Boundary dữ liệu và policy**
+   - `Bank Transaction Rule` là policy-owned definition: nếu tenant bật rule,
+     definition được validate, apply native và readback canonical qua
+     `config/policy.yaml`.
+   - Bank Transaction, Payment Order, Payment Entry, Journal Entry và các
+     transaction khác là entity/runtime DB; không đưa vào `policy.yaml`.
+   - Không có public write trực tiếp vào `GL Entry`, `Payment Ledger Entry`,
+     `Stock Ledger Entry` hoặc bảng ledger/derived state.
+
+3. **Native effect và tính đúng nghiệp vụ**
+   - Bank Transaction được native controller tạo/cập nhật và giữ đúng link
+     Company/Bank Account/Account/Party.
+   - Reconciliation tạo đúng allocation/Payment Entry/Journal Entry theo native
+     flow; số tiền debit/credit và outstanding balance được readback đối chiếu.
+   - Payment Order chạy đúng lifecycle, child-row ordering, submit/cancel và
+     trạng thái liên quan; không để ledger residue khi rollback/cancel.
+   - Idempotency không tạo bản ghi hoặc ledger effect trùng khi retry cùng
+     idempotency key/external reference.
+
+4. **Acceptance và release gate**
+   - Registry-driven disposable fixtures có dependency builder, native
+     controller assertion, cleanup `finally` và reverse-topological deletion.
+   - Mỗi test node riêng lẻ có hard-timeout `70s`; không dùng acceptance Compose
+     project thứ hai. Full-suite run là kiểm tra tùy chọn, không phải điều kiện
+     bắt buộc để ký COMPLETE.
+   - Pass các nhóm: happy path, readback/delete hoặc cancel, permission,
+     invalid link/type/state, duplicate/idempotency, controller failure rollback,
+     restart/retry và outbox/event dedupe nếu flow phát event.
+   - Evidence counters đều bằng `0`: `partial`, `not-tested`, `blocked`,
+     runtime drift, round-trip diff, unmanaged record, ledger residue,
+     acceptance residue và secret/executable leakage.
+   - Tất cả test node trong registry phải có status `passed`; không được còn
+     `partial`, `not-tested`, `blocked` hoặc timeout. Tài liệu, OpenAPI checksum, runtime snapshot, backup/restore evidence và
+     cleanup report được cập nhật theo revision đã test.
+
+Phase 9 output production-ready gồm **implementation API + OpenAPI contract +
+native Docker acceptance evidence**. Chỉ `Bank Transaction Rule` có thể xuất
+hiện trong policy; giao dịch Bank Transaction/Payment Order và ledger không phải
+policy output.
 
 Mỗi operation mới bắt đầu ở `not-tested`, chỉ chuyển `passed` sau Docker
 acceptance có native permission/controller, readback hoặc delete→404, negative
@@ -533,16 +589,22 @@ không tự động chuyển sang revision tương lai.
 | Policy runtime foundation | `COMPLETE` | 14 document thật, zero drift, rollback và idempotent apply |
 | Full policy coverage | `COMPLETE` | 56 source registry-driven; native asset và full acceptance pass |
 | Config/policy ownership | `COMPLETE` cho boundary migration | Country/currency chỉ còn ở `policy.bootstrap.company` |
-| OpenAPI handoff | `COMPLETE` | Public 137 operation, control plane 2 operation, manifest checksum |
+| OpenAPI handoff | `COMPLETE` | Public 215 operation, control plane 2 operation, manifest checksum |
 | Windows/Docker production baseline | `COMPLETE` | No-flag readiness, backup và restore drill pass |
 | Phase 8 host signature | `WINDOWS_DOCKER` | Ubuntu không thuộc tiêu chí nghiệm thu Phase 8 |
+| Phase 9 Accounts reconciliation | `COMPLETE` | Bank Transaction, Payment Reconciliation, Payment Order acceptance pass |
 | Project completion | `IN_PROGRESS` | Phase 9–12 chưa hoàn thành |
 
-Evidence Phase 8 đã chạy: host `50 passed, 26 deselected`; Docker acceptance
+Evidence Phase 8 đã chạy trên cùng revision: host `51 passed, 45 deselected`; Docker acceptance
 registry gồm 7 structural shard, 11 apply/idempotency/delete shard, asset
-lifecycle, policy/control-plane; Ruff/ty pass; hai OpenAPI validate; scanner
-`unknown=0`, `schema_drift=0`; backup gồm database/public/private files và
-restore drill health/cleanup thành công. Mỗi test có hard timeout 55 giây.
+lifecycle, tax 0/5/8/10, commercial, Stock/Buying, workflow/permission,
+cross-cutting effect và 5 fault boundary. Ruff/ty pass; hai OpenAPI validate;
+scanner `unknown=0`, `unclassified=0`, `schema_drift=0`; backup gồm database/
+public/private files và restore drill health/cleanup thành công. Restore site tạm
+`restore-drill-1.local` đã được dọn; cảnh báo `cleanup_old_syncs` được phân loại
+known upstream warning. Policy scanner cuối: `unknown=0`, `unclassified=0`,
+`schema_drift=0`, `managed_entries_without_acceptance=0`. Mỗi test có hard timeout
+70 giây cho test nhỏ và 5 phút cho test gộp.
 
 Các invariant đã xác nhận gồm explicit `/api/v1` allowlist, không có generic
 business fallback, write qua controller native, immutable Company sau
@@ -553,7 +615,7 @@ Trạng thái phát hành hiện tại:
 
 ```text
 Business API Phase 1-7:       COMPLETE
-Phase 8 policy wrapper:       IN_PROGRESS
+Phase 8 policy wrapper:       COMPLETE
 Managed production policy:    14 native documents
 Windows/Docker baseline:      VERIFIED
 Phase 8 host signature:       WINDOWS_DOCKER

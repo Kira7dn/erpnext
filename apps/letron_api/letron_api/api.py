@@ -110,6 +110,12 @@ def document_action(doctype: str, name: str, action: str) -> dict[str, object]:
         ("Journal Entry", "cancel"),
         ("Payment Request", "submit"),
         ("Payment Request", "cancel"),
+        ("Payment Order", "submit"),
+        ("Payment Order", "cancel"),
+        ("Payment Entry", "submit"),
+        ("Payment Entry", "cancel"),
+        ("Bank Transaction", "submit"),
+        ("Bank Transaction", "cancel"),
     }
     if (doctype, action) not in supported:
         frappe.throw(f"Unsupported document action: {action}")
@@ -160,6 +166,8 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
     fixture_document_names: set[str] = set()
     transaction_doctypes = (
         "Payment Request",
+        "Payment Order",
+        "Bank Transaction",
         "Journal Entry",
         "Sales Invoice",
         "Purchase Invoice",
@@ -175,7 +183,14 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
         filters: dict[str, object] = {"name": ["like", f"{prefix}%"]}
         if companies and meta.get_field("company"):
             filters = {"company": ["in", companies]}
-        names = frappe.get_all(transaction_doctype, filters=filters, pluck="name")
+        if transaction_doctype == "Payment Entry" and not companies:
+            names = frappe.get_all(
+                transaction_doctype,
+                or_filters=[{"name": ["like", f"{prefix}%"]}, {"reference_no": ["like", f"{prefix}%"]}],
+                pluck="name",
+            )
+        else:
+            names = frappe.get_all(transaction_doctype, filters=filters, pluck="name")
         transaction_names[transaction_doctype] = names
         fixture_document_names.update(names)
         vouchers.extend(names)
@@ -190,6 +205,22 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
                     document.cancel()
                     deleted.append(f"{transaction_doctype}:{name}:cancelled")
                 except Exception as error:  # noqa: BLE001 - report cleanup residue
+                    # Payment Entry cancellation can be rejected by Frappe's
+                    # dynamic-link guard when a failed acceptance run left its
+                    # generated GL rows behind. This branch is strictly
+                    # prefix-scoped disposable teardown: remove only derived
+                    # ledger rows for this voucher, then force-delete the
+                    # fixture document so cleanup itself cannot cascade into
+                    # a tenant-data mutation.
+                    if transaction_doctype == "Payment Entry" and name.startswith(prefix):
+                        for ledger_doctype in ("GL Entry", "Payment Ledger Entry", "Stock Ledger Entry"):
+                            frappe.db.delete(ledger_doctype, {"voucher_no": name})
+                        try:
+                            frappe.delete_doc("Payment Entry", name, force=True, ignore_permissions=True)
+                            deleted.append(f"Payment Entry:{name}:ledger-fallback")
+                            continue
+                        except Exception as fallback_error:  # noqa: BLE001 - report cleanup residue
+                            failures.append(f"Payment Entry:{name}:fallback:{type(fallback_error).__name__}")
                     failures.append(f"{transaction_doctype}:{name}:cancel:{type(error).__name__}")
     frappe.db.commit()
     for ledger_doctype in ("GL Entry", "Payment Ledger Entry", "Stock Ledger Entry"):
@@ -218,6 +249,36 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
             except frappe.DoesNotExistError:
                 deleted.append(f"{doctype}:{name}")
             except Exception as error:  # noqa: BLE001 - report cleanup residue
+                failures.append(f"{doctype}:{name}:{type(error).__name__}")
+    frappe.db.commit()
+
+    # Traceability documents can hold links to stock transactions and each
+    # other. Remove the run-scoped documents before deleting their masters;
+    # this is deliberately prefix-only and uses native deletion.
+    traceability_doctypes = (
+        "Quality Inspection",
+        "Stock Reservation Entry",
+        "Landed Cost Voucher",
+        "Shipment",
+        "Pick List",
+        "Stock Reconciliation",
+        "Serial No",
+        "Batch",
+    )
+    for doctype in traceability_doctypes:
+        names = frappe.get_all(doctype, filters={"name": ["like", f"{prefix}%"]}, pluck="name")
+        fixture_document_names.update(names)
+        for name in names:
+            try:
+                document = frappe.get_doc(doctype, name)
+                if document.docstatus == 1:
+                    document.flags.ignore_permissions = True
+                    document.cancel()
+                frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
+                deleted.append(f"{doctype}:{name}")
+            except frappe.DoesNotExistError:
+                deleted.append(f"{doctype}:{name}")
+            except Exception as error:  # noqa: BLE001 - report scoped residue
                 failures.append(f"{doctype}:{name}:{type(error).__name__}")
     frappe.db.commit()
 
@@ -351,7 +412,15 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
         filters: dict[str, object] = {"name": ["like", f"{name_prefix}%"]}
         if companies and frappe.get_meta(doctype).get_field("company"):
             filters = {"company": ["in", companies]}
-        names = frappe.get_all(doctype, filters=filters, pluck="name", order_by=order_by)
+        if doctype == "Payment Entry" and not companies:
+            names = frappe.get_all(
+                doctype,
+                or_filters=[{"name": ["like", f"{prefix}%"]}, {"reference_no": ["like", f"{prefix}%"]}],
+                pluck="name",
+                order_by=order_by,
+            )
+        else:
+            names = frappe.get_all(doctype, filters=filters, pluck="name", order_by=order_by)
         fixture_document_names.update(names)
         for name in names:
             try:

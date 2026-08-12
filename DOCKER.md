@@ -71,9 +71,9 @@ Mọi action runtime luôn dùng hai path cố định trong `config/`; launcher
 nhận path override. `workers.short_replicas` mặc định là `2` để delivery queue
 đáp ứng hard deadline mà không phải chia sẻ với default queue.
 
-Production Compose không chạy staging event consumer. Acceptance dùng riêng
-`docker-compose.acceptance.yml`; production delivery chỉ chạy khi
-`delivery.enabled: true`. Backup dùng `bench backup` native, mặc định mỗi 24
+Compose chỉ dùng stack ERPNext chính; không có acceptance overlay hay staging
+event consumer. Production delivery chỉ chạy khi `delivery.enabled: true`.
+Backup dùng `bench backup` native, mặc định mỗi 24
 giờ, retention 14 ngày. `backup-verify` restore vào site/database dùng một lần
 rồi tự cleanup, không ghi đè site `frontend`.
 

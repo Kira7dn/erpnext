@@ -48,6 +48,7 @@ runtime:
   public_modules:
     - Accounts
     - Buying
+    - CRM
     - Contacts
     - Selling
     - Stock
@@ -79,11 +80,41 @@ runtime:
     - doctype: Payment Request
       module: Accounts
       actions: [submit, cancel]
+    - doctype: Payment Order
+      module: Accounts
+      actions: [submit, cancel]
+    - doctype: Payment Entry
+      module: Accounts
+      actions: [submit, cancel]
+    - doctype: Bank Transaction
+      module: Accounts
+      actions: [submit, cancel]
+  custom_actions:
+    - doctype: Bank Transaction
+      module: Accounts
+      action: reconcile
+      operation_id: reconcileBankTransaction
+      path_suffix: reconcile
+      handler: letron_api.accounts_reconciliation.reconcile_bank_transaction
+    - doctype: Bank Transaction
+      module: Accounts
+      action: unreconcile
+      operation_id: unreconcileBankTransaction
+      path_suffix: unreconcile
+      handler: letron_api.accounts_reconciliation.unreconcile_bank_transaction
   include_methods:
     - letron_api.api.health
     - letron_api.api.runtime_info
     - letron_api.api.runtime_snapshot
   public_resources:
+    - doctype: Lead
+      path: /api/v1/crm/leads
+    - doctype: Opportunity
+      path: /api/v1/crm/opportunities
+    - doctype: Request for Quotation
+      path: /api/v1/crm/request-for-quotations
+    - doctype: Supplier Quotation
+      path: /api/v1/crm/supplier-quotations
     - doctype: Customer
       path: /api/v1/selling/customers
     - doctype: Quotation
@@ -110,6 +141,10 @@ runtime:
       path: /api/v1/accounts/journal-entries
     - doctype: Payment Request
       path: /api/v1/accounts/payment-requests
+    - doctype: Bank Transaction
+      path: /api/v1/accounts/bank-transactions
+    - doctype: Payment Order
+      path: /api/v1/accounts/payment-orders
     - doctype: Supplier
       path: /api/v1/buying/suppliers
     - doctype: Purchase Order
@@ -130,6 +165,22 @@ runtime:
       path: /api/v1/stock/stock-entries
     - doctype: Item Price
       path: /api/v1/stock/item-prices
+    - doctype: Stock Reconciliation
+      path: /api/v1/stock/stock-reconciliations
+    - doctype: Serial No
+      path: /api/v1/stock/serial-nos
+    - doctype: Batch
+      path: /api/v1/stock/batches
+    - doctype: Quality Inspection
+      path: /api/v1/stock/quality-inspections
+    - doctype: Pick List
+      path: /api/v1/stock/pick-lists
+    - doctype: Shipment
+      path: /api/v1/stock/shipments
+    - doctype: Landed Cost Voucher
+      path: /api/v1/stock/landed-cost-vouchers
+    - doctype: Stock Reservation Entry
+      path: /api/v1/stock/stock-reservation-entries
 
 transport:
   rest: true
@@ -183,6 +234,15 @@ acceptance:
     extended-api:
       level: docker-runtime
       test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    accounts-reconciliation:
+      level: docker-runtime
+      test: tests/integration/test_accounts_reconciliation.py
+    crm-preorder:
+      level: docker-runtime
+      test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    stock-traceability:
+      level: docker-runtime
+      test: tests/integration/test_stock_traceability.py::test_stock_traceability_contract_and_lifecycle
   operations:
     letron_api_api_health_get: {status: passed, suite: public-api}
     letron_api_api_runtime_info_get: {status: passed, suite: extended-api}
@@ -321,3 +381,81 @@ acceptance:
     deletePaymentRequest: {status: passed, suite: extended-api}
     submitPaymentRequest: {status: passed, suite: extended-api}
     cancelPaymentRequest: {status: passed, suite: extended-api}
+    listBankTransaction: {status: passed, suite: accounts-reconciliation}
+    createBankTransaction: {status: passed, suite: accounts-reconciliation}
+    getBankTransaction: {status: passed, suite: accounts-reconciliation}
+    updateBankTransaction: {status: passed, suite: accounts-reconciliation}
+    deleteBankTransaction: {status: passed, suite: accounts-reconciliation}
+    reconcileBankTransaction: {status: passed, suite: accounts-reconciliation}
+    unreconcileBankTransaction: {status: passed, suite: accounts-reconciliation}
+    listPaymentOrder: {status: passed, suite: accounts-reconciliation}
+    createPaymentOrder: {status: passed, suite: accounts-reconciliation}
+    getPaymentOrder: {status: passed, suite: accounts-reconciliation}
+    updatePaymentOrder: {status: passed, suite: accounts-reconciliation}
+    deletePaymentOrder: {status: passed, suite: accounts-reconciliation}
+    submitPaymentOrder: {status: passed, suite: accounts-reconciliation}
+    cancelPaymentOrder: {status: passed, suite: accounts-reconciliation}
+    submitPaymentEntry: {status: passed, suite: accounts-reconciliation}
+    cancelPaymentEntry: {status: passed, suite: accounts-reconciliation}
+    submitBankTransaction: {status: passed, suite: accounts-reconciliation}
+    cancelBankTransaction: {status: passed, suite: accounts-reconciliation}
+    listLead: {status: passed, suite: crm-preorder}
+    createLead: {status: passed, suite: crm-preorder}
+    getLead: {status: passed, suite: crm-preorder}
+    updateLead: {status: passed, suite: crm-preorder}
+    deleteLead: {status: passed, suite: crm-preorder}
+    listOpportunity: {status: passed, suite: crm-preorder}
+    createOpportunity: {status: passed, suite: crm-preorder}
+    getOpportunity: {status: passed, suite: crm-preorder}
+    updateOpportunity: {status: passed, suite: crm-preorder}
+    deleteOpportunity: {status: passed, suite: crm-preorder}
+    listRequestforQuotation: {status: passed, suite: crm-preorder}
+    createRequestforQuotation: {status: passed, suite: crm-preorder}
+    getRequestforQuotation: {status: passed, suite: crm-preorder}
+    updateRequestforQuotation: {status: passed, suite: crm-preorder}
+    deleteRequestforQuotation: {status: passed, suite: crm-preorder}
+    listSupplierQuotation: {status: passed, suite: crm-preorder}
+    createSupplierQuotation: {status: passed, suite: crm-preorder}
+    getSupplierQuotation: {status: passed, suite: crm-preorder}
+    updateSupplierQuotation: {status: passed, suite: crm-preorder}
+    deleteSupplierQuotation: {status: passed, suite: crm-preorder}
+    listStockReconciliation: {status: passed, suite: stock-traceability}
+    createStockReconciliation: {status: passed, suite: stock-traceability}
+    getStockReconciliation: {status: passed, suite: stock-traceability}
+    updateStockReconciliation: {status: passed, suite: stock-traceability}
+    deleteStockReconciliation: {status: passed, suite: stock-traceability}
+    listSerialNo: {status: passed, suite: stock-traceability}
+    createSerialNo: {status: passed, suite: stock-traceability}
+    getSerialNo: {status: passed, suite: stock-traceability}
+    updateSerialNo: {status: passed, suite: stock-traceability}
+    deleteSerialNo: {status: passed, suite: stock-traceability}
+    listBatch: {status: passed, suite: stock-traceability}
+    createBatch: {status: passed, suite: stock-traceability}
+    getBatch: {status: passed, suite: stock-traceability}
+    updateBatch: {status: passed, suite: stock-traceability}
+    deleteBatch: {status: passed, suite: stock-traceability}
+    listQualityInspection: {status: passed, suite: stock-traceability}
+    createQualityInspection: {status: passed, suite: stock-traceability}
+    getQualityInspection: {status: passed, suite: stock-traceability}
+    updateQualityInspection: {status: passed, suite: stock-traceability}
+    deleteQualityInspection: {status: passed, suite: stock-traceability}
+    listPickList: {status: passed, suite: stock-traceability}
+    createPickList: {status: passed, suite: stock-traceability}
+    getPickList: {status: passed, suite: stock-traceability}
+    updatePickList: {status: passed, suite: stock-traceability}
+    deletePickList: {status: passed, suite: stock-traceability}
+    listShipment: {status: passed, suite: stock-traceability}
+    createShipment: {status: passed, suite: stock-traceability}
+    getShipment: {status: passed, suite: stock-traceability}
+    updateShipment: {status: passed, suite: stock-traceability}
+    deleteShipment: {status: passed, suite: stock-traceability}
+    listLandedCostVoucher: {status: passed, suite: stock-traceability}
+    createLandedCostVoucher: {status: passed, suite: stock-traceability}
+    getLandedCostVoucher: {status: passed, suite: stock-traceability}
+    updateLandedCostVoucher: {status: passed, suite: stock-traceability}
+    deleteLandedCostVoucher: {status: passed, suite: stock-traceability}
+    listStockReservationEntry: {status: passed, suite: stock-traceability}
+    createStockReservationEntry: {status: passed, suite: stock-traceability}
+    getStockReservationEntry: {status: passed, suite: stock-traceability}
+    updateStockReservationEntry: {status: passed, suite: stock-traceability}
+    deleteStockReservationEntry: {status: passed, suite: stock-traceability}

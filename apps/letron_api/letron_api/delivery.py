@@ -31,6 +31,8 @@ PUBLIC_RESOURCE_PATHS = {
     "Cost Center": "/api/v1/accounts/cost-centers",
     "Journal Entry": "/api/v1/accounts/journal-entries",
     "Payment Request": "/api/v1/accounts/payment-requests",
+    "Bank Transaction": "/api/v1/accounts/bank-transactions",
+    "Payment Order": "/api/v1/accounts/payment-orders",
     "Supplier": "/api/v1/buying/suppliers",
     "Purchase Order": "/api/v1/buying/purchase-orders",
     "Item": "/api/v1/stock/items",

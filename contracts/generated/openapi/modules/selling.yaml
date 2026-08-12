@@ -1,0 +1,3683 @@
+openapi: 3.1.0
+info:
+  title: Letron ERPNext Selling API
+  version: 0.1.0
+servers:
+- url: http://127.0.0.1:8080
+tags:
+- name: Typed Resource API
+- name: Whitelisted methods
+- name: Metadata
+- name: Files
+- name: 'Module: Accounts'
+- name: 'Module: Selling'
+- name: 'Module: Stock'
+- name: 'Module: Utilities'
+security:
+- frappeToken: []
+paths:
+  /api/v1/selling/customers:
+    get:
+      tags:
+      - 'Module: Selling'
+      summary: List Customer records
+      description: List typed Customer documents.
+      operationId: listCustomer
+      parameters:
+      - &id002
+        $ref: '#/components/parameters/RequestId'
+      - &id015
+        name: fields
+        in: query
+        schema:
+          type: string
+        description: JSON field-name array
+      - &id016
+        name: filters
+        in: query
+        schema:
+          type: string
+        description: JSON Frappe filters
+      - &id017
+        name: order_by
+        in: query
+        schema:
+          type: string
+      - &id018
+        name: limit_page_length
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - &id019
+        name: limit_start
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id003
+                      $ref: '#/components/schemas/Customer'
+                  message: {}
+                required:
+                - data
+        '400': &id004
+          description: Invalid request
+          content: &id001
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeError'
+        '401': &id005
+          description: Authentication required
+          content: *id001
+        '403': &id006
+          description: Permission denied
+          content: *id001
+        '404': &id007
+          description: Resource not found
+          content: *id001
+        '409': &id008
+          description: Idempotency or optimistic concurrency conflict
+          content: *id001
+        '417': &id009
+          description: Native Frappe validation failure
+          content: *id001
+        '429': &id010
+          description: Rate limited
+          content: *id001
+        '500': &id011
+          description: Server or rollback failure
+          content: *id001
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: Selling'
+      summary: Create Customer
+      description: Create a Customer using the runtime DocType schema.
+      operationId: createCustomer
+      parameters: &id020
+      - *id002
+      - &id012
+        $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id013
+              type: object
+              properties:
+                name: &id027
+                  type: string
+                basic_info: &id028
+                  type: string
+                  x-frappe-options: fa fa-user
+                naming_series: &id029
+                  type: string
+                  enum:
+                  - CUST-.YYYY.-
+                customer_name: &id030
+                  type: string
+                alias: &id031
+                  type: string
+                gender: &id032
+                  type: string
+                  x-frappe-target-doctype: Gender
+                customer_type: &id033
+                  type: string
+                  enum:
+                  - Company
+                  - Individual
+                  - Partnership
+                default_bank_account: &id034
+                  type: string
+                  x-frappe-target-doctype: Bank Account
+                image: &id035
+                  type: string
+                  writeOnly: true
+                column_break0: &id036
+                  type: string
+                account_manager: &id037
+                  type: string
+                  x-frappe-target-doctype: User
+                customer_group: &id038
+                  type: string
+                  x-frappe-target-doctype: Customer Group
+                territory: &id039
+                  type: string
+                  x-frappe-target-doctype: Territory
+                tax_id: &id040
+                  type: string
+                tax_category: &id041
+                  type: string
+                  x-frappe-target-doctype: Tax Category
+                disabled: &id042
+                  type: boolean
+                is_internal_customer: &id043
+                  type: boolean
+                represents_company: &id044
+                  type: string
+                  x-frappe-target-doctype: Company
+                companies: &id045
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AllowedToTransactWith'
+                default_currency: &id046
+                  type: string
+                  x-frappe-target-doctype: Currency
+                default_price_list: &id047
+                  type: string
+                  x-frappe-target-doctype: Price List
+                language: &id048
+                  type: string
+                  x-frappe-target-doctype: Language
+                address_contacts: &id049
+                  type: string
+                  x-frappe-options: fa fa-map-marker
+                website: &id050
+                  type: string
+                column_break1: &id051
+                  type: string
+                primary_address_and_contact_detail: &id052
+                  type: string
+                customer_primary_contact: &id053
+                  type: string
+                  x-frappe-target-doctype: Contact
+                mobile_no: &id054
+                  type: string
+                  x-frappe-options: Mobile
+                email_id: &id055
+                  type: string
+                  x-frappe-options: Email
+                column_break_26: &id056
+                  type: string
+                customer_primary_address: &id057
+                  type: string
+                  x-frappe-target-doctype: Address
+                default_receivable_accounts: &id058
+                  type: string
+                accounts: &id059
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PartyAccount'
+                credit_limit_section: &id060
+                  type: string
+                payment_terms: &id061
+                  type: string
+                  x-frappe-target-doctype: Payment Terms Template
+                customer_details: &id062
+                  type: string
+                market_segment: &id063
+                  type: string
+                  x-frappe-target-doctype: Market Segment
+                industry: &id064
+                  type: string
+                  x-frappe-target-doctype: Industry Type
+                is_frozen: &id065
+                  type: boolean
+                loyalty_program: &id066
+                  type: string
+                  x-frappe-target-doctype: Loyalty Program
+                default_sales_partner: &id067
+                  type: string
+                  x-frappe-target-doctype: Sales Partner
+                default_commission_rate: &id068
+                  type: number
+                sales_team_section: &id069
+                  type: string
+                sales_team: &id070
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SalesTeam'
+                credit_limits: &id071
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CustomerCreditLimit'
+                so_required: &id072
+                  type: boolean
+                dn_required: &id073
+                  type: boolean
+                tax_withholding_category: &id074
+                  type: string
+                  x-frappe-target-doctype: Tax Withholding Category
+                contact_and_address_tab: &id075
+                  type: string
+                settings_tab: &id076
+                  type: string
+                sales_team_tab: &id077
+                  type: string
+                  x-frappe-options: fa fa-group
+                column_break_66: &id078
+                  type: string
+                column_break_21: &id079
+                  type: string
+                column_break_53: &id080
+                  type: string
+                loyalty_points_tab: &id081
+                  type: string
+                taxation_section: &id082
+                  type: string
+                accounting_tab: &id083
+                  type: string
+                tax_tab: &id084
+                  type: string
+                internal_customer_section: &id085
+                  type: string
+                column_break_54: &id086
+                  type: string
+                portal_users_tab: &id087
+                  type: string
+                portal_users: &id088
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PortalUser'
+                column_break_nwor: &id089
+                  type: string
+                first_name: &id090
+                  type: string
+                  writeOnly: true
+                last_name: &id091
+                  type: string
+                  writeOnly: true
+                supplier_numbers: &id092
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SupplierNumberAtCustomer'
+                tax_withholding_group: &id093
+                  type: string
+                  x-frappe-target-doctype: Tax Withholding Group
+                more_info_tab: &id094
+                  type: string
+                references_section: &id095
+                  type: string
+                column_break_wlbg: &id096
+                  type: string
+                section_break_objq: &id097
+                  type: string
+                column_break_hdmn: &id098
+                  type: string
+                connections_tab: &id099
+                  type: string
+                supplier_numbers_section: &id100
+                  type: string
+                section_break_hwkr: &id101
+                  type: string
+                column_break_yvyu: &id102
+                  type: string
+                default_accounts_column: &id103
+                  type: string
+                supplier_numbers_column: &id104
+                  type: string
+                section_break_nrvh: &id105
+                  type: string
+                credit_limit_column: &id106
+                  type: string
+              required:
+              - customer_name
+              - customer_type
+              - name
+              additionalProperties: true
+              x-module: Selling
+            example:
+              customer_name: ''
+              customer_type: ''
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id003
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/selling/customers/{name}:
+    get:
+      tags:
+      - 'Module: Selling'
+      operationId: getCustomer
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id003
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+    put:
+      tags:
+      - 'Module: Selling'
+      operationId: updateCustomer
+      parameters: &id014
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id013
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id003
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    delete:
+      tags:
+      - 'Module: Selling'
+      operationId: deleteCustomer
+      parameters: *id014
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/selling/quotations:
+    get:
+      tags:
+      - 'Module: Selling'
+      summary: List Quotation records
+      description: List typed Quotation documents.
+      operationId: listQuotation
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id021
+                      $ref: '#/components/schemas/Quotation'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: Selling'
+      summary: Create Quotation
+      description: Create a Quotation using the runtime DocType schema.
+      operationId: createQuotation
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id022
+              type: object
+              properties:
+                name: &id107
+                  type: string
+                customer_section: &id108
+                  type: string
+                  x-frappe-options: fa fa-user
+                naming_series: &id109
+                  type: string
+                  enum:
+                  - SAL-QTN-.YYYY.-
+                quotation_to: &id110
+                  type: string
+                  x-frappe-target-doctype: DocType
+                party_name: &id111
+                  type: string
+                  x-frappe-options: quotation_to
+                column_break1: &id112
+                  type: string
+                company: &id113
+                  type: string
+                  x-frappe-target-doctype: Company
+                transaction_date: &id114
+                  type: string
+                  format: date
+                valid_till: &id115
+                  type: string
+                  format: date
+                order_type: &id116
+                  type: string
+                  enum:
+                  - Sales
+                  - Maintenance
+                  - Shopping Cart
+                customer_address: &id117
+                  type: string
+                  x-frappe-target-doctype: Address
+                contact_person: &id118
+                  type: string
+                  x-frappe-target-doctype: Contact
+                col_break98: &id119
+                  type: string
+                shipping_address_name: &id120
+                  type: string
+                  x-frappe-target-doctype: Address
+                customer_group: &id121
+                  type: string
+                  x-frappe-target-doctype: Customer Group
+                  writeOnly: true
+                territory: &id122
+                  type: string
+                  x-frappe-target-doctype: Territory
+                currency_and_price_list: &id123
+                  type: string
+                  x-frappe-options: fa fa-tag
+                currency: &id124
+                  type: string
+                  x-frappe-target-doctype: Currency
+                conversion_rate: &id125
+                  type: number
+                column_break2: &id126
+                  type: string
+                selling_price_list: &id127
+                  type: string
+                  x-frappe-target-doctype: Price List
+                plc_conversion_rate: &id128
+                  type: number
+                ignore_pricing_rule: &id129
+                  type: boolean
+                items_section: &id130
+                  type: string
+                  x-frappe-options: fa fa-shopping-cart
+                items: &id131
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/QuotationItem'
+                pricing_rule_details: &id132
+                  type: string
+                sec_break23: &id133
+                  type: string
+                column_break_28: &id134
+                  type: string
+                taxes_section: &id135
+                  type: string
+                  x-frappe-options: fa fa-money
+                tax_category: &id136
+                  type: string
+                  x-frappe-target-doctype: Tax Category
+                column_break_34: &id137
+                  type: string
+                shipping_rule: &id138
+                  type: string
+                  x-frappe-target-doctype: Shipping Rule
+                section_break_36: &id139
+                  type: string
+                taxes_and_charges: &id140
+                  type: string
+                  x-frappe-target-doctype: Sales Taxes and Charges Template
+                taxes: &id141
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SalesTaxesandCharges'
+                sec_tax_breakup: &id142
+                  type: string
+                section_break_39: &id143
+                  type: string
+                column_break_42: &id144
+                  type: string
+                section_break_44: &id145
+                  type: string
+                coupon_code: &id146
+                  type: string
+                  x-frappe-target-doctype: Coupon Code
+                referral_sales_partner: &id147
+                  type: string
+                  x-frappe-target-doctype: Sales Partner
+                apply_discount_on: &id148
+                  type: string
+                  enum:
+                  - Grand Total
+                  - Net Total
+                column_break_46: &id149
+                  type: string
+                additional_discount_percentage: &id150
+                  type: number
+                discount_amount: &id151
+                  type: number
+                  x-frappe-options: currency
+                totals: &id152
+                  type: string
+                  x-frappe-options: fa fa-money
+                column_break3: &id153
+                  type: string
+                payment_schedule_section: &id154
+                  type: string
+                payment_terms_template: &id155
+                  type: string
+                  x-frappe-target-doctype: Payment Terms Template
+                payment_schedule: &id156
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PaymentSchedule'
+                terms_section_break: &id157
+                  type: string
+                  x-frappe-options: fa fa-legal
+                tc_name: &id158
+                  type: string
+                  x-frappe-target-doctype: Terms and Conditions
+                terms: &id159
+                  type: string
+                print_settings: &id160
+                  type: string
+                letter_head: &id161
+                  type: string
+                  x-frappe-target-doctype: Letter Head
+                group_same_items: &id162
+                  type: boolean
+                column_break_73: &id163
+                  type: string
+                select_print_heading: &id164
+                  type: string
+                  x-frappe-target-doctype: Print Heading
+                update_auto_repeat_reference: &id165
+                  type: string
+                order_lost_reason: &id166
+                  type: string
+                supplier_quotation: &id167
+                  type: string
+                  x-frappe-target-doctype: Supplier Quotation
+                packed_items: &id168
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PackedItem'
+                bundle_items_section: &id169
+                  type: string
+                  x-frappe-options: fa fa-suitcase
+                competitors: &id170
+                  type: string
+                  x-frappe-options: Competitor Detail
+                company_address: &id171
+                  type: string
+                  x-frappe-target-doctype: Address
+                scan_barcode: &id172
+                  type: string
+                  x-frappe-options: Barcode
+                address_and_contact_tab: &id173
+                  type: string
+                terms_tab: &id174
+                  type: string
+                more_info_tab: &id175
+                  type: string
+                connections_tab: &id176
+                  type: string
+                column_break_7: &id177
+                  type: string
+                column_break_31: &id178
+                  type: string
+                column_break_36: &id179
+                  type: string
+                billing_address_section: &id180
+                  type: string
+                  x-frappe-options: fa fa-bullhorn
+                shipping_address_section: &id181
+                  type: string
+                column_break_81: &id182
+                  type: string
+                company_address_section: &id183
+                  type: string
+                column_break_87: &id184
+                  type: string
+                lost_reasons_section: &id185
+                  type: string
+                column_break_117: &id186
+                  type: string
+                additional_info_section: &id187
+                  type: string
+                  x-frappe-options: fa fa-file-text
+                column_break_108: &id188
+                  type: string
+                incoterm: &id189
+                  type: string
+                  x-frappe-target-doctype: Incoterm
+                named_place: &id190
+                  type: string
+                utm_campaign: &id191
+                  type: string
+                  x-frappe-target-doctype: UTM Campaign
+                utm_source: &id192
+                  type: string
+                  x-frappe-target-doctype: UTM Source
+                utm_medium: &id193
+                  type: string
+                  x-frappe-target-doctype: UTM Medium
+                utm_content: &id194
+                  type: string
+                disable_rounded_total: &id195
+                  type: boolean
+                company_contact_person: &id196
+                  type: string
+                  x-frappe-target-doctype: Contact
+                has_unit_price_items: &id197
+                  type: boolean
+                  writeOnly: true
+                last_scanned_warehouse: &id198
+                  type: string
+                item_wise_tax_details: &id199
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ItemWiseTaxDetail'
+                  writeOnly: true
+                column_break_fozg: &id200
+                  type: string
+                utm_analytics_section: &id201
+                  type: string
+                auto_repeat_section: &id202
+                  type: string
+                title: &id203
+                  type: string
+              required:
+              - company
+              - conversion_rate
+              - currency
+              - items
+              - name
+              - naming_series
+              - order_type
+              - plc_conversion_rate
+              - quotation_to
+              - selling_price_list
+              - transaction_date
+              additionalProperties: true
+              x-module: Selling
+            example:
+              naming_series: ''
+              quotation_to: ''
+              company: ''
+              transaction_date: ''
+              order_type: ''
+              currency: ''
+              conversion_rate: 0
+              selling_price_list: ''
+              plc_conversion_rate: 0
+              items: []
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id021
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/selling/quotations/{name}:
+    get:
+      tags:
+      - 'Module: Selling'
+      operationId: getQuotation
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id021
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    put:
+      tags:
+      - 'Module: Selling'
+      operationId: updateQuotation
+      parameters: &id023
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id022
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id021
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    delete:
+      tags:
+      - 'Module: Selling'
+      operationId: deleteQuotation
+      parameters: *id023
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/selling/sales-orders:
+    get:
+      tags:
+      - 'Module: Selling'
+      summary: List Sales Order records
+      description: List typed Sales Order documents.
+      operationId: listSalesOrder
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id024
+                      $ref: '#/components/schemas/SalesOrder'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: Selling'
+      summary: Create Sales Order
+      description: Create a Sales Order using the runtime DocType schema.
+      operationId: createSalesOrder
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id025
+              type: object
+              properties:
+                name: &id204
+                  type: string
+                customer_section: &id205
+                  type: string
+                  x-frappe-options: fa fa-user
+                column_break0: &id206
+                  type: string
+                naming_series: &id207
+                  type: string
+                  enum:
+                  - SAL-ORD-.YYYY.-
+                customer: &id208
+                  type: string
+                  x-frappe-target-doctype: Customer
+                order_type: &id209
+                  type: string
+                  enum:
+                  - Sales
+                  - Maintenance
+                  - Shopping Cart
+                column_break1: &id210
+                  type: string
+                company: &id211
+                  type: string
+                  x-frappe-target-doctype: Company
+                transaction_date: &id212
+                  type: string
+                  format: date
+                delivery_date: &id213
+                  type: string
+                  format: date
+                po_no: &id214
+                  type: string
+                po_date: &id215
+                  type: string
+                  format: date
+                contact_info: &id216
+                  type: string
+                  x-frappe-options: fa fa-bullhorn
+                customer_address: &id217
+                  type: string
+                  x-frappe-target-doctype: Address
+                contact_person: &id218
+                  type: string
+                  x-frappe-target-doctype: Contact
+                company_address: &id219
+                  type: string
+                  x-frappe-target-doctype: Address
+                col_break46: &id220
+                  type: string
+                shipping_address_name: &id221
+                  type: string
+                  x-frappe-target-doctype: Address
+                customer_group: &id222
+                  type: string
+                  x-frappe-target-doctype: Customer Group
+                  writeOnly: true
+                territory: &id223
+                  type: string
+                  x-frappe-target-doctype: Territory
+                currency_and_price_list: &id224
+                  type: string
+                  x-frappe-options: fa fa-tag
+                currency: &id225
+                  type: string
+                  x-frappe-target-doctype: Currency
+                conversion_rate: &id226
+                  type: number
+                column_break2: &id227
+                  type: string
+                selling_price_list: &id228
+                  type: string
+                  x-frappe-target-doctype: Price List
+                plc_conversion_rate: &id229
+                  type: number
+                ignore_pricing_rule: &id230
+                  type: boolean
+                sec_warehouse: &id231
+                  type: string
+                set_warehouse: &id232
+                  type: string
+                  x-frappe-target-doctype: Warehouse
+                items_section: &id233
+                  type: string
+                  x-frappe-options: fa fa-shopping-cart
+                scan_barcode: &id234
+                  type: string
+                  x-frappe-options: Barcode
+                items: &id235
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SalesOrderItem'
+                pricing_rule_details: &id236
+                  type: string
+                section_break_31: &id237
+                  type: string
+                column_break_33a: &id238
+                  type: string
+                column_break_33: &id239
+                  type: string
+                taxes_section: &id240
+                  type: string
+                  x-frappe-options: fa fa-money
+                tax_category: &id241
+                  type: string
+                  x-frappe-target-doctype: Tax Category
+                column_break_38: &id242
+                  type: string
+                shipping_rule: &id243
+                  type: string
+                  x-frappe-target-doctype: Shipping Rule
+                section_break_40: &id244
+                  type: string
+                taxes_and_charges: &id245
+                  type: string
+                  x-frappe-target-doctype: Sales Taxes and Charges Template
+                taxes: &id246
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SalesTaxesandCharges'
+                sec_tax_breakup: &id247
+                  type: string
+                section_break_43: &id248
+                  type: string
+                column_break_46: &id249
+                  type: string
+                loyalty_points_redemption: &id250
+                  type: string
+                  writeOnly: true
+                coupon_code: &id251
+                  type: string
+                  x-frappe-target-doctype: Coupon Code
+                apply_discount_on: &id252
+                  type: string
+                  enum:
+                  - Grand Total
+                  - Net Total
+                column_break_50: &id253
+                  type: string
+                additional_discount_percentage: &id254
+                  type: number
+                discount_amount: &id255
+                  type: number
+                  x-frappe-options: currency
+                packing_list: &id256
+                  type: string
+                  x-frappe-options: fa fa-suitcase
+                packed_items: &id257
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PackedItem'
+                payment_schedule_section: &id258
+                  type: string
+                payment_terms_template: &id259
+                  type: string
+                  x-frappe-target-doctype: Payment Terms Template
+                payment_schedule: &id260
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PaymentSchedule'
+                terms_section_break: &id261
+                  type: string
+                  x-frappe-options: fa fa-legal
+                tc_name: &id262
+                  type: string
+                  x-frappe-target-doctype: Terms and Conditions
+                terms: &id263
+                  type: string
+                more_info: &id264
+                  type: string
+                  x-frappe-options: fa fa-file-text
+                project: &id265
+                  type: string
+                  x-frappe-target-doctype: Project
+                printing_details: &id266
+                  type: string
+                letter_head: &id267
+                  type: string
+                  x-frappe-target-doctype: Letter Head
+                column_break4: &id268
+                  type: string
+                select_print_heading: &id269
+                  type: string
+                  x-frappe-target-doctype: Print Heading
+                group_same_items: &id270
+                  type: boolean
+                section_break_78: &id271
+                  type: string
+                delivery_status: &id272
+                  type: string
+                  enum:
+                  - Not Delivered
+                  - Fully Delivered
+                  - Partly Delivered
+                  - Closed
+                  - Not Applicable
+                  writeOnly: true
+                column_break_81: &id273
+                  type: string
+                billing_status: &id274
+                  type: string
+                  enum:
+                  - Not Billed
+                  - Fully Billed
+                  - Partly Billed
+                  - Closed
+                  writeOnly: true
+                sales_team_section_break: &id275
+                  type: string
+                  x-frappe-options: fa fa-group
+                sales_partner: &id276
+                  type: string
+                  x-frappe-target-doctype: Sales Partner
+                column_break7: &id277
+                  type: string
+                commission_rate: &id278
+                  type: number
+                total_commission: &id279
+                  type: number
+                  x-frappe-options: Company:company:default_currency
+                section_break1: &id280
+                  type: string
+                sales_team: &id281
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SalesTeam'
+                from_date: &id282
+                  type: string
+                  format: date
+                to_date: &id283
+                  type: string
+                  format: date
+                column_break_108: &id284
+                  type: string
+                auto_repeat: &id285
+                  type: string
+                  x-frappe-target-doctype: Auto Repeat
+                update_auto_repeat_reference: &id286
+                  type: string
+                skip_delivery_note: &id287
+                  type: boolean
+                disable_rounded_total: &id288
+                  type: boolean
+                dispatch_address_name: &id289
+                  type: string
+                  x-frappe-target-doctype: Address
+                accounting_dimensions_section: &id290
+                  type: string
+                cost_center: &id291
+                  type: string
+                  x-frappe-target-doctype: Cost Center
+                dimension_col_break: &id292
+                  type: string
+                column_break_7: &id293
+                  type: string
+                column_break_28: &id294
+                  type: string
+                column_break_49: &id295
+                  type: string
+                connections_tab: &id296
+                  type: string
+                payment_terms_section: &id297
+                  type: string
+                column_break_116: &id298
+                  type: string
+                billing_address_column: &id299
+                  type: string
+                shipping_address_column: &id300
+                  type: string
+                column_break_93: &id301
+                  type: string
+                column_break_84: &id302
+                  type: string
+                column_break_92: &id303
+                  type: string
+                additional_info_section: &id304
+                  type: string
+                incoterm: &id305
+                  type: string
+                  x-frappe-target-doctype: Incoterm
+                named_place: &id306
+                  type: string
+                reserve_stock: &id307
+                  type: boolean
+                advance_payment_status: &id308
+                  type: string
+                  enum:
+                  - Not Requested
+                  - Requested
+                  - Partially Paid
+                  - Fully Paid
+                  writeOnly: true
+                column_break_yvzv: &id309
+                  type: string
+                utm_medium: &id310
+                  type: string
+                  x-frappe-target-doctype: UTM Medium
+                utm_content: &id311
+                  type: string
+                utm_source: &id312
+                  type: string
+                  x-frappe-target-doctype: UTM Source
+                utm_campaign: &id313
+                  type: string
+                  x-frappe-target-doctype: UTM Campaign
+                company_contact_person: &id314
+                  type: string
+                  x-frappe-target-doctype: Contact
+                has_unit_price_items: &id315
+                  type: boolean
+                  writeOnly: true
+                last_scanned_warehouse: &id316
+                  type: string
+                is_subcontracted: &id317
+                  type: boolean
+                item_wise_tax_details: &id318
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ItemWiseTaxDetail'
+                  writeOnly: true
+                totals_section: &id319
+                  type: string
+                  x-frappe-options: fa fa-money
+                base_totals_section: &id320
+                  type: string
+                column_break_nuxg: &id321
+                  type: string
+                column_break_bgfw: &id322
+                  type: string
+                section_break_efew: &id323
+                  type: string
+                additional_discount_section: &id324
+                  type: string
+                column_break_ijxt: &id325
+                  type: string
+                utm_analytics_section: &id326
+                  type: string
+                transaction_time: &id327
+                  type: string
+                  format: time
+                title: &id328
+                  type: string
+              required:
+              - company
+              - conversion_rate
+              - currency
+              - customer
+              - items
+              - name
+              - naming_series
+              - order_type
+              - plc_conversion_rate
+              - selling_price_list
+              - transaction_date
+              additionalProperties: true
+              x-module: Selling
+            example:
+              naming_series: ''
+              customer: ''
+              order_type: ''
+              company: ''
+              transaction_date: ''
+              currency: ''
+              conversion_rate: 0
+              selling_price_list: ''
+              plc_conversion_rate: 0
+              items: []
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id024
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/selling/sales-orders/{name}:
+    get:
+      tags:
+      - 'Module: Selling'
+      operationId: getSalesOrder
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id024
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    put:
+      tags:
+      - 'Module: Selling'
+      operationId: updateSalesOrder
+      parameters: &id026
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id025
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id024
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    delete:
+      tags:
+      - 'Module: Selling'
+      operationId: deleteSalesOrder
+      parameters: *id026
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/selling/sales-orders/{name}/submit:
+    post:
+      tags:
+      - 'Module: Selling'
+      - Document actions
+      operationId: submitSalesOrder
+      parameters: *id026
+      responses:
+        '200':
+          description: Submit document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: *id024
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-action: submit
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  /api/v1/selling/sales-orders/{name}/cancel:
+    post:
+      tags:
+      - 'Module: Selling'
+      - Document actions
+      operationId: cancelSalesOrder
+      parameters: *id026
+      responses:
+        '200':
+          description: Cancel document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: *id024
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-action: cancel
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+components:
+  securitySchemes:
+    frappeToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'Frappe token authentication: token api_key:api_secret'
+  parameters:
+    RequestId:
+      name: X-Request-Id
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: X-Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+  schemas:
+    AllowedToTransactWith:
+      type: object
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+      required:
+      - company
+      - name
+      additionalProperties: true
+      x-module: Accounts
+    Customer:
+      type: object
+      properties:
+        name: *id027
+        basic_info: *id028
+        naming_series: *id029
+        customer_name: *id030
+        alias: *id031
+        gender: *id032
+        customer_type: *id033
+        default_bank_account: *id034
+        lead_name:
+          type: string
+          x-frappe-target-doctype: Lead
+          readOnly: true
+        image: *id035
+        column_break0: *id036
+        account_manager: *id037
+        customer_group: *id038
+        territory: *id039
+        tax_id: *id040
+        tax_category: *id041
+        disabled: *id042
+        is_internal_customer: *id043
+        represents_company: *id044
+        companies: *id045
+        default_currency: *id046
+        default_price_list: *id047
+        language: *id048
+        address_contacts: *id049
+        address_html:
+          type: string
+          readOnly: true
+        website: *id050
+        column_break1: *id051
+        contact_html:
+          type: string
+          readOnly: true
+        primary_address_and_contact_detail: *id052
+        customer_primary_contact: *id053
+        mobile_no: *id054
+        email_id: *id055
+        column_break_26: *id056
+        customer_primary_address: *id057
+        primary_address:
+          type: string
+          readOnly: true
+        default_receivable_accounts: *id058
+        accounts: *id059
+        credit_limit_section: *id060
+        payment_terms: *id061
+        customer_details: *id062
+        market_segment: *id063
+        industry: *id064
+        is_frozen: *id065
+        loyalty_program: *id066
+        loyalty_program_tier:
+          type: string
+          readOnly: true
+        default_sales_partner: *id067
+        default_commission_rate: *id068
+        sales_team_section: *id069
+        sales_team: *id070
+        customer_pos_id:
+          type: string
+          readOnly: true
+        credit_limits: *id071
+        so_required: *id072
+        dn_required: *id073
+        tax_withholding_category: *id074
+        opportunity_name:
+          type: string
+          x-frappe-target-doctype: Opportunity
+          readOnly: true
+        contact_and_address_tab: *id075
+        settings_tab: *id076
+        sales_team_tab: *id077
+        column_break_66: *id078
+        column_break_21: *id079
+        column_break_53: *id080
+        loyalty_points_tab: *id081
+        taxation_section: *id082
+        accounting_tab: *id083
+        tax_tab: *id084
+        internal_customer_section: *id085
+        column_break_54: *id086
+        portal_users_tab: *id087
+        portal_users: *id088
+        column_break_nwor: *id089
+        prospect_name:
+          type: string
+          x-frappe-target-doctype: Prospect
+          readOnly: true
+        first_name: *id090
+        last_name: *id091
+        supplier_numbers: *id092
+        tax_withholding_group: *id093
+        more_info_tab: *id094
+        references_section: *id095
+        column_break_wlbg: *id096
+        section_break_objq: *id097
+        column_break_hdmn: *id098
+        connections_tab: *id099
+        supplier_numbers_section: *id100
+        section_break_hwkr: *id101
+        column_break_yvyu: *id102
+        default_accounts_column: *id103
+        supplier_numbers_column: *id104
+        section_break_nrvh: *id105
+        credit_limit_column: *id106
+      required:
+      - customer_name
+      - customer_type
+      - name
+      additionalProperties: true
+      x-module: Selling
+    CustomerCreditLimit:
+      type: object
+      properties:
+        name:
+          type: string
+        credit_limit:
+          type: number
+        overdue_billing_threshold:
+          type: number
+          writeOnly: true
+        column_break_2:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        bypass_credit_limit_check:
+          type: boolean
+      required:
+      - name
+      additionalProperties: true
+      x-module: Selling
+    ItemWiseTaxDetail:
+      type: object
+      properties:
+        name:
+          type: string
+        item_row:
+          type: string
+        tax_row:
+          type: string
+        rate:
+          type: number
+        amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+        taxable_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+      required:
+      - item_row
+      - name
+      - tax_row
+      additionalProperties: true
+      x-module: Accounts
+    PackedItem:
+      type: object
+      properties:
+        name:
+          type: string
+        parent_item:
+          type: string
+          x-frappe-target-doctype: Item
+          readOnly: true
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
+          readOnly: true
+        item_name:
+          type: string
+          readOnly: true
+        column_break_5:
+          type: string
+        description:
+          type: string
+        section_break_6:
+          type: string
+        warehouse:
+          type: string
+          x-frappe-target-doctype: Warehouse
+        target_warehouse:
+          type: string
+          x-frappe-target-doctype: Warehouse
+        column_break_9:
+          type: string
+        qty:
+          type: number
+          readOnly: true
+        section_break_9:
+          type: string
+        serial_no:
+          type: string
+        column_break_11:
+          type: string
+        batch_no:
+          type: string
+          x-frappe-target-doctype: Batch
+        section_break_13:
+          type: string
+        actual_qty:
+          type: number
+          readOnly: true
+        projected_qty:
+          type: number
+          readOnly: true
+        column_break_16:
+          type: string
+        uom:
+          type: string
+          x-frappe-target-doctype: UOM
+          readOnly: true
+        page_break:
+          type: boolean
+          readOnly: true
+        prevdoc_doctype:
+          type: string
+          readOnly: true
+          writeOnly: true
+        parent_detail_docname:
+          type: string
+          readOnly: true
+          writeOnly: true
+        actual_batch_qty:
+          type: number
+          readOnly: true
+        incoming_rate:
+          type: number
+          readOnly: true
+        conversion_factor:
+          type: number
+        rate:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        ordered_qty:
+          type: number
+          readOnly: true
+        picked_qty:
+          type: number
+          readOnly: true
+        packed_qty:
+          type: number
+          readOnly: true
+        serial_and_batch_bundle:
+          type: string
+          x-frappe-target-doctype: Serial and Batch Bundle
+        pick_serial_and_batch:
+          type: string
+        use_serial_batch_fields:
+          type: boolean
+        section_break_bgys:
+          type: string
+        column_break_qlha:
+          type: string
+        delivered_by_supplier:
+          type: boolean
+          readOnly: true
+        requested_qty:
+          type: number
+          readOnly: true
+      required:
+      - name
+      additionalProperties: true
+      x-module: Stock
+    PartyAccount:
+      type: object
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        account:
+          type: string
+          x-frappe-target-doctype: Account
+        advance_account:
+          type: string
+          x-frappe-target-doctype: Account
+      required:
+      - company
+      - name
+      additionalProperties: true
+      x-module: Accounts
+    PaymentSchedule:
+      type: object
+      properties:
+        name:
+          type: string
+        payment_term:
+          type: string
+          x-frappe-target-doctype: Payment Term
+        description:
+          type: string
+        due_date:
+          type: string
+          format: date
+        invoice_portion:
+          type: number
+        payment_amount:
+          type: number
+          x-frappe-options: currency
+        mode_of_payment:
+          type: string
+          x-frappe-target-doctype: Mode of Payment
+        paid_amount:
+          type: number
+          x-frappe-options: currency
+        column_break_3:
+          type: string
+        discounted_amount:
+          type: number
+          readOnly: true
+        outstanding:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        column_break_5:
+          type: string
+        discount_date:
+          type: string
+          format: date
+        discount_type:
+          type: string
+          enum:
+          - Percentage
+          - Amount
+        discount:
+          type: number
+        section_break_9:
+          type: string
+        section_break_15:
+          type: string
+        section_break_6:
+          type: string
+        column_break_9:
+          type: string
+        section_break_4:
+          type: string
+        base_payment_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+        base_outstanding:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_paid_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        due_date_based_on:
+          type: string
+          enum:
+          - Day(s) after invoice date
+          - Day(s) after the end of the invoice month
+          - Month(s) after the end of the invoice month
+          readOnly: true
+        credit_days:
+          type: integer
+          readOnly: true
+        credit_months:
+          type: integer
+          readOnly: true
+        discount_validity_based_on:
+          type: string
+          enum:
+          - Day(s) after invoice date
+          - Day(s) after the end of the invoice month
+          - Month(s) after the end of the invoice month
+          readOnly: true
+        discount_validity:
+          type: integer
+          readOnly: true
+      required:
+      - due_date
+      - name
+      - payment_amount
+      additionalProperties: true
+      x-module: Accounts
+    PortalUser:
+      type: object
+      properties:
+        name:
+          type: string
+        user:
+          type: string
+          x-frappe-target-doctype: User
+      required:
+      - name
+      - user
+      additionalProperties: true
+      x-module: Utilities
+    PricingRuleDetail:
+      type: object
+      properties:
+        name:
+          type: string
+        pricing_rule:
+          type: string
+          x-frappe-target-doctype: Pricing Rule
+          readOnly: true
+        item_code:
+          type: string
+          readOnly: true
+        margin_type:
+          type: string
+          readOnly: true
+          writeOnly: true
+        rate_or_discount:
+          type: string
+          readOnly: true
+          writeOnly: true
+        child_docname:
+          type: string
+          readOnly: true
+          writeOnly: true
+        rule_applied:
+          type: boolean
+          readOnly: true
+      required:
+      - name
+      additionalProperties: true
+      x-module: Accounts
+    Quotation:
+      type: object
+      properties:
+        name: *id107
+        customer_section: *id108
+        naming_series: *id109
+        quotation_to: *id110
+        party_name: *id111
+        customer_name:
+          type: string
+          readOnly: true
+          writeOnly: true
+        column_break1: *id112
+        amended_from:
+          type: string
+          x-frappe-target-doctype: Quotation
+          readOnly: true
+        company: *id113
+        transaction_date: *id114
+        valid_till: *id115
+        order_type: *id116
+        customer_address: *id117
+        address_display:
+          type: string
+          readOnly: true
+        contact_person: *id118
+        contact_display:
+          type: string
+          readOnly: true
+        contact_mobile:
+          type: string
+          x-frappe-options: Phone
+          readOnly: true
+        contact_email:
+          type: string
+          x-frappe-options: Email
+          readOnly: true
+          writeOnly: true
+        col_break98: *id119
+        shipping_address_name: *id120
+        shipping_address:
+          type: string
+          readOnly: true
+        customer_group: *id121
+        territory: *id122
+        currency_and_price_list: *id123
+        currency: *id124
+        conversion_rate: *id125
+        column_break2: *id126
+        selling_price_list: *id127
+        price_list_currency:
+          type: string
+          x-frappe-target-doctype: Currency
+          readOnly: true
+        plc_conversion_rate: *id128
+        ignore_pricing_rule: *id129
+        items_section: *id130
+        items: *id131
+        pricing_rule_details: *id132
+        pricing_rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/PricingRuleDetail'
+          readOnly: true
+        sec_break23: *id133
+        total_qty:
+          type: number
+          readOnly: true
+        base_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_net_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_28: *id134
+        total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        net_total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        total_net_weight:
+          type: number
+          readOnly: true
+        taxes_section: *id135
+        tax_category: *id136
+        column_break_34: *id137
+        shipping_rule: *id138
+        section_break_36: *id139
+        taxes_and_charges: *id140
+        taxes: *id141
+        sec_tax_breakup: *id142
+        other_charges_calculation:
+          type: string
+          readOnly: true
+        section_break_39: *id143
+        base_total_taxes_and_charges:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_42: *id144
+        total_taxes_and_charges:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        section_break_44: *id145
+        coupon_code: *id146
+        referral_sales_partner: *id147
+        apply_discount_on: *id148
+        base_discount_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_46: *id149
+        additional_discount_percentage: *id150
+        discount_amount: *id151
+        totals: *id152
+        base_grand_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_rounding_adjustment:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_in_words:
+          type: string
+          readOnly: true
+        base_rounded_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break3: *id153
+        grand_total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        rounding_adjustment:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        rounded_total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        in_words:
+          type: string
+          readOnly: true
+        payment_schedule_section: *id154
+        payment_terms_template: *id155
+        payment_schedule: *id156
+        terms_section_break: *id157
+        tc_name: *id158
+        terms: *id159
+        print_settings: *id160
+        letter_head: *id161
+        group_same_items: *id162
+        column_break_73: *id163
+        select_print_heading: *id164
+        language:
+          type: string
+          x-frappe-target-doctype: Language
+          readOnly: true
+        auto_repeat:
+          type: string
+          x-frappe-target-doctype: Auto Repeat
+          readOnly: true
+        update_auto_repeat_reference: *id165
+        order_lost_reason: *id166
+        status:
+          type: string
+          enum:
+          - Draft
+          - Open
+          - Replied
+          - Partially Ordered
+          - Ordered
+          - Lost
+          - Cancelled
+          - Expired
+          readOnly: true
+        enq_det:
+          type: string
+          readOnly: true
+          writeOnly: true
+        supplier_quotation: *id167
+        opportunity:
+          type: string
+          x-frappe-target-doctype: Opportunity
+          readOnly: true
+        lost_reasons:
+          type: string
+          x-frappe-options: Quotation Lost Reason Detail
+          readOnly: true
+        packed_items: *id168
+        bundle_items_section: *id169
+        competitors: *id170
+        company_address: *id171
+        company_address_display:
+          type: string
+          readOnly: true
+        scan_barcode: *id172
+        address_and_contact_tab: *id173
+        terms_tab: *id174
+        more_info_tab: *id175
+        connections_tab: *id176
+        column_break_7: *id177
+        column_break_31: *id178
+        column_break_36: *id179
+        billing_address_section: *id180
+        shipping_address_section: *id181
+        column_break_81: *id182
+        company_address_section: *id183
+        column_break_87: *id184
+        lost_reasons_section: *id185
+        column_break_117: *id186
+        additional_info_section: *id187
+        column_break_108: *id188
+        incoterm: *id189
+        named_place: *id190
+        utm_campaign: *id191
+        utm_source: *id192
+        utm_medium: *id193
+        utm_content: *id194
+        disable_rounded_total: *id195
+        company_contact_person: *id196
+        has_unit_price_items: *id197
+        last_scanned_warehouse: *id198
+        item_wise_tax_details: *id199
+        column_break_fozg: *id200
+        utm_analytics_section: *id201
+        auto_repeat_section: *id202
+        title: *id203
+      required:
+      - company
+      - conversion_rate
+      - currency
+      - items
+      - name
+      - naming_series
+      - order_type
+      - plc_conversion_rate
+      - price_list_currency
+      - quotation_to
+      - selling_price_list
+      - status
+      - transaction_date
+      additionalProperties: true
+      x-module: Selling
+    QuotationItem:
+      type: object
+      properties:
+        name:
+          type: string
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
+        customer_item_code:
+          type: string
+          readOnly: true
+          writeOnly: true
+        col_break1:
+          type: string
+        item_name:
+          type: string
+        section_break_5:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+          writeOnly: true
+        image_view:
+          type: string
+          x-frappe-options: image
+        quantity_and_rate:
+          type: string
+        qty:
+          type: number
+        stock_uom:
+          type: string
+          x-frappe-target-doctype: UOM
+          readOnly: true
+        col_break2:
+          type: string
+        uom:
+          type: string
+          x-frappe-target-doctype: UOM
+        conversion_factor:
+          type: number
+          readOnly: true
+        stock_qty:
+          type: number
+          readOnly: true
+        section_break_16:
+          type: string
+        price_list_rate:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        base_price_list_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        discount_and_margin:
+          type: string
+        margin_type:
+          type: string
+          enum:
+          - Percentage
+          - Amount
+        margin_rate_or_amount:
+          type: number
+        rate_with_margin:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        column_break_18:
+          type: string
+        discount_percentage:
+          type: number
+        discount_amount:
+          type: number
+          x-frappe-options: currency
+        base_rate_with_margin:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        section_break1:
+          type: string
+        rate:
+          type: number
+          x-frappe-options: currency
+        net_rate:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        net_amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        col_break3:
+          type: string
+        base_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_net_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_net_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        pricing_rules:
+          type: string
+          readOnly: true
+          writeOnly: true
+        is_free_item:
+          type: boolean
+          readOnly: true
+        item_weight_details:
+          type: string
+        weight_per_unit:
+          type: number
+          readOnly: true
+        total_weight:
+          type: number
+          readOnly: true
+        column_break_20:
+          type: string
+        weight_uom:
+          type: string
+          x-frappe-target-doctype: UOM
+          readOnly: true
+        item_balance:
+          type: string
+        warehouse:
+          type: string
+          x-frappe-target-doctype: Warehouse
+        column_break_30:
+          type: string
+        projected_qty:
+          type: number
+          readOnly: true
+        actual_qty:
+          type: number
+          readOnly: true
+        stock_balance:
+          type: string
+        reference:
+          type: string
+        prevdoc_doctype:
+          type: string
+          x-frappe-target-doctype: DocType
+          readOnly: true
+          writeOnly: true
+        prevdoc_docname:
+          type: string
+          x-frappe-options: prevdoc_doctype
+          readOnly: true
+        item_tax_rate:
+          type: string
+          readOnly: true
+          writeOnly: true
+        col_break4:
+          type: string
+        item_tax_template:
+          type: string
+          x-frappe-target-doctype: Item Tax Template
+        page_break:
+          type: boolean
+        item_group:
+          type: string
+          x-frappe-target-doctype: Item Group
+          readOnly: true
+          writeOnly: true
+        brand:
+          type: string
+          x-frappe-target-doctype: Brand
+          readOnly: true
+          writeOnly: true
+        shopping_cart_section:
+          type: string
+        additional_notes:
+          type: string
+        section_break_61:
+          type: string
+        image_section:
+          type: string
+        blanket_order:
+          type: string
+          x-frappe-target-doctype: Blanket Order
+        blanket_order_rate:
+          type: number
+          readOnly: true
+        against_blanket_order:
+          type: boolean
+        section_break_43:
+          type: string
+        valuation_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_45:
+          type: string
+        gross_profit:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        stock_uom_rate:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        is_alternative:
+          type: boolean
+        has_alternative_item:
+          type: boolean
+          readOnly: true
+          writeOnly: true
+        distributed_discount_amount:
+          type: number
+          x-frappe-options: currency
+        available_quantity_section:
+          type: string
+        column_break_ylrv:
+          type: string
+        company_total_stock:
+          type: number
+          readOnly: true
+        ordered_qty:
+          type: number
+          readOnly: true
+          writeOnly: true
+      required:
+      - conversion_factor
+      - item_name
+      - name
+      - ordered_qty
+      - qty
+      - uom
+      additionalProperties: true
+      x-module: Selling
+    SalesOrder:
+      type: object
+      properties:
+        name: *id204
+        customer_section: *id205
+        column_break0: *id206
+        naming_series: *id207
+        customer: *id208
+        customer_name:
+          type: string
+          readOnly: true
+        order_type: *id209
+        column_break1: *id210
+        amended_from:
+          type: string
+          x-frappe-target-doctype: Sales Order
+          readOnly: true
+          writeOnly: true
+        company: *id211
+        transaction_date: *id212
+        delivery_date: *id213
+        po_no: *id214
+        po_date: *id215
+        tax_id:
+          type: string
+          readOnly: true
+        contact_info: *id216
+        customer_address: *id217
+        address_display:
+          type: string
+          readOnly: true
+        contact_person: *id218
+        contact_display:
+          type: string
+          readOnly: true
+        contact_mobile:
+          type: string
+          x-frappe-options: Phone
+          readOnly: true
+        contact_email:
+          type: string
+          x-frappe-options: Email
+          readOnly: true
+          writeOnly: true
+        company_address_display:
+          type: string
+          readOnly: true
+        company_address: *id219
+        col_break46: *id220
+        shipping_address_name: *id221
+        shipping_address:
+          type: string
+          readOnly: true
+        customer_group: *id222
+        territory: *id223
+        currency_and_price_list: *id224
+        currency: *id225
+        conversion_rate: *id226
+        column_break2: *id227
+        selling_price_list: *id228
+        price_list_currency:
+          type: string
+          x-frappe-target-doctype: Currency
+          readOnly: true
+        plc_conversion_rate: *id229
+        ignore_pricing_rule: *id230
+        sec_warehouse: *id231
+        set_warehouse: *id232
+        items_section: *id233
+        scan_barcode: *id234
+        items: *id235
+        pricing_rule_details: *id236
+        pricing_rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/PricingRuleDetail'
+          readOnly: true
+        section_break_31: *id237
+        column_break_33a: *id238
+        total_qty:
+          type: number
+          readOnly: true
+        base_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_net_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_33: *id239
+        total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        net_total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        total_net_weight:
+          type: number
+          readOnly: true
+        taxes_section: *id240
+        tax_category: *id241
+        column_break_38: *id242
+        shipping_rule: *id243
+        section_break_40: *id244
+        taxes_and_charges: *id245
+        taxes: *id246
+        sec_tax_breakup: *id247
+        other_charges_calculation:
+          type: string
+          readOnly: true
+        section_break_43: *id248
+        base_total_taxes_and_charges:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_46: *id249
+        total_taxes_and_charges:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        loyalty_points_redemption: *id250
+        loyalty_points:
+          type: integer
+          readOnly: true
+          writeOnly: true
+        loyalty_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+          writeOnly: true
+        coupon_code: *id251
+        apply_discount_on: *id252
+        base_discount_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_50: *id253
+        additional_discount_percentage: *id254
+        discount_amount: *id255
+        base_grand_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_rounding_adjustment:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_rounded_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_in_words:
+          type: string
+          readOnly: true
+        grand_total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        rounding_adjustment:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        rounded_total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        in_words:
+          type: string
+          readOnly: true
+        advance_paid:
+          type: number
+          x-frappe-options: party_account_currency
+          readOnly: true
+        packing_list: *id256
+        packed_items: *id257
+        payment_schedule_section: *id258
+        payment_terms_template: *id259
+        payment_schedule: *id260
+        terms_section_break: *id261
+        tc_name: *id262
+        terms: *id263
+        more_info: *id264
+        inter_company_order_reference:
+          type: string
+          x-frappe-target-doctype: Purchase Order
+          readOnly: true
+        project: *id265
+        party_account_currency:
+          type: string
+          x-frappe-target-doctype: Currency
+          readOnly: true
+          writeOnly: true
+        printing_details: *id266
+        language:
+          type: string
+          x-frappe-target-doctype: Language
+          readOnly: true
+        letter_head: *id267
+        column_break4: *id268
+        select_print_heading: *id269
+        group_same_items: *id270
+        section_break_78: *id271
+        status:
+          type: string
+          enum:
+          - Draft
+          - On Hold
+          - To Pay
+          - To Deliver and Bill
+          - To Bill
+          - To Deliver
+          - Completed
+          - Cancelled
+          - Closed
+          readOnly: true
+        delivery_status: *id272
+        per_delivered:
+          type: number
+          readOnly: true
+        column_break_81: *id273
+        per_billed:
+          type: number
+          readOnly: true
+        billing_status: *id274
+        sales_team_section_break: *id275
+        sales_partner: *id276
+        column_break7: *id277
+        commission_rate: *id278
+        total_commission: *id279
+        section_break1: *id280
+        sales_team: *id281
+        from_date: *id282
+        to_date: *id283
+        column_break_108: *id284
+        auto_repeat: *id285
+        update_auto_repeat_reference: *id286
+        contact_phone:
+          type: string
+          x-frappe-options: Phone
+          readOnly: true
+        skip_delivery_note: *id287
+        is_internal_customer:
+          type: boolean
+          readOnly: true
+        represents_company:
+          type: string
+          x-frappe-target-doctype: Company
+          readOnly: true
+        disable_rounded_total: *id288
+        dispatch_address_name: *id289
+        dispatch_address:
+          type: string
+          readOnly: true
+        amount_eligible_for_commission:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        per_picked:
+          type: number
+          readOnly: true
+        accounting_dimensions_section: *id290
+        cost_center: *id291
+        dimension_col_break: *id292
+        column_break_7: *id293
+        column_break_28: *id294
+        column_break_49: *id295
+        connections_tab: *id296
+        payment_terms_section: *id297
+        column_break_116: *id298
+        billing_address_column: *id299
+        shipping_address_column: *id300
+        column_break_93: *id301
+        column_break_84: *id302
+        column_break_92: *id303
+        additional_info_section: *id304
+        incoterm: *id305
+        named_place: *id306
+        reserve_stock: *id307
+        advance_payment_status: *id308
+        column_break_yvzv: *id309
+        utm_medium: *id310
+        utm_content: *id311
+        utm_source: *id312
+        utm_campaign: *id313
+        company_contact_person: *id314
+        has_unit_price_items: *id315
+        last_scanned_warehouse: *id316
+        is_subcontracted: *id317
+        item_wise_tax_details: *id318
+        totals_section: *id319
+        base_totals_section: *id320
+        column_break_nuxg: *id321
+        column_break_bgfw: *id322
+        section_break_efew: *id323
+        additional_discount_section: *id324
+        column_break_ijxt: *id325
+        utm_analytics_section: *id326
+        transaction_time: *id327
+        ignore_default_payment_terms_template:
+          type: boolean
+          readOnly: true
+          writeOnly: true
+        auto_repeat_section:
+          type: string
+          readOnly: true
+        title: *id328
+      required:
+      - company
+      - conversion_rate
+      - currency
+      - customer
+      - items
+      - name
+      - naming_series
+      - order_type
+      - plc_conversion_rate
+      - price_list_currency
+      - selling_price_list
+      - status
+      - transaction_date
+      additionalProperties: true
+      x-module: Selling
+    SalesOrderItem:
+      type: object
+      properties:
+        name:
+          type: string
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
+        customer_item_code:
+          type: string
+          readOnly: true
+          writeOnly: true
+        ensure_delivery_based_on_produced_serial_no:
+          type: boolean
+        col_break1:
+          type: string
+        item_name:
+          type: string
+        section_break_5:
+          type: string
+        description:
+          type: string
+        delivery_date:
+          type: string
+          format: date
+        image:
+          type: string
+          writeOnly: true
+        image_view:
+          type: string
+          x-frappe-options: image
+        quantity_and_rate:
+          type: string
+        qty:
+          type: number
+        stock_uom:
+          type: string
+          x-frappe-target-doctype: UOM
+          readOnly: true
+        col_break2:
+          type: string
+        uom:
+          type: string
+          x-frappe-target-doctype: UOM
+        conversion_factor:
+          type: number
+          readOnly: true
+        stock_qty:
+          type: number
+          readOnly: true
+        section_break_16:
+          type: string
+        price_list_rate:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        base_price_list_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        discount_and_margin:
+          type: string
+        margin_type:
+          type: string
+          enum:
+          - Percentage
+          - Amount
+        margin_rate_or_amount:
+          type: number
+        rate_with_margin:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        column_break_19:
+          type: string
+        discount_percentage:
+          type: number
+        discount_amount:
+          type: number
+          x-frappe-options: currency
+        base_rate_with_margin:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        section_break_simple1:
+          type: string
+        rate:
+          type: number
+          x-frappe-options: currency
+        amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        col_break3:
+          type: string
+        base_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        pricing_rules:
+          type: string
+          readOnly: true
+          writeOnly: true
+        is_free_item:
+          type: boolean
+          readOnly: true
+        section_break_24:
+          type: string
+        net_rate:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        net_amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        column_break_27:
+          type: string
+        base_net_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_net_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        drop_ship_section:
+          type: string
+        delivered_by_supplier:
+          type: boolean
+        supplier:
+          type: string
+          x-frappe-target-doctype: Supplier
+        item_weight_details:
+          type: string
+        weight_per_unit:
+          type: number
+        total_weight:
+          type: number
+          readOnly: true
+        column_break_21:
+          type: string
+        weight_uom:
+          type: string
+          x-frappe-target-doctype: UOM
+        warehouse_and_reference:
+          type: string
+        warehouse:
+          type: string
+          x-frappe-target-doctype: Warehouse
+        target_warehouse:
+          type: string
+          x-frappe-target-doctype: Warehouse
+          writeOnly: true
+        prevdoc_docname:
+          type: string
+          x-frappe-target-doctype: Quotation
+          readOnly: true
+        brand:
+          type: string
+          x-frappe-target-doctype: Brand
+          readOnly: true
+          writeOnly: true
+        item_group:
+          type: string
+          x-frappe-target-doctype: Item Group
+          readOnly: true
+          writeOnly: true
+        billed_amt:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        valuation_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        gross_profit:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        blanket_order:
+          type: string
+          x-frappe-target-doctype: Blanket Order
+        blanket_order_rate:
+          type: number
+          readOnly: true
+        col_break4:
+          type: string
+        projected_qty:
+          type: number
+          readOnly: true
+        actual_qty:
+          type: number
+          readOnly: true
+        ordered_qty:
+          type: number
+          readOnly: true
+        delivered_qty:
+          type: number
+          readOnly: true
+        work_order_qty:
+          type: number
+          readOnly: true
+        returned_qty:
+          type: number
+          readOnly: true
+        section_break_63:
+          type: string
+        item_tax_template:
+          type: string
+          x-frappe-target-doctype: Item Tax Template
+        page_break:
+          type: boolean
+        planned_qty:
+          type: number
+          readOnly: true
+          writeOnly: true
+        produced_qty:
+          type: number
+          readOnly: true
+          writeOnly: true
+        item_tax_rate:
+          type: string
+          readOnly: true
+          writeOnly: true
+        transaction_date:
+          type: string
+          format: date
+          readOnly: true
+          writeOnly: true
+        planning_section:
+          type: string
+        column_break_69:
+          type: string
+        image_section:
+          type: string
+        shopping_cart_section:
+          type: string
+        additional_notes:
+          type: string
+        against_blanket_order:
+          type: boolean
+        bom_no:
+          type: string
+          x-frappe-target-doctype: BOM
+        manufacturing_section_section:
+          type: string
+        stock_uom_rate:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        grant_commission:
+          type: boolean
+          readOnly: true
+        picked_qty:
+          type: number
+          readOnly: true
+        inter_transfer_reference_section:
+          type: string
+        purchase_order:
+          type: string
+          x-frappe-target-doctype: Purchase Order
+          readOnly: true
+        column_break_89:
+          type: string
+        purchase_order_item:
+          type: string
+          readOnly: true
+        quotation_item:
+          type: string
+          readOnly: true
+          writeOnly: true
+        material_request:
+          type: string
+          x-frappe-target-doctype: Material Request
+        material_request_item:
+          type: string
+        reserve_stock:
+          type: boolean
+        stock_reserved_qty:
+          type: number
+          readOnly: true
+        production_plan_qty:
+          type: number
+          readOnly: true
+        is_stock_item:
+          type: boolean
+          writeOnly: true
+        distributed_discount_amount:
+          type: number
+          x-frappe-options: currency
+        company_total_stock:
+          type: number
+          readOnly: true
+        column_break_jpky:
+          type: string
+        available_quantity_section:
+          type: string
+        accounting_dimensions_section:
+          type: string
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        column_break_ihdh:
+          type: string
+        project:
+          type: string
+          x-frappe-target-doctype: Project
+        sales_order_schedule_section:
+          type: string
+        add_schedule:
+          type: string
+        subcontracted_qty:
+          type: number
+          readOnly: true
+        fg_item:
+          type: string
+          x-frappe-target-doctype: Item
+        fg_item_qty:
+          type: number
+        requested_qty:
+          type: number
+          readOnly: true
+      required:
+      - conversion_factor
+      - item_code
+      - item_name
+      - name
+      - qty
+      - uom
+      additionalProperties: true
+      x-module: Selling
+    SalesTaxesandCharges:
+      type: object
+      properties:
+        name:
+          type: string
+        charge_type:
+          type: string
+          enum:
+          - Actual
+          - On Net Total
+          - On Previous Row Amount
+          - On Previous Row Total
+          - On Item Quantity
+        row_id:
+          type: string
+        account_head:
+          type: string
+          x-frappe-target-doctype: Account
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        col_break_1:
+          type: string
+        description:
+          type: string
+        included_in_print_rate:
+          type: boolean
+        section_break_8:
+          type: string
+        rate:
+          type: number
+        section_break_9:
+          type: string
+        tax_amount:
+          type: number
+          x-frappe-options: currency
+        total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        tax_amount_after_discount_amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        column_break_13:
+          type: string
+        base_tax_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        base_tax_amount_after_discount_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        accounting_dimensions_section:
+          type: string
+        dimension_col_break:
+          type: string
+        project:
+          type: string
+          x-frappe-target-doctype: Project
+        included_in_paid_amount:
+          type: boolean
+        dont_recompute_tax:
+          type: boolean
+          readOnly: true
+          writeOnly: true
+        account_currency:
+          type: string
+          x-frappe-target-doctype: Currency
+          readOnly: true
+        net_amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        base_net_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        set_by_item_tax_template:
+          type: boolean
+          readOnly: true
+          writeOnly: true
+        is_tax_withholding_account:
+          type: boolean
+          readOnly: true
+      required:
+      - account_head
+      - charge_type
+      - description
+      - name
+      additionalProperties: true
+      x-module: Accounts
+    SalesTeam:
+      type: object
+      properties:
+        name:
+          type: string
+        sales_person:
+          type: string
+          x-frappe-target-doctype: Sales Person
+        contact_no:
+          type: string
+          writeOnly: true
+        allocated_percentage:
+          type: number
+        allocated_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        commission_rate:
+          type: string
+          readOnly: true
+        incentives:
+          type: number
+          x-frappe-options: Company:company:default_currency
+      required:
+      - name
+      - sales_person
+      additionalProperties: true
+      x-module: Selling
+    SupplierNumberAtCustomer:
+      type: object
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        supplier_number:
+          type: string
+      required:
+      - name
+      additionalProperties: true
+      x-module: Selling
+    FrappeResponse:
+      type: object
+      properties:
+        message: {}
+      required:
+      - message
+    FrappeError:
+      type: object
+      properties:
+        exc_type:
+          type: string
+        exception:
+          type: string
+        _server_messages:
+          type: string
+        request_id:
+          type: string
+    ResourceListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        message: {}
+    FileUploadResponse:
+      type: object
+      properties:
+        file_url:
+          type: string
+        file_name:
+          type: string
+        message: {}
+    PageInfo:
+      type: object
+      properties:
+        limit_start:
+          type: integer
+        limit_page_length:
+          type: integer
+    RuntimeStatus:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        status:
+          type: string
+        version:
+          type: integer
+        erpnext_version:
+          type: string
+        sha256:
+          type: string
+        drift_count:
+          type: integer
+      required:
+      - ok
+    HealthResponse:
+      type: object
+      properties:
+        message:
+          type: object
+          properties:
+            ok:
+              type: boolean
+            app:
+              type: string
+            site:
+              type: string
+            frappe_version:
+              type:
+              - string
+              - 'null'
+            installed_apps:
+              type: array
+              items:
+                type: string
+            bootstrap:
+              $ref: '#/components/schemas/RuntimeStatus'
+            config:
+              $ref: '#/components/schemas/RuntimeStatus'
+            policy:
+              $ref: '#/components/schemas/RuntimeStatus'
+            configuration_bundle:
+              $ref: '#/components/schemas/RuntimeStatus'
+          required:
+          - ok
+          - app
+          - bootstrap
+          - config
+          - policy
+          - configuration_bundle
+      required:
+      - message
+    BankTransactionAllocation:
+      type: object
+      properties:
+        payment_document:
+          type: string
+          enum:
+          - Payment Entry
+          - Journal Entry
+        payment_entry:
+          type: string
+        allocated_amount:
+          type: number
+          minimum: 0
+      required:
+      - payment_document
+      - payment_entry
+      additionalProperties: false
+    BankTransactionReconcileRequest:
+      type: object
+      properties:
+        allocations:
+          type: array
+          items:
+            $ref: '#/components/schemas/BankTransactionAllocation'
+          minItems: 1
+      required:
+      - allocations
+      additionalProperties: false
+x-contract:
+  runtime:
+    source_of_truth: erpnext
+    api_style: frappe-native
+    openapi_version: 3.1.0
+    server_url: http://127.0.0.1:8080
+    group_by: module
+    public_module_routes: true
+    include_whitelisted_methods: true
+    include_doctype_metadata: false
+    typed_doctypes:
+    - Allowed To Transact With
+    - Customer
+    - Customer Credit Limit
+    - Item Wise Tax Detail
+    - Packed Item
+    - Party Account
+    - Payment Schedule
+    - Portal User
+    - Pricing Rule Detail
+    - Quotation
+    - Quotation Item
+    - Sales Order
+    - Sales Order Item
+    - Sales Taxes and Charges
+    - Sales Team
+    - Supplier Number At Customer
+    typed_modules:
+    - Accounts
+    - Assets
+    - Automation
+    - Bulk Transaction
+    - Buying
+    - CRM
+    - Communication
+    - Contacts
+    - Core
+    - Custom
+    - Desk
+    - EDI
+    - ERPNext Integrations
+    - Email
+    - Geo
+    - Integrations
+    - Maintenance
+    - Manufacturing
+    - Printing
+    - Projects
+    - Quality Management
+    - Regional
+    - Selling
+    - Setup
+    - Stock
+    - Subcontracting
+    - Support
+    - Telephony
+    - Utilities
+    - Website
+    - Workflow
+    public_modules:
+    - Accounts
+    - Buying
+    - CRM
+    - Contacts
+    - Selling
+    - Stock
+    document_actions:
+    - doctype: Sales Invoice
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Purchase Invoice
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Sales Order
+      module: Selling
+      actions:
+      - submit
+      - cancel
+    - doctype: Purchase Order
+      module: Buying
+      actions:
+      - submit
+      - cancel
+    - doctype: Material Request
+      module: Stock
+      actions:
+      - submit
+      - cancel
+    - doctype: Purchase Receipt
+      module: Stock
+      actions:
+      - submit
+      - cancel
+    - doctype: Stock Entry
+      module: Stock
+      actions:
+      - submit
+      - cancel
+    - doctype: Journal Entry
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Payment Request
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Payment Order
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Payment Entry
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Bank Transaction
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    custom_actions:
+    - doctype: Bank Transaction
+      module: Accounts
+      action: reconcile
+      operation_id: reconcileBankTransaction
+      path_suffix: reconcile
+      handler: letron_api.accounts_reconciliation.reconcile_bank_transaction
+    - doctype: Bank Transaction
+      module: Accounts
+      action: unreconcile
+      operation_id: unreconcileBankTransaction
+      path_suffix: unreconcile
+      handler: letron_api.accounts_reconciliation.unreconcile_bank_transaction
+    include_methods:
+    - letron_api.api.health
+    - letron_api.api.runtime_info
+    - letron_api.api.runtime_snapshot
+    public_resources:
+    - doctype: Lead
+      path: /api/v1/crm/leads
+    - doctype: Opportunity
+      path: /api/v1/crm/opportunities
+    - doctype: Request for Quotation
+      path: /api/v1/crm/request-for-quotations
+    - doctype: Supplier Quotation
+      path: /api/v1/crm/supplier-quotations
+    - doctype: Customer
+      path: /api/v1/selling/customers
+    - doctype: Quotation
+      path: /api/v1/selling/quotations
+    - doctype: Sales Order
+      path: /api/v1/selling/sales-orders
+    - doctype: Delivery Note
+      path: /api/v1/selling/delivery-notes
+    - doctype: Sales Invoice
+      path: /api/v1/accounts/sales-invoices
+    - doctype: Purchase Invoice
+      path: /api/v1/accounts/purchase-invoices
+    - doctype: Payment Entry
+      path: /api/v1/accounts/payment-entries
+    - doctype: Bank
+      path: /api/v1/accounts/banks
+    - doctype: Bank Account
+      path: /api/v1/accounts/bank-accounts
+    - doctype: Mode of Payment
+      path: /api/v1/accounts/modes-of-payment
+    - doctype: Cost Center
+      path: /api/v1/accounts/cost-centers
+    - doctype: Journal Entry
+      path: /api/v1/accounts/journal-entries
+    - doctype: Payment Request
+      path: /api/v1/accounts/payment-requests
+    - doctype: Bank Transaction
+      path: /api/v1/accounts/bank-transactions
+    - doctype: Payment Order
+      path: /api/v1/accounts/payment-orders
+    - doctype: Supplier
+      path: /api/v1/buying/suppliers
+    - doctype: Purchase Order
+      path: /api/v1/buying/purchase-orders
+    - doctype: Item
+      path: /api/v1/stock/items
+    - doctype: Warehouse
+      path: /api/v1/stock/warehouses
+    - doctype: Address
+      path: /api/v1/contacts/addresses
+    - doctype: Contact
+      path: /api/v1/contacts/contacts
+    - doctype: Material Request
+      path: /api/v1/stock/material-requests
+    - doctype: Purchase Receipt
+      path: /api/v1/stock/purchase-receipts
+    - doctype: Stock Entry
+      path: /api/v1/stock/stock-entries
+    - doctype: Item Price
+      path: /api/v1/stock/item-prices
+    - doctype: Stock Reconciliation
+      path: /api/v1/stock/stock-reconciliations
+    - doctype: Serial No
+      path: /api/v1/stock/serial-nos
+    - doctype: Batch
+      path: /api/v1/stock/batches
+    - doctype: Quality Inspection
+      path: /api/v1/stock/quality-inspections
+    - doctype: Pick List
+      path: /api/v1/stock/pick-lists
+    - doctype: Shipment
+      path: /api/v1/stock/shipments
+    - doctype: Landed Cost Voucher
+      path: /api/v1/stock/landed-cost-vouchers
+    - doctype: Stock Reservation Entry
+      path: /api/v1/stock/stock-reservation-entries
+  transport:
+    rest: true
+    webhook: true
+    realtime: true
+  headers:
+    request_id: X-Request-Id
+    idempotency_key: X-Idempotency-Key
+x-capabilities:
+  webhook:
+    declared: true
+    delivery_implemented: true
+    delivery: durable-outbox
+    signature: hmac-sha256
+    max_attempts: 3
+  realtime:
+    declared: true
+    delivery_implemented: true
+    delivery: durable-outbox
+    source_of_truth: false
+x-acceptance-summary:
+  passed: 17
+  partial: 0
+  not-tested: 0
+  blocked: 0
+x-module: Selling
+x-module-index:
+  Accounts:
+  - Allowed To Transact With
+  - Item Wise Tax Detail
+  - Party Account
+  - Payment Schedule
+  - Pricing Rule Detail
+  - Sales Taxes and Charges
+  Selling:
+  - Customer
+  - Customer Credit Limit
+  - Quotation
+  - Quotation Item
+  - Sales Order
+  - Sales Order Item
+  - Sales Team
+  - Supplier Number At Customer
+  Stock:
+  - Packed Item
+  Utilities:
+  - Portal User

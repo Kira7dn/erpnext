@@ -1,0 +1,1518 @@
+openapi: 3.1.0
+info:
+  title: Letron ERPNext CRM API
+  version: 0.1.0
+servers:
+- url: http://127.0.0.1:8080
+tags:
+- name: Typed Resource API
+- name: Whitelisted methods
+- name: Metadata
+- name: Files
+- name: 'Module: CRM'
+security:
+- frappeToken: []
+paths:
+  /api/v1/crm/leads:
+    get:
+      tags:
+      - 'Module: CRM'
+      summary: List Lead records
+      description: List typed Lead documents.
+      operationId: listLead
+      parameters:
+      - &id002
+        $ref: '#/components/parameters/RequestId'
+      - &id015
+        name: fields
+        in: query
+        schema:
+          type: string
+        description: JSON field-name array
+      - &id016
+        name: filters
+        in: query
+        schema:
+          type: string
+        description: JSON Frappe filters
+      - &id017
+        name: order_by
+        in: query
+        schema:
+          type: string
+      - &id018
+        name: limit_page_length
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - &id019
+        name: limit_start
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id003
+                      $ref: '#/components/schemas/Lead'
+                  message: {}
+                required:
+                - data
+        '400': &id004
+          description: Invalid request
+          content: &id001
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeError'
+        '401': &id005
+          description: Authentication required
+          content: *id001
+        '403': &id006
+          description: Permission denied
+          content: *id001
+        '404': &id007
+          description: Resource not found
+          content: *id001
+        '409': &id008
+          description: Idempotency or optimistic concurrency conflict
+          content: *id001
+        '417': &id009
+          description: Native Frappe validation failure
+          content: *id001
+        '429': &id010
+          description: Rate limited
+          content: *id001
+        '500': &id011
+          description: Server or rollback failure
+          content: *id001
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: CRM'
+      summary: Create Lead
+      description: Create a Lead using the runtime DocType schema.
+      operationId: createLead
+      parameters: &id020
+      - *id002
+      - &id012
+        $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id013
+              type: object
+              properties:
+                name: &id024
+                  type: string
+                naming_series: &id025
+                  type: string
+                  enum:
+                  - CRM-LEAD-.YYYY.-
+                company_name: &id026
+                  type: string
+                email_id: &id027
+                  type: string
+                  x-frappe-options: Email
+                col_break123: &id028
+                  type: string
+                lead_owner: &id029
+                  type: string
+                  x-frappe-target-doctype: User
+                status: &id030
+                  type: string
+                  enum:
+                  - Lead
+                  - Open
+                  - Replied
+                  - Opportunity
+                  - Quotation
+                  - Lost Quotation
+                  - Interested
+                  - Converted
+                  - Do Not Contact
+                salutation: &id031
+                  type: string
+                  x-frappe-target-doctype: Salutation
+                gender: &id032
+                  type: string
+                  x-frappe-target-doctype: Gender
+                customer: &id033
+                  type: string
+                  x-frappe-target-doctype: Customer
+                image: &id034
+                  type: string
+                  writeOnly: true
+                contact_info_tab: &id035
+                  type: string
+                column_break2: &id036
+                  type: string
+                phone: &id037
+                  type: string
+                  x-frappe-options: Phone
+                mobile_no: &id038
+                  type: string
+                  x-frappe-options: Phone
+                fax: &id039
+                  type: string
+                type: &id040
+                  type: string
+                  enum:
+                  - Client
+                  - Channel Partner
+                  - Consultant
+                market_segment: &id041
+                  type: string
+                  x-frappe-target-doctype: Market Segment
+                industry: &id042
+                  type: string
+                  x-frappe-target-doctype: Industry Type
+                request_type: &id043
+                  type: string
+                  enum:
+                  - Product Enquiry
+                  - Request for Information
+                  - Suggestions
+                  - Other
+                company: &id044
+                  type: string
+                  x-frappe-target-doctype: Company
+                website: &id045
+                  type: string
+                territory: &id046
+                  type: string
+                  x-frappe-target-doctype: Territory
+                unsubscribed: &id047
+                  type: boolean
+                blog_subscriber: &id048
+                  type: boolean
+                language: &id049
+                  type: string
+                  x-frappe-target-doctype: Language
+                first_name: &id050
+                  type: string
+                middle_name: &id051
+                  type: string
+                last_name: &id052
+                  type: string
+                no_of_employees: &id053
+                  type: string
+                  enum:
+                  - 1-10
+                  - 11-50
+                  - 51-200
+                  - 201-500
+                  - 501-1000
+                  - 1000+
+                column_break_22: &id054
+                  type: string
+                whatsapp_no: &id055
+                  type: string
+                  x-frappe-options: Phone
+                column_break_50: &id056
+                  type: string
+                column_break_16: &id057
+                  type: string
+                phone_ext: &id058
+                  type: string
+                qualification_tab: &id059
+                  type: string
+                notes_tab: &id060
+                  type: string
+                other_info_tab: &id061
+                  type: string
+                column_break_1: &id062
+                  type: string
+                qualified_by: &id063
+                  type: string
+                  x-frappe-target-doctype: User
+                qualified_on: &id064
+                  type: string
+                  format: date
+                qualification_status: &id065
+                  type: string
+                  enum:
+                  - Unqualified
+                  - In Process
+                  - Qualified
+                address_section: &id066
+                  type: string
+                column_break_64: &id067
+                  type: string
+                column_break_20: &id068
+                  type: string
+                job_title: &id069
+                  type: string
+                annual_revenue: &id070
+                  type: number
+                activities_tab: &id071
+                  type: string
+                organization_section: &id072
+                  type: string
+                column_break_28: &id073
+                  type: string
+                column_break_31: &id074
+                  type: string
+                notes_html: &id075
+                  type: string
+                open_activities_html: &id076
+                  type: string
+                all_activities_section: &id077
+                  type: string
+                all_activities_html: &id078
+                  type: string
+                notes: &id079
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CRMNote'
+                  writeOnly: true
+                disabled: &id080
+                  type: boolean
+                column_break_38: &id081
+                  type: string
+                city: &id082
+                  type: string
+                state: &id083
+                  type: string
+                country: &id084
+                  type: string
+                  x-frappe-target-doctype: Country
+                dashboard_tab: &id085
+                  type: string
+                column_break_gkxo: &id086
+                  type: string
+                utm_content: &id087
+                  type: string
+                utm_source: &id088
+                  type: string
+                  x-frappe-target-doctype: UTM Source
+                utm_medium: &id089
+                  type: string
+                  x-frappe-target-doctype: UTM Medium
+                utm_campaign: &id090
+                  type: string
+                  x-frappe-target-doctype: UTM Campaign
+                utm_analytics_section: &id091
+                  type: string
+              required:
+              - name
+              - status
+              additionalProperties: true
+              x-module: CRM
+            example:
+              status: ''
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id003
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+  /api/v1/crm/leads/{name}:
+    get:
+      tags:
+      - 'Module: CRM'
+      operationId: getLead
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id003
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    put:
+      tags:
+      - 'Module: CRM'
+      operationId: updateLead
+      parameters: &id014
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id013
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id003
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    delete:
+      tags:
+      - 'Module: CRM'
+      operationId: deleteLead
+      parameters: *id014
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+  /api/v1/crm/opportunities:
+    get:
+      tags:
+      - 'Module: CRM'
+      summary: List Opportunity records
+      description: List typed Opportunity documents.
+      operationId: listOpportunity
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id021
+                      $ref: '#/components/schemas/Opportunity'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: CRM'
+      summary: Create Opportunity
+      description: Create a Opportunity using the runtime DocType schema.
+      operationId: createOpportunity
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id022
+              type: object
+              properties:
+                name: &id092
+                  type: string
+                naming_series: &id093
+                  type: string
+                  enum:
+                  - CRM-OPP-.YYYY.-
+                opportunity_from: &id094
+                  type: string
+                  x-frappe-target-doctype: DocType
+                party_name: &id095
+                  type: string
+                  x-frappe-options: opportunity_from
+                column_break0: &id096
+                  type: string
+                title: &id097
+                  type: string
+                  writeOnly: true
+                opportunity_type: &id098
+                  type: string
+                  x-frappe-target-doctype: Opportunity Type
+                status: &id099
+                  type: string
+                  enum:
+                  - Open
+                  - Quotation
+                  - Converted
+                  - Lost
+                  - Replied
+                  - Closed
+                expected_closing: &id100
+                  type: string
+                  format: date
+                section_break_14: &id101
+                  type: string
+                currency: &id102
+                  type: string
+                  x-frappe-target-doctype: Currency
+                opportunity_amount: &id103
+                  type: number
+                  x-frappe-options: currency
+                column_break_17: &id104
+                  type: string
+                sales_stage: &id105
+                  type: string
+                  x-frappe-target-doctype: Sales Stage
+                probability: &id106
+                  type: number
+                items_section: &id107
+                  type: string
+                  x-frappe-options: fa fa-shopping-cart
+                items: &id108
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/OpportunityItem'
+                contact_info: &id109
+                  type: string
+                  x-frappe-options: fa fa-bullhorn
+                customer_address: &id110
+                  type: string
+                  x-frappe-target-doctype: Address
+                  writeOnly: true
+                territory: &id111
+                  type: string
+                  x-frappe-target-doctype: Territory
+                customer_group: &id112
+                  type: string
+                  x-frappe-target-doctype: Customer Group
+                column_break3: &id113
+                  type: string
+                contact_person: &id114
+                  type: string
+                  x-frappe-target-doctype: Contact
+                contact_email: &id115
+                  type: string
+                  x-frappe-options: Email
+                contact_mobile: &id116
+                  type: string
+                  x-frappe-options: Phone
+                more_info: &id117
+                  type: string
+                  x-frappe-options: fa fa-file-text
+                column_break1: &id118
+                  type: string
+                company: &id119
+                  type: string
+                  x-frappe-target-doctype: Company
+                transaction_date: &id120
+                  type: string
+                  format: date
+                language: &id121
+                  type: string
+                  x-frappe-target-doctype: Language
+                section_break_32: &id122
+                  type: string
+                conversion_rate: &id123
+                  type: number
+                column_break_33: &id124
+                  type: string
+                lost_detail_section: &id125
+                  type: string
+                column_break_56: &id126
+                  type: string
+                column_break_10: &id127
+                  type: string
+                organization_details_section: &id128
+                  type: string
+                no_of_employees: &id129
+                  type: string
+                  enum:
+                  - 1-10
+                  - 11-50
+                  - 51-200
+                  - 201-500
+                  - 501-1000
+                  - 1000+
+                annual_revenue: &id130
+                  type: number
+                industry: &id131
+                  type: string
+                  x-frappe-target-doctype: Industry Type
+                market_segment: &id132
+                  type: string
+                  x-frappe-target-doctype: Market Segment
+                column_break_23: &id133
+                  type: string
+                address_contact_section: &id134
+                  type: string
+                column_break_36: &id135
+                  type: string
+                opportunity_owner: &id136
+                  type: string
+                  x-frappe-target-doctype: User
+                website: &id137
+                  type: string
+                column_break_22: &id138
+                  type: string
+                whatsapp: &id139
+                  type: string
+                  x-frappe-options: Phone
+                phone: &id140
+                  type: string
+                  x-frappe-options: Phone
+                phone_ext: &id141
+                  type: string
+                column_break_31: &id142
+                  type: string
+                primary_contact_section: &id143
+                  type: string
+                column_break_54: &id144
+                  type: string
+                dashboard_tab: &id145
+                  type: string
+                notes_tab: &id146
+                  type: string
+                notes_html: &id147
+                  type: string
+                activities_tab: &id148
+                  type: string
+                job_title: &id149
+                  type: string
+                address_html: &id150
+                  type: string
+                contact_html: &id151
+                  type: string
+                open_activities_html: &id152
+                  type: string
+                all_activities_section: &id153
+                  type: string
+                all_activities_html: &id154
+                  type: string
+                notes: &id155
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CRMNote'
+                  writeOnly: true
+                city: &id156
+                  type: string
+                state: &id157
+                  type: string
+                country: &id158
+                  type: string
+                  x-frappe-target-doctype: Country
+                column_break_emai: &id159
+                  type: string
+                utm_source: &id160
+                  type: string
+                  x-frappe-target-doctype: UTM Source
+                utm_campaign: &id161
+                  type: string
+                  x-frappe-target-doctype: UTM Campaign
+                utm_medium: &id162
+                  type: string
+                  x-frappe-target-doctype: UTM Medium
+                utm_content: &id163
+                  type: string
+                utm_analytics_section: &id164
+                  type: string
+              required:
+              - company
+              - name
+              - naming_series
+              - opportunity_from
+              - party_name
+              - status
+              - transaction_date
+              additionalProperties: true
+              x-module: CRM
+            example:
+              naming_series: ''
+              opportunity_from: ''
+              party_name: ''
+              status: ''
+              company: ''
+              transaction_date: ''
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id021
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+  /api/v1/crm/opportunities/{name}:
+    get:
+      tags:
+      - 'Module: CRM'
+      operationId: getOpportunity
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id021
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    put:
+      tags:
+      - 'Module: CRM'
+      operationId: updateOpportunity
+      parameters: &id023
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id022
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id021
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+    delete:
+      tags:
+      - 'Module: CRM'
+      operationId: deleteOpportunity
+      parameters: *id023
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: crm-preorder
+        test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+components:
+  securitySchemes:
+    frappeToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'Frappe token authentication: token api_key:api_secret'
+  parameters:
+    RequestId:
+      name: X-Request-Id
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: X-Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+  schemas:
+    CRMNote:
+      type: object
+      properties:
+        name:
+          type: string
+        note:
+          type: string
+        added_by:
+          type: string
+          x-frappe-target-doctype: User
+        added_on:
+          type: string
+          format: date-time
+      required:
+      - name
+      additionalProperties: true
+      x-module: CRM
+    Lead:
+      type: object
+      properties:
+        name: *id024
+        naming_series: *id025
+        lead_name:
+          type: string
+          readOnly: true
+        company_name: *id026
+        email_id: *id027
+        col_break123: *id028
+        lead_owner: *id029
+        status: *id030
+        salutation: *id031
+        gender: *id032
+        customer: *id033
+        image: *id034
+        contact_info_tab: *id035
+        address_html:
+          type: string
+          readOnly: true
+        column_break2: *id036
+        contact_html:
+          type: string
+          readOnly: true
+        phone: *id037
+        mobile_no: *id038
+        fax: *id039
+        type: *id040
+        market_segment: *id041
+        industry: *id042
+        request_type: *id043
+        company: *id044
+        website: *id045
+        territory: *id046
+        unsubscribed: *id047
+        blog_subscriber: *id048
+        title:
+          type: string
+          readOnly: true
+          writeOnly: true
+        language: *id049
+        first_name: *id050
+        middle_name: *id051
+        last_name: *id052
+        no_of_employees: *id053
+        column_break_22: *id054
+        whatsapp_no: *id055
+        column_break_50: *id056
+        column_break_16: *id057
+        phone_ext: *id058
+        qualification_tab: *id059
+        notes_tab: *id060
+        other_info_tab: *id061
+        column_break_1: *id062
+        qualified_by: *id063
+        qualified_on: *id064
+        qualification_status: *id065
+        address_section: *id066
+        column_break_64: *id067
+        column_break_20: *id068
+        job_title: *id069
+        annual_revenue: *id070
+        activities_tab: *id071
+        organization_section: *id072
+        column_break_28: *id073
+        column_break_31: *id074
+        notes_html: *id075
+        open_activities_html: *id076
+        all_activities_section: *id077
+        all_activities_html: *id078
+        notes: *id079
+        disabled: *id080
+        column_break_38: *id081
+        city: *id082
+        state: *id083
+        country: *id084
+        dashboard_tab: *id085
+        column_break_gkxo: *id086
+        utm_content: *id087
+        utm_source: *id088
+        utm_medium: *id089
+        utm_campaign: *id090
+        utm_analytics_section: *id091
+      required:
+      - name
+      - status
+      additionalProperties: true
+      x-module: CRM
+    Opportunity:
+      type: object
+      properties:
+        name: *id092
+        naming_series: *id093
+        opportunity_from: *id094
+        party_name: *id095
+        customer_name:
+          type: string
+          readOnly: true
+          writeOnly: true
+        column_break0: *id096
+        title: *id097
+        opportunity_type: *id098
+        status: *id099
+        order_lost_reason:
+          type: string
+          readOnly: true
+        expected_closing: *id100
+        section_break_14: *id101
+        currency: *id102
+        opportunity_amount: *id103
+        column_break_17: *id104
+        sales_stage: *id105
+        probability: *id106
+        items_section: *id107
+        items: *id108
+        contact_info: *id109
+        customer_address: *id110
+        address_display:
+          type: string
+          readOnly: true
+          writeOnly: true
+        territory: *id111
+        customer_group: *id112
+        column_break3: *id113
+        contact_person: *id114
+        contact_display:
+          type: string
+          readOnly: true
+        contact_email: *id115
+        contact_mobile: *id116
+        more_info: *id117
+        column_break1: *id118
+        company: *id119
+        transaction_date: *id120
+        amended_from:
+          type: string
+          x-frappe-target-doctype: Opportunity
+          readOnly: true
+        lost_reasons:
+          type: string
+          x-frappe-options: Opportunity Lost Reason Detail
+          readOnly: true
+        first_response_time:
+          type: number
+          readOnly: true
+        language: *id121
+        base_opportunity_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        section_break_32: *id122
+        base_total:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        total:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        conversion_rate: *id123
+        column_break_33: *id124
+        lost_detail_section: *id125
+        column_break_56: *id126
+        competitors:
+          type: string
+          x-frappe-options: Competitor Detail
+          readOnly: true
+        column_break_10: *id127
+        organization_details_section: *id128
+        no_of_employees: *id129
+        annual_revenue: *id130
+        industry: *id131
+        market_segment: *id132
+        column_break_23: *id133
+        address_contact_section: *id134
+        column_break_36: *id135
+        opportunity_owner: *id136
+        website: *id137
+        column_break_22: *id138
+        whatsapp: *id139
+        phone: *id140
+        phone_ext: *id141
+        column_break_31: *id142
+        primary_contact_section: *id143
+        column_break_54: *id144
+        dashboard_tab: *id145
+        notes_tab: *id146
+        notes_html: *id147
+        activities_tab: *id148
+        job_title: *id149
+        address_html: *id150
+        contact_html: *id151
+        open_activities_html: *id152
+        all_activities_section: *id153
+        all_activities_html: *id154
+        notes: *id155
+        city: *id156
+        state: *id157
+        country: *id158
+        column_break_emai: *id159
+        utm_source: *id160
+        utm_campaign: *id161
+        utm_medium: *id162
+        utm_content: *id163
+        utm_analytics_section: *id164
+      required:
+      - company
+      - name
+      - naming_series
+      - opportunity_from
+      - party_name
+      - status
+      - transaction_date
+      additionalProperties: true
+      x-module: CRM
+    OpportunityItem:
+      type: object
+      properties:
+        name:
+          type: string
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
+        col_break1:
+          type: string
+        qty:
+          type: number
+        item_group:
+          type: string
+          x-frappe-target-doctype: Item Group
+          writeOnly: true
+        brand:
+          type: string
+          x-frappe-target-doctype: Brand
+          writeOnly: true
+        section_break_6:
+          type: string
+        uom:
+          type: string
+          x-frappe-target-doctype: UOM
+        item_name:
+          type: string
+        description:
+          type: string
+        column_break_8:
+          type: string
+        image:
+          type: string
+          writeOnly: true
+        image_view:
+          type: string
+          x-frappe-options: image
+        rate:
+          type: number
+          x-frappe-options: currency
+        quantity_and_rate_section:
+          type: string
+        base_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_16:
+          type: string
+        amount:
+          type: number
+          x-frappe-options: currency
+          readOnly: true
+        base_rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+      required:
+      - amount
+      - base_amount
+      - base_rate
+      - name
+      - rate
+      additionalProperties: true
+      x-module: CRM
+    FrappeResponse:
+      type: object
+      properties:
+        message: {}
+      required:
+      - message
+    FrappeError:
+      type: object
+      properties:
+        exc_type:
+          type: string
+        exception:
+          type: string
+        _server_messages:
+          type: string
+        request_id:
+          type: string
+    ResourceListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        message: {}
+    FileUploadResponse:
+      type: object
+      properties:
+        file_url:
+          type: string
+        file_name:
+          type: string
+        message: {}
+    PageInfo:
+      type: object
+      properties:
+        limit_start:
+          type: integer
+        limit_page_length:
+          type: integer
+    RuntimeStatus:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        status:
+          type: string
+        version:
+          type: integer
+        erpnext_version:
+          type: string
+        sha256:
+          type: string
+        drift_count:
+          type: integer
+      required:
+      - ok
+    HealthResponse:
+      type: object
+      properties:
+        message:
+          type: object
+          properties:
+            ok:
+              type: boolean
+            app:
+              type: string
+            site:
+              type: string
+            frappe_version:
+              type:
+              - string
+              - 'null'
+            installed_apps:
+              type: array
+              items:
+                type: string
+            bootstrap:
+              $ref: '#/components/schemas/RuntimeStatus'
+            config:
+              $ref: '#/components/schemas/RuntimeStatus'
+            policy:
+              $ref: '#/components/schemas/RuntimeStatus'
+            configuration_bundle:
+              $ref: '#/components/schemas/RuntimeStatus'
+          required:
+          - ok
+          - app
+          - bootstrap
+          - config
+          - policy
+          - configuration_bundle
+      required:
+      - message
+    BankTransactionAllocation:
+      type: object
+      properties:
+        payment_document:
+          type: string
+          enum:
+          - Payment Entry
+          - Journal Entry
+        payment_entry:
+          type: string
+        allocated_amount:
+          type: number
+          minimum: 0
+      required:
+      - payment_document
+      - payment_entry
+      additionalProperties: false
+    BankTransactionReconcileRequest:
+      type: object
+      properties:
+        allocations:
+          type: array
+          items:
+            $ref: '#/components/schemas/BankTransactionAllocation'
+          minItems: 1
+      required:
+      - allocations
+      additionalProperties: false
+x-contract:
+  runtime:
+    source_of_truth: erpnext
+    api_style: frappe-native
+    openapi_version: 3.1.0
+    server_url: http://127.0.0.1:8080
+    group_by: module
+    public_module_routes: true
+    include_whitelisted_methods: true
+    include_doctype_metadata: false
+    typed_doctypes:
+    - CRM Note
+    - Lead
+    - Opportunity
+    - Opportunity Item
+    typed_modules:
+    - Accounts
+    - Assets
+    - Automation
+    - Bulk Transaction
+    - Buying
+    - CRM
+    - Communication
+    - Contacts
+    - Core
+    - Custom
+    - Desk
+    - EDI
+    - ERPNext Integrations
+    - Email
+    - Geo
+    - Integrations
+    - Maintenance
+    - Manufacturing
+    - Printing
+    - Projects
+    - Quality Management
+    - Regional
+    - Selling
+    - Setup
+    - Stock
+    - Subcontracting
+    - Support
+    - Telephony
+    - Utilities
+    - Website
+    - Workflow
+    public_modules:
+    - Accounts
+    - Buying
+    - CRM
+    - Contacts
+    - Selling
+    - Stock
+    document_actions:
+    - doctype: Sales Invoice
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Purchase Invoice
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Sales Order
+      module: Selling
+      actions:
+      - submit
+      - cancel
+    - doctype: Purchase Order
+      module: Buying
+      actions:
+      - submit
+      - cancel
+    - doctype: Material Request
+      module: Stock
+      actions:
+      - submit
+      - cancel
+    - doctype: Purchase Receipt
+      module: Stock
+      actions:
+      - submit
+      - cancel
+    - doctype: Stock Entry
+      module: Stock
+      actions:
+      - submit
+      - cancel
+    - doctype: Journal Entry
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Payment Request
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Payment Order
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Payment Entry
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    - doctype: Bank Transaction
+      module: Accounts
+      actions:
+      - submit
+      - cancel
+    custom_actions:
+    - doctype: Bank Transaction
+      module: Accounts
+      action: reconcile
+      operation_id: reconcileBankTransaction
+      path_suffix: reconcile
+      handler: letron_api.accounts_reconciliation.reconcile_bank_transaction
+    - doctype: Bank Transaction
+      module: Accounts
+      action: unreconcile
+      operation_id: unreconcileBankTransaction
+      path_suffix: unreconcile
+      handler: letron_api.accounts_reconciliation.unreconcile_bank_transaction
+    include_methods:
+    - letron_api.api.health
+    - letron_api.api.runtime_info
+    - letron_api.api.runtime_snapshot
+    public_resources:
+    - doctype: Lead
+      path: /api/v1/crm/leads
+    - doctype: Opportunity
+      path: /api/v1/crm/opportunities
+    - doctype: Request for Quotation
+      path: /api/v1/crm/request-for-quotations
+    - doctype: Supplier Quotation
+      path: /api/v1/crm/supplier-quotations
+    - doctype: Customer
+      path: /api/v1/selling/customers
+    - doctype: Quotation
+      path: /api/v1/selling/quotations
+    - doctype: Sales Order
+      path: /api/v1/selling/sales-orders
+    - doctype: Delivery Note
+      path: /api/v1/selling/delivery-notes
+    - doctype: Sales Invoice
+      path: /api/v1/accounts/sales-invoices
+    - doctype: Purchase Invoice
+      path: /api/v1/accounts/purchase-invoices
+    - doctype: Payment Entry
+      path: /api/v1/accounts/payment-entries
+    - doctype: Bank
+      path: /api/v1/accounts/banks
+    - doctype: Bank Account
+      path: /api/v1/accounts/bank-accounts
+    - doctype: Mode of Payment
+      path: /api/v1/accounts/modes-of-payment
+    - doctype: Cost Center
+      path: /api/v1/accounts/cost-centers
+    - doctype: Journal Entry
+      path: /api/v1/accounts/journal-entries
+    - doctype: Payment Request
+      path: /api/v1/accounts/payment-requests
+    - doctype: Bank Transaction
+      path: /api/v1/accounts/bank-transactions
+    - doctype: Payment Order
+      path: /api/v1/accounts/payment-orders
+    - doctype: Supplier
+      path: /api/v1/buying/suppliers
+    - doctype: Purchase Order
+      path: /api/v1/buying/purchase-orders
+    - doctype: Item
+      path: /api/v1/stock/items
+    - doctype: Warehouse
+      path: /api/v1/stock/warehouses
+    - doctype: Address
+      path: /api/v1/contacts/addresses
+    - doctype: Contact
+      path: /api/v1/contacts/contacts
+    - doctype: Material Request
+      path: /api/v1/stock/material-requests
+    - doctype: Purchase Receipt
+      path: /api/v1/stock/purchase-receipts
+    - doctype: Stock Entry
+      path: /api/v1/stock/stock-entries
+    - doctype: Item Price
+      path: /api/v1/stock/item-prices
+    - doctype: Stock Reconciliation
+      path: /api/v1/stock/stock-reconciliations
+    - doctype: Serial No
+      path: /api/v1/stock/serial-nos
+    - doctype: Batch
+      path: /api/v1/stock/batches
+    - doctype: Quality Inspection
+      path: /api/v1/stock/quality-inspections
+    - doctype: Pick List
+      path: /api/v1/stock/pick-lists
+    - doctype: Shipment
+      path: /api/v1/stock/shipments
+    - doctype: Landed Cost Voucher
+      path: /api/v1/stock/landed-cost-vouchers
+    - doctype: Stock Reservation Entry
+      path: /api/v1/stock/stock-reservation-entries
+  transport:
+    rest: true
+    webhook: true
+    realtime: true
+  headers:
+    request_id: X-Request-Id
+    idempotency_key: X-Idempotency-Key
+x-capabilities:
+  webhook:
+    declared: true
+    delivery_implemented: true
+    delivery: durable-outbox
+    signature: hmac-sha256
+    max_attempts: 3
+  realtime:
+    declared: true
+    delivery_implemented: true
+    delivery: durable-outbox
+    source_of_truth: false
+x-acceptance-summary:
+  passed: 10
+  partial: 0
+  not-tested: 0
+  blocked: 0
+x-module: CRM
+x-module-index:
+  CRM:
+  - CRM Note
+  - Lead
+  - Opportunity
+  - Opportunity Item

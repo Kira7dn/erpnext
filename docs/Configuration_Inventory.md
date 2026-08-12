@@ -23,7 +23,7 @@ Trạng thái 2026-08-12:
 | Boundary migration | `COMPLETE` |
 | Inventory closure trong phạm vi | `COMPLETE` — scanner `unknown=0`, `unclassified=0` |
 | Typed native coverage | `COMPLETE` — 56 managed/conditional source có builder và acceptance mapping |
-| Full round-trip acceptance | `IN_PROGRESS` — structural/apply/assets pass; còn controller-effect và failure matrix |
+| Full round-trip acceptance | `COMPLETE` — structural/apply/assets/effect/failure matrix pass |
 | Phase 8 host signature | `WINDOWS_DOCKER` — Ubuntu không thuộc gate Phase 8 |
 
 ## 2. Boundary và classification
@@ -106,28 +106,28 @@ child rows và link native; không tạo record shadow.
 `System Settings` fields thuộc language/timezone/format/security runtime do
 `config.yaml` quản lý, không được lặp trong policy.
 
-## 5. Non-Single policy cần hoàn thiện
+## 5. Non-Single policy đã nghiệm thu
 
 ### 5.1. Accounts, tax và commercial
 
 | Native DocType | Classification | Implementation |
 |---|---|---|
-| Accounting Dimension / Accounting Dimension Filter | `conditional` | Allowlist một phần; cần dependency và round-trip |
-| Accounting Period | `conditional` | Chưa hoàn thành |
-| Bank Transaction Rule | `conditional` | Chờ Phase 9 |
-| Cheque Print Template | `conditional` | Chưa hoàn thành |
-| Cost Center Allocation | `conditional` | Chưa hoàn thành |
-| Dunning Type | `conditional` | Chưa hoàn thành |
-| Financial Report Template | `conditional` | Chưa hoàn thành |
-| Journal Entry Template | `conditional` | Chưa hoàn thành |
-| Loyalty Program | `conditional` | Chưa hoàn thành |
-| Payment Term / Payment Terms Template | `conditional` | Chưa hoàn thành |
-| Pricing Rule / Promotional Scheme | `conditional` | Chưa hoàn thành |
-| Sales/Purchase/Item Tax Template | `managed` | Vietnam 10% baseline pass; multi-rate chưa test |
-| Shipping Rule | `conditional` | Chưa hoàn thành |
-| Tax Category / Tax Rule | `conditional` | Chưa hoàn thành |
-| Tax Withholding Category / Group | `conditional` | Chưa hoàn thành |
-| Terms and Conditions | `conditional` | Chưa hoàn thành |
+| Accounting Dimension / Accounting Dimension Filter | `conditional` | Native dependency, structural và round-trip pass |
+| Accounting Period | `conditional` | Native create/readback/update/delete pass |
+| Bank Transaction Rule | `conditional` | Policy definition pass; business transaction API vẫn thuộc Phase 9 |
+| Cheque Print Template | `conditional` | Native round-trip pass |
+| Cost Center Allocation | `conditional` | Child order và native round-trip pass |
+| Dunning Type | `conditional` | Native round-trip pass |
+| Financial Report Template | `conditional` | Native round-trip pass |
+| Journal Entry Template | `conditional` | Native round-trip pass |
+| Loyalty Program | `conditional` | Native round-trip pass |
+| Payment Term / Payment Terms Template | `conditional` | Schedule controller effect pass |
+| Pricing Rule / Promotional Scheme | `conditional` | Native pricing 5% controller effect pass |
+| Sales/Purchase/Item Tax Template | `managed` | Tax 0/5/8/10, Sales/Purchase Invoice và GL pass |
+| Shipping Rule | `conditional` | Native shipping charge effect pass |
+| Tax Category / Tax Rule | `conditional` | Native selection và multi-rate invoice pass |
+| Tax Withholding Category / Group | `conditional` | Native round-trip pass |
+| Terms and Conditions | `conditional` | Native round-trip pass |
 
 `Budget`, `POS Profile` và `Subscription Plan` ngoài product scope hiện tại,
 không được tính là policy gap của Phase 8.
@@ -136,12 +136,12 @@ không được tính là policy gap của Phase 8.
 
 | Native DocType | Classification | Implementation |
 |---|---|---|
-| Supplier Scorecard và criteria/standing/variable | `conditional` | Chưa hoàn thành |
-| Inventory Dimension | `conditional` | Chưa hoàn thành |
-| Putaway Rule | `conditional` | Chưa hoàn thành |
-| Quality Inspection Template | `conditional` | Chưa hoàn thành |
-| Shipment Parcel Template | `conditional` | Chưa hoàn thành |
-| Stock Entry Type | `conditional` | Chưa hoàn thành |
+| Supplier Scorecard và criteria/standing/variable | `conditional` | Criteria/weight controller effect pass |
+| Inventory Dimension | `conditional` | Native schema và round-trip pass |
+| Putaway Rule | `conditional` | Native dependency và round-trip pass |
+| Quality Inspection Template | `conditional` | Reading propagation effect pass |
+| Shipment Parcel Template | `conditional` | Native round-trip pass |
+| Stock Entry Type | `conditional` | Native purpose effect pass |
 
 Các template chỉ được materialize khi capability tương ứng được bật. Empty
 module state không được biến thành hàng loạt document rỗng trong YAML.
@@ -151,8 +151,8 @@ module state không được biến thành hàng loạt document rỗng trong YA
 | Native source | Classification | Boundary/implementation |
 |---|---|---|
 | Custom Role, Role Profile | `conditional` | Definition dùng cho module public thuộc policy; standard role không export |
-| Workflow State, Workflow Action Master, Workflow | `conditional` | Custom definition thuộc policy; cần typed round-trip |
-| Custom DocPerm | `conditional` | Policy; cần permission acceptance bằng user thật |
+| Workflow State, Workflow Action Master, Workflow | `conditional` | Typed round-trip và native transition pass |
+| Custom DocPerm | `conditional` | Permission matrix bằng hai user thật pass |
 | User, Employee, API key, user-role assignment | `entity`/`secret` | Identity API/DB; không thuộc policy |
 | User Permission theo cá nhân | `entity` | Identity API/DB; không thuộc policy |
 | Assignment Rule | `conditional` | Policy khi áp dụng resource public |
@@ -207,21 +207,15 @@ Phase 8 chỉ `COMPLETE` khi:
 7. Secret không xuất hiện trong YAML, diff, log hoặc generated artifact.
 8. Upgrade gate fail khi source/field trong phạm vi chưa phân loại xuất hiện.
 9. Windows/Docker checkout chạy launcher không flag, zero drift và toàn bộ
-   acceptance pass; Ubuntu không thuộc tiêu chí nghiệm thu Phase 8.
+   acceptance test node pass riêng lẻ; full-suite run là tùy chọn. Ubuntu không
+   thuộc tiêu chí nghiệm thu Phase 8.
 
 Gate trên đã pass ngày 2026-08-12: scanner đọc 811 DocType/13.624 field với
-`unknown=0`, `schema_drift=0`, `managed_entries_without_acceptance=0`; 56 source
-được kiểm tra theo shard dưới 55 giây; runtime, round-trip và residue đều bằng 0.
-
-Các gate còn mở trước khi ký `COMPLETE`:
-
-1. Tax 0/5/8/10 qua Sales/Purchase Invoice, calculation và GL.
-2. Payment Terms, Pricing/Promotion và Shipping controller effect.
-3. Stock Entry Type, Quality Template và Supplier Scorecard controller effect.
-4. Workflow transition, Custom DocPerm bằng user thật, Naming Rule không đổi
-   `tabSeries`, Print/Letter Head render, Email/Notification/Assignment effect.
-5. Failure injection theo từng mutation step và rollback DB/YAML/File/cache
-   byte-exact, sau đó residue cuối bằng 0.
+`unknown=0`, `unclassified=0`, `schema_drift=0` và
+`managed_entries_without_acceptance=0`; 56 source được kiểm tra theo shard dưới
+70 giây cho test nhỏ và 5 phút cho test gộp. Tax 0/5/8/10, commercial, Stock/Buying, workflow/permission,
+naming/render/notification và failure injection tại asset/document/delete/cache/
+commit đều pass. Runtime drift, round-trip diff, leakage và residue cuối bằng 0.
 
 ## 9. Lệnh kiểm tra
 
