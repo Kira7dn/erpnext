@@ -468,7 +468,7 @@ registry-driven disposable acceptance; tax 0/5/8/10, GL, commercial,
 Stock/Buying, workflow/permission và cross-cutting effect đều pass. Native apply
 lần hai zero-change, asset public/private và fault tại asset/document/delete/
 cache/commit rollback byte-clean, runtime zero drift, restore drill pass và
-residue cuối bằng 0. Production `config/policy.yaml` vẫn chỉ giữ 14 document thật
+residue cuối bằng 0. Production `config/policy.yaml` hiện giữ 25 document thật
 và không chứa acceptance fixture.
 
 Phase 9 `COMPLETE` trên Windows/Docker ngày 2026-08-13: API typed mới cho

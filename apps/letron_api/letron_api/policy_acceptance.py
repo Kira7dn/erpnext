@@ -210,6 +210,13 @@ DOCUMENT_BUILDERS: dict[str, dict[str, Any]] = {
         "bank_name": _fixture_name("Cheque Print Template"),
         "cheque_size": "Regular",
     },
+    "Cost Center": {
+        "cost_center_name": _fixture_name("Cost Center"),
+        "parent_cost_center": "$parent_cost_center",
+        "company": "$company",
+        "is_group": 0,
+        "disabled": 0,
+    },
     "Cost Center Allocation": {
         "main_cost_center": "$cost_center",
         "valid_from": "2042-01-01",
@@ -2026,6 +2033,328 @@ def probe_tax_effect_rate(rate: int = 10) -> dict[str, Any]:
                 frappe.delete_doc(doctype, name, ignore_permissions=True, force=True)
         frappe.db.rollback()
         cleanup_registry_residue()
+
+
+def probe_configured_tax_policy() -> dict[str, Any]:
+    """Read back configured tax categories/rules and verify native selection."""
+
+    import frappe
+    from erpnext.accounts.doctype.tax_rule.tax_rule import (  # ty: ignore[unresolved-import]
+        get_tax_template,
+    )
+
+    from letron_api import policy
+
+    if not policy._is_test_runtime():
+        raise RuntimeError("configured tax policy probe requires a disposable acceptance site")
+
+    company = policy.load_policy()["bootstrap"]["company"]["name"]
+    software_category = "Domestic Software - Non-VAT - LTVN"
+    hosting_category = "Domestic Hosting - LTVN"
+    software_sales = "Vietnam Software Non-VAT - LTVN"
+    standard_sales = "Vietnam Tax - LTVN"
+    expected = {
+        "Tax Category": [software_category, hosting_category, "Domestic Transport - LTVN"],
+        "Sales Taxes and Charges Template": [software_sales, standard_sales],
+        "Purchase Taxes and Charges Template": [software_sales, standard_sales],
+        "Item Tax Template": [software_sales],
+        "Tax Rule": [
+            "Domestic Software Sales - LTVN",
+            "Domestic Software Purchase - LTVN",
+            "Domestic Hosting Sales - LTVN",
+            "Domestic Hosting Purchase - LTVN",
+            "Domestic Transport Sales - LTVN",
+            "Domestic Transport Purchase - LTVN",
+        ],
+    }
+    missing = [
+        f"{doctype}:{name}"
+        for doctype, names in expected.items()
+        for name in names
+        if not frappe.db.exists(doctype, name)
+    ]
+    if missing:
+        raise AssertionError("configured tax policy records missing: " + ", ".join(missing))
+
+    item_template = frappe.get_doc("Item Tax Template", software_sales)
+    item_rows = item_template.get("taxes") or []
+    if len(item_rows) != 1:
+        raise AssertionError("software Item Tax Template must contain one detail row")
+    item_row = item_rows[0]
+    if str(item_row.tax_type) != "VAT - LTVN" or float(item_row.tax_rate or 0) != 0.0:
+        raise AssertionError("software Item Tax Template must use zero tax rate")
+    if int(item_row.not_applicable or 0) != 1:
+        raise AssertionError("software Item Tax Template must mark VAT as not applicable")
+
+    for doctype in ("Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"):
+        if frappe.get_doc(doctype, software_sales).get("taxes"):
+            raise AssertionError(f"{doctype} software template must have no tax rows")
+
+    today = frappe.utils.nowdate()
+    selected = {
+        "software_sales": get_tax_template(
+            today,
+            {"tax_type": "Sales", "company": company, "tax_category": software_category},
+        ),
+        "software_purchase": get_tax_template(
+            today,
+            {"tax_type": "Purchase", "company": company, "tax_category": software_category},
+        ),
+        "hosting_sales": get_tax_template(
+            today,
+            {"tax_type": "Sales", "company": company, "tax_category": hosting_category},
+        ),
+        "hosting_purchase": get_tax_template(
+            today,
+            {"tax_type": "Purchase", "company": company, "tax_category": hosting_category},
+        ),
+    }
+    assert selected == {
+        "software_sales": software_sales,
+        "software_purchase": software_sales,
+        "hosting_sales": standard_sales,
+        "hosting_purchase": standard_sales,
+    }
+    return {"ok": True, "company": company, "selected": selected}
+
+
+def probe_configured_tax_invoice_effects() -> dict[str, Any]:
+    """Submit policy-routed Sales/Purchase Invoices and verify VAT GL amounts."""
+
+    import frappe
+    from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template  # type: ignore[unresolved-import]
+
+    from letron_api import policy
+
+    if not policy._is_test_runtime():
+        raise RuntimeError("configured tax invoice probe requires a disposable acceptance site")
+
+    prerequisites = _runtime_prerequisites()
+    company = prerequisites["company"]
+    today = frappe.utils.nowdate()
+    routes = {
+        "software": ("Domestic Software - Non-VAT - LTVN", 0.0),
+        "hosting": ("Domestic Hosting - LTVN", 10000.0),
+        "transport": ("Domestic Transport - LTVN", 10000.0),
+    }
+    created: list[tuple[str, str]] = []
+    fiscal_year_name: str | None = None
+    original_po_required: Any = None
+    original_pr_required: Any = None
+    observed: dict[str, dict[str, float]] = {}
+    try:
+        _ensure_probe_prerequisites(prerequisites)
+        # This probe isolates VAT calculation. The configured policy may require
+        # PO/PR for normal purchasing, so temporarily bypass only those
+        # controller gates inside the disposable transaction and restore them.
+        original_po_required = frappe.db.get_single_value("Buying Settings", "po_required")
+        original_pr_required = frappe.db.get_single_value("Buying Settings", "pr_required")
+        frappe.db.set_single_value("Buying Settings", "po_required", "No")
+        frappe.db.set_single_value("Buying Settings", "pr_required", "No")
+        fiscal_year_name = f"Acceptance FY {today[:4]}-{frappe.generate_hash(length=6).upper()}"
+        fiscal_year = frappe.get_doc(
+            {
+                "doctype": "Fiscal Year",
+                "year": fiscal_year_name,
+                "year_start_date": f"{today[:4]}-01-01",
+                "year_end_date": f"{today[:4]}-12-31",
+                "disabled": 0,
+                "companies": [{"company": company}],
+            }
+        ).insert(ignore_permissions=True)
+        for label, (category, expected_tax) in routes.items():
+            sales_template = get_tax_template(
+                today, {"tax_type": "Sales", "company": company, "tax_category": category}
+            )
+            purchase_template = get_tax_template(
+                today, {"tax_type": "Purchase", "company": company, "tax_category": category}
+            )
+            sales_invoice = frappe.get_doc(
+                {
+                    "doctype": "Sales Invoice",
+                    "company": company,
+                    "customer": prerequisites["customer"],
+                    "posting_date": today,
+                    "due_date": today,
+                    "currency": "VND",
+                    "conversion_rate": 1,
+                    "selling_price_list": prerequisites["selling_price_list"],
+                    "price_list_currency": "VND",
+                    "plc_conversion_rate": 1,
+                    "tax_category": category,
+                    "taxes_and_charges": sales_template,
+                    "items": [{
+                        "item_code": prerequisites["tax_item"],
+                        "qty": 1,
+                        "rate": 100000,
+                        "income_account": prerequisites["income_account"],
+                        "cost_center": prerequisites["cost_center"],
+                    }],
+                }
+            )
+            sales_invoice.append_taxes_from_master()
+            sales_invoice.insert(ignore_permissions=True)
+            sales_invoice.submit()
+            created.append(("Sales Invoice", str(sales_invoice.name)))
+            sales_gl = float(frappe.db.get_value(
+                "GL Entry",
+                {"voucher_type": "Sales Invoice", "voucher_no": sales_invoice.name,
+                 "account": prerequisites["tax_account"], "is_cancelled": 0},
+                "credit",
+            ) or 0)
+
+            purchase_invoice = frappe.get_doc(
+                {
+                    "doctype": "Purchase Invoice",
+                    "company": company,
+                    "supplier": prerequisites["supplier"],
+                    "posting_date": today,
+                    "due_date": today,
+                    "bill_no": f"POLICY-{label}-{frappe.generate_hash(length=6).upper()}",
+                    "bill_date": today,
+                    "currency": "VND",
+                    "conversion_rate": 1,
+                    "buying_price_list": prerequisites["buying_price_list"],
+                    "price_list_currency": "VND",
+                    "plc_conversion_rate": 1,
+                    "tax_category": category,
+                    "taxes_and_charges": purchase_template,
+                    "items": [{
+                        "item_code": prerequisites["tax_item"],
+                        "qty": 1,
+                        "rate": 100000,
+                        "expense_account": prerequisites["expense_account"],
+                        "cost_center": prerequisites["cost_center"],
+                    }],
+                }
+            )
+            purchase_invoice.append_taxes_from_master()
+            purchase_invoice.insert(ignore_permissions=True)
+            purchase_invoice.submit()
+            created.append(("Purchase Invoice", str(purchase_invoice.name)))
+            purchase_gl = float(frappe.db.get_value(
+                "GL Entry",
+                {"voucher_type": "Purchase Invoice", "voucher_no": purchase_invoice.name,
+                 "account": prerequisites["tax_account"], "is_cancelled": 0},
+                "debit",
+            ) or 0)
+
+            if float(sales_invoice.total_taxes_and_charges or 0) != expected_tax:
+                raise AssertionError(f"{label} Sales Invoice tax mismatch")
+            if float(purchase_invoice.total_taxes_and_charges or 0) != expected_tax:
+                raise AssertionError(f"{label} Purchase Invoice tax mismatch")
+            if sales_gl != expected_tax or purchase_gl != expected_tax:
+                raise AssertionError(f"{label} VAT GL mismatch")
+            observed[label] = {"sales_tax": float(sales_invoice.total_taxes_and_charges),
+                               "purchase_tax": float(purchase_invoice.total_taxes_and_charges),
+                               "sales_gl": sales_gl, "purchase_gl": purchase_gl}
+        return {"ok": True, "observed": observed}
+    finally:
+        for doctype, name in reversed(created):
+            if frappe.db.exists(doctype, name):
+                doc = frappe.get_doc(doctype, name)
+                if doc.docstatus == 1:
+                    doc.cancel()
+        if fiscal_year_name and frappe.db.exists("Fiscal Year", fiscal_year_name):
+            frappe.delete_doc("Fiscal Year", fiscal_year_name, ignore_permissions=True, force=True)
+        if original_po_required is not None:
+            frappe.db.set_single_value("Buying Settings", "po_required", original_po_required)
+        if original_pr_required is not None:
+            frappe.db.set_single_value("Buying Settings", "pr_required", original_pr_required)
+
+
+def probe_configured_accounting_period() -> dict[str, Any]:
+    """Verify native Accounting Period behavior for the policy-owned period."""
+
+    import frappe
+    from letron_api import policy
+
+    if not policy._is_test_runtime():
+        raise RuntimeError("accounting period probe requires a disposable acceptance site")
+    expected_name = "FY 2026 - LTVN"
+    if not frappe.db.exists("Accounting Period", expected_name):
+        raise AssertionError(f"configured accounting period missing: {expected_name}")
+    doc = frappe.get_doc("Accounting Period", expected_name)
+    if {
+        "period_name": doc.period_name,
+        "start_date": str(doc.start_date),
+        "end_date": str(doc.end_date),
+        "company": doc.company,
+        "disabled": int(doc.disabled or 0),
+        "exempted_role": doc.exempted_role,
+    } != {
+        "period_name": expected_name,
+        "start_date": "2026-01-01",
+        "end_date": "2026-08-14",
+        "company": "Letron Việt Nam",
+        "disabled": 0,
+        "exempted_role": None,
+    }:
+        raise AssertionError("Accounting Period native fields differ from policy")
+    closed_documents = {
+        str(row.document_type): int(row.closed or 0) for row in (doc.closed_documents or [])
+    }
+    expected_documents = {
+        "Sales Invoice", "Purchase Invoice", "Journal Entry", "Payment Entry", "Purchase Receipt"
+    }
+    if set(closed_documents) != expected_documents or any(closed_documents.values()):
+        raise AssertionError("Accounting Period closed_documents differ from policy")
+
+    from types import SimpleNamespace
+
+    from erpnext.accounts.doctype.accounting_period.accounting_period import (
+        ClosedAccountingPeriod,
+        validate_accounting_period_on_doc_save,
+    )
+
+    sales_invoice_row = next(
+        row for row in doc.closed_documents if row.document_type == "Sales Invoice"
+    )
+    in_period_doc = SimpleNamespace(
+        doctype="Sales Invoice",
+        company=doc.company,
+        posting_date="2026-08-14",
+    )
+    outside_period_doc = SimpleNamespace(
+        doctype="Sales Invoice",
+        company=doc.company,
+        posting_date="2025-12-31",
+    )
+
+    # Policy leaves the configured documents open: an in-period document must pass.
+    validate_accounting_period_on_doc_save(in_period_doc)
+
+    # Accounting Period is a closing control, not a global date-range validator:
+    # an outside-period document is not blocked by this hook.
+    validate_accounting_period_on_doc_save(outside_period_doc)
+
+    original_closed = int(sales_invoice_row.closed or 0)
+    try:
+        frappe.db.set_value("Closed Document", sales_invoice_row.name, "closed", 1)
+        try:
+            validate_accounting_period_on_doc_save(in_period_doc)
+        except ClosedAccountingPeriod:
+            pass
+        else:
+            raise AssertionError("closed Sales Invoice was not blocked inside the period")
+
+        # No exempted_role is configured, so there is no role-based bypass.
+        if doc.exempted_role is not None:
+            raise AssertionError("Accounting Period unexpectedly has an exempted_role")
+    finally:
+        frappe.db.set_value("Closed Document", sales_invoice_row.name, "closed", original_closed)
+
+    return {
+        "ok": True,
+        "period_name": expected_name,
+        "closed_documents": closed_documents,
+        "behavior": {
+            "in_period_open_allowed": True,
+            "outside_period_not_blocked_by_closing_hook": True,
+            "in_period_closed_sales_invoice_blocked": True,
+            "exempted_role": None,
+        },
+    }
 
 
 def _make_effect_quotation(prerequisites: Mapping[str, str]) -> Any:

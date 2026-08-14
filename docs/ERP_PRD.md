@@ -152,9 +152,10 @@ POST /api/v1/accounts/sales-invoices/{name}/cancel
 11. `config/config.yaml` quản lý system/runtime; `config/policy.yaml` quản lý
     Company bootstrap và business policy; entity/transaction nằm trong ERPNext
     DB; secret nằm trong `.env` hoặc secret store.
-12. Country và currency có target owner duy nhất là `policy.yaml`. Việc chúng
-    vẫn xuất hiện như mirror trong `config.yaml` là migration gap của Phase 8.0,
-    không phải boundary đích.
+12. Country và currency có owner duy nhất là `config/policy.yaml`. Launcher lấy
+    hai giá trị từ `policy.bootstrap.company`; `config/config.yaml` không còn là
+    owner hoặc mirror business của hai giá trị này. Boundary migration đã được
+    kiểm tra trong Phase 8 acceptance.
 13. Policy completeness chỉ áp dụng cho module public và policy Frappe dùng
     chung trực tiếp cho chúng. Nguồn trong phạm vi chưa phân loại không được âm
     thầm bỏ qua.
@@ -586,7 +587,7 @@ không tự động chuyển sang revision tương lai.
 |---|---|---|
 | Business API Phase 1–7 | `COMPLETE` | 5 module, 23 resource, 137/137 operation `passed` |
 | Native controller/permission/lifecycle | `COMPLETE` trong allowlist | Docker acceptance và cleanup fail-closed |
-| Policy runtime foundation | `COMPLETE` | 14 document thật, zero drift, rollback và idempotent apply |
+| Policy runtime foundation | `COMPLETE` | 25 document thật, zero drift, rollback và idempotent apply |
 | Full policy coverage | `COMPLETE` | 56 source registry-driven; native asset và full acceptance pass |
 | Config/policy ownership | `COMPLETE` cho boundary migration | Country/currency chỉ còn ở `policy.bootstrap.company` |
 | OpenAPI handoff | `COMPLETE` | Public 215 operation, control plane 2 operation, manifest checksum |

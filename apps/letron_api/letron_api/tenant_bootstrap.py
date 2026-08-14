@@ -9,6 +9,8 @@ import frappe
 
 from letron_api import policy, system_config
 
+HEADLESS_SETUP_APPS = frozenset({"frappe", "erpnext", "letron_api"})
+
 
 def _restore_policy(content: str) -> None:
     source = system_config.policy_path()
@@ -50,6 +52,39 @@ def _ensure_company_prerequisites() -> None:
         )
 
 
+def _complete_headless_setup() -> None:
+    """Mark the UI setup state complete after the headless bootstrap.
+
+    The headless deployment intentionally performs the setup work without the
+    browser wizard.  Frappe still uses these native completion flags to decide
+    whether ``/desk`` should send the user to ``/setup-wizard``.  Leaving them
+    unset makes a successfully bootstrapped tenant loop between those routes.
+    """
+
+    frappe.db.set_single_value("System Settings", "setup_complete", 1)
+    # The browser wizard leaves this user default at ``setup-wizard``.  A
+    # headless tenant has no wizard step to finish, so Desk must be the native
+    # landing route after login.
+    frappe.defaults.set_global_default("desktop:home_page", "desk")
+    frappe.defaults.set_user_default("desktop:home_page", "desk", "Administrator")
+    installed_apps = set(frappe.get_installed_apps(_ensure_on_bench=True))
+    unsupported_apps = installed_apps - HEADLESS_SETUP_APPS
+    if unsupported_apps:
+        frappe.throw(
+            "Installed apps require explicit headless setup support: "
+            + ", ".join(sorted(unsupported_apps))
+        )
+    for app_name in installed_apps:
+        if frappe.db.exists("Installed Application", {"app_name": app_name}):
+            frappe.db.set_value(
+                "Installed Application",
+                {"app_name": app_name},
+                "is_setup_complete",
+                1,
+            )
+    frappe.clear_cache()
+
+
 def status() -> dict[str, object]:
     desired = policy.load_policy()
     configured = desired.get("bootstrap", {}).get("company", {})
@@ -78,12 +113,16 @@ def status() -> dict[str, object]:
     )
     templates_match = all(item["name"] and item["rates"] == [10.0] for item in templates.values())
     policy_status = policy.status()
+    setup_complete = bool(frappe.is_setup_complete())
+    home_page = frappe.defaults.get_global_default("desktop:home_page")
     return {
-        "ok": bool(company_matches and templates_match and policy_status["ok"]),
+        "ok": bool(company_matches and templates_match and policy_status["ok"] and setup_complete and home_page == "desk"),
         "company": company_name,
         "company_count": len(companies),
         "company_matches": company_matches,
         "templates": templates,
+        "setup_complete": setup_complete,
+        "home_page": home_page,
         "policy": policy_status,
     }
 
@@ -104,6 +143,8 @@ def run() -> dict[str, object]:
             frappe.throw(
                 f"policy.yaml declares {company_name}, but runtime Company is {existing[0]['name']}"
             )
+        _complete_headless_setup()
+        frappe.db.commit()
         return {"ok": True, "created": False, "company": company_name, **_assert_native_defaults(company_name)}
 
     previous_flag = getattr(frappe.flags, "in_letron_bootstrap", False)
@@ -125,6 +166,7 @@ def run() -> dict[str, object]:
         company.insert(ignore_permissions=True)
         counts = _assert_native_defaults(company_name)
         materialized = policy.materialize_native_defaults()
+        _complete_headless_setup()
         frappe.db.commit()
         return {"ok": True, "created": True, "company": company_name, "policy_documents": materialized["documents"], **counts}
     except Exception:

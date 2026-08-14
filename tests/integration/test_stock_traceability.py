@@ -214,6 +214,25 @@ def test_stock_traceability_contract_and_lifecycle(request: pytest.FixtureReques
         {"name": prefix + "Supplier", "supplier_name": prefix + "Supplier", "supplier_group": supplier_group},
         created,
     )
+    purchase_order = create_or_reuse(
+        client,
+        "Purchase Order",
+        {
+            "name": prefix + "Reference Purchase Order",
+            "company": company,
+            "transaction_date": "2026-08-13",
+            "schedule_date": "2026-08-13",
+            "supplier": supplier,
+            "currency": "VND",
+            "items": [
+                {"item_code": item, "qty": 1, "schedule_date": "2026-08-13", "warehouse": warehouse, "rate": 100},
+                {"item_code": reserved_item, "qty": 1, "schedule_date": "2026-08-13", "warehouse": warehouse, "rate": 100},
+            ],
+        },
+        created,
+    )
+    client.public("POST", f"/api/v1/buying/purchase-orders/{quote(purchase_order, safe='')}/submit", expected={200})
+    purchase_order_doc = response_data(client.public("GET", f"/api/v1/buying/purchase-orders/{quote(purchase_order, safe='')}", expected={200}))
     purchase_receipt = create_or_reuse(
         client,
         "Purchase Receipt",
@@ -234,6 +253,8 @@ def test_stock_traceability_contract_and_lifecycle(request: pytest.FixtureReques
                     "rate": 100,
                     "warehouse": warehouse,
                     "cost_center": cost_center,
+                    "purchase_order": purchase_order,
+                    "purchase_order_item": purchase_order_doc["items"][0]["name"],
                 },
                 {
                     "item_code": reserved_item,
@@ -245,6 +266,8 @@ def test_stock_traceability_contract_and_lifecycle(request: pytest.FixtureReques
                     "rate": 100,
                     "warehouse": warehouse,
                     "cost_center": cost_center,
+                    "purchase_order": purchase_order,
+                    "purchase_order_item": purchase_order_doc["items"][1]["name"],
                 }
             ],
         },

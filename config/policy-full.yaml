@@ -1,0 +1,1392 @@
+﻿## POLICY HIERARCHY
+## -----------------
+# [A] Metadata
+version: 2
+scope_version: 1
+erpnext_version: 16.31.1
+
+# [B] Assets
+assets: {}
+
+# [C] Bootstrap defaults
+bootstrap:
+  # Cấu hình khởi tạo site/doanh nghiệp mặc định.
+  company:
+    # Mã viết tắt của Company, dùng trong tên Account và mã chứng từ.
+    # Nhập mã ngắn, duy nhất của Company; giá trị hiện tại: LTVN.
+    abbreviation: LTVN
+
+    # Tên Chart of Accounts Template dùng để tạo hệ thống Account ban đầu.
+    # Standard = dùng bộ tài khoản chuẩn của ERPNext; giá trị hiện tại: Standard.
+    chart_of_accounts: Standard
+
+    # Quốc gia đăng ký của Company; ERPNext dùng giá trị này để chọn dữ liệu
+    # khởi tạo theo quốc gia, gồm Tax và cấu hình liên quan. Giá trị hiện tại: Vietnam.
+    country: Vietnam
+
+    # Base Currency dùng để ghi nhận và lập báo cáo kế toán của Company.
+    # Nhập mã currency hợp lệ; giá trị hiện tại: VND.
+    currency: VND
+
+    # Business Domain của Company; ERPNext lưu field này dạng Data, không có ENUM
+    # bắt buộc. ERPNext hiện nhận diện Manufacturing, Retail, Services và
+    # Distribution trong logic activation; nên dùng một trong các giá trị này.
+    # 🔹 ENUM vận hành/khuyến nghị: Manufacturing | Retail | Services | Distribution
+    # Giá trị hiện tại: Distribution.
+    domain: Distribution
+
+    # Tên Company mà policy sẽ tạo và quản lý trong ERPNext.
+    # Nhập đúng tên pháp lý dùng làm Company name; giá trị hiện tại: Letron Việt Nam.
+    name: Letron Việt Nam
+
+documents:
+  - doctype: Accounting Period
+    name: FY 2026 - LTVN
+    state: present
+    fields:
+      period_name: FY 2026 - LTVN
+      start_date: 2026-01-01
+      end_date: 2026-08-14
+      company: Letron Việt Nam
+      disabled: 0
+      exempted_role: null
+      closed_documents:
+        - document_type: Sales Invoice
+          closed: 0
+        - document_type: Purchase Invoice
+          closed: 0
+        - document_type: Journal Entry
+          closed: 0
+        - document_type: Payment Entry
+          closed: 0
+        - document_type: Purchase Receipt
+          closed: 0
+
+  - doctype: Accounts Settings
+    name: Accounts Settings
+    state: present
+
+    # [D.01] Accounts Settings
+    # 🧾 Kế toán, công nợ, tỷ giá, sổ cái và hành vi chứng từ.
+    # Thiết lập kế toán, công nợ, tỷ giá, sổ cái và hành vi chứng từ.
+    fields:
+      # Tự thêm Tax từ Item Tax Template của từng Item vào transaction.
+      # 1 = tự động; 0 = không tự động.
+      # 🔹 ENUM: 0 | 1
+      add_taxes_from_item_tax_template: 1
+
+      # Tự thêm Taxes and Charges Template khi transaction chưa có Taxes.
+      # 1 = tự động; 0 = không tự động.
+      # 🔹 ENUM: 0 | 1
+      add_taxes_from_taxes_and_charges_template: 0
+
+      # Cho phép cùng một Customer/Supplier Account ghi nhận nhiều Currency.
+      # 1 = cho phép; 0 = yêu cầu mỗi Party Account chỉ dùng một Currency.
+      # 🔹 ENUM: 0 | 1
+      allow_multi_currency_invoices_against_single_party_account: 0
+
+      # Cho phép quy đổi qua Pegged Currency trung gian khi không có rate trực tiếp.
+      # 1 = cho phép; 0 = chỉ dùng rate trực tiếp.
+      # 🔹 ENUM: 0 | 1
+      allow_pegged_currencies_exchange_rates: 0
+
+      # Cho phép dùng Exchange Rate cũ hơn thời hạn quy định.
+      # 0 = chỉ dùng rate trong số ngày tại stale_days.
+      # 1 = cho phép dùng rate cũ hơn nếu không có rate mới.
+      # 🔹 ENUM: 0 | 1
+      allow_stale: 0
+
+      # Tự động đối soát Payment với Invoice hoặc giao dịch liên quan.
+      # 1 = chạy Auto Reconciliation; 0 = kế toán đối soát thủ công.
+      # 🔹 ENUM: 0 | 1
+      auto_reconcile_payments: 0
+
+      # Khoảng thời gian giữa hai lần chạy Auto Reconciliation.
+      # Đơn vị: phút; chỉ nhận số từ 1 đến 59.
+      auto_reconciliation_job_trigger: 15
+
+      # Sao chép Payment Terms từ Order/Quotation sang Invoice.
+      # 1 = tự động giữ nguyên Payment Terms; 0 = không tự lấy.
+      # 🔹 ENUM: 0 | 1
+      automatically_fetch_payment_terms: 0
+
+      # Tự động tạo bút toán cho Deferred Revenue/Expense theo lịch phân bổ.
+      # 1 = tự động xử lý; 0 = không tự xử lý.
+      # 🔹 ENUM: 0 | 1
+      automatically_process_deferred_accounting_entry: 1
+
+      # Tự chạy Bank Transaction Rule cho giao dịch chưa đối soát.
+      # 1 = scheduler tự chạy; 0 = không tự chạy.
+      # 🔹 ENUM: 0 | 1
+      automatically_run_rules_on_unreconciled_transactions: 1
+
+      # Tự động ghi Asset Depreciation Entry khi đến kỳ khấu hao.
+      # 1 = tự ghi; 0 = không tự ghi.
+      # 🔹 ENUM: 0 | 1
+      book_asset_depreciation_entry_automatically: 1
+
+      # Cách phân bổ Deferred Revenue/Expense.
+      # Days = phân bổ theo số ngày thực tế; Months = phân bổ cố định theo tháng.
+      # 🔹 ENUM: Days | Months
+      book_deferred_entries_based_on: Days
+
+      # Cách ghi Deferred Entry.
+      # 1 = tạo Journal Entry; 0 = ghi trực tiếp vào General Ledger.
+      # Khi chọn 1, submit_journal_entries quyết định Journal Entry được submit hay Draft.
+      # 🔹 ENUM: 0 | 1
+      book_deferred_entries_via_journal_entry: 0
+
+      # Ghi Purchase Expense và chi phí thêm vào Stock đối ứng với Stock Value.
+      # 1 = bật kiểm soát Stock Expense GL; 0 = dùng cách ghi mặc định.
+      # 🔹 ENUM: 0 | 1
+      book_stock_expense_gl_entries: 0
+
+      # Tách Early Payment Discount Loss thành Income Loss và Tax Loss.
+      # 1 = tách; 0 = ghi chung theo cách mặc định.
+      # 🔹 ENUM: 0 | 1
+      book_tax_discount_loss: 0
+
+      # Tính Daily Depreciation theo tổng số ngày của toàn bộ Depreciation Period,
+      # bao gồm Leap Year. 1 = dùng cách tính này; 0 = cách tính mặc định.
+      # 🔹 ENUM: 0 | 1
+      calculate_depr_using_total_days: 0
+
+      # Kiểm tra Supplier Invoice Number không bị trùng trong cùng Financial Year.
+      # 1 = chặn số trùng; 0 = cho phép số trùng.
+      # 🔹 ENUM: 0 | 1
+      check_supplier_invoice_uniqueness: 1
+
+      # Hiển thị cảnh báo trước khi hệ thống reset Posting Date về ngày hiện tại.
+      # 1 = cảnh báo; 0 = không cảnh báo.
+      # 🔹 ENUM: 0 | 1
+      confirm_before_resetting_posting_date: 1
+
+      # Giữ Payment Request tạo từ Sales/Purchase Invoice ở trạng thái Draft.
+      # 1 = tạo Draft để kiểm tra; 0 = không áp dụng quy tắc này.
+      # 🔹 ENUM: 0 | 1
+      create_pr_in_draft_status: 1
+
+      # Role được phép vượt Credit Limit của Customer.
+      # null = chưa cấp quyền Role nào; nếu cấp, nhập đúng tên Role đã tồn tại.
+      credit_controller: null
+
+      # Các mốc ngày chia nhóm tuổi nợ trong Accounts Receivable/Payable Ageing Report.
+      # Nhập các số nguyên tăng dần, phân cách bằng dấu phẩy; ví dụ: 30, 60, 90, 120.
+      default_ageing_range: 30, 60, 90, 120
+
+      # Cho phép xóa Accounting Ledger và Stock Ledger cùng transaction.
+      # 1 = cho phép xóa lịch sử ledger; 0 = giữ audit trail và ledger bất biến.
+      # Khuyến nghị dùng 0 trong production.
+      # 🔹 ENUM: 0 | 1
+      delete_linked_ledger_entries: 0
+
+      # Địa chỉ dùng để xác định Tax Category của transaction.
+      # 🔹 ENUM: Billing Address | Shipping Address
+      determine_address_tax_category_from: Billing Address
+
+      # Cho phép sử dụng Cost Center, Project và Accounting Dimension khác trên chứng từ.
+      # 1 = bật; 0 = tắt.
+      # 🔹 ENUM: 0 | 1
+      enable_accounting_dimensions: 0
+
+      # Dùng Common Party Accounting để chia sẻ Party Account theo Company.
+      # 1 = bật; 0 = mỗi Company quản lý Party Account riêng.
+      # 🔹 ENUM: 0 | 1
+      enable_common_party_accounting: 0
+
+      # Cho phép áp dụng Discount và Margin trên Item trong transaction.
+      # 1 = bật; 0 = không áp dụng.
+      # 🔹 ENUM: 0 | 1
+      enable_discounts_and_margin: 0
+
+      # Cho phép Fuzzy Matching khi đối chiếu gần đúng Description hoặc Party Name.
+      # 1 = cho phép khớp gần đúng; 0 = chỉ khớp chính xác.
+      # 🔹 ENUM: 0 | 1
+      enable_fuzzy_matching: 0
+
+      # Bật Immutable Ledger: hủy transaction tạo bút toán đảo thay vì sửa/xóa ledger cũ.
+      # 1 = bảo toàn lịch sử; 0 = dùng cơ chế ledger thông thường.
+      # 🔹 ENUM: 0 | 1
+      enable_immutable_ledger: 1
+
+      # Cho phép theo dõi Loyalty Point trên Invoice.
+      # 1 = bật Loyalty Point Program; 0 = không sử dụng.
+      # 🔹 ENUM: 0 | 1
+      enable_loyalty_point_program: 0
+
+      # Chặn submit Sales Invoice khi Customer vượt Overdue Limit.
+      # 1 = chặn; Role trong role_allowed_to_bypass_overdue_billing có thể vượt chặn.
+      # 0 = không chặn theo Overdue Limit.
+      # 🔹 ENUM: 0 | 1
+      enable_overdue_billing_threshold: 0
+
+      # Tự động tìm và gán Customer/Supplier vào Bank Transaction.
+      # 1 = bật Automatic Party Matching; 0 = gán thủ công.
+      # 🔹 ENUM: 0 | 1
+      enable_party_matching: 0
+
+      # Cho phép theo dõi Subscription trên Invoice.
+      # 1 = bật; 0 = không sử dụng Subscription.
+      # 🔹 ENUM: 0 | 1
+      enable_subscription: 1
+
+      # Chọn ngày dùng để ghi nhận Exchange Gain/Loss trong Normal Payment.
+      # 🔹 ENUM: Invoice | Payment | Reconciliation Date
+      exchange_gain_loss_posting_date: Payment
+
+      # Sao chép Payment Schedule vào Payment Request.
+      # 1 = tự lấy; 0 = không tự lấy.
+      # 🔹 ENUM: 0 | 1
+      fetch_payment_schedule_in_payment_request: 1
+
+      # Lấy Valuation Rate khi tạo Internal Transaction.
+      # 1 = tự lấy; 0 = không tự lấy.
+      # 🔹 ENUM: 0 | 1
+      fetch_valuation_rate_for_internal_transaction: 0
+
+      # Giới hạn số ký tự Remarks trong General Ledger Entry.
+      # 0 = không giới hạn; số dương = số ký tự tối đa.
+      general_ledger_remarks_length: 0
+
+      # Bỏ qua Account Closing Balance khi tạo Financial Report.
+      # 1 = dùng GL Entry trực tiếp, phù hợp khi Period Closing thiếu hoặc không tuần tự.
+      # 0 = dùng Closing Balance bình thường.
+      # 🔹 ENUM: 0 | 1
+      ignore_account_closing_balance: 0
+
+      # Bỏ qua kiểm tra legacy Is Opening của GL Entry khi lập report.
+      # 1 = bỏ qua kiểm tra; 0 = vẫn kiểm tra.
+      # 🔹 ENUM: 0 | 1
+      ignore_is_opening_check_for_reporting: 0
+
+      # Yêu cầu cùng Exchange Rate trong toàn bộ Internal Transaction.
+      # 1 = kiểm tra rate; 0 = không kiểm tra.
+      # Khi bật, maintain_same_rate_action và Role override đi kèm.
+      # 🔹 ENUM: 0 | 1
+      maintain_same_internal_transaction_rate: 0
+
+      # Hành động khi Exchange Rate không nhất quán trong Internal Transaction.
+      # 🔹 ENUM: Stop | Warn
+      maintain_same_rate_action: Stop
+
+      # Ghi Payment bằng Journal Entry thay vì Payment Entry.
+      # 1 = dùng Journal Entry; 0 = dùng Payment Entry.
+      # 🔹 ENUM: 0 | 1
+      make_payment_via_journal_entry: 0
+
+      # Gộp các dòng có cùng Account Head trong Ledger.
+      # 1 = gộp dòng; 0 = giữ từng dòng riêng.
+      # 🔹 ENUM: 0 | 1
+      merge_similar_account_heads: 0
+
+      # Tỷ lệ được phép lập Invoice vượt số lượng/giá trị trên Order.
+      # Ví dụ 10.0 cho phép bill tối đa 110% giá trị đã order; 0.0 = không allowance.
+      over_billing_allowance: 0.0
+
+      # Thời gian tối đa cho mỗi background job của Period Closing Voucher.
+      # Đơn vị: giây; chỉ áp dụng khi use_legacy_controller_for_pcv = 0.
+      pcv_job_timeout: 3600
+
+      # Phương thức đọc dữ liệu cho Accounts Receivable/Payable Report.
+      # 🔹 ENUM: Buffered Cursor | UnBuffered Cursor
+      receivable_payable_fetch_method: Buffered Cursor
+
+      # Giới hạn số ký tự Remarks trong Accounts Receivable/Payable Report.
+      # 0 = không giới hạn; số dương = số ký tự tối đa.
+      receivable_payable_remarks_length: 0
+
+      # Số document xử lý trong mỗi lần Auto Reconciliation.
+      # Chỉ nhận số từ 5 đến 100.
+      reconciliation_queue_size: 5
+
+      # Danh sách loại chứng từ được phép kích hoạt luồng tính lại sau khi Account
+      # của transaction thay đổi: Account change → Repost Accounting Ledger →
+      # tính lại ảnh hưởng lên GL/Stock Valuation. Đây không phải luồng đồng bộ
+      # dữ liệu giữa hai hệ thống và có thể chạy qua background job.
+      # Mỗi document_type là tên loại chứng từ, không phải tên một chứng từ cụ thể.
+      # Xóa một DocType khỏi danh sách = Account change của loại đó không tự repost.
+      repost_allowed_types:
+        - document_type: Sales Invoice
+        - document_type: Purchase Invoice
+        - document_type: Journal Entry
+        - document_type: Payment Entry
+        - document_type: Purchase Receipt
+
+      # Role được phép submit Invoice dù Customer vượt Overdue Limit.
+      # Chỉ có tác dụng khi enable_overdue_billing_threshold = 1.
+      # null = không cấp quyền bypass.
+      role_allowed_to_bypass_overdue_billing: null
+
+      # Role được phép bill vượt over_billing_allowance.
+      # Chỉ có tác dụng khi over_billing_allowance > 0.
+      # null = không cấp quyền Role riêng.
+      role_allowed_to_over_bill: null
+
+      # Role nhận thông báo khi Asset Depreciation thất bại.
+      # null = chưa chỉ định Role nhận thông báo.
+      role_to_notify_on_depreciation_failure: null
+
+      # Role được phép vượt hành động Stop khi maintain_same_internal_transaction_rate = 1.
+      # null = không cấp quyền override.
+      role_to_override_stop_action: null
+
+      # Làm tròn Tax Amount ở cấp từng Item row.
+      # 1 = làm tròn từng dòng; 0 = làm tròn theo tổng transaction.
+      # 🔹 ENUM: 0 | 1
+      round_row_wise_tax: 0
+
+      # Hiển thị số dư Account trong Chart of Accounts.
+      # 1 = hiển thị; 0 = ẩn.
+      # 🔹 ENUM: 0 | 1
+      show_balance_in_coa: 1
+
+      # Hiển thị phần Tax đã bao gồm trong Rate khi in chứng từ.
+      # 1 = hiển thị; 0 = không hiển thị.
+      # 🔹 ENUM: 0 | 1
+      show_inclusive_tax_in_print: 0
+
+      # Hiển thị Payment Schedule khi in chứng từ.
+      # 1 = hiển thị; 0 = ẩn.
+      # 🔹 ENUM: 0 | 1
+      show_payment_schedule_in_print: 0
+
+      # Hiển thị Taxes dưới dạng bảng khi in chứng từ.
+      # 1 = hiển thị bảng; 0 = không hiển thị bảng.
+      # 🔹 ENUM: 0 | 1
+      show_taxes_as_table_in_print: 0
+
+      # Số ngày tối đa Exchange Rate được xem là còn hợp lệ khi allow_stale = 0.
+      # Ví dụ 1 = chỉ chấp nhận rate từ ngày giao dịch hoặc ngày liền trước.
+      # Số nguyên dương.
+      stale_days: 1
+
+      # Tự động submit Journal Entry được tạo cho Deferred Entry.
+      # 1 = tự submit; 0 = giữ Draft để kiểm tra thủ công.
+      # Chỉ có tác dụng khi book_deferred_entries_via_journal_entry = 1.
+      # 🔹 ENUM: 0 | 1
+      submit_journal_entries: 0
+
+      # Khoảng thời gian dùng để matching Transfer giữa các Bank Account.
+      # Đơn vị: ngày; số càng lớn thì phạm vi matching càng rộng.
+      transfer_match_days: 3
+
+      # Gỡ liên kết Advance Payment khi cancel Order.
+      # 1 = tự gỡ để có thể xử lý lại; 0 = giữ liên kết.
+      # 🔹 ENUM: 0 | 1
+      unlink_advance_payment_on_cancelation_of_order: 1
+
+      # Gỡ liên kết Payment khi cancel Invoice.
+      # 1 = tự gỡ để có thể phân bổ lại; 0 = giữ liên kết.
+      # 🔹 ENUM: 0 | 1
+      unlink_payment_on_cancellation_of_invoice: 1
+
+      # Dùng validation logic cũ của Budget Controller.
+      # Chỉ bật khi controller hiện tại không tương thích với quy trình Budget.
+      # 🔹 ENUM: 0 | 1
+      use_legacy_budget_controller: 0
+
+      # Chọn controller cho Period Closing Voucher.
+      # 1 = dùng legacy controller; 0 = dùng controller hiện tại.
+      # Khi chọn 0, pcv_job_timeout được áp dụng.
+      # 🔹 ENUM: 0 | 1
+      use_legacy_controller_for_pcv: 0
+  - doctype: Buying Settings
+    name: Buying Settings
+    state: present
+
+    # [D.02] Buying Settings
+    # 🛒 Mua hàng và kiểm soát Purchase cycle.
+    # Thiết lập mua hàng, giới hạn số lượng/giá và chứng từ bắt buộc.
+    fields:
+      # Cho phép cùng một Item xuất hiện nhiều dòng trong một Purchase transaction.
+      # 1 = cho phép; 0 = không cho phép.
+      # 🔹 ENUM: 0 | 1
+      allow_multiple_items: 0
+
+      # Cho phép nhập Rate âm cho Item; thường chỉ dùng cho Return/Refund hoặc Discount đặc biệt.
+      # 1 = cho phép; 0 = không cho phép.
+      # 🔹 ENUM: 0 | 1
+      allow_negative_rates_for_items: 0
+
+      # Cho phép submit Purchase Order có Quantity bằng 0, phù hợp với Rate Contract.
+      # 1 = cho phép; 0 = bắt buộc Quantity lớn hơn 0.
+      # 🔹 ENUM: 0 | 1
+      allow_zero_qty_in_purchase_order: 0
+
+      # Cho phép submit Request for Quotation có Quantity bằng 0, phù hợp với Rate Contract.
+      # 1 = cho phép; 0 = bắt buộc Quantity lớn hơn 0.
+      # 🔹 ENUM: 0 | 1
+      allow_zero_qty_in_request_for_quotation: 0
+
+      # Cho phép submit Supplier Quotation có Quantity bằng 0, phù hợp với Rate Contract.
+      # 1 = cho phép; 0 = bắt buộc Quantity lớn hơn 0.
+      # 🔹 ENUM: 0 | 1
+      allow_zero_qty_in_supplier_quotation: 0
+
+      # Tự tạo Purchase Receipt ở trạng thái Draft khi submit Subcontracting Receipt.
+      # 1 = tự tạo; 0 = tạo thủ công.
+      # 🔹 ENUM: 0 | 1
+      auto_create_purchase_receipt: 0
+
+      # Tự tạo Subcontracting Order ở trạng thái Draft khi submit Purchase Order.
+      # 1 = tự tạo; 0 = tạo thủ công.
+      # 🔹 ENUM: 0 | 1
+      auto_create_subcontracting_order: 0
+
+      # Căn cứ để Backflush Raw Materials trong Subcontracting.
+      # BOM = theo định mức nguyên vật liệu của BOM; Material Transferred for Subcontract
+      # = theo nguyên vật liệu đã chuyển cho Subcontractor.
+      # 🔹 ENUM: BOM | Material Transferred for Subcontract
+      backflush_raw_materials_of_subcontract_based_on: BOM
+
+      # Tính Rejected Quantity vào Purchase Invoice khi tạo từ Purchase Receipt.
+      # 1 = đưa cả số lượng rejected vào Invoice; 0 = không đưa vào.
+      # 🔹 ENUM: 0 | 1
+      bill_for_rejected_quantity_in_purchase_invoice: 1
+
+      # Tỷ lệ được phép đặt hàng vượt Quantity của Blanket Order.
+      # Ví dụ 10.0 cho phép đặt tối đa 110%; 0.0 = không cho vượt.
+      blanket_order_allowance: 0.0
+
+      # Price List mặc định khi tạo Purchase transaction.
+      # null = chưa chọn; nếu dùng, nhập đúng tên Price List đã tồn tại.
+      buying_price_list: null
+
+      # Kiểm soát việc lấy Rate từ Purchase transaction gần nhất.
+      # 1 = không tự lấy Last Purchase Rate; 0 = cho phép tự lấy.
+      # 🔹 ENUM: 0 | 1
+      disable_last_purchase_rate: 0
+
+      # Email Account cố định dùng để gửi Request for Quotation.
+      # null = dùng Email Account/user mặc định; nếu dùng, phải là Outgoing Email Account.
+      fixed_email: null
+
+      # Kiểm tra Rate khi Purchase Invoice/Receipt được tạo từ Purchase Order.
+      # 1 = áp dụng maintain_same_rate_action; 0 = không kiểm tra Rate.
+      # 🔹 ENUM: 0 | 1
+      maintain_same_rate: 0
+
+      # Hành động khi Rate khác Rate trên Purchase Order.
+      # Chỉ có tác dụng khi maintain_same_rate = 1.
+      # 🔹 ENUM: Stop | Warn
+      maintain_same_rate_action: Stop
+
+      # Tỷ lệ được phép đặt Purchase Order vượt Quantity của Material Request.
+      # Ví dụ 10.0 cho phép đặt tối đa 110%; 0.0 = không cho vượt.
+      over_order_allowance: 0.0
+
+      # Tỷ lệ được phép chuyển nguyên vật liệu vượt Quantity đã order trong Subcontracting.
+      # Chỉ áp dụng khi backflush_raw_materials_of_subcontract_based_on = BOM.
+      over_transfer_allowance: 0.0
+
+      # Xác định Purchase Order có bắt buộc trước Purchase Invoice và Purchase Receipt không.
+      # 🔹 ENUM: No | Yes
+      po_required: "Yes"
+
+      # Xác định Purchase Receipt có bắt buộc trước Purchase Invoice không.
+      # 🔹 ENUM: No | Yes
+      pr_required: "Yes"
+
+      # Cách cập nhật Total Purchase Cost cho Project.
+      # Each Transaction = cập nhật sau từng giao dịch; Manual = chỉ cập nhật khi chạy thủ công.
+      # 🔹 ENUM: Each Transaction | Manual
+      project_update_frequency: Each Transaction
+
+      # Role được phép vượt hành động Stop khi maintain_same_rate = 1.
+      # null = không cấp quyền override; nếu cấp, nhập đúng tên Role đã tồn tại.
+      role_to_override_stop_action: null
+
+      # Điều chỉnh Incoming Rate trên Purchase Receipt theo Rate của Purchase Invoice.
+      # 1 = cho phép điều chỉnh; 0 = giữ Incoming Rate hiện tại.
+      # Chỉ có tác dụng khi maintain_same_rate = 0.
+      # 🔹 ENUM: 0 | 1
+      set_landed_cost_based_on_purchase_invoice_rate: 0
+
+      # Tạo Accounting Entry cho Material bị reject trong Purchase Receipt.
+      # 1 = ghi nhận giá trị rejected material; 0 = không tạo entry.
+      # Chỉ có tác dụng khi bill_for_rejected_quantity_in_purchase_invoice = 1.
+      # 🔹 ENUM: 0 | 1
+      set_valuation_rate_for_rejected_materials: 0
+
+      # Hiển thị nút Pay trên Purchase Order portal.
+      # 1 = hiển thị nếu Payment capability được cài; 0 = ẩn.
+      # 🔹 ENUM: 0 | 1
+      show_pay_button: 1
+
+      # Cách đặt tên Supplier mới.
+      # 🔹 ENUM: Supplier Name | Naming Series | Auto Name
+      supp_master_name: Supplier Name
+
+      # Supplier Group mặc định cho Supplier mới.
+      # null = chưa chọn; nếu dùng, nhập đúng tên Supplier Group đã tồn tại.
+      supplier_group: null
+
+      # Cách lấy Exchange Rate khi tạo Purchase Invoice từ Purchase Order.
+      # 1 = lấy rate theo Invoice Transaction Date; 0 = kế thừa rate từ Purchase Order.
+      # 🔹 ENUM: 0 | 1
+      use_transaction_date_exchange_rate: 0
+
+      # Kiểm tra Raw Material Consumed Quantity theo Required Quantity của Finished Good BOM.
+      # Chỉ áp dụng khi backflush_raw_materials_of_subcontract_based_on = Material Transferred for Subcontract.
+      # 1 = bật kiểm tra; 0 = không kiểm tra.
+      # 🔹 ENUM: 0 | 1
+      validate_consumed_qty: 0
+  - doctype: Currency Exchange Settings
+    name: Currency Exchange Settings
+    state: present
+
+    # [D.03] Currency Exchange Settings
+    # 💱 Currency service và tỷ giá ngoại tệ.
+    # Cấu hình dịch vụ lấy tỷ giá ngoại tệ và cách đọc response.
+    fields:
+      # API Endpoint dùng để lấy Exchange Rate.
+      # Giữ nguyên placeholder {from_currency}, {to_currency} và {transaction_date}
+      # nếu endpoint/provider đang sử dụng chúng.
+      api_endpoint: https://api.frankfurter.dev/v2/rate/{from_currency}/{to_currency}
+
+      # Bật/tắt Currency Exchange Settings.
+      # 1 = không gọi API lấy rate; 0 = cho phép dùng cấu hình này.
+      # 🔹 ENUM: 0 | 1
+      disabled: 0
+
+      # Các tham số gửi kèm API request.
+      # value có thể dùng {from_currency}, {to_currency} và {transaction_date};
+      # phải khớp tên tham số mà API provider yêu cầu.
+      req_params:
+        # Tên query parameter mà API provider yêu cầu.
+        - key: date
+          # Giá trị của query parameter; placeholder sẽ được ERPNext thay bằng dữ liệu giao dịch.
+          value: "{transaction_date}"
+
+      # Đường dẫn key trong JSON response chứa Exchange Rate.
+      # Các key được đọc theo đúng thứ tự từ ngoài vào trong.
+      result_key:
+        - key: rate
+
+      # API provider dùng để lấy Exchange Rate.
+      # Custom = tự khai báo api_endpoint, req_params và result_key.
+      # 🔹 ENUM: frankfurter.dev | exchangerate.host | frankfurter.dev - v2 | Custom
+      service_provider: frankfurter.dev - v2
+
+      # access_key không được lưu trong policy.yaml vì là secret.
+      # Chỉ cần cấp secret runtime khi service_provider = exchangerate.host.
+
+      # Example URL do ERPNext tạo sau khi kiểm tra API; không phải nguồn rate riêng.
+      # null = chưa có URL kiểm tra hoặc chưa dùng giá trị này.
+      url: null
+
+      # Chọn giao thức gọi Currency Service.
+      # 0 = dùng HTTPS; 1 = dùng HTTP. Giữ 0 để mã hóa request và response.
+      # Không áp dụng khi service_provider = Custom theo metadata ERPNext.
+      # 🔹 ENUM: 0 | 1
+      use_http: 0
+  - doctype: Delivery Settings
+    name: Delivery Settings
+    state: present
+
+    # [D.04] Delivery Settings
+    # Cấu hình thông báo giao hàng và thời gian dừng giữa các điểm giao.
+    fields:
+      # Print Format đính kèm Dispatch Notification.
+      # null = dùng format chuẩn của Delivery Note; chỉ có tác dụng khi send_with_attachment = 1.
+      dispatch_attachment: null
+
+      # Email Template dùng để gửi Dispatch Notification.
+      # null = chưa chọn template; nếu dùng, nhập đúng tên Email Template đã tồn tại.
+      dispatch_template: null
+
+      # Gửi Dispatch Notification kèm bản in Delivery Note.
+      # 1 = gửi kèm attachment; 0 = không đính kèm.
+      # 🔹 ENUM: 0 | 1
+      send_with_attachment: 0
+
+      # Thời gian cộng thêm giữa hai Delivery Stop khi tính lịch Delivery Trip.
+      # Đơn vị: phút; 0 = không cộng thêm thời gian dừng.
+      stop_delay: 0
+  - doctype: Item Variant Settings
+    name: Item Variant Settings
+    state: present
+
+    # [D.05] Item Variant Settings
+    # Cấu hình cách tạo và cập nhật Item Variant từ Item Template.
+    fields:
+      # Cho phép Item Variant dùng Stock UOM khác Item Template.
+      # 1 = cho phép; 0 = Variant phải dùng cùng Stock UOM với Template.
+      # 🔹 ENUM: 0 | 1
+      allow_different_uom: 0
+
+      # Cho phép đổi tên Attribute Value đang được Item Variant sử dụng.
+      # 1 = cho phép; 0 = chỉ chấp nhận Attribute Value đã có.
+      # 🔹 ENUM: 0 | 1
+      allow_rename_attribute_value: 0
+
+      # Kiểm soát việc cập nhật Variant khi Item Template được lưu.
+      # 1 = chỉ copy field lúc tạo Variant, không cập nhật Variant về sau;
+      # 0 = tiếp tục cập nhật Variant theo Template khi Template thay đổi.
+      # 🔹 ENUM: 0 | 1
+      do_not_update_variants: 0
+
+      # Các field của Item Template được copy sang Item Variant.
+      # Mỗi dòng phải có field_name hợp lệ của Item; [] = không khai báo field bổ sung.
+      fields: []
+  - doctype: Ledger Health Monitor
+    name: Ledger Health Monitor
+    state: present
+
+    # [D.06] Ledger Health Monitor
+    # Cấu hình giám sát sai lệch giữa các sổ kế toán.
+    fields:
+      # Các Company được Ledger Health Monitor kiểm tra.
+      # Mỗi dòng là một Company đã tồn tại; [] = không chọn Company nào.
+      companies: []
+
+      # Kiểm tra tổng Debit và Credit theo từng Voucher có cân bằng không.
+      # 1 = ghi nhận Voucher bị lệch; 0 = không kiểm tra.
+      # 🔹 ENUM: 0 | 1
+      debit_credit_mismatch: 0
+
+      # Bật scheduler Ledger Health Monitor.
+      # 1 = chạy các kiểm tra đã chọn; 0 = không chạy monitor.
+      # 🔹 ENUM: 0 | 1
+      enable_health_monitor: 0
+
+      # So sánh General Ledger với Payment Ledger theo từng Voucher.
+      # 1 = ghi nhận Voucher bị lệch; 0 = không kiểm tra.
+      # 🔹 ENUM: 0 | 1
+      general_and_payment_ledger_mismatch: 0
+
+      # Số ngày tính lùi từ hôm nay để monitor kiểm tra.
+      # Ví dụ 60 = kiểm tra 60 ngày gần nhất; số âm cũng được ERPNext đổi thành trị tuyệt đối.
+      monitor_for_last_x_days: 60
+  - doctype: Pegged Currencies
+    name: Pegged Currencies
+    state: present
+
+    # [D.07] Pegged Currencies
+    # Danh sách các cặp tiền tệ neo tỷ giá với nhau.
+    fields:
+      # Các cặp Currency có tỷ giá neo cố định với một Currency khác.
+      # Mỗi dòng phải tham chiếu đúng một Currency đã tồn tại trong ERPNext.
+      pegged_currency_item:
+        # Currency được quy đổi theo tỷ giá neo.
+        - pegged_against: USD
+          # Tên Currency neo làm cơ sở so sánh tỷ giá.
+          pegged_exchange_rate: "3.6725"
+          # Currency được quy đổi theo Currency neo.
+          source_currency: AED
+        # Currency được quy đổi theo tỷ giá neo.
+        - pegged_against: USD
+          # Tỷ giá cố định: số đơn vị source_currency tương ứng với 1 đơn vị pegged_against.
+          pegged_exchange_rate: "0.376"
+          # Currency được quy đổi theo Currency neo.
+          source_currency: BHD
+        # Currency được quy đổi theo tỷ giá neo.
+        - pegged_against: USD
+          # Tỷ giá cố định: số đơn vị source_currency tương ứng với 1 đơn vị pegged_against.
+          pegged_exchange_rate: "0.709"
+          # Currency được quy đổi theo Currency neo.
+          source_currency: JOD
+        # Currency được quy đổi theo tỷ giá neo.
+        - pegged_against: USD
+          # Tỷ giá cố định: số đơn vị source_currency tương ứng với 1 đơn vị pegged_against.
+          pegged_exchange_rate: "0.3845"
+          # Currency được quy đổi theo Currency neo.
+          source_currency: OMR
+        # Currency được quy đổi theo tỷ giá neo.
+        - pegged_against: USD
+          # Tỷ giá cố định: số đơn vị source_currency tương ứng với 1 đơn vị pegged_against.
+          pegged_exchange_rate: "3.64"
+          # Currency được quy đổi theo Currency neo.
+          source_currency: QAR
+        # Currency được quy đổi theo tỷ giá neo.
+        - pegged_against: USD
+          # Tỷ giá cố định: số đơn vị source_currency tương ứng với 1 đơn vị pegged_against.
+          pegged_exchange_rate: "3.75"
+          # Currency được quy đổi theo Currency neo.
+          source_currency: SAR
+  - doctype: Selling Settings
+    name: Selling Settings
+    state: present
+
+    # [D.08] Selling Settings
+    # 💰 Bán hàng, giá bán và Sales cycle.
+    # Thiết lập bán hàng, giá, giới hạn và các chứng từ liên quan.
+    fields:
+      # Cho phép cùng một Item xuất hiện trong nhiều Purchase Order của Sales transaction.
+      # 1 = cho phép; 0 = không cho phép.
+      # 🔹 ENUM: 0 | 1
+      allow_against_multiple_purchase_orders: 0
+
+      # Cho phép Delivery toàn bộ Finished Good đã sản xuất dù vượt Sales Order Quantity.
+      # 1 = cho phép; 0 = giới hạn theo Order.
+      # 🔹 ENUM: 0 | 1
+      allow_delivery_of_overproduced_qty: 0
+
+      # Cho phép cùng một Item xuất hiện nhiều dòng trong một Sales transaction.
+      # 1 = cho phép; 0 = không cho phép.
+      # 🔹 ENUM: 0 | 1
+      allow_multiple_items: 0
+
+      # Cho phép nhập Selling Rate âm; thường chỉ dùng cho Return/Refund hoặc Discount đặc biệt.
+      # 1 = cho phép; 0 = không cho phép.
+      # 🔹 ENUM: 0 | 1
+      allow_negative_rates_for_items: 0
+
+      # Cho phép tạo Sales Order từ Quotation đã hết hạn.
+      # 1 = cho phép; 0 = chặn.
+      # 🔹 ENUM: 0 | 1
+      allow_sales_order_creation_for_expired_quotation: 0
+
+      # Cho phép submit Quotation có Quantity bằng 0, phù hợp với Rate Contract.
+      # 1 = cho phép; 0 = bắt buộc Quantity lớn hơn 0.
+      # 🔹 ENUM: 0 | 1
+      allow_zero_qty_in_quotation: 0
+
+      # Cho phép submit Sales Order có Quantity bằng 0, phù hợp với Rate Contract.
+      # 1 = cho phép; 0 = bắt buộc Quantity lớn hơn 0.
+      # 🔹 ENUM: 0 | 1
+      allow_zero_qty_in_sales_order: 0
+
+      # Tỷ lệ được phép bán vượt Quantity của Blanket Order.
+      # Ví dụ 10.0 cho phép bán tối đa 110%; 0.0 = không cho vượt.
+      blanket_order_allowance: 0.0
+
+      # Cách đặt tên Customer; enum: Customer Name | Naming Series | Auto Name.
+      # 🔹 ENUM: Customer Name | Naming Series | Auto Name
+      cust_master_name: Customer Name
+
+      # Customer Group mặc định cho Customer mới; null = chưa chọn.
+      customer_group: null
+
+      # Thêm Secondary Items vào Stock Entry khi giao Finished Good.
+      # 1 = thêm; 0 = không thêm.
+      # 🔹 ENUM: 0 | 1
+      deliver_secondary_items: 0
+
+      # Xác định Delivery Note có bắt buộc trước Sales Invoice không.
+      # 🔹 ENUM: No | Yes
+      dn_required: "Yes"
+
+      # Không reserve lại Sales Order Quantity khi xử lý Sales Return.
+      # 1 = không reserve lại; 0 = cho phép reserve lại theo logic chuẩn.
+      # 🔹 ENUM: 0 | 1
+      dont_reserve_sales_order_qty_on_sales_return: 0
+
+      # Tính Product Bundle theo Rate của child Items và cho phép sửa Rate child.
+      # 1 = cho phép sửa; 0 = dùng Rate của Bundle.
+      # 🔹 ENUM: 0 | 1
+      editable_bundle_item_rates: 0
+
+      # Cho phép sửa Price List Rate trực tiếp trên transaction.
+      # 1 = cho phép; 0 = giữ Rate từ Price List.
+      # 🔹 ENUM: 0 | 1
+      editable_price_list_rate: 0
+
+      # Cho phép chọn Cutoff Date khi tạo hàng loạt Delivery Note từ Sales Order.
+      # 1 = bật; 0 = không dùng Cutoff Date.
+      # 🔹 ENUM: 0 | 1
+      enable_cutoff_date_on_bulk_delivery_note_creation: 0
+
+      # Tạo Ledger Entry riêng để hạch toán Discount trên Sales transaction.
+      # 1 = hạch toán riêng; 0 = xử lý theo cách mặc định.
+      # 🔹 ENUM: 0 | 1
+      enable_discount_accounting: 0
+
+      # Theo dõi Commission của Sales Partner và Sales Team.
+      # 1 = bật; 0 = không theo dõi.
+      # 🔹 ENUM: 0 | 1
+      enable_tracking_sales_commissions: 0
+
+      # Lưu UTM Parameters trên Sales/CRM transaction để theo dõi nguồn bán hàng.
+      # 1 = bật; 0 = tắt.
+      # 🔹 ENUM: 0 | 1
+      enable_utm: 0
+
+      # Dùng Rate từ Default Price List khi Price List của transaction thiếu Item Price.
+      # 1 = fallback sang Default Price List; 0 = không fallback.
+      # 🔹 ENUM: 0 | 1
+      fallback_to_default_price_list: 0
+
+      # Ẩn Customer Tax ID khỏi Sales transaction.
+      # 1 = ẩn; 0 = hiển thị theo quyền/trường dữ liệu.
+      # 🔹 ENUM: 0 | 1
+      hide_tax_id: 0
+
+      # Hành động khi Selling Rate thay đổi trong Sales cycle.
+      # 🔹 ENUM: Stop | Warn
+      maintain_same_rate_action: Stop
+
+      # Kiểm tra Selling Rate khi chứng từ được tạo từ Sales Order.
+      # 1 = áp dụng maintain_same_rate_action; 0 = không kiểm tra.
+      # 🔹 ENUM: 0 | 1
+      maintain_same_sales_rate: 0
+
+      # Role được phép vượt hành động Stop khi maintain_same_sales_rate = 1.
+      # null = không cấp quyền override.
+      role_to_override_stop_action: null
+
+      # Tần suất cập nhật Sales data vào Company/Project.
+      # 🔹 ENUM: Monthly | Each Transaction | Daily
+      sales_update_frequency: Daily
+
+      # Price List mặc định khi tạo Sales transaction; null = chưa chọn.
+      selling_price_list: null
+
+      # Đặt Incoming Rate bằng 0 cho standalone Credit Note có Expired Batch.
+      # 1 = đặt bằng 0; 0 = giữ cách tính rate mặc định.
+      # 🔹 ENUM: 0 | 1
+      set_zero_rate_for_expired_batch: 0
+
+      # Xác định Sales Order có bắt buộc trước Sales Invoice và Delivery Note không.
+      # 🔹 ENUM: No | Yes
+      so_required: "Yes"
+
+      # Territory mặc định cho Customer/Sales transaction; null = chưa chọn.
+      territory: null
+
+      # Dùng cơ chế client-side reactivity cũ của ERPNext.
+      # 1 = dùng legacy behavior; 0 = dùng behavior hiện tại.
+      # 🔹 ENUM: 0 | 1
+      use_legacy_js_reactivity: 0
+
+      # Chặn Sales transaction khi Selling Price thấp hơn Purchase/Valuation Rate.
+      # 1 = chặn; 0 = không chặn.
+      # 🔹 ENUM: 0 | 1
+      validate_selling_price: 0
+  - doctype: Stock Settings
+    name: Stock Settings
+    state: present
+
+    # [D.09] Stock Settings
+    # 📦 Tồn kho, valuation, reservation và Serial/Batch.
+    # Thiết lập tồn kho, định giá, serial/batch, reservation và giới hạn giao nhận.
+    fields:
+      # Hành động khi Quality Inspection bắt buộc chưa được submit.
+      # 🔹 ENUM: Stop | Warn
+      action_if_quality_inspection_is_not_submitted: Stop
+
+      # Hành động khi Quality Inspection của Item bị reject.
+      # 🔹 ENUM: Stop | Warn
+      action_if_quality_inspection_is_rejected: Stop
+
+      # Cho phép dùng lại Serial No đã tồn tại.
+      # 1 = cho phép; 0 = không cho phép tái sử dụng.
+      # 🔹 ENUM: 0 | 1
+      allow_existing_serial_no: 0
+
+      # Cho phép nhập Rate riêng trong Internal Transfer; GL vẫn dùng Valuation Rate.
+      # 1 = cho phép; 0 = không cho phép.
+      # 🔹 ENUM: 0 | 1
+      allow_internal_transfer_at_arms_length_price: 0
+
+      # Cho phép Stock Quantity âm.
+      # 1 = cho phép; 0 = chặn giao dịch làm tồn kho âm.
+      # 🔹 ENUM: 0 | 1
+      allow_negative_stock: 0
+
+      # Cho phép Batch có Stock Quantity âm; có thể làm sai Valuation Rate.
+      # 1 = cho phép; 0 = chặn.
+      # 🔹 ENUM: 0 | 1
+      allow_negative_stock_for_batch: 0
+
+      # Cho phép Partial Stock Reservation khi không đủ Quantity.
+      # 1 = reserve phần còn đủ; 0 = chỉ reserve khi đủ toàn bộ.
+      # 🔹 ENUM: 0 | 1
+      allow_partial_reservation: 1
+
+      # Cho phép sửa Stock UOM Quantity trên Purchase documents.
+      # 1 = cho phép; 0 = giữ Quantity do ERPNext tính.
+      # 🔹 ENUM: 0 | 1
+      allow_to_edit_stock_uom_qty_for_purchase: 0
+
+      # Cho phép sửa Stock UOM Quantity trên Sales documents.
+      # 1 = cho phép; 0 = giữ Quantity do ERPNext tính.
+      # 🔹 ENUM: 0 | 1
+      allow_to_edit_stock_uom_qty_for_sales: 0
+
+      # Cho phép sửa Stock UOM Quantity trên Stock Entry.
+      # 1 = cho phép; 0 = giữ Quantity do ERPNext tính.
+      # 🔹 ENUM: 0 | 1
+      allow_to_edit_stock_uom_qty_for_stock_entry: 0
+
+      # Cho phép tạo Quality Inspection sau Purchase hoặc Delivery.
+      # 1 = cho phép tạo sau; 0 = chỉ tạo theo quy trình trước đó.
+      # 🔹 ENUM: 0 | 1
+      allow_to_make_quality_inspection_after_purchase_or_delivery: 0
+
+      # Chỉ cho chọn UOM đã có Conversion Rate trong Item.
+      # 1 = bắt buộc có conversion; 0 = không bắt buộc.
+      # 🔹 ENUM: 0 | 1
+      allow_uom_with_conversion_rate_defined_in_item: 0
+
+      # Tự tạo Serial and Batch Bundle khi Outward Stock transaction submit.
+      # 1 = tự tạo; 0 = không tự tạo.
+      # 🔹 ENUM: 0 | 1
+      auto_create_serial_and_batch_bundle_for_outward: 1
+
+      # Tự tạo Material Request khi Stock đạt Reorder Level.
+      # 1 = tự tạo; 0 = không tự tạo.
+      # 🔹 ENUM: 0 | 1
+      auto_indent: 0
+
+      # Tự tạo Item Price khi transaction thiếu Price List Rate.
+      # 1 = tự tạo; 0 = không tự tạo.
+      # 🔹 ENUM: 0 | 1
+      auto_insert_price_list_rate_if_missing: 0
+
+      # Tự động reserve Serial/Batch theo thứ tự được chọn ở pick_serial_and_batch_based_on.
+      # 1 = tự reserve; 0 = chọn thủ công.
+      # 🔹 ENUM: 0 | 1
+      auto_reserve_serial_and_batch: 1
+
+      # Tự reserve Stock khi submit Sales Order, Work Order hoặc Production Plan.
+      # 1 = tự reserve; 0 = không tự reserve.
+      # 🔹 ENUM: 0 | 1
+      auto_reserve_stock: 0
+
+      # Reserve Stock cho Sales Order khi submit Purchase Receipt từ Material Request.
+      # 1 = tự reserve; 0 = không tự reserve.
+      # 🔹 ENUM: 0 | 1
+      auto_reserve_stock_for_sales_order_on_purchase: 0
+
+      # Loại bỏ HTML không an toàn/không cần thiết khỏi Item Description trước khi lưu.
+      # 1 = làm sạch; 0 = giữ nguyên.
+      # 🔹 ENUM: 0 | 1
+      clean_description_html: 1
+
+      # Warehouse mặc định cho Stock transaction; null = chưa chọn.
+      default_warehouse: null
+
+      # Buộc nhập Serial/Batch thủ công thay vì dùng Selector dialog.
+      # 1 = buộc nhập thủ công; 0 = cho phép Selector.
+      # 🔹 ENUM: 0 | 1
+      disable_serial_no_and_batch_selector: 0
+
+      # Không cập nhật Serial/Batch fields trên transaction khi tạo Auto Bundle.
+      # 1 = không cập nhật; 0 = cập nhật theo Bundle.
+      # 🔹 ENUM: 0 | 1
+      do_not_update_serial_batch_on_creation_of_auto_bundle: 1
+
+      # Không dùng Batch-wise Valuation; dùng Moving Average thay thế.
+      # 1 = dùng Moving Average; 0 = valuation theo Batch.
+      # 🔹 ENUM: 0 | 1
+      do_not_use_batchwise_valuation: 0
+
+      # Cho phép Item sử dụng Serial No/Batch No tracking.
+      # 1 = bật capability; 0 = tắt.
+      # 🔹 ENUM: 0 | 1
+      enable_serial_and_batch_no_for_item: 0
+
+      # Bật Stock Reservation để giữ Stock cho Order cụ thể.
+      # 1 = bật; 0 = tắt.
+      # 🔹 ENUM: 0 | 1
+      enable_stock_reservation: 1
+
+      # Item Group mặc định cho Item mới; null = chưa chọn.
+      item_group: null
+
+      # Item Naming By; giá trị hợp lệ: Item Code / Naming Series.
+      # 🔹 ENUM: Item Code | Naming Series
+      item_naming_by: Item Code
+
+      # Tỷ lệ Material Request được phép transfer vượt Quantity đã order.
+      # Ví dụ 10.0 cho phép transfer tối đa 110%; 0.0 = không allowance.
+      mr_qty_allowance: 0.0
+
+      # Prefix dùng để tạo Batch ID khi use_naming_series = 1; hiện tại: BATCH-.
+      naming_series_prefix: BATCH-
+
+      # Tỷ lệ được phép Receive/Deliver vượt Quantity đã order.
+      over_delivery_receipt_allowance: 0.0
+
+      # Tỷ lệ được phép Pick vượt Quantity đã order.
+      over_picking_allowance: 0.0
+
+      # Thứ tự chọn Serial/Batch khi Pick.
+      # 🔹 ENUM: FIFO | LIFO | Expiry
+      pick_serial_and_batch_based_on: FIFO
+
+      # Gửi email cho Purchase Manager khi tự động tạo Material Request.
+      # 1 = gửi; 0 = không gửi.
+      # 🔹 ENUM: 0 | 1
+      reorder_email_notify: 0
+
+      # Role được phép tạo/sửa Stock transaction có Posting Date quá khứ.
+      # null = không cấp Role đặc biệt.
+      role_allowed_to_create_edit_back_dated_transactions: null
+
+      # Role được phép Over-deliver/Receive vượt allowance.
+      # null = không cấp Role đặc biệt.
+      role_allowed_to_over_deliver_receive: null
+
+      # Warehouse lưu Sample Retention; null = không dùng hoặc chưa chọn.
+      sample_retention_warehouse: null
+
+      # Đặt tên Serial and Batch Bundle theo Naming Series.
+      # 1 = dùng Naming Series; 0 = dùng cơ chế đặt tên mặc định.
+      # 🔹 ENUM: 0 | 1
+      set_serial_and_batch_bundle_naming_based_on_naming_series: 0
+
+      # Hiển thị Barcode field trong Stock transaction.
+      # 1 = hiển thị; 0 = ẩn.
+      # 🔹 ENUM: 0 | 1
+      show_barcode_field: 1
+
+      # Role được phép sửa Stock transaction sau khi bị freeze.
+      # null = không cấp Role đặc biệt.
+      stock_auth_role: null
+
+      # Mốc ngày trước đó không được tạo/sửa Stock transaction; null = không dùng ngày cố định.
+      stock_frozen_upto: null
+
+      # Số ngày lùi lại trong đó Stock transaction không được sửa; 0 = không khóa theo số ngày.
+      stock_frozen_upto_days: 0
+
+      # Stock UOM mặc định cho Item/Stock transaction; null = chưa chọn.
+      stock_uom: null
+
+      # Cho phép cập nhật Item Price đã tồn tại từ transaction.
+      # 1 = cập nhật; 0 = giữ nguyên.
+      # 🔹 ENUM: 0 | 1
+      update_existing_price_list_rate: 0
+
+      # Update Price List based on; giá trị hợp lệ: Rate / Price List Rate.
+      # 🔹 ENUM: Rate | Price List Rate
+      update_price_list_based_on: Rate
+
+      # Dùng default Naming Series cho Batch ID khi Item chưa có series riêng.
+      # 1 = dùng series mặc định; 0 = không dùng.
+      # 🔹 ENUM: 0 | 1
+      use_naming_series: 0
+
+      # Tự tạo Serial and Batch Bundle từ Serial/Batch fields khi submit Stock transaction.
+      # 1 = tự tạo; 0 = không tự tạo.
+      # 🔹 ENUM: 0 | 1
+      use_serial_batch_fields: 1
+
+      # Bắt buộc Source và Target Warehouse khác nhau khi Material Transfer.
+      # 1 = kiểm tra; 0 = không kiểm tra.
+      # 🔹 ENUM: 0 | 1
+      validate_material_transfer_warehouses: 0
+
+      # Valuation Method mặc định để tính Stock Value/Cost of Goods Sold.
+      # 🔹 ENUM: FIFO | Moving Average | LIFO
+      valuation_method: FIFO
+  - doctype: Stock Reposting Settings
+    name: Stock Reposting Settings
+    state: present
+
+    # [D.10] Stock Reposting Settings
+    # 🔄 Stock Reposting và điều chỉnh valuation.
+    # Thiết lập chạy lại (repost) valuation cho Stock Ledger.
+    fields:
+      # Với legacy Serial No, lấy Incoming Rate từ Inward transaction thay vì Serial No.
+      # 1 = dùng cách legacy này; 0 = lấy rate từ Serial No.
+      # 🔹 ENUM: 0 | 1
+      do_not_fetch_incoming_rate_from_serial_no: 0
+
+      # Cho phép chạy nhiều Stock Reposting job song song.
+      # 1 = chạy song song; 0 = chạy tuần tự.
+      # 🔹 ENUM: 0 | 1
+      enable_parallel_reposting: 0
+
+      # Tách Stock Reposting và General Ledger Reposting thành các xử lý riêng.
+      # 1 = tách; 0 = xử lý chung.
+      # 🔹 ENUM: 0 | 1
+      enable_separate_reposting_for_gl: 0
+
+      # Thời điểm kết thúc Time Slot cho Stock Reposting; chỉ dùng khi limit_reposting_timeslot = 1.
+      # null = chưa giới hạn giờ kết thúc.
+      end_time: null
+
+      # Chạy Reposting theo từng Item/Warehouse để giới hạn phạm vi xử lý.
+      # 1 = theo Item/Warehouse; 0 = dùng cách gom mặc định.
+      # 🔹 ENUM: 0 | 1
+      item_based_reposting: 1
+
+      # Chỉ cho chạy Stock Reposting trong khoảng start_time đến end_time.
+      # 1 = giới hạn theo Time Slot; 0 = không giới hạn.
+      # 🔹 ENUM: 0 | 1
+      limit_reposting_timeslot: 0
+
+      # Ngày trong tuần được miễn giới hạn Time Slot.
+      # '' = không miễn ngày nào; tên ngày = miễn giới hạn vào ngày đó.
+      # 🔹 ENUM: '' | Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
+      limits_dont_apply_on: ""
+
+      # Số worker xử lý song song cho mỗi Item khi parallel reposting bật.
+      no_of_parallel_reposting: 4
+
+      # Role nhận thông báo khi Stock Reposting lỗi; null = chưa chỉ định.
+      notify_reposting_error_to_role: null
+
+      # Scheduler tự tìm và Repost các Valuation Entry sai theo Item/Warehouse.
+      # 1 = bật scheduler; 0 = không tự chạy.
+      # 🔹 ENUM: 0 | 1
+      repost_incorrect_valuation_entries: 0
+
+      # Thời điểm bắt đầu Time Slot cho Stock Reposting; chỉ dùng khi limit_reposting_timeslot = 1.
+      # null = chưa giới hạn giờ bắt đầu.
+      start_time: null
+  - doctype: Global Defaults
+    name: Global Defaults
+    state: present
+
+    # [D.11] Global Defaults
+    # ⚙️ Giá trị mặc định dùng chung toàn hệ thống.
+    # Các giá trị mặc định dùng chung toàn hệ thống.
+    fields:
+      # Country mặc định cho các giao dịch và master data mới.
+      country: Vietnam
+
+      # Company mặc định khi giao dịch không chỉ rõ Company.
+      default_company: Letron Việt Nam
+
+      # Currency mặc định khi giao dịch không chỉ rõ Currency.
+      default_currency: VND
+
+      # UOM mặc định để ghi nhận Distance; null = chưa chọn.
+      default_distance_unit: null
+
+      # Company dùng làm Demo Company; null = không dùng Demo Company.
+      demo_company: null
+
+      # Ẩn tổng tiền bằng chữ (In Words) trên transaction.
+      # 1 = ẩn; 0 = hiển thị.
+      # 🔹 ENUM: 0 | 1
+      disable_in_words: 0
+
+      # Ẩn Rounded Total trên transaction.
+      # 1 = ẩn; 0 = hiển thị.
+      # 🔹 ENUM: 0 | 1
+      disable_rounded_total: 0
+
+      # Kiểm soát hiển thị Currency Symbol trên số tiền.
+      # 🔹 ENUM: '' | No | Yes
+      hide_currency_symbol: ""
+
+      # Dùng Posting Datetime thay vì Creation Datetime khi đặt tên Document.
+      # 1 = dùng Posting Datetime; 0 = dùng Creation Datetime.
+      # 🔹 ENUM: 0 | 1
+      use_posting_datetime_for_naming_documents: 0
+
+  - doctype: Item Tax Template
+    name: Vietnam Tax - LTVN
+    state: present
+
+    # [D.12] Item Tax Template
+    # 🧮 Tax theo Item và Company.
+    # Mẫu thuế áp dụng theo Item và Company.
+    fields:
+      # Company sở hữu Item Tax Template; phải là Company hiện hành.
+      company: Letron Việt Nam
+
+      # Vô hiệu hóa Item Tax Template.
+      # 1 = không áp dụng template; 0 = template được dùng.
+      # 🔹 ENUM: 0 | 1
+      disabled: 0
+
+      # Các Tax áp dụng cho Item; mỗi dòng gồm Tax Account và Tax Rate.
+      taxes:
+        # Child table Item Tax Template Detail: danh sách Tax áp dụng cho Item.
+        - # 1 = Tax không áp dụng cho Item; 0 = áp dụng Tax Rate bên dưới.
+          # Khác với Tax Rate bằng 0%.
+          not_applicable: 0
+          # Tax Rate áp dụng cho Item (%).
+          tax_rate: 10.0
+          # Tax Account dùng để ghi nhận Tax của Item.
+          tax_type: VAT - LTVN
+      # Tên hiển thị của Item Tax Template; do doanh nghiệp đặt, không phải ENUM.
+      title: Vietnam Tax
+
+  - doctype: Purchase Taxes and Charges Template
+    name: Vietnam Tax - LTVN
+    state: present
+
+    # [D.13] Purchase Taxes and Charges Template
+    # 🧾 Tax/Charge cho giao dịch mua.
+    # Mẫu thuế/phí mặc định cho giao dịch mua.
+    fields:
+      # Company sở hữu Purchase Tax Template; phải trùng Company của transaction.
+      company: Letron Việt Nam
+
+      # Vô hiệu hóa Purchase Tax Template.
+      # 1 = không cho áp dụng; 0 = template được dùng.
+      # 🔹 ENUM: 0 | 1
+      disabled: 0
+
+      # Đánh dấu template này là Purchase Tax Template mặc định.
+      # 1 = mặc định; 0 = không mặc định.
+      # 🔹 ENUM: 0 | 1
+      is_default: 0
+
+      # Tax Category dùng để chọn template theo nhóm thuế; null = không giới hạn Category.
+      tax_category: null
+
+      # Các dòng Tax/Charge áp dụng cho Purchase transaction.
+      taxes:
+        # Child table Purchase Taxes and Charges: các dòng Tax/Charge của giao dịch mua.
+        # Currency của Account Head; null = dùng Currency của Company/transaction.
+        - account_currency: null
+          # Currency của Account Head dùng để ghi nhận Tax/Charge; null = dùng Currency của Account.
+          account_head: VAT - LTVN
+          # Cộng hoặc trừ Tax/Charge khỏi giá trị transaction.
+          # 🔹 ENUM: Add | Deduct
+          add_deduct_tax: Add
+          # Phân bổ toàn bộ Tax/Charge vào Stock/Asset Value.
+          # 1 = phân bổ toàn bộ; 0 = xử lý theo Category/logic thông thường.
+          # 🔹 ENUM: 0 | 1
+          allocate_full_amount_to_stock_items: 1
+          # Net Amount của transaction theo Currency giao dịch; ERPNext tự tính.
+          # Không nhập thủ công khi dùng policy để tạo template.
+          base_net_amount: 0.0
+          # Tax Amount theo Company Currency; ERPNext tự tính từ tax rule và exchange rate.
+          # Không nhập thủ công.
+          base_tax_amount: 0.0
+          # Tax Amount sau Discount theo Company Currency; ERPNext tự tính.
+          # Không nhập thủ công.
+          base_tax_amount_after_discount_amount: 0.0
+          # Total của dòng theo Company Currency; ERPNext tự tính.
+          # Không nhập thủ công.
+          base_total: 0.0
+          # 🔹 ENUM: Valuation and Total | Valuation | Total
+          category: Total
+          # Phạm vi hạch toán của dòng Tax/Charge: Valuation, Total hoặc cả hai.
+          # 🔹 ENUM: '' | Actual | On Net Total | On Previous Row Amount | On Previous Row Total | On Item Quantity
+          charge_type: On Net Total
+          # Cost Center ghi nhận chi phí/Tax; phải thuộc Company tương ứng.
+          cost_center: Main - LTVN
+          # Mô tả hiển thị của dòng Tax/Charge.
+          description: VAT @ 10.0
+          # Giữ Tax Amount hiện tại, không tính lại theo các Item trong transaction.
+          # 1 = giữ nguyên; 0 = ERPNext tính lại. Chỉ dùng 1 khi cần override có chủ đích.
+          # 🔹 ENUM: 0 | 1
+          dont_recompute_tax: 0
+          # Đưa Tax/Charge này vào số tiền được xem là đã thanh toán.
+          # 1 = đã bao gồm trong Paid Amount; 0 = không bao gồm.
+          # 🔹 ENUM: 0 | 1
+          included_in_paid_amount: 0
+          # Xem Tax/Charge đã nằm trong giá niêm yết/in trên chứng từ chưa.
+          # 1 = đã bao gồm trong Print Rate; 0 = cộng thêm.
+          # 🔹 ENUM: 0 | 1
+          included_in_print_rate: 0
+          # Đánh dấu Account Head là tài khoản Tax Withholding.
+          # ERPNext tự xác định từ Account Head; field này read-only và không nên nhập thủ công.
+          # 🔹 ENUM: 0 | 1
+          is_tax_withholding_account: 0
+          # Net Amount của transaction theo Currency giao dịch; ERPNext tự tính.
+          # Không nhập thủ công.
+          net_amount: 0.0
+          # Project nhận diện chi phí/doanh thu của dòng; null = không gắn Project.
+          project: null
+          # Tax Rate (%) của dòng.
+          rate: 10.0
+          # Số thứ tự dòng Tax được tham chiếu khi charge_type dùng Previous Row.
+          # null = không tham chiếu dòng trước.
+          row_id: null
+          # Cờ nội bộ cho biết dòng được tạo từ Item Tax Template.
+          # ERPNext tự đặt; không nên nhập thủ công trong policy.
+          # 🔹 ENUM: 0 | 1
+          set_by_item_tax_template: 0
+          # Tax Amount theo Currency giao dịch; ERPNext tự tính.
+          # Không nhập thủ công.
+          tax_amount: 0.0
+          # Tax Amount sau Discount theo Currency giao dịch; ERPNext tự tính.
+          # Không nhập thủ công.
+          tax_amount_after_discount_amount: 0.0
+          # Total của dòng theo Currency giao dịch; ERPNext tự tính.
+          # Không nhập thủ công.
+          total: 0.0
+      # Tên hiển thị của Purchase Tax Template; do doanh nghiệp đặt, không phải ENUM.
+      title: Vietnam Tax
+  - doctype: Sales Taxes and Charges Template
+    name: Vietnam Tax - LTVN
+    state: present
+
+    # [D.14] Sales Taxes and Charges Template
+    # 🧾 Tax/Charge cho giao dịch bán.
+    # Mẫu thuế/phí mặc định cho giao dịch bán.
+    fields:
+      # Company sở hữu Sales Tax Template; phải trùng Company của transaction.
+      company: Letron Việt Nam
+
+      # Vô hiệu hóa Sales Tax Template.
+      # 1 = không cho áp dụng; 0 = template được dùng.
+      # 🔹 ENUM: 0 | 1
+      disabled: 0
+
+      # Đánh dấu template này là Sales Tax Template mặc định.
+      # 1 = mặc định; 0 = không mặc định.
+      # 🔹 ENUM: 0 | 1
+      is_default: 0
+
+      # Tax Category dùng để chọn template theo nhóm thuế; null = không giới hạn Category.
+      tax_category: null
+
+      # Các dòng Tax/Charge áp dụng cho Sales transaction.
+      taxes:
+        # Child table Sales Taxes and Charges: các dòng Tax/Charge của giao dịch bán.
+        # Currency của Account Head; null = dùng Currency của Company/transaction.
+        - account_currency: null
+          # Currency của Account Head dùng để ghi nhận Tax/Charge; null = dùng Currency của Account.
+          account_head: VAT - LTVN
+          # Net Amount theo Company Currency; ERPNext tự tính.
+          # Không nhập thủ công.
+          base_net_amount: 0.0
+          # Tax Amount theo Company Currency; ERPNext tự tính.
+          # Không nhập thủ công.
+          base_tax_amount: 0.0
+          # Tax Amount sau Discount theo Company Currency; ERPNext tự tính.
+          # Không nhập thủ công.
+          base_tax_amount_after_discount_amount: 0.0
+          # Total của dòng theo Company Currency; ERPNext tự tính.
+          # Không nhập thủ công.
+          base_total: 0.0
+          # 🔹 ENUM: '' | Actual | On Net Total | On Previous Row Amount | On Previous Row Total | On Item Quantity
+          # Cách tính Tax/Charge của dòng theo Net Total, dòng trước hoặc Quantity.
+          charge_type: On Net Total
+          # Cost Center ghi nhận chi phí/Tax; phải thuộc Company tương ứng.
+          cost_center: Main - LTVN
+          # Mô tả hiển thị của dòng Tax/Charge.
+          description: VAT @ 10.0
+          # Giữ Tax Amount hiện tại, không tính lại theo các Item trong transaction.
+          # 1 = giữ nguyên; 0 = ERPNext tính lại. Chỉ dùng 1 khi cần override có chủ đích.
+          # 🔹 ENUM: 0 | 1
+          dont_recompute_tax: 0
+          # Đưa Tax/Charge này vào số tiền được xem là đã thanh toán.
+          # 1 = đã bao gồm trong Paid Amount; 0 = không bao gồm.
+          # 🔹 ENUM: 0 | 1
+          included_in_paid_amount: 0
+          # Xem Tax/Charge đã nằm trong giá niêm yết/in trên chứng từ chưa.
+          # 1 = đã bao gồm trong Print Rate; 0 = cộng thêm.
+          # 🔹 ENUM: 0 | 1
+          included_in_print_rate: 0
+          # Đánh dấu Account Head là tài khoản Tax Withholding.
+          # ERPNext tự xác định từ Account Head; field này read-only và không nên nhập thủ công.
+          # 🔹 ENUM: 0 | 1
+          is_tax_withholding_account: 0
+          # Net Amount theo Currency giao dịch; ERPNext tự tính.
+          # Không nhập thủ công.
+          net_amount: 0.0
+          # Project nhận diện chi phí/doanh thu của dòng; null = không gắn Project.
+          project: null
+          # Tax Rate (%) của dòng.
+          rate: 10.0
+          # Số thứ tự dòng Tax được tham chiếu khi charge_type dùng Previous Row.
+          # null = không tham chiếu dòng trước.
+          row_id: null
+          # Cờ nội bộ cho biết dòng được tạo từ Item Tax Template.
+          # ERPNext tự đặt; không nên nhập thủ công trong policy.
+          # 🔹 ENUM: 0 | 1
+          set_by_item_tax_template: 0
+          # Tax Amount theo Currency giao dịch; ERPNext tự tính.
+          # Không nhập thủ công.
+          tax_amount: 0.0
+          # Tax Amount sau Discount theo Currency giao dịch; ERPNext tự tính.
+          # Không nhập thủ công.
+          tax_amount_after_discount_amount: 0.0
+          # Total của dòng theo Currency giao dịch; ERPNext tự tính.
+          # Không nhập thủ công.
+          total: 0.0
+      # Tên hiển thị của Sales Tax Template; do doanh nghiệp đặt, không phải ENUM.
+      title: Vietnam Tax

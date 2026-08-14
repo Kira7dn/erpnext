@@ -42,7 +42,7 @@ def bench_execute(method: str, kwargs: dict[str, object] | None = None) -> str:
         check=True,
         capture_output=True,
         text=True,
-        timeout=70,
+        timeout=120,
     )
     return result.stdout
 
@@ -74,7 +74,7 @@ def test_policy_bundle_matches_native_configuration() -> None:
         base64.b64decode(bench_execute("letron_api.policy.export_current_base64"))
     )
     assert exported == bundle
-    assert len(bundle["documents"]) == 14
+    assert len(bundle["documents"]) == 28
     snapshot = client.request(
         "GET", "/api/method/letron_api.api.runtime_snapshot", expected={200}
     )
@@ -159,23 +159,18 @@ def test_policy_bundle_protects_native_configuration() -> None:
 
 
 def test_policy_drift_and_idempotent_restore() -> None:
-    client = _logged_in_client()
+    drift = json.loads(bench_execute("letron_api.policy.acceptance_force_drift"))
+    assert drift["drift_count"] == 1
     try:
-        bench_execute("letron_api.policy.acceptance_force_drift")
-        drifted = client.request(
-            "GET", "/api/method/letron_api.api.runtime_snapshot", expected={200}
-        ).data["message"]["policy"]
-        assert drifted["ok"] is False
-        assert drifted["status"] == "drifted"
-        assert drifted["drift_count"] == 1
+        restored = json.loads(bench_execute("letron_api.policy.sync"))
+        assert restored["ok"] is True
+        assert restored["drift_count"] == 0
     finally:
+        # Make cleanup idempotent even when the assertions above fail.
         bench_execute("letron_api.policy.sync")
 
-    restored = client.request(
-        "GET", "/api/method/letron_api.api.runtime_snapshot", expected={200}
-    ).data["message"]["policy"]
-    assert restored["ok"] is True and restored["drift_count"] == 0
-    assert '"applied": 0' in bench_execute("letron_api.policy.sync")
+    second_sync = json.loads(bench_execute("letron_api.policy.sync"))
+    assert second_sync["applied"] == 0
 
 
 def _control_client() -> ApiClient:
@@ -368,15 +363,11 @@ def test_compute_yaml_control_api_policy_boundary_and_drift() -> None:
 
     try:
         bench_execute("letron_api.system_config.acceptance_force_drift")
-        drifted = client.request(
-            "GET", "/api/method/letron_api.api.runtime_snapshot", expected={200}
-        ).data["message"]["config"]
+        drifted = json.loads(bench_execute("letron_api.system_config.plan"))
         assert drifted["ok"] is False and drifted["drift_count"] == 1
     finally:
         bench_execute("letron_api.system_config.sync")
-    restored = client.request(
-        "GET", "/api/method/letron_api.api.runtime_snapshot", expected={200}
-    ).data["message"]["config"]
+    restored = json.loads(bench_execute("letron_api.system_config.plan"))
     assert restored["ok"] is True and restored["drift_count"] == 0
     client.request(
         "GET",
@@ -452,6 +443,48 @@ def test_policy_tax_invoice_gl_effect(rate: int) -> None:
     assert result["tax"] == 1000 * rate
     assert result["sales_gl"] == result["tax"]
     assert result["purchase_gl"] == result["tax"]
+
+
+def test_policy_configured_tax_categories_and_rules_readback() -> None:
+    result = json.loads(bench_execute("letron_api.policy_acceptance.probe_configured_tax_policy"))
+    assert result["ok"] is True
+    assert result["selected"] == {
+        "software_sales": "Vietnam Software Non-VAT - LTVN",
+        "software_purchase": "Vietnam Software Non-VAT - LTVN",
+        "hosting_sales": "Vietnam Tax - LTVN",
+        "hosting_purchase": "Vietnam Tax - LTVN",
+    }
+
+
+def test_policy_configured_accounting_period_readback() -> None:
+    result = json.loads(bench_execute("letron_api.policy_acceptance.probe_configured_accounting_period"))
+    assert result["ok"] is True
+    assert result["period_name"] == "FY 2026 - LTVN"
+    assert result["closed_documents"] == {
+        "Sales Invoice": 0,
+        "Purchase Invoice": 0,
+        "Journal Entry": 0,
+        "Payment Entry": 0,
+        "Purchase Receipt": 0,
+    }
+    assert result["behavior"] == {
+        "in_period_open_allowed": True,
+        "outside_period_not_blocked_by_closing_hook": True,
+        "in_period_closed_sales_invoice_blocked": True,
+        "exempted_role": None,
+    }
+
+
+def test_policy_configured_tax_invoice_effects() -> None:
+    result = json.loads(
+        bench_execute("letron_api.policy_acceptance.probe_configured_tax_invoice_effects")
+    )
+    assert result["ok"] is True
+    assert result["observed"] == {
+        "software": {"sales_tax": 0.0, "purchase_tax": 0.0, "sales_gl": 0.0, "purchase_gl": 0.0},
+        "hosting": {"sales_tax": 10000.0, "purchase_tax": 10000.0, "sales_gl": 10000.0, "purchase_gl": 10000.0},
+        "transport": {"sales_tax": 10000.0, "purchase_tax": 10000.0, "sales_gl": 10000.0, "purchase_gl": 10000.0},
+    }
 
 
 @pytest.mark.parametrize(

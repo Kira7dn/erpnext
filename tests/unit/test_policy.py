@@ -5,7 +5,15 @@ import re
 from pathlib import Path
 
 import pytest
+import yaml
 from letron_api import policy
+from letron_api.einvoice_handoff import (
+    EInvoiceHandoffError,
+    idempotency_key,
+    load_contract,
+    validate_handoff,
+    validate_provider_result,
+)
 from letron_api.policy_acceptance import (
     CONTROLLER_EFFECT_ASSERTIONS,
     resolve_builder,
@@ -36,6 +44,195 @@ def test_repository_policy_is_valid_and_deterministic() -> None:
         "domain": "Distribution",
         "chart_of_accounts": "Standard",
     }
+
+
+def test_scope_ownership_and_einvoice_boundary_are_explicit() -> None:
+    root = Path(__file__).parents[2]
+    scope = yaml.safe_load((root / "contracts" / "scope.yml").read_text(encoding="utf-8"))
+    sources = {entry["name"]: entry for entry in scope["sources"]}
+    assert sources["Global Defaults"]["classification"] == "system"
+    assert sources["Global Defaults"]["owner"] == "bootstrap"
+    assert sources["Accounting Period"]["classification"] == "managed"
+
+    handoff = yaml.safe_load(
+        (root / "contracts" / "einvoice-handoff.yml").read_text(encoding="utf-8")
+    )
+    assert handoff["kind"] == "letron-einvoice-handoff-contract"
+    assert "credentials_and_certificates_must_not_be_stored_in_policy" in handoff[
+        "invariants"
+    ]
+
+
+def test_compact_policy_fills_only_declared_documents_from_full_defaults(tmp_path: Path) -> None:
+    compact = write_policy(
+        tmp_path / "policy.yaml",
+        """version: 2
+scope_version: 1
+erpnext_version: 16.31.1
+documents:
+  - doctype: Accounts Settings
+    name: Accounts Settings
+    state: present
+    fields:
+      allow_stale: 0
+  - doctype: Buying Settings
+    name: Buying Settings
+    state: present
+    fields: {}
+""",
+    )
+    write_policy(
+        tmp_path / "policy-full.yaml",
+        """version: 2
+scope_version: 1
+erpnext_version: 16.31.1
+documents:
+  - doctype: Accounts Settings
+    name: Accounts Settings
+    state: present
+    fields:
+      allow_stale: 1
+      stale_days: 7
+  - doctype: Buying Settings
+    name: Buying Settings
+    state: present
+    fields:
+      po_required: "Yes"
+  - doctype: Selling Settings
+    name: Selling Settings
+    state: present
+    fields:
+      so_required: "Yes"
+""",
+    )
+
+    loaded = policy.load_policy(compact)
+    by_doctype = {entry["doctype"]: entry for entry in loaded["documents"]}
+    assert set(by_doctype) == {"Accounts Settings", "Buying Settings"}
+    assert by_doctype["Accounts Settings"]["fields"] == {"allow_stale": 0, "stale_days": 7}
+    assert by_doctype["Buying Settings"]["fields"] == {}
+
+
+def test_candidate_policy_uses_adjacent_full_fallback(tmp_path: Path) -> None:
+    candidate = write_policy(
+        tmp_path / ".policy.yaml.123.candidate",
+        """version: 2
+scope_version: 1
+erpnext_version: 16.31.1
+documents:
+  - doctype: Accounts Settings
+    name: Accounts Settings
+    state: present
+    fields:
+      allow_stale: 0
+""",
+    )
+    write_policy(
+        tmp_path / "policy-full.yaml",
+        """version: 2
+scope_version: 1
+erpnext_version: 16.31.1
+documents:
+  - doctype: Accounts Settings
+    name: Accounts Settings
+    state: present
+    fields:
+      allow_stale: 1
+      stale_days: 7
+""",
+    )
+
+    loaded = policy.load_policy(candidate)
+    fields = loaded["documents"][0]["fields"]
+    assert fields == {"allow_stale": 0, "stale_days": 7}
+
+
+def test_policy_fallback_preserves_explicit_falsy_values(tmp_path: Path) -> None:
+    candidate = write_policy(
+        tmp_path / "policy.yaml",
+        """version: 2
+scope_version: 1
+erpnext_version: 16.31.1
+documents:
+  - doctype: Accounts Settings
+    name: Accounts Settings
+    state: present
+    fields: {zero: 0, null_value: null, empty: '', mapping: {}, sequence: []}
+""",
+    )
+    write_policy(
+        tmp_path / "policy-full.yaml",
+        """version: 2
+scope_version: 1
+erpnext_version: 16.31.1
+documents:
+  - doctype: Accounts Settings
+    name: Accounts Settings
+    state: present
+    fields: {zero: 1, null_value: fallback, empty: fallback, mapping: {x: 1}, sequence: [x]}
+""",
+    )
+    fields = policy.load_policy(candidate)["documents"][0]["fields"]
+    assert fields == {"zero": 0, "null_value": None, "empty": "", "mapping": {}, "sequence": []}
+
+
+def test_policy_full_loaded_directly_does_not_merge_itself() -> None:
+    full = policy.load_policy(Path(__file__).parents[2] / "config" / "policy-full.yaml")
+    assert len(full["documents"]) == 15
+
+
+def test_einvoice_handoff_contract_is_provider_neutral() -> None:
+    contract = load_contract()
+    assert contract["provider"]["name"] == "MISA"
+    source = {
+        "company": "Letron Việt Nam",
+        "doctype": "Sales Invoice",
+        "name": "ACC-SINV-0001",
+        "posting_date": "2026-08-14",
+        "currency": "VND",
+        "conversion_rate": 1,
+    }
+    payload = {
+        "seller": {"company": "Letron Việt Nam", "tax_id": "TAX-SELLER", "company_address": "A"},
+        "buyer": {"party": "Customer", "tax_id": "TAX-BUYER", "party_address": "B"},
+        "lines": {"item_code": "ITEM", "description": "Service", "qty": 1, "uom": "Unit", "rate": 100, "amount": 100},
+        "taxes": {"account_head": "VAT - LTVN", "charge_type": "On Net Total", "rate": 10, "tax_amount": 10},
+        "totals": {"net_total": 100, "total_taxes_and_charges": 10, "grand_total": 110, "base_grand_total": 110},
+    }
+    envelope = validate_handoff(source, payload)
+    assert envelope["idempotency_key"] == idempotency_key(source)
+    assert "credentials" not in envelope and "certificate" not in envelope
+
+
+def test_einvoice_handoff_rejects_incomplete_payload_section() -> None:
+    source = {
+        "company": "Letron Việt Nam",
+        "doctype": "Sales Invoice",
+        "name": "SINV-1",
+        "posting_date": "2026-08-14",
+        "currency": "VND",
+        "conversion_rate": 1,
+    }
+    payload = {
+        "seller": {},
+        "buyer": {},
+        "lines": {},
+        "taxes": {},
+        "totals": {},
+    }
+    with pytest.raises(EInvoiceHandoffError, match="payload section seller is missing"):
+        validate_handoff(source, payload)
+
+
+def test_einvoice_provider_status_validation_and_idempotency() -> None:
+    issued = validate_provider_result(
+        {"status": "issued", "received_at": "2026-08-14T00:00:00Z", "provider_invoice_id": "MISA-1"}
+    )
+    assert issued["status"] == "issued"
+    with pytest.raises(EInvoiceHandoffError):
+        validate_provider_result({"status": "issued", "received_at": "now"})
+    with pytest.raises(EInvoiceHandoffError):
+        validate_provider_result({"status": "unknown", "received_at": "now"})
 
 
 def test_scope_registry_has_explicit_fingerprints_and_concrete_acceptance_builders() -> (

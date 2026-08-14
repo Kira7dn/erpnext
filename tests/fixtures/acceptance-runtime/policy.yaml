@@ -400,8 +400,6 @@ documents:
       taxes:
         # Child table Item Tax Template Detail.
         - # Account VAT/Tax được liên kết; phải thuộc Company tương ứng.
-          # Với Item chịu VAT, đây là VAT đầu ra khi dùng cho Sales; không dùng
-          # dòng này để suy ra VAT đầu vào của Purchase.
           tax_type: VAT - LTVN
           # Thuế suất áp dụng cho Item (%).
           tax_rate: 10.0
@@ -447,13 +445,7 @@ documents:
       title: Vietnam Tax
       # Các dòng VAT/Tax áp dụng cho Purchase transaction.
       taxes:
-        # Account ghi nhận VAT đầu vào; phải thuộc Company tương ứng.
-        # ⚠️ AUDIT BLOCKER F-03: giá trị hiện tại dùng chung VAT - LTVN,
-        # nhưng readback native cho thấy đây là Tax/Liability (VAT đầu ra).
-        # Chưa coi Purchase mapping là production-ready khi chưa có Input VAT
-        # Account riêng thuộc nhóm Asset được kế toán xác nhận.
-        # Account là master data ngoài phạm vi policy; policy chỉ tham chiếu
-        # Account đã tồn tại, không tạo hoặc sửa Account trong DB.
+        # Account ghi nhận VAT/Tax; phải thuộc Company tương ứng.
         - account_head: VAT - LTVN
           # Cộng hoặc trừ Tax khỏi giá trị transaction.
           # 🔹 ENUM: Add | Deduct

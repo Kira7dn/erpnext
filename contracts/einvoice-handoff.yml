@@ -1,0 +1,97 @@
+version: 1
+kind: letron-einvoice-handoff-contract
+
+provider:
+  name: MISA
+  product_or_api: pending_provider_contract
+  integration_owner: Headless BE
+
+# This contract defines the ERP <-> e-invoice provider boundary.
+# Provider credentials, certificates, signing and tax-authority transport are
+# deliberately owned by the Headless BE integration and secret store.
+source_of_truth:
+  accounting_document: erpnext
+  provider_lifecycle: einvoice_provider
+
+source_documents:
+  - doctype: Sales Invoice
+    provider_submission: supported
+  - doctype: Purchase Invoice
+    provider_submission: conditional
+
+immutable_source_identity:
+  required:
+    - company
+    - doctype
+    - name
+    - posting_date
+    - currency
+    - conversion_rate
+
+payload_requirements:
+  seller:
+    required:
+      - company
+      - tax_id
+      - company_address
+  buyer:
+    required:
+      - party
+      - tax_id
+      - party_address
+  lines:
+    required:
+      - item_code
+      - description
+      - qty
+      - uom
+      - rate
+      - amount
+  taxes:
+    required:
+      - account_head
+      - charge_type
+      - rate
+      - tax_amount
+  totals:
+    required:
+      - net_total
+      - total_taxes_and_charges
+      - grand_total
+      - base_grand_total
+
+idempotency:
+  key_fields:
+    - company
+    - doctype
+    - name
+  duplicate_submission: return_existing_provider_result
+
+provider_result:
+  required:
+    - status
+    - received_at
+  statuses:
+    - pending
+    - submitted
+    - issued
+    - rejected
+    - cancelled
+    - adjusted
+  conditional_fields:
+    - provider_invoice_id
+    - invoice_number
+    - invoice_series
+    - tax_authority_code
+    - original_invoice_reference
+    - replacement_invoice_reference
+    - adjustment_reference
+    - rejection_code
+    - rejection_message
+
+invariants:
+  - provider_status_must_not_mutate_accounting_totals
+  - rejected_submission_must_not_be_marked_issued
+  - cancellation_and_adjustment_must_keep_original_reference
+  - retry_must_be_idempotent
+  - credentials_and_certificates_must_not_be_stored_in_policy

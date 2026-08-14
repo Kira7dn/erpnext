@@ -441,9 +441,9 @@ sources:
     sha256: 2905541854904abac444416d9d2134c6484a484859d9abf11c6c2cb4526d6517
   standard_record_rule: none
 - name: Global Defaults
-  classification: managed
+  classification: system
   source_type: frappe
-  owner: policy
+  owner: bootstrap
   selector: single
   dependency: []
   schema_fingerprint:
@@ -596,6 +596,24 @@ sources:
     cleanup_handler: delete-fixture-reverse-dependency
     dependency_prerequisites: []
     controller_effect_assertion: native-controller:Cheque Print Template
+- name: Cost Center
+  classification: managed
+  source_type: erpnext
+  owner: policy
+  selector: name
+  dependency:
+  - Company
+  schema_fingerprint:
+    algorithm: frappe-json-v1
+    sha256: c0d43a5fc3284072e69a3549ad7e3043fdb288f31a7f2198675c21d48cf4c258
+  standard_record_rule: none
+  acceptance:
+    fixture_builder: native-document:Cost Center
+    structural_test: create-readback-update-delete
+    cleanup_handler: delete-fixture-reverse-dependency
+    dependency_prerequisites:
+    - Company
+    controller_effect_assertion: native-controller:Cost Center
 - name: Cost Center Allocation
   classification: managed
   source_type: erpnext

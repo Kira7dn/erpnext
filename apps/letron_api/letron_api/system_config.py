@@ -318,9 +318,11 @@ def validate_bundle(
     global_defaults = documents.get(("Global Defaults", "Global Defaults"), {}).get("fields", {})
     expected = {
         "erpnext_version": (config["erpnext_version"], policy["erpnext_version"]),
-        "country/global_defaults": (company["country"], global_defaults.get("country")),
-        "currency/global_defaults": (company["currency"], global_defaults.get("default_currency")),
     }
+    if "country" in global_defaults:
+        expected["country/global_defaults"] = (company["country"], global_defaults["country"])
+    if "default_currency" in global_defaults:
+        expected["currency/global_defaults"] = (company["currency"], global_defaults["default_currency"])
     default_company = global_defaults.get("default_company")
     if default_company is not None:
         expected["company/global_defaults"] = (company["name"], default_company)

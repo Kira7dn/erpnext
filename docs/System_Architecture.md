@@ -129,12 +129,19 @@ OpenAPI business contract và control plane cấu hình là hai boundary tách b
 |---|---|
 | Docker, database, Redis, worker, backup, endpoint | `config/config.yaml` |
 | Language, timezone, date/number format, system runtime | `config/config.yaml` |
-| Company bootstrap, country, currency, business policy | `config/policy.yaml` |
+| Company bootstrap, selected ERPNext business settings | `config/policy.yaml` |
 | Secret thật | `.env` hoặc secret store |
 | Identity theo cá nhân | Identity API và ERPNext DB |
 | Entity, master, transaction, ledger | Business API và ERPNext DB |
 | Executable customization/migration | Source/fixture của `letron_api` |
 | Metadata/catalog/OpenAPI sinh ra | Artifact, không phải SOT |
+
+`policy.yaml` không sở hữu toàn bộ compliance của doanh nghiệp. E-invoice
+provider, chữ ký số, cấp mã/gửi cơ quan thuế và vòng đời thay thế/điều chỉnh hóa
+đơn thuộc integration contract của Headless BE với nhà cung cấp e-invoice. Tax
+matrix, accounting regime, account mapping, hồ sơ phê duyệt và retention evidence
+thuộc quy trình kế toán/compliance riêng. `policy-full.yaml` chỉ là fallback kỹ
+thuật/reference, không phải nguồn apply độc lập.
 
 Một Docker project/Frappe site tương ứng một tenant và đúng một Company.
 `letron_api` chỉ điều phối native controller/DocType; không tạo business
@@ -170,7 +177,7 @@ identity API/DB, không thuộc policy YAML.
    consumer deduplicate theo event ID. REST vẫn là source of truth.
 5. Country/currency chỉ có owner là `policy.yaml`; launcher lấy bootstrap input
    từ policy và `config.yaml` không giữ mirror business jurisdiction.
-6. Phase 8 `COMPLETE` trên Windows/Docker: production policy có 14 document thật;
+6. Phase 8 `COMPLETE` trên Windows/Docker: production policy có 25 document thật;
    56 source managed/conditional được chứng minh bằng disposable fixture, schema
    fingerprint, native readback, controller effect, idempotency, rollback từng
    mutation boundary và cleanup zero-residue.

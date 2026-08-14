@@ -44,6 +44,40 @@ Health:       http://localhost:8080/api/method/letron_api.api.health
 Business API: http://localhost:8080/api/v1/{module}/{resource}
 ```
 
+### Đăng nhập local
+
+```text
+URL:      http://localhost:8080
+User:     Administrator
+Password: 123456
+```
+
+> Đây là credential development local để truy cập site hiện tại. Không sử dụng
+> credential này cho production; production phải dùng secret riêng và password
+> mạnh hơn.
+
+### Hot reload Docker
+
+Khi thay đổi source, config, policy hoặc entrypoint mà không muốn build lại image:
+
+```powershell
+.\docker-start.ps1 -Action reload
+```
+
+Action này dùng image hiện có (`--no-build`), chạy lại các bước sync idempotent,
+recreate các service dài hạn để nạp source mới, và không recreate `create-site`
+nên không chạy lại site migration.
+
+`reload` tự kiểm tra plan hiện tại: nếu chỉ sửa source thì chỉ restart process;
+nếu phát hiện drift từ `config.yaml` hoặc `policy.yaml` thì mới chạy sync đầy đủ.
+
+Trong môi trường dev, `up` và `restart` cũng luôn dùng image hiện có và không
+build. Trước production, build tường minh bằng:
+
+```powershell
+.\docker-start.ps1 -Action build
+```
+
 Mỗi project/site là một tenant và đúng một Company. Chỉnh system/runtime trong
 `config/config.yaml`, chỉnh Company và policy nghiệp vụ trong
 `config/policy.yaml`, giữ secret thật trong `.env`. Không sửa managed policy

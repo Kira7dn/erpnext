@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import copy
 import hashlib
 import json
 import os
@@ -91,6 +92,7 @@ POLICY_DOCTYPES = (
     "Shipment Parcel Template",
     "Stock Entry Type",
     "Cheque Print Template",
+    "Cost Center",
     "Cost Center Allocation",
     "Dunning Type",
     "Financial Report Template",
@@ -330,10 +332,10 @@ def _policy_path(path: str | Path | None = None) -> Path:
 
 
 def _scope_path(policy_path: Path) -> Path:
-    adjacent = policy_path.parent.parent / "contracts" / "policy-scope.yml"
+    adjacent = policy_path.parent.parent / "contracts" / "scope.yml"
     if adjacent.is_file():
         return adjacent
-    return Path(__file__).resolve().parents[3] / "contracts" / "policy-scope.yml"
+    return Path(__file__).resolve().parents[3] / "contracts" / "scope.yml"
 
 
 def _load_scope(policy_path: Path) -> dict[str, Any]:
@@ -414,6 +416,68 @@ def _asset_source_path(policy_path: Path, source: str) -> Path:
     if candidate != assets_root and assets_root not in candidate.parents:
         raise PolicyError(f"Asset path traversal is forbidden: {source}")
     return candidate
+
+
+def _fill_missing(primary: Any, fallback: Any) -> Any:
+    """Fill only absent values while preserving every explicit primary value."""
+
+    if isinstance(primary, Mapping) and isinstance(fallback, Mapping):
+        if not primary:
+            return copy.deepcopy(primary)
+        result = copy.deepcopy(dict(fallback))
+        for key, value in primary.items():
+            result[key] = _fill_missing(value, fallback[key]) if key in fallback else copy.deepcopy(value)
+        return result
+    if isinstance(primary, list) and isinstance(fallback, list):
+        result = copy.deepcopy(primary)
+        for index, value in enumerate(primary):
+            if index < len(fallback):
+                result[index] = _fill_missing(value, fallback[index])
+        return result
+    return copy.deepcopy(primary)
+
+
+def _load_full_defaults(source: Path) -> dict[str, Any] | None:
+    """Load the optional adjacent full policy used only as packaging fallback."""
+
+    if source.name == "policy-full.yaml":
+        return None
+    full_source = source.with_name("policy-full.yaml")
+    if not full_source.is_file():
+        return None
+    try:
+        full = yaml.load(full_source.read_text(encoding="utf-8"), Loader=_UniqueKeyLoader)
+    except yaml.YAMLError as error:
+        raise PolicyError(f"Invalid full policy YAML: {error}") from error
+    if not isinstance(full, dict) or not isinstance(full.get("documents"), list):
+        raise PolicyError("policy-full.yaml must contain a documents list")
+    return full
+
+
+def _merge_full_defaults(raw: dict[str, Any], source: Path) -> dict[str, Any]:
+    """Build the effective policy without expanding its declared DocType scope."""
+
+    full = _load_full_defaults(source)
+    if full is None:
+        return raw
+    full_documents = {
+        (item.get("doctype"), item.get("name")): item
+        for item in full["documents"]
+        if isinstance(item, Mapping)
+    }
+    merged = copy.deepcopy(raw)
+    effective_documents: list[Any] = []
+    for item in raw.get("documents", []):
+        if not isinstance(item, Mapping):
+            effective_documents.append(copy.deepcopy(item))
+            continue
+        fallback = full_documents.get((item.get("doctype"), item.get("name")))
+        if fallback is None or item.get("state") == "absent" or item.get("fields") == {}:
+            effective_documents.append(copy.deepcopy(item))
+            continue
+        effective_documents.append(_fill_missing(item, fallback))
+    merged["documents"] = effective_documents
+    return merged
 
 
 def _validate_assets(policy_path: Path, assets: Mapping[str, Any]) -> None:
@@ -580,6 +644,7 @@ def load_policy(path: str | Path | None = None) -> dict[str, Any]:
         raise PolicyError(f"Invalid policy YAML: {error}") from error
     if not isinstance(raw, dict):
         raise PolicyError("Policy YAML root must be a mapping")
+    raw = _merge_full_defaults(raw, source)
     unknown_top_level = set(raw) - {"version", "scope_version", "erpnext_version", "bootstrap", "assets", "documents"}
     if unknown_top_level:
         raise PolicyError("Unsupported top-level policy keys: " + ", ".join(sorted(unknown_top_level)))

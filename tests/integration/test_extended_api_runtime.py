@@ -619,7 +619,8 @@ def test_extended_auth_system_resources_and_business_flows(request: pytest.Fixtu
     submitted_po = response_data(client.public("POST", _path("/api/v1/buying/purchase-orders", po_name) + "/submit", expected={200}))
     assert submitted_po["docstatus"] == 1
     po_item = submitted_po["items"][0]
-    purchase_invoice_payload = {"supplier": supplier, "company": company, "posting_date": "2026-08-10", "currency": "VND", "conversion_rate": 1, "items": lines}
+    purchase_invoice_items = [{**lines[0], "purchase_order": po_name, "po_detail": po_item["name"]}]
+    purchase_invoice_payload = {"supplier": supplier, "company": company, "posting_date": "2026-08-10", "currency": "VND", "conversion_rate": 1, "items": purchase_invoice_items}
     draft_pi = _create(client, "/api/v1/accounts/purchase-invoices", purchase_invoice_payload, created, "Purchase Invoice")
     draft_pi_name = str(draft_pi["name"])
     _assert_list_controls(client, "/api/v1/accounts/purchase-invoices", draft_pi_name)
@@ -628,7 +629,7 @@ def test_extended_auth_system_resources_and_business_flows(request: pytest.Fixtu
     delete_pi = str(_create(client, "/api/v1/accounts/purchase-invoices", purchase_invoice_payload, created, "Purchase Invoice")["name"])
     _delete_and_assert(client, "/api/v1/accounts/purchase-invoices", delete_pi)
 
-    purchase_invoice = _create(client, "/api/v1/accounts/purchase-invoices", {**purchase_invoice_payload, "items": [{**lines[0], "purchase_order": po_name, "po_detail": po_item["name"]}]}, created, "Purchase Invoice")
+    purchase_invoice = _create(client, "/api/v1/accounts/purchase-invoices", purchase_invoice_payload, created, "Purchase Invoice")
     pi_name = str(purchase_invoice["name"])
     assert response_data(client.public("POST", _path("/api/v1/accounts/purchase-invoices", pi_name) + "/submit", expected={200}))["docstatus"] == 1
     assert response_data(client.public("POST", _path("/api/v1/accounts/purchase-invoices", pi_name) + "/cancel", expected={200}))["docstatus"] == 2
@@ -808,7 +809,8 @@ def test_extended_auth_system_resources_and_business_flows(request: pytest.Fixtu
         )
     )
     assert submitted_journal["docstatus"] == 1
-    assert active_gl_entries(lifecycle_journal_name), "Journal Entry submit did not create active GL rows"
+    submitted_gl_entries = active_gl_entries(lifecycle_journal_name)
+    assert submitted_gl_entries, "Journal Entry submit did not create active GL rows"
     client.public(
         "PUT",
         _path("/api/v1/accounts/journal-entries", lifecycle_journal_name),
@@ -823,7 +825,12 @@ def test_extended_auth_system_resources_and_business_flows(request: pytest.Fixtu
         )
     )
     assert cancelled_journal["docstatus"] == 2
-    assert active_gl_entries(lifecycle_journal_name) == []
+    cancelled_gl_entries = active_gl_entries(lifecycle_journal_name)
+    assert cancelled_gl_entries, "Journal Entry cancel did not create reversal GL rows"
+    assert {row["name"] for row in cancelled_gl_entries} != {row["name"] for row in submitted_gl_entries}
+    assert sum(float(row["debit"] or 0) for row in cancelled_gl_entries) == sum(
+        float(row["credit"] or 0) for row in cancelled_gl_entries
+    )
     client.public("POST", _path("/api/v1/accounts/journal-entries", journal_name) + "/amend", expected={404, 405})
     client.public("POST", "/api/v1/accounts/journal-entries", {}, expected={400, 417})
     unbalanced_journal = _create(

@@ -168,7 +168,7 @@ def test_repository_config_and_policy_invariants_match() -> None:
     assert result["company"] == "Letron Việt Nam"
 
 
-def test_cross_file_invariants_fail_closed(tmp_path: Path) -> None:
+def test_bootstrap_country_has_no_global_defaults_mirror(tmp_path: Path) -> None:
     candidate = tmp_path / "config.yaml"
     content = system_config.config_path().read_text(encoding="utf-8")
     candidate.write_text(content, encoding="utf-8")
@@ -176,8 +176,8 @@ def test_cross_file_invariants_fail_closed(tmp_path: Path) -> None:
     policy_path = tmp_path / "policy.yaml"
     policy_content = system_config.policy_path().read_text(encoding="utf-8")
     policy_path.write_text(policy_content.replace("country: Vietnam", "country: Singapore", 1), encoding="utf-8")
-    with pytest.raises(system_config.ConfigError, match="country/global_defaults"):
-        system_config.validate_bundle(candidate, policy_path)
+    result = system_config.validate_bundle(candidate, policy_path)
+    assert result["ok"] is True
 
 
 def test_launchers_use_only_the_two_fixed_yaml_sources() -> None:

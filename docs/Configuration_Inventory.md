@@ -19,7 +19,7 @@ Trạng thái 2026-08-12:
 
 | Gate | Trạng thái |
 |---|---|
-| Runtime foundation | `COMPLETE` cho baseline 14 document native |
+| Runtime foundation | `COMPLETE` cho baseline 28 document native |
 | Boundary migration | `COMPLETE` |
 | Inventory closure trong phạm vi | `COMPLETE` — scanner `unknown=0`, `unclassified=0` |
 | Typed native coverage | `COMPLETE` — 56 managed/conditional source có builder và acceptance mapping |
@@ -50,27 +50,54 @@ Mỗi source trong phạm vi phải có đúng một classification:
 `unknown` là lỗi completeness, không phải classification hợp lệ. Một field không
 được có hai owner.
 
-### Migration gap hiện tại
+### Không đồng nhất policy với compliance system
 
-- Country/currency không còn thuộc `config.yaml`; launcher lấy hai giá trị từ
-  `policy.bootstrap.company` và validator chỉ đối chiếu với Global Defaults.
-- Runtime allowlist hiện vẫn chứa Settings của module ngoài product scope và
-  `User`/`User Permission`. Phase 8.0 đã thu hẹp ownership: user, credential,
-  role assignment và User Permission theo cá nhân thuộc Identity API/DB.
-- Cho tới khi hai gap trên được sửa và test, tài liệu chỉ được nói
-  “policy baseline in-sync”, không được nói “full policy complete”.
+`config/policy.yaml` chỉ là desired state cho một số cấu hình ERPNext. Nó không
+phải là toàn bộ hồ sơ tuân thủ kế toán/thuế của doanh nghiệp và không được dùng
+để kết luận hệ thống đã tuân thủ pháp luật.
+
+| Phạm vi | Owner | Không thuộc policy vì |
+|---|---|---|
+| Company bootstrap và các setting ERPNext được chọn | `config/policy.yaml` | Đây là cấu hình desired state của ERPNext |
+| Default/runtime Docker, database, Redis, backup, endpoint | `config/config.yaml` | Đây là system operation, không phải business policy |
+| Customer, Supplier, Item, Account, Warehouse, Address | Business API/ERPNext DB | Đây là master/entity có lifecycle, policy chỉ tham chiếu |
+| Invoice, Order, Receipt, Payment, Journal Entry, Stock movement | Business API/ERPNext DB | Đây là transaction phát sinh, không phải baseline config |
+| GL Entry, Stock Ledger Entry, Payment Ledger, totals/calculated fields | ERPNext runtime | Đây là derived state, không được nhập vào policy |
+| Hóa đơn điện tử, ký số, cấp mã, gửi cơ quan thuế, thay thế/điều chỉnh | Nhà cung cấp e-invoice + Headless BE integration | Đây là dịch vụ và integration lifecycle bên ngoài ERPNext policy |
+| Tax/legal interpretation, VAT matrix, accounting regime, account mapping | Kế toán trưởng/tài liệu nghiệp vụ | Đây là quyết định pháp lý/nghiệp vụ, không tự suy ra từ ERPNext field |
+| Secret, API key, certificate, provider credential | Secret store/.env | Không được lưu trong policy hoặc fallback |
+| Backup retention, restore evidence, legal hold | Operations/compliance storage | Đây là control vận hành và bằng chứng lưu trữ |
+
+`config/policy-full.yaml` chỉ là technical fallback/reference cho các DocType đã
+được khai báo trong `policy.yaml`. Nó không mở rộng ownership, không được apply
+trực tiếp và không phải legal policy. Giá trị explicit trong policy chính thắng;
+`0`, `null`, `''`, `{}` và `[]` không được coi là thiếu.
+
+### Boundary migration đã hoàn tất
+
+- Country/currency có một owner duy nhất là `config/policy.yaml`; launcher lấy
+  hai giá trị từ `policy.bootstrap.company`. `Global Defaults` không còn là
+  mirror bắt buộc trong operational policy.
+- Settings ngoài product scope và `User`/`User Permission` không còn được
+  policy nhận ownership. User, credential, role assignment và User Permission
+  theo cá nhân thuộc Identity API/DB.
+- Boundary migration đã được kiểm tra trong registry-driven acceptance. Không
+  còn migration gap là blocker của Phase 8.
+- `config/policy.yaml` là production baseline gồm 28 document thật; registry
+  `contracts/scope.yml` rộng hơn và quản lý 56 managed/conditional source
+  bằng disposable fixture, không materialize acceptance fixture vào production.
 
 ## 3. Baseline đang được quản lý
 
-`config/policy.yaml` hiện có 14 document native:
+`config/policy.yaml` hiện có 28 document native:
 
 | Nhóm | Native document | Classification | Trạng thái |
 |---|---|---|---|
+| Accounts | Accounting Period `FY 2026 - LTVN` | `managed` | Policy period configured through 2026-08-14 |
 | Settings | Accounts Settings | `managed` | Round-trip baseline pass |
 | Settings | Buying Settings | `managed` | Round-trip baseline pass |
 | Settings | Currency Exchange Settings | `managed` | Round-trip baseline pass; credential bị loại |
 | Settings | Delivery Settings | `managed` | Round-trip baseline pass |
-| Settings | Global Defaults | `managed` | Round-trip baseline pass |
 | Settings | Item Variant Settings | `managed` | Round-trip baseline pass |
 | Settings | Ledger Health Monitor | `managed` | Round-trip baseline pass |
 | Settings | Pegged Currencies | `managed` | Round-trip baseline pass |
@@ -101,7 +128,7 @@ child rows và link native; không tạo record shadow.
 | Stock | [Item Variant Settings](../apps/erpnext/erpnext/stock/doctype/item_variant_settings/item_variant_settings.json) | `managed` | Baseline pass |
 | Stock | [Stock Reposting Settings](../apps/erpnext/erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json) | `managed` | Baseline pass |
 | Stock | [Stock Settings](../apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.json) | `managed` | Baseline pass |
-| Cross-cutting | [Global Defaults](../apps/erpnext/erpnext/setup/doctype/global_defaults/global_defaults.json) | `managed` | Baseline pass |
+| Cross-cutting | [Global Defaults](../apps/erpnext/erpnext/setup/doctype/global_defaults/global_defaults.json) | `excluded` | Derived from `policy.bootstrap.company`; not duplicated in operational policy |
 
 `System Settings` fields thuộc language/timezone/format/security runtime do
 `config.yaml` quản lý, không được lặp trong policy.
@@ -112,8 +139,9 @@ child rows và link native; không tạo record shadow.
 
 | Native DocType | Classification | Implementation |
 |---|---|---|
+| Cost Center | `managed` | Cost Center root và ledger dùng bởi VAT/Tax Template |
 | Accounting Dimension / Accounting Dimension Filter | `conditional` | Native dependency, structural và round-trip pass |
-| Accounting Period | `conditional` | Native create/readback/update/delete pass |
+| Accounting Period | `managed` | Native acceptance exists; tenant period policy values pending accounting approval |
 | Bank Transaction Rule | `conditional` | Policy definition pass; business transaction API vẫn thuộc Phase 9 |
 | Cheque Print Template | `conditional` | Native round-trip pass |
 | Cost Center Allocation | `conditional` | Child order và native round-trip pass |
@@ -123,9 +151,9 @@ child rows và link native; không tạo record shadow.
 | Loyalty Program | `conditional` | Native round-trip pass |
 | Payment Term / Payment Terms Template | `conditional` | Schedule controller effect pass |
 | Pricing Rule / Promotional Scheme | `conditional` | Native pricing 5% controller effect pass |
-| Sales/Purchase/Item Tax Template | `managed` | Tax 0/5/8/10, Sales/Purchase Invoice và GL pass |
+| Sales/Purchase/Item Tax Template | `managed` | Native controller acceptance exists; tenant tax matrix values pending accounting approval |
 | Shipping Rule | `conditional` | Native shipping charge effect pass |
-| Tax Category / Tax Rule | `conditional` | Native selection và multi-rate invoice pass |
+| Tax Category / Tax Rule | `managed` | Native selection acceptance exists; tenant tax matrix values pending accounting approval |
 | Tax Withholding Category / Group | `conditional` | Native round-trip pass |
 | Terms and Conditions | `conditional` | Native round-trip pass |
 
@@ -166,7 +194,7 @@ module state không được biến thành hàng loạt document rỗng trong YA
 
 Các loại sau không thuộc `policy.yaml`:
 
-- Company sau bootstrap, Account, Cost Center, Warehouse, Bank, Bank Account,
+- Company sau bootstrap, Account, Warehouse, Bank, Bank Account,
   Mode of Payment, Customer, Supplier, Item, Address và Contact: `entity`;
 - quotation, order, invoice, receipt, Journal Entry, Payment Request và stock
   movement: `entity` transaction;
@@ -194,8 +222,8 @@ policy không nhận ownership lifecycle của các entity được sinh ra.
 
 Phase 8 chỉ `COMPLETE` khi:
 
-1. Country/currency có một owner; runtime allowlist không còn nhận ownership
-   User/User Permission hoặc module ngoài product scope.
+1. Country/currency có một owner; runtime allowlist không nhận ownership
+   User/User Permission hoặc module ngoài product scope. Gate này đã pass.
 2. Mọi source trong các mục 4–6 có classification và `unknown = 0`.
 3. Mọi `managed` và `conditional-enabled` giữ đúng native type, child row,
    Unicode, `true`, `false`, `0`, `null` và empty value.
@@ -218,6 +246,11 @@ naming/render/notification và failure injection tại asset/document/delete/cac
 commit đều pass. Runtime drift, round-trip diff, leakage và residue cuối bằng 0.
 
 ## 9. Lệnh kiểm tra
+
+Checklist câu hỏi nghiệp vụ để hoàn thiện các giá trị trong policy nằm tại
+[`Policy Configuration Questionnaire`](Policy_Configuration_Questionnaire.md).
+Tài liệu này là nơi ghi câu trả lời, người xác nhận và trạng thái quyết định;
+inventory chỉ giữ ownership và evidence kỹ thuật.
 
 Production chỉ chạy launcher không flag. Các action dưới đây dành cho
 acceptance/chẩn đoán:

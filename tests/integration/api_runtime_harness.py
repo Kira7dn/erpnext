@@ -113,7 +113,7 @@ class ApiClient:
     def __init__(self) -> None:
         config = _config()
         self.base = f"http://127.0.0.1:{config['project']['http_port']}"
-        self.timeout = int(config["developer"]["request_timeout"])
+        self.timeout = min(int(config["developer"]["request_timeout"]), 60)
         self.username = "Administrator"
         self.password = os.environ.get("LETRON_ACCEPTANCE_ADMIN_PASSWORD") or config["site"]["admin_password"]
         self.cookies = CookieJar()
