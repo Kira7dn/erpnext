@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('up','down','restart','ps','logs','config','bootstrap','inspect','verify','backup','backup-verify','config-validate','config-plan','config-apply','policy-validate','policy-export','policy-plan','policy-apply')]
+    [ValidateSet('up','reload','down','restart','ps','logs','config','bootstrap','inspect','verify','backup','backup-verify','config-validate','config-plan','config-apply','policy-validate','policy-export','policy-plan','policy-apply')]
     [string]$Action = 'up',
     [switch]$FollowLogs
 )
@@ -81,12 +81,30 @@ function Invoke-Readiness {
     throw "Runtime did not reach zero-drift HTTP readiness within 180 seconds: $uri"
 }
 
+function Invoke-ReloadReadiness {
+    $uri = "http://localhost:$env:HTTP_PORT/api/method/frappe.ping"
+    $deadline = [DateTime]::UtcNow.AddSeconds(20)
+    do {
+        try {
+            $response = Invoke-WebRequest -UseBasicParsing -TimeoutSec 3 -Uri $uri -Method Get
+            if ($response.StatusCode -eq 200) {
+                Write-Host "Fast reload verified: $uri"
+                return
+            }
+        } catch { }
+        Start-Sleep -Milliseconds 500
+    } while ([DateTime]::UtcNow -lt $deadline)
+    Invoke-Compose @('ps','-a')
+    Invoke-Compose @('logs','--tail=40','backend')
+    throw "Fast reload did not become ready within 20 seconds: $uri"
+}
+
 if ($Action -eq 'config') {
     Invoke-Compose @('config','--quiet')
     Write-Host 'Compose, config and policy YAML are valid (secrets omitted)'
     return
 }
-if ($Action -in @('up','restart','down','ps','logs','bootstrap','inspect','verify','backup','backup-verify','config-plan','config-apply','policy-export','policy-plan','policy-apply')) {
+if ($Action -in @('up','reload','restart','down','ps','logs','bootstrap','inspect','verify','backup','backup-verify','config-plan','config-apply','policy-export','policy-plan','policy-apply')) {
     & docker info --format '{{.ServerVersion}}' *> $null
     if ($LASTEXITCODE -ne 0) { throw 'Docker daemon is not available. Start Docker Desktop and retry.' }
 }
@@ -98,6 +116,10 @@ switch ($Action) {
         Invoke-Compose @('restart','backend','frontend','websocket','scheduler','queue-short','queue-long')
         Invoke-Compose @('ps')
         Invoke-Readiness
+    }
+    'reload' {
+        Invoke-Compose @('restart','backend')
+        Invoke-ReloadReadiness
     }
     'down' { Invoke-Compose @('down') }
     'restart' { Invoke-Compose @('down'); Invoke-Compose @('up','-d'); Invoke-Compose @('ps'); Invoke-Readiness }
