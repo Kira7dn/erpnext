@@ -633,12 +633,12 @@ operation công bố có test status `passed`, inventory trong phạm vi có
 |---|---|
 | PRD này | Phạm vi, requirement, roadmap, tiến độ, definition of done và audit |
 | [System Architecture](System_Architecture.md) | Boundary, ownership, data flow và invariant |
-| [Configuration Inventory](Configuration_Inventory.md) | Policy source, classification, implementation/test status |
-| [Integration Handbook](Integration_Handbook.md) | Cách consumer sử dụng capability đã công bố |
+| [Purchase Accounting API Flow](Purchase_Accounting_API_Flow.md) | Master design nghiệp vụ kế toán và Accounting API |
+| [Tax Matrix Approval](Tax_Matrix_Approval.md) | Tax mapping và quyết định VAT cần phê duyệt |
 | [Docker runbook](../DOCKER.md) | Deploy, readiness, backup, restore và troubleshooting |
 | [README](../README.md) | Entry point, quick start và trạng thái tóm tắt |
 | [Integration contract](../contracts/erpnext-integration.yml) | Allowlist nguồn cho public API contract |
 
 Khi có mâu thuẫn, sửa tài liệu sở hữu nội dung trước rồi cập nhật các tài liệu
-khác bằng liên kết hoặc summary. Không sao chép roadmap, inventory hoặc evidence
-chi tiết sang handbook, architecture hay runbook.
+khác bằng liên kết hoặc summary. Không sao chép roadmap hoặc evidence chi tiết
+sang architecture hay runbook.

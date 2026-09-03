@@ -185,5 +185,5 @@ identity API/DB, không thuộc policy YAML.
    Bank Transaction, reconciliation và Payment Order cùng native controller
    evidence. `Bank Transaction Rule` có thể thuộc policy; transaction và ledger
    luôn là runtime entity, không được đưa vào policy YAML.
-   Completeness thuộc [PRD](ERP_PRD.md), classification chi tiết thuộc
-   [Configuration Inventory](Configuration_Inventory.md).
+   Completeness thuộc [PRD](ERP_PRD.md); chi tiết nghiệp vụ kế toán thuộc
+   [Purchase Accounting API Flow](Purchase_Accounting_API_Flow.md).
