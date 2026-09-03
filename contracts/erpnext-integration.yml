@@ -47,12 +47,28 @@ runtime:
   # typed modules stay available in catalog.json for discovery.
   public_modules:
     - Accounts
+    - Assets
     - Buying
     - CRM
     - Contacts
     - Selling
     - Stock
   document_actions:
+    - doctype: Asset
+      module: Assets
+      actions: [submit, cancel]
+    - doctype: Asset Capitalization
+      module: Assets
+      actions: [submit, cancel]
+    - doctype: Asset Movement
+      module: Assets
+      actions: [submit, cancel]
+    - doctype: Asset Repair
+      module: Assets
+      actions: [submit, cancel]
+    - doctype: Asset Value Adjustment
+      module: Assets
+      actions: [submit, cancel]
     - doctype: Sales Invoice
       module: Accounts
       actions: [submit, cancel]
@@ -107,6 +123,22 @@ runtime:
     - letron_api.api.runtime_info
     - letron_api.api.runtime_snapshot
   public_resources:
+    - doctype: Asset
+      path: /api/v1/assets/assets
+    - doctype: Asset Category
+      path: /api/v1/assets/asset-categories
+    - doctype: Asset Capitalization
+      path: /api/v1/assets/asset-capitalizations
+    - doctype: Asset Maintenance
+      path: /api/v1/assets/asset-maintenance
+    - doctype: Asset Movement
+      path: /api/v1/assets/asset-movements
+    - doctype: Asset Repair
+      path: /api/v1/assets/asset-repairs
+    - doctype: Asset Value Adjustment
+      path: /api/v1/assets/asset-value-adjustments
+    - doctype: Location
+      path: /api/v1/assets/locations
     - doctype: Lead
       path: /api/v1/crm/leads
     - doctype: Opportunity
@@ -243,11 +275,64 @@ acceptance:
     stock-traceability:
       level: docker-runtime
       test: tests/integration/test_stock_traceability.py::test_stock_traceability_contract_and_lifecycle
+    assets-lifecycle:
+      level: docker-runtime
+      test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
   operations:
     letron_api_api_health_get: {status: passed, suite: public-api}
     letron_api_api_runtime_info_get: {status: passed, suite: extended-api}
     letron_api_api_runtime_snapshot_get: {status: passed, suite: public-api}
     uploadFile: {status: passed, suite: extended-api}
+    listAsset: {status: not-tested, suite: assets-lifecycle}
+    createAsset: {status: not-tested, suite: assets-lifecycle}
+    getAsset: {status: not-tested, suite: assets-lifecycle}
+    updateAsset: {status: not-tested, suite: assets-lifecycle}
+    deleteAsset: {status: not-tested, suite: assets-lifecycle}
+    submitAsset: {status: not-tested, suite: assets-lifecycle}
+    cancelAsset: {status: not-tested, suite: assets-lifecycle}
+    listAssetCategory: {status: not-tested, suite: assets-lifecycle}
+    createAssetCategory: {status: not-tested, suite: assets-lifecycle}
+    getAssetCategory: {status: not-tested, suite: assets-lifecycle}
+    updateAssetCategory: {status: not-tested, suite: assets-lifecycle}
+    deleteAssetCategory: {status: not-tested, suite: assets-lifecycle}
+    listAssetCapitalization: {status: not-tested, suite: assets-lifecycle}
+    createAssetCapitalization: {status: not-tested, suite: assets-lifecycle}
+    getAssetCapitalization: {status: not-tested, suite: assets-lifecycle}
+    updateAssetCapitalization: {status: not-tested, suite: assets-lifecycle}
+    deleteAssetCapitalization: {status: not-tested, suite: assets-lifecycle}
+    submitAssetCapitalization: {status: not-tested, suite: assets-lifecycle}
+    cancelAssetCapitalization: {status: not-tested, suite: assets-lifecycle}
+    listAssetMaintenance: {status: not-tested, suite: assets-lifecycle}
+    createAssetMaintenance: {status: not-tested, suite: assets-lifecycle}
+    getAssetMaintenance: {status: not-tested, suite: assets-lifecycle}
+    updateAssetMaintenance: {status: not-tested, suite: assets-lifecycle}
+    deleteAssetMaintenance: {status: not-tested, suite: assets-lifecycle}
+    listAssetMovement: {status: not-tested, suite: assets-lifecycle}
+    createAssetMovement: {status: not-tested, suite: assets-lifecycle}
+    getAssetMovement: {status: not-tested, suite: assets-lifecycle}
+    updateAssetMovement: {status: not-tested, suite: assets-lifecycle}
+    deleteAssetMovement: {status: not-tested, suite: assets-lifecycle}
+    submitAssetMovement: {status: not-tested, suite: assets-lifecycle}
+    cancelAssetMovement: {status: not-tested, suite: assets-lifecycle}
+    listAssetRepair: {status: not-tested, suite: assets-lifecycle}
+    createAssetRepair: {status: not-tested, suite: assets-lifecycle}
+    getAssetRepair: {status: not-tested, suite: assets-lifecycle}
+    updateAssetRepair: {status: not-tested, suite: assets-lifecycle}
+    deleteAssetRepair: {status: not-tested, suite: assets-lifecycle}
+    submitAssetRepair: {status: not-tested, suite: assets-lifecycle}
+    cancelAssetRepair: {status: not-tested, suite: assets-lifecycle}
+    listAssetValueAdjustment: {status: not-tested, suite: assets-lifecycle}
+    createAssetValueAdjustment: {status: not-tested, suite: assets-lifecycle}
+    getAssetValueAdjustment: {status: not-tested, suite: assets-lifecycle}
+    updateAssetValueAdjustment: {status: not-tested, suite: assets-lifecycle}
+    deleteAssetValueAdjustment: {status: not-tested, suite: assets-lifecycle}
+    submitAssetValueAdjustment: {status: not-tested, suite: assets-lifecycle}
+    cancelAssetValueAdjustment: {status: not-tested, suite: assets-lifecycle}
+    listLocation: {status: not-tested, suite: assets-lifecycle}
+    createLocation: {status: not-tested, suite: assets-lifecycle}
+    getLocation: {status: not-tested, suite: assets-lifecycle}
+    updateLocation: {status: not-tested, suite: assets-lifecycle}
+    deleteLocation: {status: not-tested, suite: assets-lifecycle}
     listCustomer: {status: passed, suite: public-api}
     createCustomer: {status: passed, suite: public-api}
     getCustomer: {status: passed, suite: extended-api}

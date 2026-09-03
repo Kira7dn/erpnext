@@ -4,6 +4,10 @@
       "json": "contracts/generated/openapi/modules/accounts.json",
       "yaml": "contracts/generated/openapi/modules/accounts.yaml"
     },
+    "Assets": {
+      "json": "contracts/generated/openapi/modules/assets.json",
+      "yaml": "contracts/generated/openapi/modules/assets.yaml"
+    },
     "Buying": {
       "json": "contracts/generated/openapi/modules/buying.json",
       "yaml": "contracts/generated/openapi/modules/buying.yaml"

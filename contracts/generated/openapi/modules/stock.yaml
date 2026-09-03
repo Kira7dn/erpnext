@@ -1,4 +1,4 @@
-onnxopenapi: 3.1.0
+openapi: 3.1.0
 info:
   title: Letron ERPNext Stock API
   version: 0.1.0
@@ -9409,12 +9409,38 @@ x-contract:
     - Workflow
     public_modules:
     - Accounts
+    - Assets
     - Buying
     - CRM
     - Contacts
     - Selling
     - Stock
     document_actions:
+    - doctype: Asset
+      module: Assets
+      actions:
+      - submit
+      - cancel
+    - doctype: Asset Capitalization
+      module: Assets
+      actions:
+      - submit
+      - cancel
+    - doctype: Asset Movement
+      module: Assets
+      actions:
+      - submit
+      - cancel
+    - doctype: Asset Repair
+      module: Assets
+      actions:
+      - submit
+      - cancel
+    - doctype: Asset Value Adjustment
+      module: Assets
+      actions:
+      - submit
+      - cancel
     - doctype: Sales Invoice
       module: Accounts
       actions:
@@ -9493,6 +9519,22 @@ x-contract:
     - letron_api.api.runtime_info
     - letron_api.api.runtime_snapshot
     public_resources:
+    - doctype: Asset
+      path: /api/v1/assets/assets
+    - doctype: Asset Category
+      path: /api/v1/assets/asset-categories
+    - doctype: Asset Capitalization
+      path: /api/v1/assets/asset-capitalizations
+    - doctype: Asset Maintenance
+      path: /api/v1/assets/asset-maintenance
+    - doctype: Asset Movement
+      path: /api/v1/assets/asset-movements
+    - doctype: Asset Repair
+      path: /api/v1/assets/asset-repairs
+    - doctype: Asset Value Adjustment
+      path: /api/v1/assets/asset-value-adjustments
+    - doctype: Location
+      path: /api/v1/assets/locations
     - doctype: Lead
       path: /api/v1/crm/leads
     - doctype: Opportunity

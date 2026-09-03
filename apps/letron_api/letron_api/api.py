@@ -116,6 +116,16 @@ def document_action(doctype: str, name: str, action: str) -> dict[str, object]:
         ("Payment Entry", "cancel"),
         ("Bank Transaction", "submit"),
         ("Bank Transaction", "cancel"),
+        ("Asset", "submit"),
+        ("Asset", "cancel"),
+        ("Asset Capitalization", "submit"),
+        ("Asset Capitalization", "cancel"),
+        ("Asset Movement", "submit"),
+        ("Asset Movement", "cancel"),
+        ("Asset Repair", "submit"),
+        ("Asset Repair", "cancel"),
+        ("Asset Value Adjustment", "submit"),
+        ("Asset Value Adjustment", "cancel"),
     }
     if (doctype, action) not in supported:
         frappe.throw(f"Unsupported document action: {action}")

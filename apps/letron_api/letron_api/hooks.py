@@ -20,6 +20,14 @@ required_apps = ["frappe", "erpnext"]
 _ROUTE_CACHE: dict[tuple[str, str], str] = {}
 _ROUTE_CACHE_LOCK = Lock()
 PUBLIC_RESOURCE_ROUTES = {
+    ("assets", "assets"): "Asset",
+    ("assets", "asset-categories"): "Asset Category",
+    ("assets", "asset-capitalizations"): "Asset Capitalization",
+    ("assets", "asset-maintenance"): "Asset Maintenance",
+    ("assets", "asset-movements"): "Asset Movement",
+    ("assets", "asset-repairs"): "Asset Repair",
+    ("assets", "asset-value-adjustments"): "Asset Value Adjustment",
+    ("assets", "locations"): "Location",
     ("selling", "customers"): "Customer",
     ("selling", "quotations"): "Quotation",
     ("selling", "sales-orders"): "Sales Order",
@@ -59,6 +67,11 @@ PUBLIC_RESOURCE_ROUTES = {
     ("stock", "stock-reservation-entries"): "Stock Reservation Entry",
 }
 DOCUMENT_ACTIONS = {
+    ("assets", "assets"): {"submit", "cancel"},
+    ("assets", "asset-capitalizations"): {"submit", "cancel"},
+    ("assets", "asset-movements"): {"submit", "cancel"},
+    ("assets", "asset-repairs"): {"submit", "cancel"},
+    ("assets", "asset-value-adjustments"): {"submit", "cancel"},
     ("accounts", "sales-invoices"): {"submit", "cancel"},
     ("accounts", "purchase-invoices"): {"submit", "cancel"},
     ("selling", "sales-orders"): {"submit", "cancel"},

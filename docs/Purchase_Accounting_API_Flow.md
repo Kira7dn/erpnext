@@ -693,7 +693,7 @@ master design và API của phiên bản này.
 | Banking | Statement import, rule, Bank Transaction, clearance, reconcile/unreconcile, cashier, cheque | Clearance/reconciliation và voucher native | Bank Transaction/reconcile một phần | ACC-014, ACC-021, ACC-022 |
 | GL | JE, opening, bank/cash/contra, intercompany, accrual, reclass, write-off, depreciation, FX, deferred | GL sau submit | Journal Entry có public route | ACC-015, ACC-019 |
 | Stock accounting | Receipt, delivery/issue, transfer, reconciliation, serial/batch, LCV, future repost | Stock value, COGS, RBNB, valuation adjustment | Stock routes một phần | ACC-004, ACC-009, ACC-018 |
-| Fixed asset | Capitalization, CWIP, depreciation, movement, repair, value adjustment, disposal | Asset/CWIP, depreciation, gain/loss | Native-only, chưa public Assets API | ACC-016 |
+| Fixed asset | Capitalization, CWIP, depreciation, movement, repair, value adjustment, disposal | Asset/CWIP, depreciation, gain/loss | Public typed Assets resources; runtime lifecycle acceptance còn pending | ACC-016 |
 | Deferred/recurring | Deferred expense/revenue, schedule, Subscription, recurring invoice | Phân bổ theo ngày/tháng và recurring GL | Native-only | ACC-005, ACC-017 |
 | POS/loyalty | POS opening/invoice/closing, return, loyalty earn/redeem/expiry | Cash/card, sales/tax, loyalty liability/expense | Native-only | ACC-017 |
 | Close/report | TB, GL, P&L, BS, cash flow, AR/AP aging, tax, asset, ledger health, PCV, period close | Đối soát và khóa kỳ | Report/close API chưa public đủ | ACC-019, ACC-021, ACC-022 |
@@ -800,9 +800,9 @@ depreciation method/frequency/shift/finance book, schedule, Asset Movement,
 custodian/location, Asset Repair, capitalizable repair, Asset Value Adjustment,
 partial/full disposal, scrap, gain/loss và manual/system depreciation JE.
 Purchase asset chỉ tạo GL khi item/category/CWIP accounts hợp lệ; landed cost của
-asset phải cập nhật purchase amount và valuation trước depreciation. Hiện tại
-Assets/Maintenance chưa nằm trong public API, phải mở typed lifecycle trước khi
-đánh dấu COMPLETE.
+asset phải cập nhật purchase amount và valuation trước depreciation. Assets API
+đã có typed CRUD và submit/cancel routes; vẫn phải chạy acceptance runtime cho
+controller effect, GL, rollback và residue trước khi đánh dấu COMPLETE.
 
 ### 18.4. Deferred, recurring, POS và loyalty
 
