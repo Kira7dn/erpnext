@@ -44,6 +44,69 @@ Health:       http://localhost:8080/api/method/letron_api.api.health
 Business API: http://localhost:8080/api/v1/{module}/{resource}
 ```
 
+## Lark SSO và Global Portal
+
+`apps/auth-server` là Next.js OIDC Provider đứng giữa Lark và các ứng dụng
+Letron. Người dùng mở Web App trong Lark, vào Global Portal rồi chọn ERP; ERP
+đổi authorization code lấy identity, tạo session Frappe và chuyển tới `/desk`.
+
+```text
+Lark Web App
+  -> Letron Global Portal / Auth Server (:3000)
+  -> OIDC Authorization Code + PKCE
+  -> ERP SSO adapter (:8080)
+  -> ERPNext Desk
+```
+
+Ranh giới nguồn dữ liệu chuẩn:
+
+| Dữ liệu | Source of truth |
+|---|---|
+| Danh tính, trạng thái truy cập, membership User Group | Lark |
+| Liên kết người dùng | `tenant_key + union_id`; không dùng email làm identity |
+| Mapping Lark Group sang role được quản lý | Environment của SSO |
+| Định nghĩa Role, Role Permission, Workflow, User Permission, Company | ERPNext |
+
+ERP tạo `System User` theo JIT ở lần đăng nhập đầu hợp lệ. Sau đăng nhập,
+`auth_hooks` kiểm tra on-demand identity đang hoạt động, dùng cache 60 giây và
+không chạy cron role sync. Gỡ khỏi group truy cập hoặc disable Auth User sẽ gỡ
+role do Lark quản lý, disable ERP User, xóa session và từ chối request hiện tại.
+Role ngoài allowlist không bị bộ đồng bộ thay đổi. Snapshot đăng nhập quá hạn
+sẽ bị từ chối; lỗi làm mới kéo dài quá 10 phút sẽ stale-lock tài khoản cho tới
+khi nhận snapshot hợp lệ mới.
+
+Chạy local trong hai terminal:
+
+```powershell
+# Terminal 1: Auth Server
+Set-Location apps/auth-server
+npm run db:migrate
+npm run dev
+
+# Terminal 2: ERPNext
+Set-Location D:\BusinessAnalyze\Letron\erp
+.\docker-start.ps1 -Action up
+```
+
+Các URL local:
+
+```text
+Lark Web App / Portal: http://localhost:3000
+Lark OAuth callback:   http://localhost:3000/api/auth/lark/callback
+Auth health:           http://localhost:3000/api/health
+ERP SSO launch:        http://localhost:8080/api/method/letron_api.sso.launch
+ERP health:            http://localhost:8080/api/method/letron_api.api.health
+```
+
+`localhost` chỉ dùng được khi mở Lark Desktop trên chính máy đang chạy hai
+server. Lark mobile hoặc máy khác cần URL HTTPS công khai và callback/home URL
+tương ứng trong Lark Developer Console. Chi tiết cấu hình, lifecycle và
+break-glass xem [Auth Server README](apps/auth-server/README.md). Thiết kế một
+user thuộc nhiều group, catalog group→role và thứ tự triển khai nằm tại
+[Lark SSO Role Design and Next Steps](docs/notes/Lark_SSO_Role_Design_and_Next_Steps_2026-09-05.md).
+Kế hoạch đưa Driver Next.js đang dùng Amplify/Cognito JWT vào cùng luồng nằm tại
+[Driver Amplify Lark SSO Action Plan](docs/notes/Driver_Amplify_Lark_SSO_Action_Plan_2026-09-05.md).
+
 ### Đăng nhập local
 
 ```text
@@ -118,6 +181,7 @@ Tài liệu chính:
 ```text
 apps/letron_api/       # app chạy bên trong Frappe/ERPNext
 apps/erpnext/          # source ERPNext trong monorepo
+apps/auth-server/      # Global Portal và OIDC Provider dùng Lark upstream
 lib/api_generator/     # inspect metadata, validate contract, sinh OpenAPI
 contracts/             # integration contract YAML
 docs/                  # PRD, handbook và kiến trúc

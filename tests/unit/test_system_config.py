@@ -13,7 +13,7 @@ def test_repository_system_config_is_valid_and_secret_free() -> None:
     validation = system_config.validate_file()
 
     assert validation["sha256"] == system_config.config_sha256(config)
-    assert validation["system_settings"] == 6
+    assert validation["system_settings"] == 7
     assert config["version"] == 3
     assert config["runtime"]["environment"] == "production-like"
     assert config["credentials"]["production_like"] is True

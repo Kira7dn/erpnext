@@ -1,0 +1,6 @@
+.next/
+coverage/
+generated/
+*.tsbuildinfo
+.env
+.env.local

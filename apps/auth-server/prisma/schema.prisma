@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+model User {
+  id          String             @id @default(uuid()) @db.Uuid
+  email       String             @unique @db.VarChar(320)
+  displayName String             @map("display_name") @db.VarChar(200)
+  avatarUrl   String?            @map("avatar_url") @db.Text
+  status      UserStatus         @default(ACTIVE)
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  identities  ExternalIdentity[]
+  sessions    SsoSession[]
+  auditEvents AuditEvent[]
+
+  @@map("auth_user")
+}
+
+model OAuthTransaction {
+  id                    BigInt    @id @default(autoincrement())
+  stateHash             String    @unique @map("state_hash") @db.Char(64)
+  browserBindingHash    String    @map("browser_binding_hash") @db.Char(64)
+  interactionUid        String?   @map("interaction_uid") @db.VarChar(255)
+  returnTo               String?   @map("return_to") @db.Text
+  encryptedCodeVerifier String  @map("encrypted_code_verifier") @db.Text
+  expiresAt             DateTime  @map("expires_at") @db.Timestamptz(3)
+  consumedAt            DateTime? @map("consumed_at") @db.Timestamptz(3)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([expiresAt])
+  @@map("oauth_transaction")
+}
+
+model ExternalIdentity {
+  id             BigInt    @id @default(autoincrement())
+  provider       String    @db.VarChar(32)
+  tenantKey      String    @map("tenant_key") @db.VarChar(128)
+  subject        String    @db.VarChar(256)
+  subjectType    String?   @map("subject_type") @db.VarChar(32)
+  userId         String    @map("user_id") @db.Uuid
+  email          String?   @db.VarChar(320)
+  groupIds       String[]  @default([]) @map("group_ids")
+  groupsSyncedAt DateTime? @map("groups_synced_at") @db.Timestamptz(3)
+  lastSeenAt     DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, tenantKey, subject])
+  @@index([userId])
+  @@map("external_identity")
+}
+
+model SsoSession {
+  id         BigInt    @id @default(autoincrement())
+  tokenHash  String    @unique @map("token_hash") @db.Char(64)
+  userId     String    @map("user_id") @db.Uuid
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz(3)
+  lastSeenAt DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sso_session")
+}
+
+model OidcArtifact {
+  model     String    @db.VarChar(64)
+  id        String    @db.VarChar(255)
+  payload   Json      @db.JsonB
+  grantId   String?   @map("grant_id") @db.VarChar(255)
+  userCode  String?   @map("user_code") @db.VarChar(255)
+  uid       String?   @db.VarChar(255)
+  expiresAt DateTime? @map("expires_at") @db.Timestamptz(3)
+
+  @@id([model, id])
+  @@index([grantId])
+  @@index([userCode])
+  @@index([uid])
+  @@index([expiresAt])
+  @@map("oidc_artifact")
+}
+
+model OidcClient {
+  id                    BigInt   @id @default(autoincrement())
+  clientId              String   @unique @map("client_id") @db.VarChar(255)
+  metadata              Json     @db.JsonB
+  encryptedClientSecret String?  @map("encrypted_client_secret") @db.Text
+  active                Boolean  @default(true)
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("oidc_client")
+}
+
+model AuditEvent {
+  id        BigInt   @id @default(autoincrement())
+  eventType String   @map("event_type") @db.VarChar(64)
+  outcome   String   @db.VarChar(32)
+  userId    String?  @map("user_id") @db.Uuid
+  clientId  String?  @map("client_id") @db.VarChar(255)
+  requestId String?  @map("request_id") @db.VarChar(128)
+  detail    Json?    @db.JsonB
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([createdAt])
+  @@map("audit_event")
+}

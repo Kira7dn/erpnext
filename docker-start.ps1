@@ -118,8 +118,14 @@ switch ($Action) {
         Invoke-Readiness
     }
     'reload' {
-        Invoke-Compose @('restart','backend')
-        Invoke-ReloadReadiness
+        Invoke-Compose @('run','--rm','--no-deps','config-sync')
+        Invoke-Compose @('run','--rm','--no-deps','policy-bootstrap')
+        Invoke-Compose @('run','--rm','--no-deps','policy-sync')
+        Invoke-Compose @(
+            'up','-d','--no-build','--force-recreate','--no-deps',
+            'backend','frontend','websocket','scheduler','queue-short','queue-long','backup'
+        )
+        Invoke-Readiness
     }
     'down' { Invoke-Compose @('down') }
     'restart' { Invoke-Compose @('down'); Invoke-Compose @('up','-d'); Invoke-Compose @('ps'); Invoke-Readiness }

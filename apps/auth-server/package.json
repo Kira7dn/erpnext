@@ -1,0 +1,54 @@
+{
+  "name": "@letron/auth-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run db:validate && npm run typecheck && npm run lint && npm run test && npm run build",
+    "db:generate": "prisma generate",
+    "db:validate": "prisma validate",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "keys:generate": "tsx scripts/generate-secrets.ts",
+    "keys:write": "tsx scripts/generate-secrets.ts --write-env",
+    "client:create": "tsx scripts/create-client.ts",
+    "client:provision-erp": "tsx scripts/provision-erp-client.ts",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "1.1.0",
+    "@prisma/adapter-neon": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "dotenv": "17.4.2",
+    "jose": "6.2.11",
+    "next": "16.3.4",
+    "oidc-provider": "9.12.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "ws": "8.21.3",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "26.4.1",
+    "@types/oidc-provider": "9.12.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@types/ws": "8.18.1",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.3.4",
+    "prisma": "7.10.0",
+    "tsx": "4.23.13",
+    "typescript": "6.0.3",
+    "vitest": "5.0.0"
+  }
+}

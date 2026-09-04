@@ -1,0 +1,152 @@
+# Letron Auth Server
+
+Next.js SSO server chạy trên Vercel Functions. Lark là upstream identity provider; các ứng dụng Letron dùng máy chủ này như một OpenID Connect Provider.
+
+## Phạm vi hiện tại
+
+- Lark OAuth authorization-code với `state` và PKCE S256.
+- Chỉ cho phép một Lark tenant qua `LARK_ALLOWED_TENANT_KEY`.
+- Phiên SSO opaque 8 giờ, token chỉ được lưu dưới dạng SHA-256 trong PostgreSQL.
+- OIDC Authorization Code Flow, `openid profile email groups`, bắt buộc PKCE.
+- OIDC clients được đăng ký tĩnh trong bảng `oidc_client`; không có dynamic registration, implicit, password, refresh-token hoặc device flow.
+- Không lưu Lark access token sau khi lấy thông tin người dùng.
+- Adapter ERPNext bắt buộc PKCE, kiểm tra state, browser binding, nonce, chữ ký ID token, issuer, audience và UserInfo subject.
+- Lark User Group là nguồn gán quyền và vòng đời truy cập. Danh tính ổn định là `tenant_key + union_id`, không phải email.
+- Auth Server phát snapshot `group_id`; ERPNext ánh xạ và chỉ thay đổi các role nằm trong allowlist quản lý bởi Lark.
+- ERPNext vẫn là nguồn định nghĩa quyền của role qua Role Permission Manager, Workflow và User Permission.
+- Global Portal suy ra role từ cùng mapping và chỉ hiển thị ứng dụng/phân hệ phù
+  hợp. Đây là presentation filter; ERPNext vẫn phải kiểm tra authorization cho
+  mọi request.
+- Trang chủ là Letron Global Portal; người dùng mở portal từ Lark rồi chọn ERP hoặc các ứng dụng được bổ sung sau này.
+
+## Chạy local
+
+1. Tạo PostgreSQL serverless trên Neon hoặc Vercel Marketplace và lấy pooled `DATABASE_URL`.
+2. Copy `.env.example` thành `.env.local`. Có thể giữ `LARK_APP_ID` và `LARK_APP_SECRET` trong file `.env` ở root repo khi chạy local; production phải khai báo trong Vercel Environment Variables.
+3. Chạy `npm run keys:generate` rồi đưa ba giá trị sinh ra vào `.env.local`/Vercel.
+4. Trong Lark Developer Console, đăng ký callback chính xác `http://localhost:3000/api/auth/lark/callback` cho local và `${AUTH_BASE_URL}/api/auth/lark/callback` cho production.
+5. Bật các quyền ứng dụng cần thiết để API `authen/v1/user_info` trả về email hoặc enterprise email; auth server cố ý từ chối tài khoản không có email.
+6. Để bật đồng bộ role, cấp application permission `contact:group:readonly`, đặt Contacts data scope bao phủ người dùng ERP, tạo các User Group và cấu hình mapping bằng `group_id`.
+7. Chạy migration rồi khởi động:
+
+```powershell
+npm run db:migrate
+npm run dev
+```
+
+Không cần ERPNext hoặc Docker để chạy auth server này.
+
+## Đăng ký OIDC client
+
+```powershell
+npm run client:create -- --id letron-erp --redirect-uri https://erp.example.com/api/method/let.../callback
+```
+
+Lệnh in client secret đúng một lần; trong DB secret được mã hóa bằng `AUTH_DATA_ENCRYPTION_KEY`. Với public client, thêm `--public` và luôn dùng PKCE.
+
+Để provision client ERP local và ghi cấu hình bí mật vào `.env` ở root repo mà không in secret:
+
+```powershell
+npm run client:provision-erp
+```
+
+Sau khi Auth Server và ERPNext đều chạy, URL đặt làm trang chủ Web App trong Lark là:
+
+```text
+http://localhost:3000
+```
+
+Portal tự động chuyển qua Lark khi chưa có phiên. Thẻ Letron ERP trong portal mở
+`http://localhost:8080/api/method/letron_api.sso.launch`, nhận callback OIDC,
+tạo session ERP và chuyển tới `/desk`.
+
+`localhost` chỉ hợp lệ với Lark Desktop chạy trên cùng máy. Lark mobile và máy
+khác không truy cập được server local; môi trường dùng chung phải có HTTPS
+public origin và đăng ký chính xác callback theo origin đó.
+
+## Đồng bộ role từ Lark
+
+Giữ `LARK_GROUP_SYNC_ENABLED=false` và `LETRON_SSO_ROLE_SYNC_ENABLED=false` cho tới khi quyền Lark và các `group_id` thật đã sẵn sàng. Sau đó cấu hình hai phía theo `.env.example` và bật cả hai cờ.
+
+Một người dùng có thể thuộc nhiều Lark Contact User Group. `ERP - Access` là
+group cổng bắt buộc; các group nghiệp vụ như `ERP - Finance User` hoặc
+`ERP - Warehouse Manager` cấp thêm bundle ERP Role. Role cuối cùng là phép hợp
+của tất cả mapping đang khớp. Không tạo group theo từng cá nhân hoặc sao chép
+mọi role lẻ của ERPNext sang Lark.
+
+Thiết kế group, quy tắc membership, bảng mapping khởi đầu và checklist triển
+khai nằm tại
+[Lark SSO Role Design and Next Steps](../../docs/notes/Lark_SSO_Role_Design_and_Next_Steps_2026-09-05.md).
+
+Portal dùng chính `LETRON_SSO_LARK_ROLE_MAPPING`: thiếu `Desk User` thì không
+hiển thị thẻ ERP; các nhãn Tài chính, Mua hàng, Kho và Bán hàng chỉ xuất hiện
+khi role bundle chứa role tương ứng. Production phải khai báo cùng mapping này
+cho cả Auth Server và ERP runtime để tránh visibility drift.
+
+Auth Server làm mới group membership trước mỗi OIDC login. Sau khi đăng nhập,
+ERP dùng `auth_hooks` để kiểm tra riêng identity đang gửi request khi snapshot
+cũ hơn `LETRON_SSO_REQUEST_CHECK_INTERVAL_SECONDS` (mặc định 60 giây). User
+không hoạt động không tạo API call Lark và role sync không dùng cron. Endpoint
+nội bộ dùng bearer secret riêng; không dùng Lark App Secret và không được công
+khai cho client.
+
+Luồng vòng đời:
+
+- Lần đăng nhập đầu: nếu danh tính thuộc group truy cập bắt buộc, ERP tạo `System User` theo JIT và lưu liên kết `tenant_key + union_id`.
+- Email hoặc tên đổi trong Lark: ERP cập nhật User đã liên kết theo stable identity, không dò ghép lại bằng email.
+- Bị gỡ khỏi group truy cập hoặc Auth User bị disable: ERP gỡ role do Lark quản lý, disable User và xóa session.
+- Được thêm lại: ERP enable User và khôi phục role theo mapping; local admin block vẫn được tôn trọng.
+- Endpoint lỗi: login mới từ chối snapshot quá `LETRON_SSO_SNAPSHOT_MAX_AGE_SECONDS`; request đang hoạt động được dùng snapshot gần nhất trong cửa sổ cho phép. Khi lần đồng bộ thành công gần nhất quá `LETRON_SSO_STALE_LOCK_SECONDS`, User bị disable và session hiện có bị xóa. Snapshot mới hợp lệ sẽ mở khóa.
+
+Thay đổi trực tiếp các role trong `LETRON_SSO_LARK_MANAGED_ROLES` trên User bị chặn. Role ngoài allowlist, Role Permission Manager, Workflow, User Permission và Company vẫn do ERP quản lý.
+
+Break-glass chỉ chạy bằng lệnh operator không public, có lý do và TTL bị giới hạn bởi `LETRON_SSO_BREAK_GLASS_MAX_SECONDS`:
+
+```powershell
+docker exec `
+  -e LETRON_BREAK_GLASS_USER=user@example.com `
+  -e LETRON_BREAK_GLASS_ROLE_NAMES="Desk User,Accounts User" `
+  -e LETRON_BREAK_GLASS_REASON="Incident reference" `
+  -e LETRON_BREAK_GLASS_TTL_SECONDS=900 `
+  erpnext-backend-1 bench --site frontend execute letron_api.sso_admin.break_glass_from_environment
+```
+
+Không dùng break-glass để vượt qua việc bị gỡ khỏi group truy cập hoặc local admin block. Mọi lần JIT, backfill, thu hồi, reconcile, stale-lock và break-glass được ghi vào `Letron SSO Audit Log`.
+
+Frappe scheduler vẫn phục vụ các job ERP khác nhưng không tham gia đồng bộ role
+Lark. Không thêm lại cron quét toàn bộ identity; kiểm tra quyền phải chạy theo
+request qua `auth_hooks`.
+
+Chỉ các role trong `LETRON_SSO_LARK_MANAGED_ROLES` được thêm hoặc xóa. `Administrator`, `All`, `Guest` và `System Manager` bị từ chối trong mapping để tránh nâng quyền đặc biệt từ Lark.
+
+Issuer: `${AUTH_BASE_URL}/api/oidc`
+
+Discovery: `${AUTH_BASE_URL}/api/oidc/.well-known/openid-configuration`
+
+## Kiểm chứng
+
+Gate Auth Server:
+
+```powershell
+npm run check
+npm run db:migrate
+```
+
+`npm run check` gồm Prisma validation, TypeScript, ESLint, unit test và
+production build. Sau khi cả Auth Server và ERP chạy, kiểm tra:
+
+```text
+GET http://localhost:3000/api/health
+GET http://localhost:8080/api/method/letron_api.api.health
+```
+
+Health Auth phải báo group sync enabled. Health ERP phải báo
+`sso_role_sync.enabled=true`, `installed=true` và identity ở trạng thái
+`Active`. Bằng chứng on-demand yêu cầu `last_sync_at` tự tăng sau khi chờ hết
+`LETRON_SSO_REQUEST_CHECK_INTERVAL_SECONDS` rồi gửi một request ERP đã xác thực;
+không dùng reconcile thủ công. Gate cuối cùng vẫn là mở Web App thật trong Lark
+Desktop, chọn ERP và vào được `/desk`.
+
+## Vercel
+
+Đặt Root Directory thành `apps/auth-server`, khai báo toàn bộ biến trong `.env.example`, sau đó chạy migration từ CI hoặc máy quản trị trước khi promote deployment. Runtime không giữ session hoặc OAuth state trong memory; tất cả state bền vững nằm trong PostgreSQL.

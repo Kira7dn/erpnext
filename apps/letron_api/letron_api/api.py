@@ -25,6 +25,7 @@ def health() -> dict[str, object]:
     from letron_api.system_config import bundle_status
     from letron_api.system_config import cached_status as config_status
     from letron_api.tenant_bootstrap import status as bootstrap_status
+    from letron_api.sso_identity import status as sso_status
 
     bootstrap = bootstrap_status()
     policy = policy_status()
@@ -37,6 +38,7 @@ def health() -> dict[str, object]:
         "config": config,
         "policy": policy,
         "configuration_bundle": bundle,
+        "sso_role_sync": sso_status(),
         **_runtime_info(),
     }
 
@@ -56,6 +58,7 @@ def runtime_snapshot() -> dict[str, object]:
     from letron_api.system_config import bundle_status
     from letron_api.system_config import status as config_status
     from letron_api.tenant_bootstrap import status as bootstrap_status
+    from letron_api.sso_identity import status as sso_status
 
     snapshot: dict[str, object] = {
         **_runtime_info(),
@@ -64,6 +67,7 @@ def runtime_snapshot() -> dict[str, object]:
         "config": config_status(),
         "policy": policy_status(),
         "configuration_bundle": bundle_status(),
+        "sso_role_sync": sso_status(),
     }
     for doctype in ("Company", "Currency", "User"):
         try:
