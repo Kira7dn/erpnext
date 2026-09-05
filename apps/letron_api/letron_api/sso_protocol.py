@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import base64
 import hashlib
-import json
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from urllib.parse import urlencode, urlparse
@@ -10,6 +10,7 @@ from urllib.parse import urlencode, urlparse
 CALLBACK_PATH = "/api/method/letron_api.sso.callback"
 LAUNCH_PATH = "/api/method/letron_api.sso.launch"
 OIDC_SCOPES = "openid profile email groups"
+POLICY_ROLE_PREFIX = "Letron Policy - "
 FORBIDDEN_LARK_MANAGED_ROLES = {"Administrator", "All", "Guest", "System Manager"}
 
 
@@ -20,8 +21,6 @@ class SsoConfigurationError(ValueError):
 @dataclass(frozen=True)
 class RoleSyncConfiguration:
     enabled: bool
-    group_role_mapping: Mapping[str, tuple[str, ...]]
-    managed_roles: frozenset[str]
     required_group_id: str | None
     sync_url: str | None
     sync_secret: str | None
@@ -92,13 +91,6 @@ def _enabled(env: Mapping[str, str], name: str) -> bool:
     raise SsoConfigurationError(f"{name} must be true or false")
 
 
-def _json_value(env: Mapping[str, str], name: str) -> object:
-    try:
-        return json.loads(_required(env, name))
-    except json.JSONDecodeError as exc:
-        raise SsoConfigurationError(f"{name} must contain valid JSON") from exc
-
-
 def _integer(env: Mapping[str, str], name: str, default: int, minimum: int, maximum: int) -> int:
     raw = env.get(name, str(default)).strip()
     try:
@@ -112,38 +104,9 @@ def _integer(env: Mapping[str, str], name: str, default: int, minimum: int, maxi
 
 def _load_role_sync_configuration(env: Mapping[str, str]) -> RoleSyncConfiguration:
     if not _enabled(env, "LETRON_SSO_ROLE_SYNC_ENABLED"):
-        return RoleSyncConfiguration(False, {}, frozenset(), None, None, None, 60, 120, 600, 3600)
-
-    raw_mapping = _json_value(env, "LETRON_SSO_LARK_ROLE_MAPPING")
-    raw_managed_roles = _json_value(env, "LETRON_SSO_LARK_MANAGED_ROLES")
-    if not isinstance(raw_mapping, dict) or not raw_mapping:
-        raise SsoConfigurationError("LETRON_SSO_LARK_ROLE_MAPPING must be a non-empty JSON object")
-    if not isinstance(raw_managed_roles, list) or not raw_managed_roles:
-        raise SsoConfigurationError("LETRON_SSO_LARK_MANAGED_ROLES must be a non-empty JSON array")
-
-    managed_roles = frozenset(
-        role.strip() for role in raw_managed_roles if isinstance(role, str) and role.strip()
-    )
-    if len(managed_roles) != len(raw_managed_roles):
-        raise SsoConfigurationError("LETRON_SSO_LARK_MANAGED_ROLES contains invalid or duplicate roles")
-    forbidden = managed_roles & FORBIDDEN_LARK_MANAGED_ROLES
-    if forbidden:
-        raise SsoConfigurationError(f"Privileged or implicit roles cannot be managed from Lark: {sorted(forbidden)}")
-
-    mapping: dict[str, tuple[str, ...]] = {}
-    for group_id, roles in raw_mapping.items():
-        if not isinstance(group_id, str) or not group_id.strip() or not isinstance(roles, list) or not roles:
-            raise SsoConfigurationError("Each Lark group mapping must have a group ID and at least one ERP role")
-        normalized_roles = tuple(role.strip() for role in roles if isinstance(role, str) and role.strip())
-        if len(normalized_roles) != len(roles) or len(set(normalized_roles)) != len(normalized_roles):
-            raise SsoConfigurationError(f"Invalid or duplicate ERP roles for Lark group {group_id}")
-        if not set(normalized_roles) <= managed_roles:
-            raise SsoConfigurationError(f"Lark group {group_id} maps outside LETRON_SSO_LARK_MANAGED_ROLES")
-        mapping[group_id.strip()] = normalized_roles
+        return RoleSyncConfiguration(False, None, None, None, 60, 120, 600, 3600)
 
     required_group_id = _required(env, "LETRON_SSO_REQUIRED_LARK_GROUP_ID")
-    if required_group_id not in mapping:
-        raise SsoConfigurationError("LETRON_SSO_REQUIRED_LARK_GROUP_ID must exist in the role mapping")
     sync_url = _required(env, "LETRON_SSO_SYNC_URL")
     sync_secret = _required(env, "LETRON_SSO_SYNC_SECRET")
     _validate_url("LETRON_SSO_SYNC_URL", sync_url, allow_internal_http=True)
@@ -165,8 +128,6 @@ def _load_role_sync_configuration(env: Mapping[str, str]) -> RoleSyncConfigurati
         raise SsoConfigurationError("LETRON_SSO_REQUEST_CHECK_INTERVAL_SECONDS must not exceed snapshot max age")
     return RoleSyncConfiguration(
         True,
-        mapping,
-        managed_roles,
         required_group_id,
         sync_url,
         sync_secret,
@@ -195,10 +156,13 @@ def load_configuration(env: Mapping[str, str]) -> SsoConfiguration:
 
 
 def desired_erp_roles(group_ids: set[str], role_sync: RoleSyncConfiguration) -> set[str]:
+    # The group remains the role identity. The Portal owns permissions for the
+    # deterministic technical role; ERP only assigns that role to the linked
+    # user so Frappe can enforce the projected Custom DocPerm rows.
     return {
-        role
+        f"{POLICY_ROLE_PREFIX}group-{re.sub(r'[^a-z0-9]+', '-', group_id.lower()).strip('-')}"
         for group_id in group_ids
-        for role in role_sync.group_role_mapping.get(group_id, ())
+        if re.sub(r"[^a-z0-9]+", "-", group_id.lower()).strip("-")
     }
 
 

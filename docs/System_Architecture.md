@@ -132,6 +132,7 @@ OpenAPI business contract và control plane cấu hình là hai boundary tách b
 | Company bootstrap, selected ERPNext business settings | `config/policy.yaml` |
 | Secret thật | `.env` hoặc secret store |
 | Identity theo cá nhân | Identity API và ERPNext DB |
+| Centrally managed access policy | Global Portal; publish thành projection xuống ERPNext |
 | Entity, master, transaction, ledger | Business API và ERPNext DB |
 | Executable customization/migration | Source/fixture của `letron_api` |
 | Metadata/catalog/OpenAPI sinh ra | Artifact, không phải SOT |
@@ -162,6 +163,11 @@ Direct mutation managed policy qua Desk/generic resource API bị chặn hoặc 
 readiness fail-closed. Company identity là ngoại lệ bootstrap trong policy;
 Account, Cost Center, Warehouse và entity do controller Company tạo vẫn thuộc
 DB, policy chỉ tham chiếu chúng.
+
+User, Employee và API key thuộc identity API/DB. User-role assignment và User
+Permission thuộc centrally managed scope được định nghĩa trong Global Portal,
+publish xuống ERPNext và enforce tại ERPNext; phần ngoài scope vẫn thuộc
+ERPNext/operator.
 
 Policy inventory chỉ bao phủ module public và Frappe policy dùng chung trực tiếp
 cho chúng. Module mới phải mở rộng inventory trước khi được public. User,

@@ -17,6 +17,16 @@ const groupPageSchema = z.object({
   has_more: z.boolean().default(false),
 });
 
+const groupCatalogPageSchema = z.object({
+  grouplist: z.array(z.object({
+    id: z.string().min(1),
+    name: z.string().min(1).optional(),
+    description: z.string().optional(),
+  }).passthrough()).default([]),
+  page_token: z.preprocess((value) => value === "" ? undefined : value, z.string().min(1).optional()),
+  has_more: z.boolean().default(false),
+});
+
 const optionalId = z.preprocess((value) => value === "" ? undefined : value, z.string().min(1).optional());
 const optionalEmail = z.preprocess((value) => value === "" ? undefined : value, z.string().email().optional());
 const optionalUrl = z.preprocess((value) => value === "" ? undefined : value, z.string().url().optional());
@@ -158,6 +168,25 @@ export async function fetchLarkGroupIds(subject: string, subjectType: LarkSubjec
   }
 
   throw new Error("LARK_GROUP_PAGINATION_LIMIT");
+}
+
+export async function fetchLarkGroupCatalog(): Promise<Array<{ id: string; name: string; description?: string }>> {
+  const env = getEnv();
+  const tenantAccessToken = await getTenantAccessToken();
+  const groups = new Map<string, { id: string; name: string; description?: string }>();
+  let pageToken: string | undefined;
+  for (let page = 0; page < 100; page += 1) {
+    const url = new URL("/open-apis/contact/v3/group/simplelist", env.LARK_DOMAIN);
+    url.searchParams.set("page_size", "100");
+    if (pageToken) url.searchParams.set("page_token", pageToken);
+    const response = await fetch(url, { headers: { authorization: `Bearer ${tenantAccessToken}` }, signal: AbortSignal.timeout(10_000) });
+    const data = groupCatalogPageSchema.parse(unwrap(await readJson(response)));
+    data.grouplist.forEach((group) => groups.set(group.id, { id: group.id, name: group.name ?? group.id, description: group.description }));
+    if (!data.has_more) return [...groups.values()].sort((a, b) => a.name.localeCompare(b.name));
+    if (!data.page_token || data.page_token === pageToken) throw new Error("LARK_GROUP_CATALOG_PAGINATION_INVALID");
+    pageToken = data.page_token;
+  }
+  throw new Error("LARK_GROUP_CATALOG_PAGINATION_LIMIT");
 }
 
 export function resetLarkTokenCacheForTests(): void {

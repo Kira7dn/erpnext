@@ -12,6 +12,11 @@ enum UserStatus {
   DISABLED
 }
 
+enum AccessPolicyStatus {
+  PUBLISHED
+  SUPERSEDED
+}
+
 model User {
   id          String             @id @default(uuid()) @db.Uuid
   email       String             @unique @db.VarChar(320)
@@ -121,4 +126,21 @@ model AuditEvent {
   @@index([clientId])
   @@index([createdAt])
   @@map("audit_event")
+}
+
+model AccessPolicy {
+  id             String            @id @default(uuid()) @db.Uuid
+  version        Int
+  status         AccessPolicyStatus @default(PUBLISHED)
+  policy         Json              @db.JsonB
+  sha256         String            @db.Char(64)
+  createdBy      String            @map("created_by") @db.Uuid
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  publishedAt    DateTime?         @map("published_at") @db.Timestamptz(3)
+  supersededAt   DateTime?         @map("superseded_at") @db.Timestamptz(3)
+
+  @@unique([version])
+  @@index([status])
+  @@index([createdBy])
+  @@map("access_policy")
 }

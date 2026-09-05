@@ -9,13 +9,16 @@
 | Ngày cập nhật | 2026-08-12 |
 | Trạng thái | Phase 1-12 hoàn thành trên Windows/Docker; Phase 12 Final production handoff đã hoàn tất |
 | Product owner | Letron |
-| Backend source of truth | ERPNext/Frappe |
+| Business data/runtime enforcement source of truth | ERPNext/Frappe |
+| Centrally managed access policy source of truth | Global Portal |
 | Runtime | Docker Compose |
 
 ## 2. Tóm tắt sản phẩm
 
 Letron ERP cung cấp một backend ERP dùng ERPNext/Frappe làm source of truth cho
-dữ liệu, schema, permission, validation và business lifecycle. Frontend hoặc
+dữ liệu, schema, runtime permission enforcement, validation và business
+lifecycle. Centrally managed access policy được định nghĩa/phê duyệt tại Global
+Portal rồi publish xuống ERPNext thành projection. Frontend hoặc
 ứng dụng tích hợp gọi API của ERPNext thông qua contract và OpenAPI được quản
 lý trong monorepo.
 
@@ -136,7 +139,8 @@ POST /api/v1/accounts/sales-invoices/{name}/cancel
 
 ## 7. Nguyên tắc sản phẩm
 
-1. ERPNext là source of truth.
+1. ERPNext là source of truth cho dữ liệu nghiệp vụ và runtime enforcement;
+   Global Portal là source of truth cho centrally managed access policy.
 2. Không sửa source ERPNext chỉ để phục vụ OpenAPI generator.
 3. Catalog đầy đủ và OpenAPI curated là hai artifact khác nhau.
 4. Chỉ module được khai báo trong `public_modules` mới sinh public module path.

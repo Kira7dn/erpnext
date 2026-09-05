@@ -9,10 +9,18 @@ from typing import Any
 
 import frappe
 
-from letron_api.sso_protocol import RoleSyncConfiguration, desired_erp_roles, sha256_hex
+from letron_api.sso_protocol import FORBIDDEN_LARK_MANAGED_ROLES, POLICY_ROLE_PREFIX, RoleSyncConfiguration, desired_erp_roles, sha256_hex
 
 IDENTITY_DOCTYPE = "Letron SSO Identity"
 AUDIT_DOCTYPE = "Letron SSO Audit Log"
+LEGACY_NATIVE_ROLES = frozenset({
+    "Desk User", "Accounts User", "Accounts Manager", "Purchase User", "Purchase Manager",
+    "Stock User", "Stock Manager", "Sales User", "Sales Manager",
+})
+
+
+def _managed_policy_roles(roles: set[str]) -> set[str]:
+    return {role for role in roles if role.startswith(POLICY_ROLE_PREFIX)}
 
 
 class SsoIdentityError(ValueError):
@@ -283,7 +291,7 @@ def reconcile_identity(
         before, after = _sync_user(
             user,
             desired_roles=set(),
-            managed_roles=role_sync.managed_roles,
+            managed_roles=LEGACY_NATIVE_ROLES | _managed_policy_roles(before),
             enabled=False,
         )
         identity.disabled_by_sync = 1
@@ -320,7 +328,7 @@ def reconcile_identity(
     before, after = _sync_user(
         user,
         desired_roles=desired_roles,
-        managed_roles=role_sync.managed_roles,
+        managed_roles=LEGACY_NATIVE_ROLES | _managed_policy_roles(before),
         enabled=True,
     )
     identity.user = user.name
@@ -379,8 +387,8 @@ def apply_break_glass(
     ttl_seconds: int,
     role_sync: RoleSyncConfiguration,
 ) -> dict[str, Any]:
-    if not roles <= role_sync.managed_roles:
-        raise SsoIdentityError("Break-glass roles must be within the managed-role allowlist")
+    if any(role in FORBIDDEN_LARK_MANAGED_ROLES or not role.startswith(POLICY_ROLE_PREFIX) for role in roles):
+        raise SsoIdentityError("Break-glass roles must be Global Portal policy roles")
     if not 60 <= ttl_seconds <= role_sync.break_glass_max_seconds:
         raise SsoIdentityError("Break-glass TTL is outside the configured range")
     identity_name = frappe.db.get_value(IDENTITY_DOCTYPE, {"user": user_name}, "name")
@@ -391,7 +399,9 @@ def apply_break_glass(
     if role_sync.required_group_id not in groups or identity.local_blocked:
         raise SsoAccessDenied("Break-glass cannot bypass ERP access removal or a local block")
     user = frappe.get_doc("User", user_name)
-    before, after = _sync_user(user, desired_roles=roles, managed_roles=role_sync.managed_roles, enabled=True)
+    before = {row.role for row in user.roles}
+    before_managed = LEGACY_NATIVE_ROLES | _managed_policy_roles(before)
+    before, after = _sync_user(user, desired_roles=roles, managed_roles=before_managed, enabled=True)
     identity.break_glass_until = frappe.utils.add_to_date(
         frappe.utils.now_datetime(), seconds=ttl_seconds, as_datetime=True
     )
@@ -435,8 +445,8 @@ def record_sync_error(
             current_roles = {row.role for row in user.roles}
             _sync_user(
                 user,
-                desired_roles=current_roles & role_sync.managed_roles,
-                managed_roles=role_sync.managed_roles,
+                desired_roles=current_roles & _managed_policy_roles(current_roles),
+                managed_roles=LEGACY_NATIVE_ROLES | _managed_policy_roles(current_roles),
                 enabled=False,
             )
             _clear_sessions(identity.user)
@@ -464,7 +474,9 @@ def protect_lark_managed_user(document: Any, _method: str | None = None) -> None
     role_sync = load_configuration(os.environ).role_sync
     previous_roles = set(frappe.get_all("Has Role", filters={"parent": document.name}, pluck="role"))
     next_roles = {row.role for row in document.roles}
-    if (previous_roles & role_sync.managed_roles) != (next_roles & role_sync.managed_roles):
+    managed_before = LEGACY_NATIVE_ROLES | _managed_policy_roles(previous_roles)
+    managed_after = LEGACY_NATIVE_ROLES | _managed_policy_roles(next_roles)
+    if (previous_roles & managed_before) != (next_roles & managed_after):
         frappe.throw(
             "Managed ERP roles are controlled by Lark. Use the SSO break-glass command for a temporary override.",
             exc=frappe.PermissionError,

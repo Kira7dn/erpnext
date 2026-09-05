@@ -803,6 +803,15 @@ def _is_standard_policy_record(policy_path: Path, doctype: str, name: str) -> bo
     )
 
 
+def _is_global_portal_rbac_record(doctype: str, name: str) -> bool:
+    """RBAC DocPerm rows are owned by the Global Portal policy publisher."""
+
+    if doctype != "Custom DocPerm":
+        return False
+    role = _frappe().db.get_value(doctype, name, "role")
+    return isinstance(role, str) and role.startswith("Letron Policy - ")
+
+
 def _frappe() -> Any:
     import frappe
 
@@ -998,7 +1007,11 @@ def plan(path: str | Path | None = None) -> dict[str, Any]:
     for doctype, expected_names in expected.items():
         current_names = set(frappe.get_all(doctype, pluck="name", limit_page_length=0))
         for name in sorted(current_names - expected_names):
-            if _is_acceptance_fixture(name) or _is_standard_policy_record(_policy_path(path), doctype, name):
+            if (
+                _is_acceptance_fixture(name)
+                or _is_standard_policy_record(_policy_path(path), doctype, name)
+                or _is_global_portal_rbac_record(doctype, name)
+            ):
                 continue
             changes.append(
                 {"document": f"{doctype}/{name}", "operation": "unexpected-native-document"}

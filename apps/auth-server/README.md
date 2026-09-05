@@ -13,7 +13,13 @@ Next.js SSO server chạy trên Vercel Functions. Lark là upstream identity pro
 - Adapter ERPNext bắt buộc PKCE, kiểm tra state, browser binding, nonce, chữ ký ID token, issuer, audience và UserInfo subject.
 - Lark User Group là nguồn gán quyền và vòng đời truy cập. Danh tính ổn định là `tenant_key + union_id`, không phải email.
 - Auth Server phát snapshot `group_id`; ERPNext ánh xạ và chỉ thay đổi các role nằm trong allowlist quản lý bởi Lark.
-- ERPNext vẫn là nguồn định nghĩa quyền của role qua Role Permission Manager, Workflow và User Permission.
+- Global Portal là control plane cho centrally managed access policy; policy được
+  publish thành projection xuống ERPNext.
+- RBAC của Portal chỉ có dạng `Lark User Group → OpenAPI resource → CRUD
+  operation`; không có multi-tenant authorization, field-level permission,
+  record/data scope hoặc metadata-driven form generator.
+- ERPNext vẫn là enforcement engine cho Role Permission, Workflow và User
+  Permission trên mọi request; Portal không thay thế authorization runtime.
 - Global Portal suy ra role từ cùng mapping và chỉ hiển thị ứng dụng/phân hệ phù
   hợp. Đây là presentation filter; ERPNext vẫn phải kiểm tra authorization cho
   mọi request.
@@ -69,19 +75,36 @@ public origin và đăng ký chính xác callback theo origin đó.
 Giữ `LARK_GROUP_SYNC_ENABLED=false` và `LETRON_SSO_ROLE_SYNC_ENABLED=false` cho tới khi quyền Lark và các `group_id` thật đã sẵn sàng. Sau đó cấu hình hai phía theo `.env.example` và bật cả hai cờ.
 
 Một người dùng có thể thuộc nhiều Lark Contact User Group. `ERP - Access` là
-group cổng bắt buộc; các group nghiệp vụ như `ERP - Finance User` hoặc
-`ERP - Warehouse Manager` cấp thêm bundle ERP Role. Role cuối cùng là phép hợp
-của tất cả mapping đang khớp. Không tạo group theo từng cá nhân hoặc sao chép
-mọi role lẻ của ERPNext sang Lark.
+group cổng bắt buộc; Portal render đúng các group đang tồn tại và cấp OpenAPI
+CRUD permission trực tiếp cho từng group. Không tạo group theo từng cá nhân và
+không sao chép role native của ERPNext sang Lark.
 
 Thiết kế group, quy tắc membership, bảng mapping khởi đầu và checklist triển
 khai nằm tại
 [Lark SSO Role Design and Next Steps](../../docs/notes/Lark_SSO_Role_Design_and_Next_Steps_2026-09-05.md).
 
-Portal dùng chính `LETRON_SSO_LARK_ROLE_MAPPING`: thiếu `Desk User` thì không
-hiển thị thẻ ERP; các nhãn Tài chính, Mua hàng, Kho và Bán hàng chỉ xuất hiện
-khi role bundle chứa role tương ứng. Production phải khai báo cùng mapping này
-cho cả Auth Server và ERP runtime để tránh visibility drift.
+Portal dùng policy CRUD đã publish làm nguồn quyền duy nhất. Không còn mapping
+group-to-native-role trong environment; mỗi entitlement được định danh duy nhất
+từ Lark group và projection ERP dùng role kỹ thuật `Letron Policy - group-*`.
+
+## Global Access Policy và OpenAPI gateway
+
+Trang `/admin/access-policy` dành riêng cho Lark group
+`GLOBAL_ACCESS_ADMIN_GROUP_ID`. Policy được lưu trong PostgreSQL theo version và
+autosave thành bản published mới; không có draft/approve/rollback workflow.
+Policy v1 chỉ tham chiếu các public OpenAPI routes đã đăng ký.
+
+`/api/gateway/*` là gateway server-side: phải có Global Portal session, published
+policy và entitlement từ Lark group phù hợp. Route ngoài public registry hoặc
+operation không được cấp sẽ fail closed. Gateway truyền authorization context
+bằng header HMAC nội bộ; ERP origin phải private và chỉ nhận traffic từ gateway.
+Không đưa authorization decision vào query string hoặc tin header do client gửi.
+
+Gateway và policy publication dùng lại `LETRON_SSO_ERP_BASE_URL` và
+`LETRON_SSO_SYNC_SECRET` hiện có. Đây là app nội bộ nên không tạo thêm ERP
+credential riêng trong Auth Server; ERP origin vẫn phải nằm trong mạng nội bộ.
+nếu chưa có ERP-side verifier, policy projection readback và direct-origin deny
+acceptance.
 
 Auth Server làm mới group membership trước mỗi OIDC login. Sau khi đăng nhập,
 ERP dùng `auth_hooks` để kiểm tra riêng identity đang gửi request khi snapshot
@@ -98,7 +121,10 @@ Luồng vòng đời:
 - Được thêm lại: ERP enable User và khôi phục role theo mapping; local admin block vẫn được tôn trọng.
 - Endpoint lỗi: login mới từ chối snapshot quá `LETRON_SSO_SNAPSHOT_MAX_AGE_SECONDS`; request đang hoạt động được dùng snapshot gần nhất trong cửa sổ cho phép. Khi lần đồng bộ thành công gần nhất quá `LETRON_SSO_STALE_LOCK_SECONDS`, User bị disable và session hiện có bị xóa. Snapshot mới hợp lệ sẽ mở khóa.
 
-Thay đổi trực tiếp các role trong `LETRON_SSO_LARK_MANAGED_ROLES` trên User bị chặn. Role ngoài allowlist, Role Permission Manager, Workflow, User Permission và Company vẫn do ERP quản lý.
+Thay đổi trực tiếp các role/permission thuộc centrally managed policy trong
+ERPNext bị chặn hoặc phải tạo drift alert. Role ngoài allowlist và policy chưa
+được Global Portal quản lý vẫn do ERP/operator quản lý. ERPNext luôn là nơi
+enforce permission runtime.
 
 Break-glass chỉ chạy bằng lệnh operator không public, có lý do và TTL bị giới hạn bởi `LETRON_SSO_BREAK_GLASS_MAX_SECONDS`:
 
@@ -117,7 +143,8 @@ Frappe scheduler vẫn phục vụ các job ERP khác nhưng không tham gia đ�
 Lark. Không thêm lại cron quét toàn bộ identity; kiểm tra quyền phải chạy theo
 request qua `auth_hooks`.
 
-Chỉ các role trong `LETRON_SSO_LARK_MANAGED_ROLES` được thêm hoặc xóa. `Administrator`, `All`, `Guest` và `System Manager` bị từ chối trong mapping để tránh nâng quyền đặc biệt từ Lark.
+ERP chỉ được projection các role kỹ thuật có prefix `Letron Policy - group-`;
+`Administrator`, `All`, `Guest` và `System Manager` không bao giờ được quản lý bởi Portal.
 
 Issuer: `${AUTH_BASE_URL}/api/oidc`
 
@@ -146,6 +173,21 @@ Health Auth phải báo group sync enabled. Health ERP phải báo
 `LETRON_SSO_REQUEST_CHECK_INTERVAL_SECONDS` rồi gửi một request ERP đã xác thực;
 không dùng reconcile thủ công. Gate cuối cùng vẫn là mở Web App thật trong Lark
 Desktop, chọn ERP và vào được `/desk`.
+
+### Sau khi thay đổi Prisma schema
+
+Mỗi lần sửa `prisma/schema.prisma`, phải chạy đủ các bước sau:
+
+```powershell
+npm run db:generate
+npm run db:migrate
+npm run check
+npm run dev
+```
+
+Dev server phải được restart sau `db:generate`. Nếu không, Next.js có thể vẫn
+giữ Prisma Client cũ trong memory và phát sinh lỗi `column does not exist` dù
+database migration đã thành công.
 
 ## Vercel
 

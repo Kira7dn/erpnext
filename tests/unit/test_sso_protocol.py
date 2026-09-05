@@ -64,13 +64,9 @@ def test_configuration_rejects_unsafe_or_invalid_values(name: str, value: str) -
         load_configuration(environment)
 
 
-def test_lark_role_mapping_produces_only_managed_erp_roles() -> None:
+def test_lark_groups_project_only_deterministic_policy_roles() -> None:
     environment = _environment() | {
         "LETRON_SSO_ROLE_SYNC_ENABLED": "true",
-        "LETRON_SSO_LARK_ROLE_MAPPING": (
-            '{"g-access":["Desk User"],"g-accounts":["Accounts User","Accounts Manager"]}'
-        ),
-        "LETRON_SSO_LARK_MANAGED_ROLES": '["Desk User","Accounts User","Accounts Manager"]',
         "LETRON_SSO_REQUIRED_LARK_GROUP_ID": "g-access",
         "LETRON_SSO_SYNC_URL": "http://host.docker.internal:3000/api/internal/lark-role-snapshots",
         "LETRON_SSO_SYNC_SECRET": "s" * 32,
@@ -83,40 +79,27 @@ def test_lark_role_mapping_produces_only_managed_erp_roles() -> None:
     assert role_sync.stale_lock_seconds == 600
     assert role_sync.break_glass_max_seconds == 3600
     assert desired_erp_roles({"g-access", "g-accounts", "unrelated"}, role_sync) == {
-        "Desk User",
-        "Accounts User",
-        "Accounts Manager",
+        "Letron Policy - group-g-access",
+        "Letron Policy - group-g-accounts",
+        "Letron Policy - group-unrelated",
     }
 
 
-@pytest.mark.parametrize(
-    ("name", "value"),
-    [
-        ("LETRON_SSO_LARK_MANAGED_ROLES", '["Desk User","System Manager"]'),
-        ("LETRON_SSO_LARK_ROLE_MAPPING", '{"g-access":["Desk User","Stock User"]}'),
-        ("LETRON_SSO_REQUIRED_LARK_GROUP_ID", "g-missing"),
-    ],
-)
-def test_role_sync_rejects_privileged_or_inconsistent_configuration(name: str, value: str) -> None:
+def test_role_sync_requires_access_group_and_internal_sync_credentials() -> None:
     environment = _environment() | {
         "LETRON_SSO_ROLE_SYNC_ENABLED": "true",
-        "LETRON_SSO_LARK_ROLE_MAPPING": '{"g-access":["Desk User"]}',
-        "LETRON_SSO_LARK_MANAGED_ROLES": '["Desk User"]',
         "LETRON_SSO_REQUIRED_LARK_GROUP_ID": "g-access",
         "LETRON_SSO_SYNC_URL": "http://host.docker.internal:3000/api/internal/lark-role-snapshots",
         "LETRON_SSO_SYNC_SECRET": "s" * 32,
     }
-    environment[name] = value
-
-    with pytest.raises(ValueError):
+    environment.pop("LETRON_SSO_SYNC_SECRET")
+    with pytest.raises(ValueError, match="LETRON_SSO_SYNC_SECRET"):
         load_configuration(environment)
 
 
 def test_role_sync_requires_stale_lock_to_exceed_login_snapshot_age() -> None:
     environment = _environment() | {
         "LETRON_SSO_ROLE_SYNC_ENABLED": "true",
-        "LETRON_SSO_LARK_ROLE_MAPPING": '{"g-access":["Desk User"]}',
-        "LETRON_SSO_LARK_MANAGED_ROLES": '["Desk User"]',
         "LETRON_SSO_REQUIRED_LARK_GROUP_ID": "g-access",
         "LETRON_SSO_SYNC_URL": "http://host.docker.internal:3000/api/internal/lark-role-snapshots",
         "LETRON_SSO_SYNC_SECRET": "s" * 32,
@@ -131,8 +114,6 @@ def test_role_sync_requires_stale_lock_to_exceed_login_snapshot_age() -> None:
 def test_role_sync_requires_request_check_interval_within_snapshot_age() -> None:
     environment = _environment() | {
         "LETRON_SSO_ROLE_SYNC_ENABLED": "true",
-        "LETRON_SSO_LARK_ROLE_MAPPING": '{"g-access":["Desk User"]}',
-        "LETRON_SSO_LARK_MANAGED_ROLES": '["Desk User"]',
         "LETRON_SSO_REQUIRED_LARK_GROUP_ID": "g-access",
         "LETRON_SSO_SYNC_URL": "http://host.docker.internal:3000/api/internal/lark-role-snapshots",
         "LETRON_SSO_SYNC_SECRET": "s" * 32,

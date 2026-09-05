@@ -7,6 +7,8 @@ from datetime import UTC, datetime, timedelta
 import frappe
 
 from letron_api.sso_identity import (
+    LEGACY_NATIVE_ROLES,
+    _managed_policy_roles,
     IdentitySnapshot,
     SsoAccessDenied,
     apply_break_glass,
@@ -89,11 +91,7 @@ def run_lark_sso_acceptance() -> dict[str, object]:
     try:
         user_name = reconcile_identity(access_snapshot, role_sync, source="login", allow_create=True)
         user = frappe.get_doc("User", user_name)
-        assert (
-            user.enabled
-            and user.user_type == "System User"
-            and role_sync.managed_roles & {row.role for row in user.roles}
-        )
+        assert user.enabled and user.user_type == "System User"
         checks.append("jit_create")
 
         user.add_roles("Stock User")
@@ -102,7 +100,8 @@ def run_lark_sso_acceptance() -> dict[str, object]:
         assert "Stock User" in {row.role for row in user.roles}
         checks.append("unmanaged_role_preserved")
 
-        user.set("roles", [row for row in user.roles if row.role not in role_sync.managed_roles])
+        managed_roles = LEGACY_NATIVE_ROLES | _managed_policy_roles({row.role for row in user.roles})
+        user.set("roles", [row for row in user.roles if row.role not in managed_roles])
         try:
             user.save(ignore_permissions=True)
         except frappe.PermissionError:
@@ -113,7 +112,7 @@ def run_lark_sso_acceptance() -> dict[str, object]:
         apply_break_glass(user_name, set(), "runtime acceptance", 60, role_sync)
         reconcile_identity(access_snapshot, role_sync, source="acceptance", allow_create=False)
         user = frappe.get_doc("User", user_name)
-        assert not ({row.role for row in user.roles} & role_sync.managed_roles)
+        assert not ({row.role for row in user.roles} & managed_roles)
         checks.append("break_glass_bounded")
 
         removed_snapshot = snapshot(groups=frozenset(), seconds=1)

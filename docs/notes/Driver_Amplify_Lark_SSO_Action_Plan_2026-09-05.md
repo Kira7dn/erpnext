@@ -49,7 +49,7 @@ giữ ổn định trong giai đoạn tích hợp.
 | Driver API | Xác minh Cognito access token và enforce role `manager`/`dispatcher` |
 | Global Portal | Chỉ hiển thị Driver/feature phù hợp; không phải authorization boundary |
 
-Mapping role của ứng dụng phải tách khỏi `LETRON_SSO_LARK_ROLE_MAPPING` của
+Mapping quyền của ứng dụng phải tách khỏi cấu hình role native của ERPNext; quyền
 ERP. Không đưa `manager`/`dispatcher` của LeOS vào managed-role allowlist của
 ERPNext.
 

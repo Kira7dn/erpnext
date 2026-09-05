@@ -4,6 +4,7 @@ import { getDb } from "./db";
 import { getEnv } from "./env";
 import { appendSetCookie, parseCookies, serializeCookie } from "./http";
 import { randomToken, sha256 } from "./crypto";
+import { fetchLarkGroupIds } from "./lark";
 
 export const SESSION_COOKIE = "letron_sso";
 
@@ -67,12 +68,28 @@ export async function getUserBySessionToken(token: string | undefined): Promise<
     },
   });
   if (!session) return null;
+  const identity = session.user.identities[0];
+  let groupIds = identity?.groupIds ?? [];
+  const env = getEnv();
+  if (env.LARK_GROUP_SYNC_ENABLED && identity) {
+    if (identity.subjectType !== "union_id") return null;
+    const staleAt = Date.now() - env.AUTH_GROUP_SYNC_STALE_SECONDS * 1000;
+    if (!identity.groupsSyncedAt || identity.groupsSyncedAt.getTime() <= staleAt) {
+      try {
+        groupIds = await fetchLarkGroupIds(identity.subject, "union_id");
+        await getDb().externalIdentity.update({ where: { id: identity.id }, data: { groupIds, groupsSyncedAt: new Date() } });
+      } catch {
+        // Do not authorize Portal pages or APIs with an unverified stale snapshot.
+        return null;
+      }
+    }
+  }
   return {
     id: session.user.id,
     email: session.user.email,
     displayName: session.user.displayName,
     avatarUrl: session.user.avatarUrl,
-    groupIds: session.user.identities[0]?.groupIds ?? [],
+    groupIds,
   };
 }
 

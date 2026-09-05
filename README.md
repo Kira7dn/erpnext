@@ -64,8 +64,8 @@ Ranh giới nguồn dữ liệu chuẩn:
 |---|---|
 | Danh tính, trạng thái truy cập, membership User Group | Lark |
 | Liên kết người dùng | `tenant_key + union_id`; không dùng email làm identity |
-| Mapping Lark Group sang role được quản lý | Environment của SSO |
-| Định nghĩa Role, Role Permission, Workflow, User Permission, Company | ERPNext |
+| Access policy: group/entitlement, role bundle, managed permission | Global Portal |
+| Projection và enforcement của Role, Role Permission, Workflow, User Permission | ERPNext |
 
 ERP tạo `System User` theo JIT ở lần đăng nhập đầu hợp lệ. Sau đăng nhập,
 `auth_hooks` kiểm tra on-demand identity đang hoạt động, dùng cache 60 giây và
@@ -104,6 +104,10 @@ tương ứng trong Lark Developer Console. Chi tiết cấu hình, lifecycle v�
 break-glass xem [Auth Server README](apps/auth-server/README.md). Thiết kế một
 user thuộc nhiều group, catalog group→role và thứ tự triển khai nằm tại
 [Lark SSO Role Design and Next Steps](docs/notes/Lark_SSO_Role_Design_and_Next_Steps_2026-09-05.md).
+
+Public OpenAPI clients phải đi qua Global Portal gateway; ERP origin không được
+coi là public API endpoint. Gateway kiểm tra published access policy trước khi
+forward tới ERPNext và fail-closed với route/operation ngoài registry.
 Kế hoạch đưa Driver Next.js đang dùng Amplify/Cognito JWT vào cùng luồng nằm tại
 [Driver Amplify Lark SSO Action Plan](docs/notes/Driver_Amplify_Lark_SSO_Action_Plan_2026-09-05.md).
 
@@ -141,7 +145,9 @@ build. Trước production, build tường minh bằng:
 .\docker-start.ps1 -Action build
 ```
 
-Mỗi project/site là một tenant và đúng một Company. Chỉnh system/runtime trong
+Mỗi project/site là một tenant và đúng một Company. Access policy centrally
+managed được định nghĩa/phê duyệt trong Global Portal rồi publish xuống ERPNext;
+ERPNext vẫn enforce trên mọi request. Chỉnh system/runtime trong
 `config/config.yaml`, chỉnh Company và policy nghiệp vụ trong
 `config/policy.yaml`, giữ secret thật trong `.env`. Không sửa managed policy
 qua ERPNext Desk hoặc generic `/api/resource`.

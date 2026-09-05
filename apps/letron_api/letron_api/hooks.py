@@ -179,7 +179,7 @@ def add_request_headers(response=None, request=None) -> None:
             cache.set_value(cache_key, "completed", expires_in_sec=86400)
 
 
-before_request = ["letron_api.hooks.rewrite_public_routes"]
+before_request = ["letron_api.gateway.enforce_gateway_ingress", "letron_api.hooks.rewrite_public_routes"]
 after_request = ["letron_api.hooks.add_request_headers"]
 auth_hooks = ["letron_api.sso.enforce_lark_entitlement"]
 
