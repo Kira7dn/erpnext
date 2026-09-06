@@ -30,6 +30,12 @@ uv run python -m letron_api.system_config validate --path "$CONFIG"
 uv run python -m letron_api.policy validate --path "$POLICY"
 uv run python -m letron_api.system_config bundle-validate --config "$CONFIG" --policy "$POLICY"
 eval "$(uv run python -m letron_api.system_config env --path "$CONFIG" --format posix)"
+if [[ -f "$ROOT/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "$ROOT/.env"
+  set +a
+fi
 
 compose=(docker compose --project-name "$PROJECT_NAME" -f "$COMPOSE")
 
@@ -48,7 +54,7 @@ readiness() {
     sleep 2
   done
   "${compose[@]}" ps -a
-  "${compose[@]}" logs --tail=80 backend frontend config-sync policy-sync
+  "${compose[@]}" logs --tail=80 backend
   echo "Runtime did not reach zero-drift HTTP readiness within 180 seconds" >&2
   return 1
 }
@@ -61,7 +67,6 @@ case "$ACTION" in
   up)
     "${compose[@]}" config --quiet
     "${compose[@]}" up -d --remove-orphans
-    "${compose[@]}" restart backend frontend websocket scheduler queue-short queue-long
     "${compose[@]}" ps
     readiness
     ;;
@@ -74,10 +79,10 @@ case "$ACTION" in
     ;;
   ps) "${compose[@]}" ps -a ;;
   logs) "${compose[@]}" logs --tail=100 ;;
-  bootstrap) "${compose[@]}" run --no-deps --rm policy-bootstrap ;;
+  bootstrap) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.tenant_bootstrap.run ;;
   inspect) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.api.runtime_snapshot ;;
   config-plan) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.system_config.plan ;;
-  config-apply) "${compose[@]}" run --no-deps --rm config-sync ;;
+  config-apply) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.system_config.sync ;;
   policy-export)
     temporary_policy="$(mktemp "$ROOT/config/.policy.yaml.XXXXXX")"
     trap 'rm -f "$temporary_policy"' EXIT
@@ -89,8 +94,11 @@ case "$ACTION" in
     echo "Exported native ERPNext business policy to $POLICY"
     ;;
   policy-plan) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.policy.plan ;;
-  policy-apply) "${compose[@]}" run --no-deps --rm policy-sync ;;
-  backup) "${compose[@]}" run --rm -e BACKUP_ENABLED=True -e BACKUP_ONCE=True backup ;;
+  policy-apply) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.policy.sync ;;
+  backup)
+    "${compose[@]}" run --rm -e BACKUP_ENABLED=True -e BACKUP_ONCE=True backup
+    python3 scripts/backup_to_s3.py
+    ;;
   backup-verify) "${compose[@]}" --profile operations run --rm --no-deps backup-verify ;;
   verify) readiness ;;
   *)

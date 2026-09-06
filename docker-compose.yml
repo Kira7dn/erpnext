@@ -18,6 +18,7 @@ x-frappe-defaults: &frappe_defaults
     - ./apps/erpnext:/home/frappe/frappe-bench/apps/erpnext:ro
     - ./apps/letron_api:/home/frappe/frappe-bench/apps/${INTEGRATION_APP}:ro
     - ./contracts:/home/frappe/frappe-bench/contracts:ro
+    - ./docker/backend-entrypoint.sh:/usr/local/bin/backend-entrypoint.sh:ro
     - type: bind
       source: ${LETRON_CONFIG_HOST_DIR:-./config}
       target: /etc/letron/config
@@ -50,58 +51,23 @@ x-frappe-defaults: &frappe_defaults
     LETRON_SSO_SNAPSHOT_MAX_AGE_SECONDS: ${LETRON_SSO_SNAPSHOT_MAX_AGE_SECONDS:-120}
     LETRON_SSO_STALE_LOCK_SECONDS: ${LETRON_SSO_STALE_LOCK_SECONDS:-600}
     LETRON_SSO_BREAK_GLASS_MAX_SECONDS: ${LETRON_SSO_BREAK_GLASS_MAX_SECONDS:-3600}
+    SITE_NAME: ${SITE_NAME}
+    DB_ROOT_USER: ${DB_ROOT_USER}
+    MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    REDIS_SOCKETIO: ${REDIS_SOCKETIO}
+    ALLOW_TESTS: ${ALLOW_TESTS}
+    REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
+    COUNTRY: ${COUNTRY}
+    TIMEZONE: ${TIMEZONE}
+    LANGUAGE: ${LANGUAGE}
+    CURRENCY: ${CURRENCY}
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+    AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-ap-southeast-1}
+    S3_BUCKET_NAME: ${S3_BUCKET_NAME:-letron-erp-backups}
 
 services:
-  configurator:
-    <<: *frappe_defaults
-    restart: "no"
-    entrypoint: [bash, -c]
-    command:
-      - >-
-        set -e;
-        ls -1 apps > sites/apps.txt;
-        bench set-config -g db_host $$DB_HOST;
-        bench set-config -gp db_port $$DB_PORT;
-        bench set-config -g redis_cache "redis://$$REDIS_CACHE";
-        bench set-config -g redis_queue "redis://$$REDIS_QUEUE";
-        bench set-config -g redis_socketio "redis://$$REDIS_SOCKETIO";
-        bench set-config -gp socketio_port $$SOCKETIO_PORT;
-        bench set-config -gp developer_mode $$DEVELOPER_MODE;
-        bench set-config -gp allow_tests $$ALLOW_TESTS;
-        bench set-config -gp request_timeout $$REQUEST_TIMEOUT;
-        bench set-config -g country "$$COUNTRY";
-        bench set-config -g time_zone "$$TIMEZONE";
-        bench set-config -g lang "$$LANGUAGE";
-        bench set-config -g currency "$$CURRENCY";
-        if [ "$$EMAIL_ENABLED" = "True" ]; then
-          bench set-config -g mail_server "$$SMTP_HOST";
-          bench set-config -gp mail_port $$SMTP_PORT;
-          bench set-config -g mail_login "$$SMTP_USERNAME";
-          bench set-config -g mail_password "$$SMTP_PASSWORD";
-          bench set-config -gp use_tls $$SMTP_USE_TLS;
-        fi;
-        bench set-config -g chromium_path /usr/bin/chromium-headless-shell;
-    environment:
-      <<: *frappe_environment
-      REDIS_SOCKETIO: ${REDIS_SOCKETIO}
-      SOCKETIO_PORT: "9000"
-      ALLOW_TESTS: ${ALLOW_TESTS}
-      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
-      COUNTRY: ${COUNTRY}
-      TIMEZONE: ${TIMEZONE}
-      LANGUAGE: ${LANGUAGE}
-      CURRENCY: ${CURRENCY}
-      EMAIL_ENABLED: ${EMAIL_ENABLED}
-      SMTP_HOST: ${SMTP_HOST}
-      SMTP_PORT: ${SMTP_PORT}
-      SMTP_USERNAME: ${SMTP_USERNAME}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
-      SMTP_USE_TLS: ${SMTP_USE_TLS}
-    depends_on:
-      db: {condition: service_healthy}
-      redis-cache: {condition: service_started}
-      redis-queue: {condition: service_started}
-
   db:
     image: ${DB_IMAGE}
     restart: ${RESTART_POLICY}
@@ -122,146 +88,34 @@ services:
       retries: 30
     volumes: ["db-data:/var/lib/mysql"]
 
-  redis-cache:
+  redis:
     image: ${REDIS_CACHE_IMAGE}
-    restart: ${RESTART_POLICY}
-    networks: [frappe_network]
-
-  redis-queue:
-    image: ${REDIS_QUEUE_IMAGE}
     restart: ${RESTART_POLICY}
     networks: [frappe_network]
     volumes: ["redis-queue-data:/data"]
 
-  create-site:
-    <<: *frappe_defaults
-    restart: "no"
-    entrypoint: [bash, -c]
-    command:
-      - >-
-        set -e;
-        wait-for-it -t 120 db:3306;
-        wait-for-it -t 120 redis-cache:6379;
-        wait-for-it -t 120 redis-queue:6379;
-        if [ ! -f sites/$${SITE_NAME}/site_config.json ]; then
-          if [ "$${INTEGRATION_APP_ENABLED}" = "True" ]; then
-            bench new-site --mariadb-user-host-login-scope='%' --admin-password="$${ADMIN_PASSWORD}" --db-root-username="$${DB_ROOT_USER}" --db-root-password="$${MARIADB_ROOT_PASSWORD}" --install-app erpnext --install-app "$${INTEGRATION_APP}" --set-default "$${SITE_NAME}";
-          else
-            bench new-site --mariadb-user-host-login-scope='%' --admin-password="$${ADMIN_PASSWORD}" --db-root-username="$${DB_ROOT_USER}" --db-root-password="$${MARIADB_ROOT_PASSWORD}" --install-app erpnext --set-default "$${SITE_NAME}";
-          fi;
-        else
-          if [ "$${INTEGRATION_APP_ENABLED}" = "True" ] && ! bench --site "$${SITE_NAME}" list-apps | grep -Fxq "$${INTEGRATION_APP}"; then bench --site "$${SITE_NAME}" install-app "$${INTEGRATION_APP}"; fi;
-          bench --site "$${SITE_NAME}" migrate; echo "Site $${SITE_NAME} already exists";
-        fi
-    environment:
-      <<: *frappe_environment
-      SITE_NAME: ${SITE_NAME}
-      DB_ROOT_USER: ${DB_ROOT_USER}
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      INTEGRATION_APP: ${INTEGRATION_APP}
-      INTEGRATION_APP_ENABLED: ${INTEGRATION_APP_ENABLED}
-    depends_on:
-      db: {condition: service_healthy}
-      configurator: {condition: service_completed_successfully}
-      redis-cache: {condition: service_started}
-      redis-queue: {condition: service_started}
-
-  policy-bootstrap:
-    <<: *frappe_defaults
-    restart: "no"
-    entrypoint: [bash, -c]
-    command: ["bench --site $${SITE_NAME} execute letron_api.tenant_bootstrap.run"]
-    environment:
-      <<: *frappe_environment
-      SITE_NAME: ${SITE_NAME}
-    depends_on:
-      create-site: {condition: service_completed_successfully}
-
-  config-sync:
-    <<: *frappe_defaults
-    restart: "no"
-    entrypoint: [bash, -c]
-    command: ["bench --site $${SITE_NAME} execute letron_api.system_config.sync"]
-    environment:
-      <<: *frappe_environment
-      SITE_NAME: ${SITE_NAME}
-    depends_on:
-      policy-bootstrap: {condition: service_completed_successfully}
-
-  policy-sync:
-    <<: *frappe_defaults
-    restart: "no"
-    entrypoint: [bash, -c]
-    command: ["bench --site $${SITE_NAME} execute letron_api.policy.sync"]
-    environment:
-      <<: *frappe_environment
-      SITE_NAME: ${SITE_NAME}
-    depends_on:
-      config-sync: {condition: service_completed_successfully}
-
   backend:
     <<: *frappe_defaults
-    depends_on: {policy-sync: {condition: service_completed_successfully}}
-
-  frontend:
-    <<: *frappe_defaults
-    command: [nginx-entrypoint.sh]
-    environment:
-      <<: *frappe_environment
-      BACKEND: ${FRONTEND_BACKEND}
-      SOCKETIO: ${FRONTEND_WEBSOCKET}
-      PROXY_READ_TIMEOUT: ${FRONTEND_PROXY_TIMEOUT}
-      CLIENT_MAX_BODY_SIZE: ${FRONTEND_UPLOAD_SIZE}
-      UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
-      UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
-      UPSTREAM_REAL_IP_RECURSIVE: "off"
-    depends_on: {backend: {condition: service_started}, websocket: {condition: service_started}}
-    ports: ["${HTTP_PORT}:8080"]
-
-  websocket:
-    <<: *frappe_defaults
-    command: [node, /home/frappe/frappe-bench/apps/frappe/socketio.js]
-    depends_on: {policy-sync: {condition: service_completed_successfully}}
-  queue-short:
-    <<: *frappe_defaults
-    command: [bash, -c, "${SHORT_COMMAND}"]
-    deploy:
-      replicas: ${SHORT_WORKER_REPLICAS}
-    environment:
-      <<: *frappe_environment
-      LETRON_WEBHOOK_URL: ${LETRON_WEBHOOK_URL:-}
-      LETRON_WEBHOOK_SECRET: ${LETRON_WEBHOOK_SECRET:-}
-      LETRON_WEBHOOK_TIMEOUT_MS: ${LETRON_WEBHOOK_TIMEOUT_MS:-5000}
-      LETRON_REALTIME_URL: ${LETRON_REALTIME_URL:-}
-      LETRON_REALTIME_TOKEN: ${LETRON_REALTIME_TOKEN:-}
-    depends_on: {policy-sync: {condition: service_completed_successfully}}
-  queue-long:
-    <<: *frappe_defaults
-    command: [bash, -c, "${LONG_COMMAND}"]
-    depends_on: {policy-sync: {condition: service_completed_successfully}}
-  scheduler:
-    <<: *frappe_defaults
-    command: [bash, -c, "${SCHEDULER_COMMAND}"]
-    environment:
-      <<: *frappe_environment
-      LETRON_WEBHOOK_URL: ${LETRON_WEBHOOK_URL:-}
-      LETRON_WEBHOOK_SECRET: ${LETRON_WEBHOOK_SECRET:-}
-      LETRON_WEBHOOK_TIMEOUT_MS: ${LETRON_WEBHOOK_TIMEOUT_MS:-5000}
-      LETRON_REALTIME_URL: ${LETRON_REALTIME_URL:-}
-      LETRON_REALTIME_TOKEN: ${LETRON_REALTIME_TOKEN:-}
-    depends_on: {policy-sync: {condition: service_completed_successfully}}
+    command: [bash, /usr/local/bin/backend-entrypoint.sh]
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_started}
+    ports: ["${HTTP_PORT}:8000"]
 
   backup-init:
     <<: *frappe_defaults
+    profiles: [operations]
     user: root
     restart: "no"
     entrypoint: [sh, -c]
     command: ["chown -R 1000:1000 /home/frappe/backups"]
-    depends_on: {policy-sync: {condition: service_completed_successfully}}
+    depends_on:
+      db: {condition: service_healthy}
 
   backup:
     <<: *frappe_defaults
+    profiles: [operations]
+    restart: "no"
     entrypoint: [bash, -c]
     command:
       - >-
@@ -302,6 +156,13 @@ services:
     command:
       - >-
         set -e;
+        if ! ls /home/frappe/backups/*-database.sql.gz >/dev/null 2>&1; then
+          echo "No local backup found. Downloading latest verified backup from AWS S3...";
+          if ! /home/frappe/frappe-bench/env/bin/python -c "import boto3" >/dev/null 2>&1; then
+            /home/frappe/frappe-bench/env/bin/pip install boto3 >/dev/null 2>&1 || true;
+          fi;
+          /home/frappe/frappe-bench/env/bin/python -c "from letron_api.restore import download_latest_backup; download_latest_backup('/home/frappe/backups')";
+        fi;
         sql="";
         for candidate in $$(ls -1t /home/frappe/backups/*-database.sql.gz); do
           if gzip -t "$${candidate}" >/dev/null 2>&1; then sql="$${candidate}"; break; fi;
@@ -312,7 +173,10 @@ services:
         private="$${prefix}-private-files.tgz";
         drill_site="restore-drill-$$$$.local";
         drill_db="letron_restore_drill_$$$$";
-        cleanup() { bench drop-site "$${drill_site}" --no-backup --force --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${DB_ROOT_PASSWORD}" >/dev/null 2>&1 || true; };
+        cleanup() {
+          bench drop-site "$${drill_site}" --no-backup --force --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${DB_ROOT_PASSWORD}" >/dev/null 2>&1 || true;
+          rm -f /home/frappe/backups/*;
+        };
         trap cleanup EXIT;
         bench new-site "$${drill_site}" --mariadb-user-host-login-scope='%' --db-name "$${drill_db}" --admin-password "$${ADMIN_PASSWORD}" --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${DB_ROOT_PASSWORD}";
         bench --site "$${drill_site}" restore "$${sql}" --force --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${DB_ROOT_PASSWORD}" --with-public-files "$${public}" --with-private-files "$${private}";

@@ -155,7 +155,7 @@ def test_missing_secret_fails_only_when_materializing(
 def test_short_worker_replica_count_is_bounded(tmp_path: Path) -> None:
     candidate = tmp_path / "config.yaml"
     content = system_config.config_path().read_text(encoding="utf-8")
-    candidate.write_text(content.replace("short_replicas: 2", "short_replicas: 0"), encoding="utf-8")
+    candidate.write_text(content.replace("short_replicas: 1", "short_replicas: 0"), encoding="utf-8")
 
     with pytest.raises(system_config.ConfigError, match="short_replicas"):
         system_config.load_config(candidate)

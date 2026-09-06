@@ -27,9 +27,9 @@ database:
   volume: db-data
 
 redis:
-  cache: redis-cache:6379
-  queue: redis-queue:6379
-  socketio: redis-queue:6379
+  cache: redis:6379
+  queue: redis:6379
+  socketio: redis:6379
   cache_image: redis:6.2-alpine
   queue_image: redis:6.2-alpine
 
@@ -46,13 +46,13 @@ developer:
 
 frontend:
   backend: backend:8000
-  websocket: websocket:9000
+  websocket: 127.0.0.1:9000
   upload_size: 50m
   proxy_timeout: 120
 
 workers:
   short_command: "bench worker --queue short"
-  short_replicas: 2
+  short_replicas: 1
   long_command: "bench worker --queue long,default"
   scheduler_command: "bench schedule"
 

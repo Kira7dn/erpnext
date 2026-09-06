@@ -1,5 +1,5 @@
 # Local workspace state
-.env
+.env*
 .venv/
 .agent/
 .cache/

@@ -47,6 +47,20 @@ $environment = $environmentJson | ConvertFrom-Json
 foreach ($property in $environment.PSObject.Properties) {
     [Environment]::SetEnvironmentVariable($property.Name, [string]$property.Value, 'Process')
 }
+$envFile = Join-Path $root '.env'
+if (Test-Path -LiteralPath $envFile) {
+    Get-Content $envFile | ForEach-Object {
+        $l = $_.Trim()
+        if ($l -and -not $l.StartsWith('#') -and $l.Contains('=')) {
+            $parts = $l.Split('=', 2)
+            $k = $parts[0].Trim()
+            $v = $parts[1].Trim().Trim("'").Trim('"')
+            if (-not [Environment]::GetEnvironmentVariable($k, 'Process')) {
+                [Environment]::SetEnvironmentVariable($k, $v, 'Process')
+            }
+        }
+    }
+}
 
 Write-Host $configValidation
 Write-Host $policyValidation
@@ -77,7 +91,7 @@ function Invoke-Readiness {
         Start-Sleep -Seconds 2
     } while ([DateTime]::UtcNow -lt $deadline)
     Invoke-Compose @('ps','-a')
-    Invoke-Compose @('logs','--tail=80','backend','frontend','config-sync','policy-sync')
+    Invoke-Compose @('logs','--tail=80','backend')
     throw "Runtime did not reach zero-drift HTTP readiness within 180 seconds: $uri"
 }
 
@@ -113,28 +127,21 @@ switch ($Action) {
     'up' {
         Invoke-Compose @('config','--quiet')
         Invoke-Compose @('up','-d','--remove-orphans')
-        Invoke-Compose @('restart','backend','frontend','websocket','scheduler','queue-short','queue-long')
         Invoke-Compose @('ps')
         Invoke-Readiness
     }
     'reload' {
-        Invoke-Compose @('run','--rm','--no-deps','config-sync')
-        Invoke-Compose @('run','--rm','--no-deps','policy-bootstrap')
-        Invoke-Compose @('run','--rm','--no-deps','policy-sync')
-        Invoke-Compose @(
-            'up','-d','--no-build','--force-recreate','--no-deps',
-            'backend','frontend','websocket','scheduler','queue-short','queue-long','backup'
-        )
+        Invoke-Compose @('restart','backend')
         Invoke-Readiness
     }
     'down' { Invoke-Compose @('down') }
     'restart' { Invoke-Compose @('down'); Invoke-Compose @('up','-d'); Invoke-Compose @('ps'); Invoke-Readiness }
     'ps' { Invoke-Compose @('ps','-a') }
     'logs' { Invoke-Compose ($(if($FollowLogs){@('logs','-f')}else{@('logs','--tail=100')})) }
-    'bootstrap' { Invoke-Compose @('run','--no-deps','--rm','policy-bootstrap') }
+    'bootstrap' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.tenant_bootstrap.run') }
     'inspect' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.api.runtime_snapshot') }
     'config-plan' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.system_config.plan') }
-    'config-apply' { Invoke-Compose @('run','--no-deps','--rm','config-sync') }
+    'config-apply' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.system_config.sync') }
     'policy-export' {
         $encoded = (& docker @composeArgs exec -T backend bench --site $env:SITE_NAME execute letron_api.policy.export_current_base64)
         if ($LASTEXITCODE -ne 0) { throw "Policy export failed with exit code $LASTEXITCODE" }
@@ -154,12 +161,18 @@ switch ($Action) {
         Write-Host "Exported native ERPNext business policy to $policyPath"
     }
     'policy-plan' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.policy.plan') }
-    'policy-apply' { Invoke-Compose @('run','--no-deps','--rm','policy-sync') }
+    'policy-apply' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.policy.sync') }
     # Run the one-shot backup independently of the long-lived scheduled
     # service.  The scheduled service intentionally sleeps forever when
     # backup.enabled is false; waiting on that dependency here made the
     # acceptance gate appear hung instead of producing a backup result.
-    'backup' { Invoke-Compose @('run','--rm','--no-deps','-e','BACKUP_ENABLED=True','-e','BACKUP_ONCE=True','backup') }
+    'backup' {
+        Invoke-Compose @('run','--rm','--no-deps','-e','BACKUP_ENABLED=True','-e','BACKUP_ONCE=True','backup')
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Syncing backup to AWS S3 (letron-erp-backups)..." -ForegroundColor Cyan
+            uv run python scripts/backup_to_s3.py
+        }
+    }
     'backup-verify' { Invoke-Compose @('--profile','operations','run','--rm','--no-deps','backup-verify') }
     'verify' { Invoke-Readiness }
 }

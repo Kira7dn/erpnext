@@ -208,4 +208,9 @@ user_handlers["validate"] = "letron_api.sso_identity.protect_lark_managed_user"
 scheduler_events = {
     "all": ["letron_api.delivery.process_pending_outbox"],
     "hourly": ["letron_api.policy.audit", "letron_api.system_config.audit"],
+    "cron": {
+        "0 1 * * *": [
+            "letron_api.backup.scheduled_s3_backup"
+        ]
+    },
 }

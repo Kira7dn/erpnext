@@ -2,7 +2,9 @@
 name = "erpnext-workspace-tools"
 version = "0.1.0"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "boto3>=1.43.89",
+]
 
 [project.scripts]
 api-generator = "lib.api_generator.cli:main"
