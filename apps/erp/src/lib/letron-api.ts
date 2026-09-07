@@ -67,6 +67,16 @@ export type AccountingFormField = {
   targetDoctype?: string;
 };
 
+export const RESOURCE_PAGE_SIZE = 25;
+
+export function resourcePageQuery(page: number, pageSize = RESOURCE_PAGE_SIZE): string {
+  const safePage = Math.max(1, Math.floor(page));
+  return new URLSearchParams({
+    limit_page_length: String(pageSize + 1),
+    limit_start: String((safePage - 1) * pageSize),
+  }).toString();
+}
+
 type ContractSchema = { properties?: Record<string, { type?: string; format?: string; enum?: string[]; writeOnly?: boolean; "x-frappe-target-doctype"?: string }> ; required?: string[] };
 type PublicContract = { paths?: Record<string, Record<string, { requestBody?: { content?: { "application/json"?: { schema?: ContractSchema } } } }>> };
 
@@ -194,6 +204,6 @@ export async function getAccountingResource(
   );
 }
 
-export async function listBankAccounts(cookieHeader: string): Promise<BankAccount[]> {
-  return listAccountingResource("bank-accounts", cookieHeader) as Promise<BankAccount[]>;
+export async function listBankAccounts(cookieHeader: string, searchParams = ""): Promise<BankAccount[]> {
+  return listAccountingResource("bank-accounts", cookieHeader, searchParams) as Promise<BankAccount[]>;
 }
