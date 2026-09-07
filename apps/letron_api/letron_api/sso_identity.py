@@ -13,6 +13,24 @@ from letron_api.sso_protocol import FORBIDDEN_LARK_MANAGED_ROLES, POLICY_ROLE_PR
 
 IDENTITY_DOCTYPE = "Letron SSO Identity"
 AUDIT_DOCTYPE = "Letron SSO Audit Log"
+IDENTITY_SYNC_FIELDS = (
+    "identity_key",
+    "provider",
+    "tenant_key",
+    "subject",
+    "subject_type",
+    "user",
+    "email",
+    "display_name",
+    "group_ids",
+    "last_sync_at",
+    "sync_state",
+    "disabled_by_sync",
+    "local_blocked",
+    "last_error",
+    "break_glass_until",
+    "break_glass_reason",
+)
 LEGACY_NATIVE_ROLES = frozenset({
     "Desk User", "Accounts User", "Accounts Manager", "Purchase User", "Purchase Manager",
     "Stock User", "Stock Manager", "Sales User", "Sales Manager",
@@ -142,7 +160,14 @@ def _save(document: Any) -> None:
     if document.is_new():
         document.insert(ignore_permissions=True)
     else:
-        document.save(ignore_permissions=True)
+        # SSO identity rows are refreshed by concurrent authenticated requests.
+        # Document.save() performs an optimistic modified-timestamp check and
+        # turns that expected race into MariaDB error 1020. These fields are
+        # server-maintained state with no document hooks, so update them in one
+        # direct statement and keep the in-memory document current.
+        values = {fieldname: document.get(fieldname) for fieldname in IDENTITY_SYNC_FIELDS}
+        frappe.db.set_value(IDENTITY_DOCTYPE, document.name, values, update_modified=True)
+        document.reload()
 
 
 def _clear_sessions(user_name: str) -> None:
