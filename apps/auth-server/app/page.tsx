@@ -1,17 +1,40 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { BackupCard } from "../src/components/backup-card";
 import { getEnv } from "../src/server/env";
 import { getUserBySessionToken, SESSION_COOKIE } from "../src/server/session";
 
 export const dynamic = "force-dynamic";
 
 function AppIcon() {
-  return <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200" aria-hidden="true"><svg className="h-6 w-6 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.2 2.8 7.8 7 9.5 4.2-1.7 7-5.3 7-9.5V6l-7-3Z" /><path d="m9 12 2 2 4-4" /></svg></span>;
+  return (
+    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200" aria-hidden="true">
+      <svg className="h-6 w-6 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+        <path d="M12 3 5 6v5c0 4.2 2.8 7.8 7 9.5 4.2-1.7 7-5.3 7-9.5V6l-7-3Z" />
+        <path d="m9 12 2 2 4-4" />
+      </svg>
+    </span>
+  );
 }
+
 function AccessPolicyCard() {
-  return <a className="group flex min-h-[290px] flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-100" href="/admin/access-policy"><div className="flex items-start justify-between gap-4"><AppIcon /><span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700"><i className="h-2 w-2 rounded-full bg-emerald-500" />Quản trị</span></div><div className="mt-6 flex-1"><h3 className="text-xl font-bold text-slate-950">Role Permission Settings</h3><p className="mt-2 text-sm leading-6 text-slate-500">Cấu hình tập trung quyền truy cập và policy cho các hệ thống Letron theo Lark User Group.</p><ul className="mt-4 flex flex-wrap gap-2" aria-label="Các chức năng quản trị"><li className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">Access Policy</li><li className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">CRUD permissions</li><li className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">Lark groups</li></ul></div><div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-xs font-semibold text-slate-500"><span>Global Access Admin</span><span className="text-xl text-blue-600 transition group-hover:translate-x-1">→</span></div></a>;
+  return (
+    <a className="group flex min-h-[290px] flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-100" href="/admin/access-policy">
+      <div className="flex items-start justify-between gap-4"><AppIcon /><span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700"><i className="h-2 w-2 rounded-full bg-emerald-500" />Quản trị</span></div>
+      <div className="mt-6 flex-1"><h3 className="text-xl font-bold text-slate-950">Role Permission Settings</h3><p className="mt-2 text-sm leading-6 text-slate-500">Cấu hình tập trung quyền truy cập và policy cho các hệ thống Letron theo Lark User Group.</p><ul className="mt-4 flex flex-wrap gap-2" aria-label="Các chức năng quản trị"><li className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">Access Policy</li><li className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">CRUD permissions</li><li className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">Lark groups</li></ul></div>
+      <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-xs font-semibold text-slate-500"><span>Global Access Admin</span><span className="text-xl text-blue-600 transition group-hover:translate-x-1">→</span></div>
+    </a>
+  );
+}
+
+function BackupCardLink() {
+  return (
+    <a className="group flex min-h-[290px] flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-100" href="/admin/backups">
+      <div className="flex items-start justify-between gap-4"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-2xl text-white shadow-lg shadow-blue-200" aria-hidden="true">↻</span><span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700"><i className="h-2 w-2 rounded-full bg-emerald-500" />Quản trị</span></div>
+      <div className="mt-6 flex-1"><h3 className="text-xl font-bold text-slate-950">Sao lưu &amp; Khôi phục</h3><p className="mt-2 text-sm leading-6 text-slate-500">Mở trang quản lý backup S3, Restore Drill và khôi phục production.</p><ul className="mt-4 flex flex-wrap gap-2" aria-label="Các chức năng backup"><li className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">Backup history</li><li className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">Restore Drill</li><li className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">S3</li></ul></div>
+      <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-xs font-semibold text-slate-500"><span>Global Access Admin</span><span className="text-xl text-blue-600 transition group-hover:translate-x-1">→</span></div>
+    </a>
+  );
 }
 
 export default async function HomePage() {
@@ -22,9 +45,14 @@ export default async function HomePage() {
   const isAccessAdmin = Boolean(env.GLOBAL_ACCESS_ADMIN_GROUP_ID && user.groupIds.includes(env.GLOBAL_ACCESS_ADMIN_GROUP_ID));
   const initials = user.displayName.split(/\s+/).filter(Boolean).slice(-2).map((part) => part[0]?.toUpperCase()).join("") || "L";
 
-  return <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#dbeafe,_transparent_35%),linear-gradient(135deg,_#f8fafc_0%,_#eef2ff_100%)] px-4 py-8 text-slate-900 sm:px-8 lg:py-12"><div className="mx-auto max-w-6xl"><header className="flex flex-col gap-5 border-b border-slate-200/80 pb-8 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-xl font-black text-white shadow-lg">L</span><span><strong className="block text-sm font-black tracking-[0.2em] text-slate-950">LETRON</strong><small className="block text-[10px] font-bold tracking-[0.18em] text-blue-600">LeTRON-Global Portal</small></span></div><div className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/75 px-3 py-2 shadow-sm backdrop-blur" title={user.email}><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 font-bold text-blue-700">{initials}</span><span className="min-w-0"><strong className="block truncate text-sm text-slate-900">{user.displayName}</strong><small className="block max-w-[220px] truncate text-xs text-slate-500">{user.email}</small></span></div></header><section className="py-12 sm:py-16"><p className="text-xs font-black uppercase tracking-[0.2em] text-blue-600">LeTRON-Global Portal control plane</p><h1 className="mt-4 max-w-3xl text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">Xác thực và cấu hình tập trung</h1><p className="mt-5 max-w-2xl text-base leading-7 text-slate-500 sm:text-lg">Quản lý phiên đăng nhập Lark, quyền truy cập và policy dùng chung cho các ứng dụng Letron.</p></section><section aria-labelledby="settings-title"><div className="mb-6"><h2 id="settings-title" className="text-2xl font-bold text-slate-950">Cấu hình hệ thống</h2><p className="mt-1 text-sm text-slate-500">Chỉ các công cụ quản trị được hiển thị theo quyền của tài khoản.</p></div><div className="grid gap-5 md:grid-cols-2">{isAccessAdmin ? <AccessPolicyCard /> : <div className="rounded-3xl border border-dashed border-slate-300 bg-white/70 p-12 text-center" role="status"><span className="text-4xl text-slate-300" aria-hidden="true">○</span><h3 className="mt-4 text-lg font-bold text-slate-800">Không có cấu hình khả dụng</h3><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">Tài khoản hiện tại không thuộc nhóm Global Access Admin.</p></div>}</div></section>{isAccessAdmin ? <BackupCard /> : null}<footer className="mt-16 flex flex-col gap-3 border-t border-slate-200/80 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between"><span>LeTRON-Global Portal · Auth and configuration</span><form action="/api/auth/logout" method="post"><button className="font-semibold text-slate-600 underline-offset-4 hover:text-blue-600 hover:underline" type="submit">Đăng xuất</button></form></footer></div></main>;
+  return (
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#dbeafe,_transparent_35%),linear-gradient(135deg,_#f8fafc_0%,_#eef2ff_100%)] px-4 py-8 text-slate-900 sm:px-8 lg:py-12">
+      <div className="mx-auto max-w-6xl">
+        <header className="flex flex-col gap-5 border-b border-slate-200/80 pb-8 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-xl font-black text-white shadow-lg">L</span><span><strong className="block text-sm font-black tracking-[0.2em] text-slate-950">LETRON</strong><small className="block text-[10px] font-bold tracking-[0.18em] text-blue-600">LeTRON-Global Portal</small></span></div><div className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/75 px-3 py-2 shadow-sm backdrop-blur" title={user.email}><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 font-bold text-blue-700">{initials}</span><span className="min-w-0"><strong className="block truncate text-sm text-slate-900">{user.displayName}</strong><small className="block max-w-[220px] truncate text-xs text-slate-500">{user.email}</small></span></div></header>
+        <section className="py-12 sm:py-16"><p className="text-xs font-black uppercase tracking-[0.2em] text-blue-600">LeTRON-Global Portal control plane</p><h1 className="mt-4 max-w-3xl text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">Xác thực và cấu hình tập trung</h1><p className="mt-5 max-w-2xl text-base leading-7 text-slate-500 sm:text-lg">Quản lý phiên đăng nhập Lark, quyền truy cập và policy dùng chung cho các ứng dụng Letron.</p></section>
+        <section aria-labelledby="settings-title"><div className="mb-6"><h2 id="settings-title" className="text-2xl font-bold text-slate-950">Cấu hình hệ thống</h2><p className="mt-1 text-sm text-slate-500">Chỉ các công cụ quản trị được hiển thị theo quyền của tài khoản.</p></div><div className="grid gap-5 md:grid-cols-2">{isAccessAdmin ? <><AccessPolicyCard /><BackupCardLink /></> : <div className="rounded-3xl border border-dashed border-slate-300 bg-white/70 p-12 text-center" role="status"><span className="text-4xl text-slate-300" aria-hidden="true">○</span><h3 className="mt-4 text-lg font-bold text-slate-800">Không có cấu hình khả dụng</h3><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">Tài khoản hiện tại không thuộc nhóm Global Access Admin.</p></div>}</div></section>
+        <footer className="mt-16 flex flex-col gap-3 border-t border-slate-200/80 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between"><span>LeTRON-Global Portal · Auth and configuration</span><form action="/api/auth/logout" method="post"><button className="font-semibold text-slate-600 underline-offset-4 hover:text-blue-600 hover:underline" type="submit">Đăng xuất</button></form></footer>
+      </div>
+    </main>
+  );
 }
-
-
-
-
