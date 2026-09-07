@@ -23,7 +23,7 @@ Next.js SSO server chạy trên Vercel Functions. Lark là upstream identity pro
 - Global Portal suy ra role từ cùng mapping và chỉ hiển thị ứng dụng/phân hệ phù
   hợp. Đây là presentation filter; ERPNext vẫn phải kiểm tra authorization cho
   mọi request.
-- Trang chủ là Letron Auth Portal; portal chỉ phụ trách xác thực, cấu hình và quản trị access policy. Các ứng dụng nghiệp vụ mở độc lập và dùng chung session SSO.
+- Trang chủ là LeTRON-Global Portal; portal chỉ phụ trách xác thực, cấu hình và quản trị access policy. Các ứng dụng nghiệp vụ mở độc lập và dùng chung session SSO.
 
 ## Chạy local
 
@@ -62,8 +62,8 @@ URL đặt làm trang chủ Web App trong Lark để đăng nhập vào ứng d�
 http://localhost:3000/login?return_to=http%3A%2F%2Flocalhost%3A3001%2Faccounts
 ```
 
-Auth Portal tự động chuyển qua Lark khi chưa có phiên, sau đó trả người dùng về
-ứng dụng đã yêu cầu đăng nhập. Auth Portal không còn hiển thị thẻ hoặc launch
+LeTRON-Global Portal tự động chuyển qua Lark khi chưa có phiên, sau đó trả người dùng về
+ứng dụng đã yêu cầu đăng nhập. LeTRON-Global Portal không còn hiển thị thẻ hoặc launch
 URL của ERP.
 
 `localhost` chỉ hợp lệ với Lark Desktop chạy trên cùng máy. Lark mobile và máy
