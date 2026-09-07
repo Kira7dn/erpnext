@@ -14,3 +14,5 @@ build/
 .pytest_cache/
 backups/
 .playwright-cli/
+*.out.log
+*.err.log
