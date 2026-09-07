@@ -48692,6 +48692,247 @@
       ]
     },
     {
+      "name": "Letron SSO Audit Log",
+      "module": "Letron API",
+      "source": "letron_api\\doctype\\letron_sso_audit_log\\letron_sso_audit_log.json",
+      "is_child_table": 0,
+      "fields": [
+        {
+          "fieldname": "occurred_at",
+          "fieldtype": "Datetime",
+          "label": "Occurred At",
+          "options": null,
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "event_type",
+          "fieldtype": "Data",
+          "label": "Event Type",
+          "options": null,
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "identity",
+          "fieldtype": "Link",
+          "label": "Identity",
+          "options": "Letron SSO Identity",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "user",
+          "fieldtype": "Link",
+          "label": "ERP User",
+          "options": "User",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "source",
+          "fieldtype": "Select",
+          "label": "Source",
+          "options": "login\nrequest\nbreak-glass\nmigration\nacceptance",
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "outcome",
+          "fieldtype": "Select",
+          "label": "Outcome",
+          "options": "success\ndenied\nerror",
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "before_roles",
+          "fieldtype": "Long Text",
+          "label": "Roles Before",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "after_roles",
+          "fieldtype": "Long Text",
+          "label": "Roles After",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "detail",
+          "fieldtype": "Long Text",
+          "label": "Detail",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        }
+      ]
+    },
+    {
+      "name": "Letron SSO Identity",
+      "module": "Letron API",
+      "source": "letron_api\\doctype\\letron_sso_identity\\letron_sso_identity.json",
+      "is_child_table": 0,
+      "fields": [
+        {
+          "fieldname": "identity_key",
+          "fieldtype": "Data",
+          "label": "Identity Key",
+          "options": null,
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "provider",
+          "fieldtype": "Data",
+          "label": "Provider",
+          "options": null,
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "tenant_key",
+          "fieldtype": "Data",
+          "label": "Tenant Key",
+          "options": null,
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "subject",
+          "fieldtype": "Data",
+          "label": "Subject",
+          "options": null,
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "subject_type",
+          "fieldtype": "Select",
+          "label": "Subject Type",
+          "options": "union_id\nopen_id",
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "user",
+          "fieldtype": "Link",
+          "label": "ERP User",
+          "options": "User",
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "email",
+          "fieldtype": "Data",
+          "label": "Last Lark Email",
+          "options": null,
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "display_name",
+          "fieldtype": "Data",
+          "label": "Display Name",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "group_ids",
+          "fieldtype": "Long Text",
+          "label": "Group IDs",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "last_sync_at",
+          "fieldtype": "Datetime",
+          "label": "Last Successful Sync",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "sync_state",
+          "fieldtype": "Select",
+          "label": "Sync State",
+          "options": "Active\nAccess Removed\nStale Locked\nConflict\nLocal Blocked",
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "disabled_by_sync",
+          "fieldtype": "Check",
+          "label": "Disabled by Sync",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "local_blocked",
+          "fieldtype": "Check",
+          "label": "Local Blocked",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "last_error",
+          "fieldtype": "Small Text",
+          "label": "Last Error",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "break_glass_until",
+          "fieldtype": "Datetime",
+          "label": "Break Glass Until",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "break_glass_reason",
+          "fieldtype": "Small Text",
+          "label": "Break Glass Reason",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        }
+      ]
+    },
+    {
       "name": "Letter Head",
       "module": "Printing",
       "source": "printing\\doctype\\letter_head\\letter_head.json",
@@ -157001,6 +157242,15 @@
       ]
     },
     {
+      "dotted_path": "letron_api.access_policy.publish",
+      "source": "access_policy.py",
+      "method": "publish",
+      "app": "letron_api",
+      "methods": [],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
       "dotted_path": "letron_api.accounts_reconciliation.reconcile_bank_transaction",
       "source": "accounts_reconciliation.py",
       "method": "reconcile_bank_transaction",
@@ -157117,6 +157367,496 @@
       "parameters": []
     },
     {
+      "dotted_path": "letron_api.backup.scheduled_s3_backup",
+      "source": "backup.py",
+      "method": "scheduled_s3_backup",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.banking.accounts_settings",
+      "source": "banking.py",
+      "method": "accounts_settings",
+      "app": "letron_api",
+      "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.banking.accounts_settings_update",
+      "source": "banking.py",
+      "method": "accounts_settings_update",
+      "app": "letron_api",
+      "methods": [
+        "PUT"
+      ],
+      "allow_guest": false,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.banking.reconciliation_action",
+      "source": "banking.py",
+      "method": "reconciliation_action",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "action",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "payload",
+          "annotation": "Any",
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.reconciliation_balance",
+      "source": "banking.py",
+      "method": "reconciliation_balance",
+      "app": "letron_api",
+      "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "bank_account",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "till_date",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "company",
+          "annotation": "str",
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.reconciliation_clear_clearance",
+      "source": "banking.py",
+      "method": "reconciliation_clear_clearance",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "voucher_type",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "voucher_name",
+          "annotation": "str",
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.reconciliation_linked_payments",
+      "source": "banking.py",
+      "method": "reconciliation_linked_payments",
+      "app": "letron_api",
+      "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "bank_transaction_name",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "document_types",
+          "annotation": "Any",
+          "required": false
+        },
+        {
+          "name": "from_date",
+          "annotation": "str | None",
+          "required": false
+        },
+        {
+          "name": "to_date",
+          "annotation": "str | None",
+          "required": false
+        },
+        {
+          "name": "filter_by_reference_date",
+          "annotation": "Any",
+          "required": false
+        },
+        {
+          "name": "from_reference_date",
+          "annotation": "str | None",
+          "required": false
+        },
+        {
+          "name": "to_reference_date",
+          "annotation": "str | None",
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.reconciliation_transactions",
+      "source": "banking.py",
+      "method": "reconciliation_transactions",
+      "app": "letron_api",
+      "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "bank_account",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "from_date",
+          "annotation": "str | None",
+          "required": false
+        },
+        {
+          "name": "to_date",
+          "annotation": "str | None",
+          "required": false
+        },
+        {
+          "name": "all_transactions",
+          "annotation": "Any",
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.reconciliation_update_clearance",
+      "source": "banking.py",
+      "method": "reconciliation_update_clearance",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "payment_document",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "payment_entry",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "account",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "clearance_date",
+          "annotation": "str | None",
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.report",
+      "source": "banking.py",
+      "method": "report",
+      "app": "letron_api",
+      "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "report_key",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "filters",
+          "annotation": "Any",
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.run_rule_evaluation",
+      "source": "banking.py",
+      "method": "run_rule_evaluation",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "force_evaluate",
+          "annotation": "Any",
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.statement_details",
+      "source": "banking.py",
+      "method": "statement_details",
+      "app": "letron_api",
+      "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "statement_import_id",
+          "annotation": "str",
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.statement_import_create",
+      "source": "banking.py",
+      "method": "statement_import_create",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "bank_account",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "file",
+          "annotation": "str",
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.statement_import_get",
+      "source": "banking.py",
+      "method": "statement_import_get",
+      "app": "letron_api",
+      "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "statement_import_id",
+          "annotation": "str",
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.statement_import_update",
+      "source": "banking.py",
+      "method": "statement_import_update",
+      "app": "letron_api",
+      "methods": [
+        "PUT"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "statement_import_id",
+          "annotation": "str",
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.statement_import_upload",
+      "source": "banking.py",
+      "method": "statement_import_upload",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.banking.statement_imports",
+      "source": "banking.py",
+      "method": "statement_imports",
+      "app": "letron_api",
+      "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "limit_page_length",
+          "annotation": "int",
+          "required": false
+        },
+        {
+          "name": "start",
+          "annotation": "int",
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.statement_reextract_pdf_table",
+      "source": "banking.py",
+      "method": "statement_reextract_pdf_table",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "statement_import_id",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "page",
+          "annotation": "int",
+          "required": true
+        },
+        {
+          "name": "table_index",
+          "annotation": "int",
+          "required": true
+        },
+        {
+          "name": "bbox",
+          "annotation": "Any",
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.statement_set_header_index",
+      "source": "banking.py",
+      "method": "statement_set_header_index",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "statement_import_id",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "header_index",
+          "annotation": "int",
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.statement_set_pdf_table_header",
+      "source": "banking.py",
+      "method": "statement_set_pdf_table_header",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "statement_import_id",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "page",
+          "annotation": "int",
+          "required": true
+        },
+        {
+          "name": "table_index",
+          "annotation": "int",
+          "required": true
+        },
+        {
+          "name": "header_index",
+          "annotation": "int",
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.statement_update_column_mapping",
+      "source": "banking.py",
+      "method": "statement_update_column_mapping",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "statement_import_id",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "column_mapping",
+          "annotation": "Any",
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.banking.statement_update_pdf_tables",
+      "source": "banking.py",
+      "method": "statement_update_pdf_tables",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "statement_import_id",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "tables",
+          "annotation": "Any",
+          "required": true
+        }
+      ]
+    },
+    {
       "dotted_path": "letron_api.config_control.get_configuration",
       "source": "config_control.py",
       "method": "get_configuration",
@@ -157165,6 +157905,45 @@
           "required": false
         }
       ]
+    },
+    {
+      "dotted_path": "letron_api.sso.callback",
+      "source": "sso.py",
+      "method": "callback",
+      "app": "letron_api",
+      "methods": [],
+      "allow_guest": true,
+      "parameters": [
+        {
+          "name": "code",
+          "annotation": "str | None",
+          "required": false
+        },
+        {
+          "name": "state",
+          "annotation": "str | None",
+          "required": false
+        },
+        {
+          "name": "error",
+          "annotation": "str | None",
+          "required": false
+        },
+        {
+          "name": "error_description",
+          "annotation": "str | None",
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.sso.launch",
+      "source": "sso.py",
+      "method": "launch",
+      "app": "letron_api",
+      "methods": [],
+      "allow_guest": true,
+      "parameters": []
     }
   ],
   "modules": {
@@ -157702,7 +158481,9 @@
       "Webhook Request Log"
     ],
     "Letron API": [
-      "Letron Event Outbox"
+      "Letron Event Outbox",
+      "Letron SSO Audit Log",
+      "Letron SSO Identity"
     ],
     "Maintenance": [
       "Maintenance Schedule",

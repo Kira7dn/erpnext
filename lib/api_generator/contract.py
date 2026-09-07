@@ -65,6 +65,28 @@ def validate_contract(data: dict[str, Any], doctypes: list[Any] | None = None, m
             raise ValueError(f"runtime.custom_actions module must be public: {item['module']}")
         custom_action_keys.add(key)
         custom_operation_ids.add(item["operation_id"])
+    custom_routes = runtime.get("custom_routes", [])
+    if not isinstance(custom_routes, list) or any(not isinstance(item, dict) for item in custom_routes):
+        raise TypeError("runtime.custom_routes must be a list of mappings")
+    route_paths: set[str] = set()
+    route_operation_ids: set[str] = set()
+    for item in custom_routes:
+        required_route = ("module", "resource", "method", "path", "operation", "operation_id", "handler")
+        if any(not isinstance(item.get(key), str) or not item[key].strip() for key in required_route):
+            raise ValueError("runtime.custom_routes require module, resource, method, path, operation, operation_id and handler")
+        if item["method"].upper() not in {"GET", "POST", "PUT", "PATCH", "DELETE"}:
+            raise ValueError("runtime.custom_routes method is invalid")
+        if item["operation"] not in {"list", "read", "create", "update", "delete"}:
+            raise ValueError("runtime.custom_routes operation is invalid")
+        if not item["path"].startswith("/"):
+            raise ValueError("runtime.custom_routes path must be absolute")
+        route_key = f"{item['method'].upper()} {item['path']}"
+        if route_key in route_paths:
+            raise ValueError(f"runtime.custom_routes path collision: {route_key}")
+        if item["operation_id"] in route_operation_ids:
+            raise ValueError(f"runtime.custom_routes operation collision: {item['operation_id']}")
+        route_paths.add(route_key)
+        route_operation_ids.add(item["operation_id"])
     for key in ("include_doctype_metadata",):
         if not isinstance(runtime.get(key), bool):
             raise TypeError(f"runtime.{key} must be boolean")

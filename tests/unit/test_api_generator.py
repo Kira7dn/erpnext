@@ -99,18 +99,18 @@ def test_openapi_contains_frappe_contract_paths():
         for verb, operation in path_item.items()
         if verb in {"get", "post", "put", "patch", "delete"}
     ]
-    assert len(contract["runtime"]["public_resources"]) == 45
+    assert len(contract["runtime"]["public_resources"]) == 46
     assert {
         item.module
         for item in doctypes
         if item.name in {resource["doctype"] for resource in contract["runtime"]["public_resources"]}
     } == {"Accounts", "Assets", "Buying", "Contacts", "Selling", "Stock", "CRM"}
-    assert len(operations) == 265
+    assert len(operations) == 291
     status_counts = {
         status: sum(operation["x-test-status"] == status for operation in operations)
         for status in ("passed", "partial", "not-tested", "blocked")
     }
-    assert status_counts == {"passed": 215, "partial": 0, "not-tested": 50, "blocked": 0}
+    assert status_counts == {"passed": 215, "partial": 0, "not-tested": 76, "blocked": 0}
     assert all(operation["x-test-level"] == "docker-runtime" for operation in operations)
     assert all(operation.get("x-test-evidence", {}).get("test") for operation in operations)
     assert spec["x-acceptance-summary"] == status_counts
@@ -191,5 +191,5 @@ def test_control_plane_is_typed_and_separate_from_business_operations():
 def test_committed_handoff_manifest_keeps_business_and_control_counts_separate():
     manifest = json.loads((ROOT / "contracts" / "openapi" / "manifest.json").read_text(encoding="utf-8"))
 
-    assert manifest["artifacts"]["public"]["operations"] == 265
+    assert manifest["artifacts"]["public"]["operations"] == 291
     assert manifest["artifacts"]["control-plane"]["operations"] == 2

@@ -10407,6 +10407,197 @@
           "operation_id": "unreconcileBankTransaction",
           "path_suffix": "unreconcile",
           "handler": "letron_api.accounts_reconciliation.unreconcile_bank_transaction"
+        },
+        {
+          "doctype": "Bank Transaction Rule",
+          "module": "Accounts",
+          "action": "run-evaluation",
+          "operation_id": "runBankTransactionRules",
+          "path_suffix": "run-evaluation",
+          "handler": "letron_api.banking.run_rule_evaluation"
+        }
+      ],
+      "custom_routes": [
+        {
+          "module": "Accounts",
+          "resource": "bank-reconciliation",
+          "method": "GET",
+          "path": "/api/v1/accounts/bank-reconciliation/transactions",
+          "operation": "list",
+          "operation_id": "listBankReconciliationTransactions",
+          "handler": "letron_api.banking.reconciliation_transactions"
+        },
+        {
+          "module": "Accounts",
+          "resource": "bank-reconciliation",
+          "method": "GET",
+          "path": "/api/v1/accounts/bank-reconciliation/balance",
+          "operation": "read",
+          "operation_id": "getBankReconciliationBalance",
+          "handler": "letron_api.banking.reconciliation_balance"
+        },
+        {
+          "module": "Accounts",
+          "resource": "bank-reconciliation",
+          "method": "GET",
+          "path": "/api/v1/accounts/bank-reconciliation/linked-payments",
+          "operation": "read",
+          "operation_id": "getBankReconciliationLinkedPayments",
+          "handler": "letron_api.banking.reconciliation_linked_payments"
+        },
+        {
+          "module": "Accounts",
+          "resource": "bank-reconciliation",
+          "method": "POST",
+          "path": "/api/v1/accounts/bank-reconciliation/clearance",
+          "operation": "update",
+          "operation_id": "updateBankReconciliationClearance",
+          "handler": "letron_api.banking.reconciliation_update_clearance"
+        },
+        {
+          "module": "Accounts",
+          "resource": "bank-reconciliation",
+          "method": "POST",
+          "path": "/api/v1/accounts/bank-reconciliation/clear-clearance",
+          "operation": "update",
+          "operation_id": "clearBankReconciliationClearance",
+          "handler": "letron_api.banking.reconciliation_clear_clearance"
+        },
+        {
+          "module": "Accounts",
+          "resource": "bank-reconciliation",
+          "method": "POST",
+          "path": "/api/v1/accounts/bank-reconciliation/actions/{action}",
+          "operation": "update",
+          "operation_id": "runBankReconciliationAction",
+          "handler": "letron_api.banking.reconciliation_action"
+        },
+        {
+          "module": "Accounts",
+          "resource": "reports",
+          "method": "GET",
+          "path": "/api/v1/accounts/reports/report",
+          "operation": "read",
+          "operation_id": "runAccountsReport",
+          "handler": "letron_api.banking.report"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "GET",
+          "path": "/api/v1/accounts/statement-imports",
+          "operation": "list",
+          "operation_id": "listStatementImports",
+          "handler": "letron_api.banking.statement_imports"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports",
+          "operation": "create",
+          "operation_id": "createStatementImport",
+          "handler": "letron_api.banking.statement_import_create"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports/upload",
+          "operation": "create",
+          "operation_id": "uploadStatementImport",
+          "handler": "letron_api.banking.statement_import_upload",
+          "content_type": "multipart/form-data"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "GET",
+          "path": "/api/v1/accounts/statement-imports/{name}",
+          "operation": "read",
+          "operation_id": "getStatementImport",
+          "handler": "letron_api.banking.statement_import_get"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "PUT",
+          "path": "/api/v1/accounts/statement-imports/{name}",
+          "operation": "update",
+          "operation_id": "updateStatementImport",
+          "handler": "letron_api.banking.statement_import_update"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "GET",
+          "path": "/api/v1/accounts/statement-imports/{name}/details",
+          "operation": "read",
+          "operation_id": "getStatementImportDetails",
+          "handler": "letron_api.banking.statement_details"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports/{name}/update-pdf-tables",
+          "operation": "update",
+          "operation_id": "updateStatementImportPdfTables",
+          "handler": "letron_api.banking.statement_update_pdf_tables"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports/{name}/reextract-pdf-table",
+          "operation": "update",
+          "operation_id": "reextractStatementImportPdfTable",
+          "handler": "letron_api.banking.statement_reextract_pdf_table"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports/{name}/set-pdf-table-header",
+          "operation": "update",
+          "operation_id": "setStatementImportPdfTableHeader",
+          "handler": "letron_api.banking.statement_set_pdf_table_header"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports/{name}/update-column-mapping",
+          "operation": "update",
+          "operation_id": "updateStatementImportColumnMapping",
+          "handler": "letron_api.banking.statement_update_column_mapping"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports/{name}/set-header-index",
+          "operation": "update",
+          "operation_id": "setStatementImportHeaderIndex",
+          "handler": "letron_api.banking.statement_set_header_index"
+        },
+        {
+          "module": "Accounts",
+          "resource": "settings",
+          "method": "GET",
+          "path": "/api/v1/accounts/settings",
+          "operation": "read",
+          "operation_id": "getAccountsSettings",
+          "handler": "letron_api.banking.accounts_settings"
+        },
+        {
+          "module": "Accounts",
+          "resource": "settings",
+          "method": "PUT",
+          "path": "/api/v1/accounts/settings",
+          "operation": "update",
+          "operation_id": "updateAccountsSettings",
+          "handler": "letron_api.banking.accounts_settings_update"
         }
       ],
       "include_methods": [
@@ -10522,6 +10713,10 @@
         {
           "doctype": "Payment Order",
           "path": "/api/v1/accounts/payment-orders"
+        },
+        {
+          "doctype": "Bank Transaction Rule",
+          "path": "/api/v1/accounts/bank-transaction-rules"
         },
         {
           "doctype": "Supplier",

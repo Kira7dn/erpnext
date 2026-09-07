@@ -12,7 +12,17 @@ import { getEnv } from "../../../../src/server/env";
 import { refreshLarkGroupsForUser } from "../../../../src/server/users";
 
 function safeReturnTo(value: string | undefined): string {
-  return value?.startsWith("/") && !value.startsWith("//") ? value : "/";
+  if (!value) return "/";
+  if (value.startsWith("/") && !value.startsWith("//")) return value;
+  const configured = getEnv().LETRON_NEXT_BASE_URL;
+  if (!configured) return "/";
+  try {
+    const requested = new URL(value);
+    const allowed = new URL(configured);
+    return requested.origin === allowed.origin ? requested.toString() : "/";
+  } catch {
+    return "/";
+  }
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {

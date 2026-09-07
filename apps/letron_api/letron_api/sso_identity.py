@@ -167,14 +167,20 @@ def _sync_user(
     before = {row.role for row in user.roles}
     after = (before - managed_roles) | desired_roles
     target_enabled = 1 if enabled else 0
-    if before == after and int(user.enabled) == target_enabled:
+    target_user_type = "System User" if enabled else "Website User"
+    if before == after and int(user.enabled) == target_enabled and user.user_type == target_user_type:
         return before, after
     user.flags.lark_sso_sync = True
     user.enabled = target_enabled
+    user.user_type = target_user_type
     user.set("roles", [])
     for role in sorted(after):
         user.append("roles", {"role": role})
     user.save(ignore_permissions=True)
+    # Frappe derives user_type from desk-access roles during User.save().
+    # Policy roles are intentionally API roles and may not grant Desk access,
+    # but the public gateway still requires an active System User.
+    frappe.db.set_value("User", user.name, "user_type", target_user_type, update_modified=False)
     frappe.clear_cache(user=user.name)
     return before, after
 
@@ -325,10 +331,11 @@ def reconcile_identity(
         return user.name
 
     was_enabled = bool(user.enabled)
+    existing_roles = {row.role for row in user.roles}
     before, after = _sync_user(
         user,
         desired_roles=desired_roles,
-        managed_roles=LEGACY_NATIVE_ROLES | _managed_policy_roles(before),
+        managed_roles=LEGACY_NATIVE_ROLES | _managed_policy_roles(existing_roles),
         enabled=True,
     )
     identity.user = user.name

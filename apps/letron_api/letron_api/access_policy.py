@@ -23,6 +23,13 @@ RESOURCE_DOCTYPES = {
     "assets/assets": "Asset",
 }
 
+POLICY_RESOURCE_DOCTYPES = {
+    "accounts/bank-reconciliation": "Bank Transaction",
+    "accounts/reports": "GL Entry",
+    "accounts/statement-imports": "Bank Statement Import Log",
+    "accounts/settings": "Accounts Settings",
+}
+
 OPERATION_FIELDS = {
     "list": "read", "read": "read", "create": "create", "update": "write",
     "delete": "delete",
@@ -76,7 +83,7 @@ def publish() -> dict[str, Any]:
             frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 0}).insert(ignore_permissions=True)
         for rule in entitlement.get("rules", []):
             key = f"{rule.get('module')}/{rule.get('resource')}"
-            doctype = PUBLIC_RESOURCE_ROUTES.get((rule.get("module"), rule.get("resource")))
+            doctype = PUBLIC_RESOURCE_ROUTES.get((rule.get("module"), rule.get("resource"))) or POLICY_RESOURCE_DOCTYPES.get(key)
             if key == "erp/workspace":
                 continue
             if not doctype:

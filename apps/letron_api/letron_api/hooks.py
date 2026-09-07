@@ -47,6 +47,7 @@ PUBLIC_RESOURCE_ROUTES = {
     ("accounts", "payment-requests"): "Payment Request",
     ("accounts", "bank-transactions"): "Bank Transaction",
     ("accounts", "payment-orders"): "Payment Order",
+    ("accounts", "bank-transaction-rules"): "Bank Transaction Rule",
     ("buying", "suppliers"): "Supplier",
     ("buying", "purchase-orders"): "Purchase Order",
     ("stock", "items"): "Item",
@@ -88,7 +89,52 @@ DOCUMENT_ACTIONS = {
 CUSTOM_ACTIONS = {
     ("accounts", "bank-transactions", "reconcile"): "letron_api.accounts_reconciliation.reconcile_bank_transaction",
     ("accounts", "bank-transactions", "unreconcile"): "letron_api.accounts_reconciliation.unreconcile_bank_transaction",
+    ("accounts", "bank-transaction-rules", "run-evaluation"): "letron_api.banking.run_rule_evaluation",
 }
+
+VIRTUAL_BANKING_ROUTES = {
+    ("accounts", "bank-reconciliation", "transactions"): "letron_api.banking.reconciliation_transactions",
+    ("accounts", "bank-reconciliation", "balance"): "letron_api.banking.reconciliation_balance",
+    ("accounts", "bank-reconciliation", "linked-payments"): "letron_api.banking.reconciliation_linked_payments",
+    ("accounts", "bank-reconciliation", "clearance"): "letron_api.banking.reconciliation_update_clearance",
+    ("accounts", "bank-reconciliation", "clear-clearance"): "letron_api.banking.reconciliation_clear_clearance",
+    ("accounts", "bank-reconciliation", "actions"): "letron_api.banking.reconciliation_action",
+    ("accounts", "reports", "report"): "letron_api.banking.report",
+    ("accounts", "statement-imports", "details"): "letron_api.banking.statement_details",
+    ("accounts", "statement-imports", "update-pdf-tables"): "letron_api.banking.statement_update_pdf_tables",
+    ("accounts", "statement-imports", "reextract-pdf-table"): "letron_api.banking.statement_reextract_pdf_table",
+    ("accounts", "statement-imports", "set-pdf-table-header"): "letron_api.banking.statement_set_pdf_table_header",
+    ("accounts", "statement-imports", "update-column-mapping"): "letron_api.banking.statement_update_column_mapping",
+    ("accounts", "statement-imports", "set-header-index"): "letron_api.banking.statement_set_header_index",
+}
+
+
+def _virtual_banking_target(parts: list[str]) -> str | None:
+    if len(parts) == 4 and parts[2:4] == ["accounts", "statement-imports"]:
+        return "letron_api.banking.statement_imports" if frappe.local.request.method == "GET" else "letron_api.banking.statement_import_create"
+    if len(parts) == 4 and parts[2:4] == ["accounts", "settings"]:
+        return "letron_api.banking.accounts_settings" if frappe.local.request.method == "GET" else "letron_api.banking.accounts_settings_update"
+    if len(parts) == 5:
+        if parts[2:4] == ["accounts", "statement-imports"] and parts[4] == "upload":
+            return "letron_api.banking.statement_import_upload"
+        if parts[2:4] == ["accounts", "statement-imports"]:
+            return "letron_api.banking.statement_import_get" if frappe.local.request.method == "GET" else "letron_api.banking.statement_import_update"
+        return VIRTUAL_BANKING_ROUTES.get((parts[2], parts[3], parts[4]))
+    if len(parts) == 6 and parts[2:4] == ["accounts", "bank-reconciliation"] and parts[4] == "actions":
+        frappe.local.form_dict.update({"action": parts[5], "payload": frappe.request.get_data(as_text=True)})
+        return "letron_api.banking.reconciliation_action"
+    if len(parts) == 6 and parts[2:4] == ["accounts", "statement-imports"]:
+        action = parts[5]
+        method = {
+            "details": "letron_api.banking.statement_details",
+            "update-pdf-tables": "letron_api.banking.statement_update_pdf_tables",
+            "reextract-pdf-table": "letron_api.banking.statement_reextract_pdf_table",
+            "set-pdf-table-header": "letron_api.banking.statement_set_pdf_table_header",
+            "update-column-mapping": "letron_api.banking.statement_update_column_mapping",
+            "set-header-index": "letron_api.banking.statement_set_header_index",
+        }.get(action)
+        return method
+    return None
 
 
 
@@ -109,6 +155,14 @@ def rewrite_public_routes() -> None:
     if not module_slug or not doctype_slug:
         return
     if (module_slug, doctype_slug) not in PUBLIC_RESOURCE_ROUTES:
+        target_method = _virtual_banking_target(parts)
+        if target_method:
+            if len(parts) >= 5 and parts[2:4] == ["accounts", "statement-imports"]:
+                frappe.local.form_dict.setdefault("statement_import_id", parts[4])
+            target = f"/api/method/{target_method}"
+            request.environ["PATH_INFO"] = target
+            request.__dict__["path"] = target
+            return
         return
     if frappe.session.user in {"Guest", ""}:
         frappe.throw("Authentication required", exc=frappe.AuthenticationError)

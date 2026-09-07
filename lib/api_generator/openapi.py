@@ -272,6 +272,29 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
                     "x-native-action": custom["action"],
                 }
             }
+    for custom in runtime.get("custom_routes", []):
+        if module_name is not None and custom["module"] != module_name:
+            continue
+        method = custom["method"].lower()
+        parameters = []
+        for name in re.findall(r"\{([^}]+)\}", custom["path"]):
+            parameters.append({"name": name, "in": "path", "required": True, "schema": {"type": "string"}})
+        parameters.extend(write_headers if method not in {"get", "head"} else request_headers)
+        operation: dict[str, Any] = {
+            "tags": [f"Module: {custom['module']}", "Business routes"],
+            "summary": custom.get("summary", custom["operation_id"]),
+            "operationId": custom["operation_id"],
+            "parameters": parameters,
+            "responses": {**_response(custom.get("response_description", "Business route response"), {"$ref": "#/components/schemas/FrappeResponse"}), **error},
+            "x-frappe-handler": custom["handler"],
+            "x-public-operation": custom["operation"],
+        }
+        if method not in {"get", "head"}:
+            if custom.get("content_type") == "multipart/form-data":
+                operation["requestBody"] = {"required": True, "content": {"multipart/form-data": {"schema": {"type": "object", "required": ["file"], "properties": {"file": {"type": "string", "format": "binary"}}}}}}
+            else:
+                operation["requestBody"] = _json_body({"type": "object", "additionalProperties": True}, required=False)
+        paths.setdefault(custom["path"], {})[method] = operation
     if module_name is None:
         paths["/api/method/upload_file"] = {"post": {"tags": ["Files"], "operationId": "uploadFile", "parameters": write_headers, "requestBody": {"required": True, "content": {"multipart/form-data": {"schema": {"type": "object", "required": ["file"], "properties": {"file": {"type": "string", "format": "binary"}, "is_private": {"type": "boolean"}, "doctype": {"type": "string"}, "docname": {"type": "string"}}}}}}, "responses": {**_response("Uploaded file", {"$ref": "#/components/schemas/FileUploadResponse"}), **error}}}
     server = os.environ.get("ERPNEXT_API_URL") or runtime["server_url"]

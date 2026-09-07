@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-type OpenApiDocument = { paths?: Record<string, Record<string, unknown>> };
+type OpenApiOperation = Record<string, unknown>;
+type OpenApiDocument = { paths?: Record<string, Record<string, OpenApiOperation>> };
+type CatalogOperation = "list" | "read" | "create" | "update" | "delete";
 
 export type OpenApiPermission = { key: string; module: string; resource: string; label: string; operation: string; operationId: string; method: string; path: string };
 
@@ -36,6 +38,21 @@ export function openApiPermissions(): OpenApiPermission[] {
     }
   }
   return [...permissions.values()].sort((a, b) => `${a.module}/${a.resource}/${a.operation}`.localeCompare(`${b.module}/${b.resource}/${b.operation}`));
+}
+
+export function openApiRouteOperations(): Array<{ method: string; path: string; module: string; resource: string; operation: CatalogOperation }> {
+  const routes: Array<{ method: string; path: string; module: string; resource: string; operation: CatalogOperation }> = [];
+  for (const [path, definition] of Object.entries(readOpenApi().paths ?? {})) {
+    const match = path.match(/^\/api\/v1\/([^/]+)\/([^/]+)/);
+    if (!match) continue;
+    for (const [method, operation] of Object.entries(definition ?? {})) {
+      if (!operation || typeof operation !== "object" || !("x-public-operation" in operation)) continue;
+      const declared = operation["x-public-operation"];
+      if (typeof declared !== "string" || !["list", "read", "create", "update", "delete"].includes(declared)) continue;
+      routes.push({ method: method.toUpperCase(), path, module: match[1], resource: match[2], operation: declared as CatalogOperation });
+    }
+  }
+  return routes;
 }
 
 export function openApiActionPaths(): Set<string> {

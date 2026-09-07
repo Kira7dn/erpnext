@@ -15,6 +15,7 @@ const schema = z.object({
   LARK_GROUP_SYNC_ENABLED: z.stringbool().default(false),
   AUTH_GROUP_SYNC_STALE_SECONDS: z.coerce.number().int().min(60).max(86400).default(600),
   LETRON_SSO_ERP_BASE_URL: z.url().optional().transform((value) => value?.replace(/\/$/, "")),
+  LETRON_NEXT_BASE_URL: z.url().optional().transform((value) => value?.replace(/\/$/, "")),
   GLOBAL_ACCESS_ADMIN_GROUP_ID: z.string().min(1).optional(),
   LETRON_SSO_SYNC_SECRET: z.string().min(32).optional(),
   AUTH_ERP_SYNC_SECRET: z.string().min(32).optional(),

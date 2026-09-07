@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 
 import { z } from "zod";
 
-import { openApiActionPaths, openApiResourceKeys } from "./openapi-catalog";
+import { openApiActionPaths, openApiResourceKeys, openApiRouteOperations } from "./openapi-catalog";
 
 export const PUBLIC_OPERATIONS = ["list", "read", "create", "update", "delete"] as const;
 export type PublicOperation = typeof PUBLIC_OPERATIONS[number];
@@ -150,6 +150,13 @@ export function routeOperation(
   method: string,
   path: string,
 ): { module: string; resource: string; operation: PublicOperation } | null {
+  const pathParts = path.replace(/^\/+|\/+$/g, "").split("/");
+  const matches = (pattern: string) => {
+    const patternParts = pattern.replace(/^\/+|\/+$/g, "").split("/");
+    return patternParts.length === pathParts.length && patternParts.every((part, index) => part.startsWith("{") || part === pathParts[index]);
+  };
+  const custom = openApiRouteOperations().find((route) => route.method === method.toUpperCase() && matches(route.path));
+  if (custom) return { module: custom.module, resource: custom.resource, operation: custom.operation };
   const parts = path.replace(/^\/+|\/+$/g, "").split("/");
   if (parts.length < 3 || parts[0] !== "api" || parts[1] !== "v1") return null;
   const moduleName = parts[2];
