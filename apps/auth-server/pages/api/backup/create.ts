@@ -14,7 +14,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const sessionToken = req.cookies[SESSION_COOKIE];
   const user = await getUserBySessionToken(sessionToken);
-  if (!user) {
+  const adminGroupId = getEnv().GLOBAL_ACCESS_ADMIN_GROUP_ID;
+  if (!user || !adminGroupId || !user.groupIds.includes(adminGroupId)) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }

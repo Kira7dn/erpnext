@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LeTRON-Kế toán và LeTRON-Tài sản",
-  description: "Frontend tiếng Việt cho các phân hệ Accounting và Assets của LeTRON",
+  title: "LeTRON-ERP",
+  description: "Nền tảng nghiệp vụ LeTRON-ERP",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
