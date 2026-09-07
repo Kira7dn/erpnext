@@ -30,9 +30,10 @@ export function appendSetCookie(res: NextApiResponse, value: string): void {
 export function serializeCookie(
   name: string,
   value: string,
-  options: { maxAge?: number; expires?: Date; secure?: boolean } = {},
+  options: { maxAge?: number; expires?: Date; secure?: boolean; domain?: string } = {},
 ): string {
   const parts = [`${name}=${encodeURIComponent(value)}`, "Path=/", "HttpOnly", "SameSite=Lax"];
+  if (options.domain) parts.push(`Domain=${options.domain}`);
   if (options.maxAge !== undefined) parts.push(`Max-Age=${Math.max(0, Math.floor(options.maxAge))}`);
   if (options.expires) parts.push(`Expires=${options.expires.toUTCString()}`);
   if (options.secure) parts.push("Secure");

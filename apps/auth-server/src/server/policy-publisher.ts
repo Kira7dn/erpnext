@@ -3,7 +3,7 @@ import { getEnv } from "./env";
 export async function publishPolicyToErp(input: { policy: unknown; version: number; sha256: string }): Promise<void> {
   const env = getEnv();
   const baseUrl = env.LETRON_SSO_ERP_BASE_URL;
-  const secret = env.LETRON_SSO_SYNC_SECRET;
+  const secret = env.LETRON_SSO_SYNC_SECRET ?? env.AUTH_ERP_SYNC_SECRET;
   if (!baseUrl || !secret) throw new Error("ERP policy publication is not configured");
   const response = await fetch(new URL("/api/method/letron_api.access_policy.publish", `${baseUrl}/`), {
     method: "POST",

@@ -58,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   const env = getEnv();
   const baseUrl = env.LETRON_SSO_ERP_BASE_URL;
-  const secret = env.LETRON_SSO_SYNC_SECRET;
+  const secret = env.LETRON_SSO_SYNC_SECRET ?? env.AUTH_ERP_SYNC_SECRET;
   if (!baseUrl || !secret) { res.status(503).json({ error: "gateway_not_configured" }); return; }
   const roles = policyRolesForGroups(policy.policy, user.groupIds);
   const target = new URL(path, `${baseUrl}/`);

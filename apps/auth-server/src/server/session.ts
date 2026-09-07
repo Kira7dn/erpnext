@@ -31,6 +31,7 @@ export function setSessionCookie(res: NextApiResponse, token: string, expiresAt:
   appendSetCookie(res, serializeCookie(SESSION_COOKIE, token, {
     expires: expiresAt,
     secure: secureCookie(),
+    domain: getEnv().AUTH_COOKIE_DOMAIN,
   }));
 }
 
@@ -39,6 +40,7 @@ export function clearSessionCookie(res: NextApiResponse): void {
     maxAge: 0,
     expires: new Date(0),
     secure: secureCookie(),
+    domain: getEnv().AUTH_COOKIE_DOMAIN,
   }));
 }
 

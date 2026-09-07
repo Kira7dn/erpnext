@@ -7,6 +7,7 @@ let loadedFiles = false;
 
 const schema = z.object({
   AUTH_BASE_URL: z.url().transform((value) => value.replace(/\/$/, "")),
+  AUTH_COOKIE_DOMAIN: z.string().min(1).optional(),
   DATABASE_URL: z.string().min(1),
   LARK_APP_ID: z.string().min(1),
   LARK_APP_SECRET: z.string().min(1),
