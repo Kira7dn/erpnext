@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AssetsAppShell } from "@/components/assets-shell";
 
 export const metadata: Metadata = {
   title: "LeTRON-Tài sản",
@@ -6,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AssetsLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return children;
+  return <AssetsAppShell>{children}</AssetsAppShell>;
 }

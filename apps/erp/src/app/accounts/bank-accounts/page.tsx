@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { AlertCircle, Plus } from "lucide-react";
 
-import { AccountingShell } from "@/components/accounting-shell";
 import { BankAccountsTable } from "@/components/bank-accounts-table";
 import { ResourcePagination } from "@/components/resource-pagination";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -38,8 +37,7 @@ export default async function BankAccountsPage({ searchParams }: { searchParams:
   }
 
   return (
-    <AccountingShell>
-      <main className="mx-auto max-w-7xl space-y-6 p-5 md:p-8">
+    <main className="mx-auto max-w-7xl space-y-6 p-5 md:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-blue-600"><span>LeTRON-Kế toán</span><span>/</span><span>Banking</span></div>
@@ -51,6 +49,5 @@ export default async function BankAccountsPage({ searchParams }: { searchParams:
         <div className="flex items-center gap-2"><Badge variant={error ? "destructive" : "default"}>{error ? "Gateway không khả dụng" : "API đã kết nối"}</Badge><span className="text-xs text-muted-foreground">LeTRON-Global Portal SSO · policy enforced</span></div>
         {error ? <Alert variant="destructive"><AlertCircle className="size-4" /><AlertTitle>{needsLogin ? "Đăng nhập qua LeTRON-Global Portal" : accessDenied ? "Chưa được cấp quyền" : "Không lấy được dữ liệu từ Letron Gateway"}</AlertTitle><AlertDescription><p>{error}</p>{needsLogin ? <a className="mt-3 inline-flex rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground" href="/api/auth/login">Đăng nhập bằng Lark</a> : null}</AlertDescription></Alert> : <><BankAccountsTable accounts={accounts} />{accounts.length || page > 1 ? <ResourcePagination basePath="/accounts/bank-accounts" page={page} hasNext={hasNext} /> : null}</>}
       </main>
-    </AccountingShell>
   );
 }

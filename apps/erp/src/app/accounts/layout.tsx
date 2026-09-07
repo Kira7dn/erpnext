@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AccountingAppShell } from "@/components/accounting-shell";
 
 export const metadata: Metadata = {
   title: "LeTRON-Kế toán",
@@ -6,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AccountingLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return children;
+  return <AccountingAppShell>{children}</AccountingAppShell>;
 }
