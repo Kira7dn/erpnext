@@ -102,6 +102,14 @@ services:
       redis: {condition: service_started}
     ports: ["${HTTP_PORT}:8000"]
 
+  cloudflared:
+    image: cloudflare/cloudflared:2026.6.0
+    restart: ${RESTART_POLICY}
+    command: [tunnel, run, --token, "${CLOUDFLARE_TUNNEL_TOKEN}"]
+    depends_on:
+      backend: {condition: service_started}
+    networks: [frappe_network]
+
   backup-init:
     <<: *frappe_defaults
     profiles: [operations]
