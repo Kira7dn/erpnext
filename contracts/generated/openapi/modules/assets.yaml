@@ -117,175 +117,175 @@ paths:
             schema: &id013
               type: object
               properties:
-                name: &id042
+                name: &id057
                   type: string
-                naming_series: &id043
+                naming_series: &id058
                   type: string
                   enum:
                   - ACC-ASS-.YYYY.-
-                asset_name: &id044
+                asset_name: &id059
                   type: string
-                item_code: &id045
+                item_code: &id060
                   type: string
                   x-frappe-target-doctype: Item
-                asset_owner: &id046
+                asset_owner: &id061
                   type: string
                   enum:
                   - Company
                   - Supplier
                   - Customer
-                asset_owner_company: &id047
+                asset_owner_company: &id062
                   type: string
                   x-frappe-target-doctype: Company
-                supplier: &id048
+                supplier: &id063
                   type: string
                   x-frappe-target-doctype: Supplier
-                customer: &id049
+                customer: &id064
                   type: string
                   x-frappe-target-doctype: Customer
-                image: &id050
+                image: &id065
                   type: string
                   writeOnly: true
-                column_break_3: &id051
+                column_break_3: &id066
                   type: string
-                company: &id052
+                company: &id067
                   type: string
                   x-frappe-target-doctype: Company
-                location: &id053
+                location: &id068
                   type: string
                   x-frappe-target-doctype: Location
-                custodian: &id054
+                custodian: &id069
                   type: string
                   x-frappe-target-doctype: Employee
-                cost_center: &id055
+                cost_center: &id070
                   type: string
                   x-frappe-target-doctype: Cost Center
-                department: &id056
+                department: &id071
                   type: string
                   x-frappe-target-doctype: Department
-                purchase_date: &id057
+                purchase_date: &id072
                   type: string
                   format: date
-                available_for_use_date: &id058
+                available_for_use_date: &id073
                   type: string
                   format: date
-                calculate_depreciation: &id059
+                calculate_depreciation: &id074
                   type: boolean
-                opening_accumulated_depreciation: &id060
+                opening_accumulated_depreciation: &id075
                   type: number
                   x-frappe-options: Company:company:default_currency
-                finance_books: &id061
+                finance_books: &id076
                   type: array
                   items:
                     $ref: '#/components/schemas/AssetFinanceBook'
-                section_break_33: &id062
+                section_break_33: &id077
                   type: string
                   writeOnly: true
-                depreciation_method: &id063
+                depreciation_method: &id078
                   type: string
                   enum:
                   - Straight Line
                   - Double Declining Balance
                   - Written Down Value
                   - Manual
-                total_number_of_depreciations: &id064
+                total_number_of_depreciations: &id079
                   type: integer
-                column_break_24: &id065
+                column_break_24: &id080
                   type: string
-                frequency_of_depreciation: &id066
+                frequency_of_depreciation: &id081
                   type: integer
-                next_depreciation_date: &id067
+                next_depreciation_date: &id082
                   type: string
                   format: date
                   writeOnly: true
-                policy_number: &id068
+                policy_number: &id083
                   type: string
-                insurer: &id069
+                insurer: &id084
                   type: string
-                insured_value: &id070
+                insured_value: &id085
                   type: string
-                column_break_48: &id071
+                column_break_48: &id086
                   type: string
-                insurance_start_date: &id072
-                  type: string
-                  format: date
-                insurance_end_date: &id073
+                insurance_start_date: &id087
                   type: string
                   format: date
-                comprehensive_insurance: &id074
+                insurance_end_date: &id088
                   type: string
-                maintenance_required: &id075
+                  format: date
+                comprehensive_insurance: &id089
+                  type: string
+                maintenance_required: &id090
                   type: boolean
-                column_break_51: &id076
+                column_break_51: &id091
                   type: string
-                purchase_receipt: &id077
+                purchase_receipt: &id092
                   type: string
                   x-frappe-target-doctype: Purchase Receipt
-                purchase_invoice: &id078
+                purchase_invoice: &id093
                   type: string
                   x-frappe-target-doctype: Purchase Invoice
-                purchase_details_section: &id079
+                purchase_details_section: &id094
                   type: string
-                column_break_23: &id080
+                column_break_23: &id095
                   type: string
-                column_break_33: &id081
+                column_break_33: &id096
                   type: string
-                section_break_36: &id082
+                section_break_36: &id097
                   type: string
-                asset_quantity: &id083
+                asset_quantity: &id098
                   type: integer
-                depreciation_schedule_sb: &id084
+                depreciation_schedule_sb: &id099
                   type: string
-                depreciation_schedule_view: &id085
+                depreciation_schedule_view: &id100
                   type: string
                   writeOnly: true
-                is_fully_depreciated: &id086
+                is_fully_depreciated: &id101
                   type: boolean
-                opening_number_of_booked_depreciations: &id087
+                opening_number_of_booked_depreciations: &id102
                   type: integer
-                purchase_receipt_item: &id088
+                purchase_receipt_item: &id103
                   type: string
                   writeOnly: true
-                purchase_invoice_item: &id089
+                purchase_invoice_item: &id104
                   type: string
                   writeOnly: true
-                other_info_tab: &id090
+                other_info_tab: &id105
                   type: string
-                connections_tab: &id091
+                connections_tab: &id106
                   type: string
-                depreciation_tab: &id092
+                depreciation_tab: &id107
                   type: string
-                accounting_dimensions_section: &id093
+                accounting_dimensions_section: &id108
                   type: string
-                section_break_jtou: &id094
+                section_break_jtou: &id109
                   type: string
-                net_purchase_amount: &id095
+                net_purchase_amount: &id110
                   type: number
                   x-frappe-options: currency
-                asset_type: &id096
+                asset_type: &id111
                   type: string
                   enum:
                   - Existing Asset
                   - Composite Asset
                   - Composite Component
-                column_break_wqzi: &id097
+                column_break_wqzi: &id112
                   type: string
-                column_break_rjyw: &id098
+                column_break_rjyw: &id113
                   type: string
-                insurance_section: &id099
+                insurance_section: &id114
                   type: string
-                section_break_uiyd: &id100
+                section_break_uiyd: &id115
                   type: string
-                column_break_bbwr: &id101
+                column_break_bbwr: &id116
                   type: string
-                column_break_bfkm: &id102
+                column_break_bfkm: &id117
                   type: string
-                item_name: &id103
+                item_name: &id118
                   type: string
                   writeOnly: true
-                asset_owner_section: &id104
+                asset_owner_section: &id119
                   type: string
-                column_break_yeds: &id105
+                column_break_yeds: &id120
                   type: string
               required:
               - asset_name
@@ -548,83 +548,83 @@ paths:
             schema: &id022
               type: object
               properties:
-                name: &id106
+                name: &id121
                   type: string
-                title: &id107
+                title: &id122
                   type: string
                   writeOnly: true
-                target_asset: &id108
+                target_asset: &id123
                   type: string
                   x-frappe-target-doctype: Asset
-                column_break_9: &id109
+                column_break_9: &id124
                   type: string
-                company: &id110
+                company: &id125
                   type: string
                   x-frappe-target-doctype: Company
-                posting_date: &id111
+                posting_date: &id126
                   type: string
                   format: date
-                posting_time: &id112
+                posting_time: &id127
                   type: string
                   format: time
-                set_posting_time: &id113
+                set_posting_time: &id128
                   type: boolean
-                naming_series: &id114
+                naming_series: &id129
                   type: string
                   enum:
                   - ACC-ASC-.YYYY.-
-                section_break_16: &id115
+                section_break_16: &id130
                   type: string
-                stock_items: &id116
+                stock_items: &id131
                   type: array
                   items:
                     $ref: '#/components/schemas/AssetCapitalizationStockItem'
-                section_break_26: &id117
+                section_break_26: &id132
                   type: string
-                asset_items: &id118
+                asset_items: &id133
                   type: array
                   items:
                     $ref: '#/components/schemas/AssetCapitalizationAssetItem'
-                finance_book: &id119
+                finance_book: &id134
                   type: string
                   x-frappe-target-doctype: Finance Book
-                service_expenses_section: &id120
+                service_expenses_section: &id135
                   type: string
-                service_items: &id121
+                service_items: &id136
                   type: array
                   items:
                     $ref: '#/components/schemas/AssetCapitalizationServiceItem'
-                totals_section: &id122
+                totals_section: &id137
                   type: string
-                column_break_36: &id123
+                column_break_36: &id138
                   type: string
-                accounting_dimensions_section: &id124
+                accounting_dimensions_section: &id139
                   type: string
-                cost_center: &id125
+                cost_center: &id140
                   type: string
                   x-frappe-target-doctype: Cost Center
-                project: &id126
+                project: &id141
                   type: string
                   x-frappe-target-doctype: Project
-                dimension_col_break: &id127
+                dimension_col_break: &id142
                   type: string
-                section_break_urtz: &id128
+                section_break_urtz: &id143
                   type: string
-                column_break_gqep: &id129
+                column_break_gqep: &id144
                   type: string
-                column_break_yvlx: &id130
+                column_break_yvlx: &id145
                   type: string
-                section_break_arbh: &id131
+                section_break_arbh: &id146
                   type: string
-                column_break_boeu: &id132
+                column_break_boeu: &id147
                   type: string
-                column_break_qecy: &id133
+                column_break_qecy: &id148
                   type: string
-                section_break_ptna: &id134
+                section_break_ptna: &id149
                   type: string
-                column_break_szvh: &id135
+                column_break_szvh: &id150
                   type: string
-                column_break_katv: &id136
+                column_break_katv: &id151
                   type: string
               required:
               - company
@@ -885,29 +885,29 @@ paths:
             schema: &id025
               type: object
               properties:
-                name: &id137
+                name: &id152
                   type: string
-                asset_category_name: &id138
+                asset_category_name: &id153
                   type: string
-                column_break_3: &id139
+                column_break_3: &id154
                   type: string
-                finance_book_detail: &id140
+                finance_book_detail: &id155
                   type: string
-                finance_books: &id141
+                finance_books: &id156
                   type: array
                   items:
                     $ref: '#/components/schemas/AssetFinanceBook'
-                section_break_2: &id142
+                section_break_2: &id157
                   type: string
-                accounts: &id143
+                accounts: &id158
                   type: array
                   items:
                     $ref: '#/components/schemas/AssetCategoryAccount'
-                depreciation_options: &id144
+                depreciation_options: &id159
                   type: string
-                enable_cwip_accounting: &id145
+                enable_cwip_accounting: &id160
                   type: boolean
-                non_depreciable_category: &id146
+                non_depreciable_category: &id161
                   type: boolean
               required:
               - accounts
@@ -1044,13 +1044,13 @@ paths:
       x-test-evidence:
         suite: assets-lifecycle
         test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/asset-maintenance:
+  /api/v1/assets/asset-depreciation-schedules:
     get:
       tags:
       - 'Module: Assets'
-      summary: List Asset Maintenance records
-      description: List typed Asset Maintenance documents.
-      operationId: listAssetMaintenance
+      summary: List Asset Depreciation Schedule records
+      description: List typed Asset Depreciation Schedule documents.
+      operationId: listAssetDepreciationSchedule
       parameters:
       - *id002
       - *id015
@@ -1069,7 +1069,7 @@ paths:
                   data:
                     type: array
                     items: &id027
-                      $ref: '#/components/schemas/AssetMaintenance'
+                      $ref: '#/components/schemas/AssetDepreciationSchedule'
                   message: {}
                 required:
                 - data
@@ -1089,9 +1089,10 @@ paths:
     post:
       tags:
       - 'Module: Assets'
-      summary: Create Asset Maintenance
-      description: Create a Asset Maintenance using the runtime DocType schema.
-      operationId: createAssetMaintenance
+      summary: Create Asset Depreciation Schedule
+      description: Create a Asset Depreciation Schedule using the runtime DocType
+        schema.
+      operationId: createAssetDepreciationSchedule
       parameters: *id020
       requestBody:
         required: true
@@ -1100,50 +1101,39 @@ paths:
             schema: &id028
               type: object
               properties:
-                name: &id147
+                name: &id162
                   type: string
-                asset_name: &id148
+                asset: &id163
                   type: string
                   x-frappe-target-doctype: Asset
-                asset_category: &id149
+                naming_series: &id164
                   type: string
-                item_code: &id150
+                  enum:
+                  - ACC-ADS-.YYYY.-
+                column_break_2: &id165
                   type: string
-                item_name: &id151
+                depreciation_details_section: &id166
                   type: string
-                column_break_3: &id152
+                finance_book: &id167
                   type: string
-                company: &id153
+                  x-frappe-target-doctype: Finance Book
+                column_break_8: &id168
                   type: string
-                  x-frappe-target-doctype: Company
-                section_break_6: &id154
+                depreciation_schedule_section: &id169
                   type: string
-                maintenance_team: &id155
-                  type: string
-                  x-frappe-target-doctype: Asset Maintenance Team
-                column_break_9: &id156
-                  type: string
-                maintenance_manager_name: &id157
-                  type: string
-                section_break_8: &id158
-                  type: string
-                asset_maintenance_tasks: &id159
+                depreciation_schedule: &id170
                   type: array
                   items:
-                    $ref: '#/components/schemas/AssetMaintenanceTask'
+                    $ref: '#/components/schemas/DepreciationSchedule'
+                details_section: &id171
+                  type: string
               required:
-              - asset_maintenance_tasks
-              - asset_name
-              - company
-              - maintenance_team
+              - asset
               - name
               additionalProperties: true
               x-module: Assets
             example:
-              asset_name: ''
-              company: ''
-              maintenance_team: ''
-              asset_maintenance_tasks: []
+              asset: ''
       responses:
         '200':
           description: Created typed resource
@@ -1168,11 +1158,11 @@ paths:
       x-test-evidence:
         suite: assets-lifecycle
         test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/asset-maintenance/{name}:
+  /api/v1/assets/asset-depreciation-schedules/{name}:
     get:
       tags:
       - 'Module: Assets'
-      operationId: getAssetMaintenance
+      operationId: getAssetDepreciationSchedule
       parameters:
       - name: name
         in: path
@@ -1207,7 +1197,7 @@ paths:
     put:
       tags:
       - 'Module: Assets'
-      operationId: updateAssetMaintenance
+      operationId: updateAssetDepreciationSchedule
       parameters: &id029
       - name: name
         in: path
@@ -1248,8 +1238,684 @@ paths:
     delete:
       tags:
       - 'Module: Assets'
-      operationId: deleteAssetMaintenance
+      operationId: deleteAssetDepreciationSchedule
       parameters: *id029
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-maintenance:
+    get:
+      tags:
+      - 'Module: Assets'
+      summary: List Asset Maintenance records
+      description: List typed Asset Maintenance documents.
+      operationId: listAssetMaintenance
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id030
+                      $ref: '#/components/schemas/AssetMaintenance'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    post:
+      tags:
+      - 'Module: Assets'
+      summary: Create Asset Maintenance
+      description: Create a Asset Maintenance using the runtime DocType schema.
+      operationId: createAssetMaintenance
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id031
+              type: object
+              properties:
+                name: &id172
+                  type: string
+                asset_name: &id173
+                  type: string
+                  x-frappe-target-doctype: Asset
+                asset_category: &id174
+                  type: string
+                item_code: &id175
+                  type: string
+                item_name: &id176
+                  type: string
+                column_break_3: &id177
+                  type: string
+                company: &id178
+                  type: string
+                  x-frappe-target-doctype: Company
+                section_break_6: &id179
+                  type: string
+                maintenance_team: &id180
+                  type: string
+                  x-frappe-target-doctype: Asset Maintenance Team
+                column_break_9: &id181
+                  type: string
+                maintenance_manager_name: &id182
+                  type: string
+                section_break_8: &id183
+                  type: string
+                asset_maintenance_tasks: &id184
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AssetMaintenanceTask'
+              required:
+              - asset_maintenance_tasks
+              - asset_name
+              - company
+              - maintenance_team
+              - name
+              additionalProperties: true
+              x-module: Assets
+            example:
+              asset_name: ''
+              company: ''
+              maintenance_team: ''
+              asset_maintenance_tasks: []
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id030
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-maintenance/{name}:
+    get:
+      tags:
+      - 'Module: Assets'
+      operationId: getAssetMaintenance
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id030
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    put:
+      tags:
+      - 'Module: Assets'
+      operationId: updateAssetMaintenance
+      parameters: &id032
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id031
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id030
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    delete:
+      tags:
+      - 'Module: Assets'
+      operationId: deleteAssetMaintenance
+      parameters: *id032
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-maintenance-logs:
+    get:
+      tags:
+      - 'Module: Assets'
+      summary: List Asset Maintenance Log records
+      description: List typed Asset Maintenance Log documents.
+      operationId: listAssetMaintenanceLog
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id033
+                      $ref: '#/components/schemas/AssetMaintenanceLog'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    post:
+      tags:
+      - 'Module: Assets'
+      summary: Create Asset Maintenance Log
+      description: Create a Asset Maintenance Log using the runtime DocType schema.
+      operationId: createAssetMaintenanceLog
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id034
+              type: object
+              properties:
+                name: &id185
+                  type: string
+                asset_maintenance: &id186
+                  type: string
+                  x-frappe-target-doctype: Asset Maintenance
+                naming_series: &id187
+                  type: string
+                  enum:
+                  - ACC-AML-.YYYY.-
+                asset_name: &id188
+                  type: string
+                column_break_2: &id189
+                  type: string
+                item_code: &id190
+                  type: string
+                item_name: &id191
+                  type: string
+                section_break_5: &id192
+                  type: string
+                task: &id193
+                  type: string
+                  x-frappe-target-doctype: Asset Maintenance Task
+                maintenance_type: &id194
+                  type: string
+                assign_to_name: &id195
+                  type: string
+                column_break_6: &id196
+                  type: string
+                completion_date: &id197
+                  type: string
+                  format: date
+                maintenance_status: &id198
+                  type: string
+                  enum:
+                  - Planned
+                  - Completed
+                  - Cancelled
+                  - Overdue
+                has_certificate: &id199
+                  type: boolean
+                certificate_attachement: &id200
+                  type: string
+                column_break_9: &id201
+                  type: string
+                actions_performed: &id202
+                  type: string
+              required:
+              - maintenance_status
+              - name
+              - naming_series
+              additionalProperties: true
+              x-module: Assets
+            example:
+              naming_series: ''
+              maintenance_status: ''
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id033
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-maintenance-logs/{name}:
+    get:
+      tags:
+      - 'Module: Assets'
+      operationId: getAssetMaintenanceLog
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id033
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    put:
+      tags:
+      - 'Module: Assets'
+      operationId: updateAssetMaintenanceLog
+      parameters: &id035
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id034
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id033
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    delete:
+      tags:
+      - 'Module: Assets'
+      operationId: deleteAssetMaintenanceLog
+      parameters: *id035
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-maintenance-teams:
+    get:
+      tags:
+      - 'Module: Assets'
+      summary: List Asset Maintenance Team records
+      description: List typed Asset Maintenance Team documents.
+      operationId: listAssetMaintenanceTeam
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id036
+                      $ref: '#/components/schemas/AssetMaintenanceTeam'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    post:
+      tags:
+      - 'Module: Assets'
+      summary: Create Asset Maintenance Team
+      description: Create a Asset Maintenance Team using the runtime DocType schema.
+      operationId: createAssetMaintenanceTeam
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id037
+              type: object
+              properties:
+                name: &id203
+                  type: string
+                maintenance_team_name: &id204
+                  type: string
+                maintenance_manager: &id205
+                  type: string
+                  x-frappe-target-doctype: User
+                maintenance_manager_name: &id206
+                  type: string
+                column_break_2: &id207
+                  type: string
+                company: &id208
+                  type: string
+                  x-frappe-target-doctype: Company
+                section_break_2: &id209
+                  type: string
+                maintenance_team_members: &id210
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/MaintenanceTeamMember'
+              required:
+              - company
+              - maintenance_team_members
+              - maintenance_team_name
+              - name
+              additionalProperties: true
+              x-module: Assets
+            example:
+              maintenance_team_name: ''
+              company: ''
+              maintenance_team_members: []
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id036
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-maintenance-teams/{name}:
+    get:
+      tags:
+      - 'Module: Assets'
+      operationId: getAssetMaintenanceTeam
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id036
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    put:
+      tags:
+      - 'Module: Assets'
+      operationId: updateAssetMaintenanceTeam
+      parameters: &id038
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id037
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id036
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    delete:
+      tags:
+      - 'Module: Assets'
+      operationId: deleteAssetMaintenanceTeam
+      parameters: *id038
       responses:
         '200':
           description: Deleted typed resource
@@ -1294,7 +1960,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id030
+                    items: &id039
                       $ref: '#/components/schemas/AssetMovement'
                   message: {}
                 required:
@@ -1323,41 +1989,41 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id031
+            schema: &id040
               type: object
               properties:
-                name: &id160
+                name: &id211
                   type: string
-                company: &id161
+                company: &id212
                   type: string
                   x-frappe-target-doctype: Company
-                purpose: &id162
+                purpose: &id213
                   type: string
                   enum:
                   - Issue
                   - Receipt
                   - Transfer
                   - Transfer and Issue
-                transaction_date: &id163
+                transaction_date: &id214
                   type: string
                   format: date-time
-                column_break_4: &id164
+                column_break_4: &id215
                   type: string
-                reference: &id165
+                reference: &id216
                   type: string
-                reference_doctype: &id166
+                reference_doctype: &id217
                   type: string
                   x-frappe-target-doctype: DocType
-                reference_name: &id167
+                reference_name: &id218
                   type: string
                   x-frappe-options: reference_doctype
-                section_break_10: &id168
+                section_break_10: &id219
                   type: string
-                assets: &id169
+                assets: &id220
                   type: array
                   items:
                     $ref: '#/components/schemas/AssetMovementItem'
-                column_break_9: &id170
+                column_break_9: &id221
                   type: string
               required:
               - assets
@@ -1380,7 +2046,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id030
+                  data: *id039
                 required:
                 - data
         '400': *id004
@@ -1416,7 +2082,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id030
+                  data: *id039
                 required:
                 - data
         '400': *id004
@@ -1436,924 +2102,6 @@ paths:
       tags:
       - 'Module: Assets'
       operationId: updateAssetMovement
-      parameters: &id032
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      - *id002
-      - *id012
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: *id031
-      responses:
-        '200':
-          description: Updated typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id030
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-    delete:
-      tags:
-      - 'Module: Assets'
-      operationId: deleteAssetMovement
-      parameters: *id032
-      responses:
-        '200':
-          description: Deleted typed resource
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FrappeResponse'
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/asset-movements/{name}/submit:
-    post:
-      tags:
-      - 'Module: Assets'
-      - Document actions
-      operationId: submitAssetMovement
-      parameters: *id032
-      responses:
-        '200':
-          description: Submit document
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: *id030
-                required:
-                - message
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-frappe-action: submit
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/asset-movements/{name}/cancel:
-    post:
-      tags:
-      - 'Module: Assets'
-      - Document actions
-      operationId: cancelAssetMovement
-      parameters: *id032
-      responses:
-        '200':
-          description: Cancel document
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: *id030
-                required:
-                - message
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-frappe-action: cancel
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/asset-repairs:
-    get:
-      tags:
-      - 'Module: Assets'
-      summary: List Asset Repair records
-      description: List typed Asset Repair documents.
-      operationId: listAssetRepair
-      parameters:
-      - *id002
-      - *id015
-      - *id016
-      - *id017
-      - *id018
-      - *id019
-      responses:
-        '200':
-          description: Typed resource list
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: &id033
-                      $ref: '#/components/schemas/AssetRepair'
-                  message: {}
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-    post:
-      tags:
-      - 'Module: Assets'
-      summary: Create Asset Repair
-      description: Create a Asset Repair using the runtime DocType schema.
-      operationId: createAssetRepair
-      parameters: *id020
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: &id034
-              type: object
-              properties:
-                name: &id171
-                  type: string
-                naming_series: &id172
-                  type: string
-                  enum:
-                  - ACC-ASR-.YYYY.-
-                column_break_2: &id173
-                  type: string
-                failure_date: &id174
-                  type: string
-                  format: date-time
-                completion_date: &id175
-                  type: string
-                  format: date-time
-                repair_status: &id176
-                  type: string
-                  enum:
-                  - Pending
-                  - Completed
-                  - Cancelled
-                section_break_9: &id177
-                  type: string
-                description: &id178
-                  type: string
-                column_break_9: &id179
-                  type: string
-                actions_performed: &id180
-                  type: string
-                asset: &id181
-                  type: string
-                  x-frappe-target-doctype: Asset
-                asset_name: &id182
-                  type: string
-                capitalize_repair_cost: &id183
-                  type: boolean
-                accounting_details: &id184
-                  type: string
-                stock_items: &id185
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AssetRepairConsumedItem'
-                cost_center: &id186
-                  type: string
-                  x-frappe-target-doctype: Cost Center
-                project: &id187
-                  type: string
-                  x-frappe-target-doctype: Project
-                column_break_14: &id188
-                  type: string
-                stock_consumption_details_section: &id189
-                  type: string
-                increase_in_asset_life: &id190
-                  type: integer
-                company: &id191
-                  type: string
-                  x-frappe-target-doctype: Company
-                invoices: &id192
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AssetRepairPurchaseInvoice'
-                section_break_muyc: &id193
-                  type: string
-                column_break_hkem: &id194
-                  type: string
-                capitalizations_section: &id195
-                  type: string
-                column_break_spre: &id196
-                  type: string
-                column_break_ajbh: &id197
-                  type: string
-                section_break_ltbb: &id198
-                  type: string
-                column_break_ewor: &id199
-                  type: string
-                column_break_ceuc: &id200
-                  type: string
-                consumed_items_cost: &id201
-                  type: number
-                column_break_xebe: &id202
-                  type: string
-                accounting_dimensions_section: &id203
-                  type: string
-                connection_tab: &id204
-                  type: string
-              required:
-              - asset
-              - failure_date
-              - name
-              - naming_series
-              additionalProperties: true
-              x-module: Assets
-            example:
-              naming_series: ''
-              failure_date: ''
-              asset: ''
-      responses:
-        '200':
-          description: Created typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id033
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/asset-repairs/{name}:
-    get:
-      tags:
-      - 'Module: Assets'
-      operationId: getAssetRepair
-      parameters:
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      - *id002
-      responses:
-        '200':
-          description: Typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id033
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-    put:
-      tags:
-      - 'Module: Assets'
-      operationId: updateAssetRepair
-      parameters: &id035
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      - *id002
-      - *id012
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: *id034
-      responses:
-        '200':
-          description: Updated typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id033
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-    delete:
-      tags:
-      - 'Module: Assets'
-      operationId: deleteAssetRepair
-      parameters: *id035
-      responses:
-        '200':
-          description: Deleted typed resource
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FrappeResponse'
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/asset-repairs/{name}/submit:
-    post:
-      tags:
-      - 'Module: Assets'
-      - Document actions
-      operationId: submitAssetRepair
-      parameters: *id035
-      responses:
-        '200':
-          description: Submit document
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: *id033
-                required:
-                - message
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-frappe-action: submit
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/asset-repairs/{name}/cancel:
-    post:
-      tags:
-      - 'Module: Assets'
-      - Document actions
-      operationId: cancelAssetRepair
-      parameters: *id035
-      responses:
-        '200':
-          description: Cancel document
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: *id033
-                required:
-                - message
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-frappe-action: cancel
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/asset-value-adjustments:
-    get:
-      tags:
-      - 'Module: Assets'
-      summary: List Asset Value Adjustment records
-      description: List typed Asset Value Adjustment documents.
-      operationId: listAssetValueAdjustment
-      parameters:
-      - *id002
-      - *id015
-      - *id016
-      - *id017
-      - *id018
-      - *id019
-      responses:
-        '200':
-          description: Typed resource list
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: &id036
-                      $ref: '#/components/schemas/AssetValueAdjustment'
-                  message: {}
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-    post:
-      tags:
-      - 'Module: Assets'
-      summary: Create Asset Value Adjustment
-      description: Create a Asset Value Adjustment using the runtime DocType schema.
-      operationId: createAssetValueAdjustment
-      parameters: *id020
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: &id037
-              type: object
-              properties:
-                name: &id205
-                  type: string
-                company: &id206
-                  type: string
-                  x-frappe-target-doctype: Company
-                asset: &id207
-                  type: string
-                  x-frappe-target-doctype: Asset
-                asset_category: &id208
-                  type: string
-                finance_book: &id209
-                  type: string
-                  x-frappe-target-doctype: Finance Book
-                column_break_4: &id210
-                  type: string
-                date: &id211
-                  type: string
-                  format: date
-                new_asset_value: &id212
-                  type: number
-                cost_center: &id213
-                  type: string
-                  x-frappe-target-doctype: Cost Center
-                accounting_dimensions_section: &id214
-                  type: string
-                dimension_col_break: &id215
-                  type: string
-                value_details_section: &id216
-                  type: string
-                column_break_11: &id217
-                  type: string
-                difference_account: &id218
-                  type: string
-                  x-frappe-target-doctype: Account
-              required:
-              - asset
-              - date
-              - difference_account
-              - name
-              - new_asset_value
-              additionalProperties: true
-              x-module: Assets
-            example:
-              asset: ''
-              date: ''
-              new_asset_value: 0
-              difference_account: ''
-      responses:
-        '200':
-          description: Created typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id036
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/asset-value-adjustments/{name}:
-    get:
-      tags:
-      - 'Module: Assets'
-      operationId: getAssetValueAdjustment
-      parameters:
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      - *id002
-      responses:
-        '200':
-          description: Typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id036
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-    put:
-      tags:
-      - 'Module: Assets'
-      operationId: updateAssetValueAdjustment
-      parameters: &id038
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      - *id002
-      - *id012
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: *id037
-      responses:
-        '200':
-          description: Updated typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id036
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-    delete:
-      tags:
-      - 'Module: Assets'
-      operationId: deleteAssetValueAdjustment
-      parameters: *id038
-      responses:
-        '200':
-          description: Deleted typed resource
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FrappeResponse'
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/asset-value-adjustments/{name}/submit:
-    post:
-      tags:
-      - 'Module: Assets'
-      - Document actions
-      operationId: submitAssetValueAdjustment
-      parameters: *id038
-      responses:
-        '200':
-          description: Submit document
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: *id036
-                required:
-                - message
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-frappe-action: submit
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/asset-value-adjustments/{name}/cancel:
-    post:
-      tags:
-      - 'Module: Assets'
-      - Document actions
-      operationId: cancelAssetValueAdjustment
-      parameters: *id038
-      responses:
-        '200':
-          description: Cancel document
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: *id036
-                required:
-                - message
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-frappe-action: cancel
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/locations:
-    get:
-      tags:
-      - 'Module: Assets'
-      summary: List Location records
-      description: List typed Location documents.
-      operationId: listLocation
-      parameters:
-      - *id002
-      - *id015
-      - *id016
-      - *id017
-      - *id018
-      - *id019
-      responses:
-        '200':
-          description: Typed resource list
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: &id039
-                      $ref: '#/components/schemas/Location'
-                  message: {}
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-    post:
-      tags:
-      - 'Module: Assets'
-      summary: Create Location
-      description: Create a Location using the runtime DocType schema.
-      operationId: createLocation
-      parameters: *id020
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: &id040
-              type: object
-              properties:
-                name: &id219
-                  type: string
-                location_name: &id220
-                  type: string
-                parent_location: &id221
-                  type: string
-                  x-frappe-target-doctype: Location
-                cb_details: &id222
-                  type: string
-                is_container: &id223
-                  type: boolean
-                is_group: &id224
-                  type: boolean
-                sb_location_details: &id225
-                  type: string
-                latitude: &id226
-                  type: number
-                longitude: &id227
-                  type: number
-                cb_latlong: &id228
-                  type: string
-                area_uom: &id229
-                  type: string
-                  x-frappe-target-doctype: UOM
-                sb_geolocation: &id230
-                  type: string
-                location: &id231
-                  type: string
-                tree_details: &id232
-                  type: string
-                  writeOnly: true
-              required:
-              - location_name
-              - name
-              additionalProperties: true
-              x-module: Assets
-            example:
-              location_name: ''
-      responses:
-        '200':
-          description: Created typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id039
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-  /api/v1/assets/locations/{name}:
-    get:
-      tags:
-      - 'Module: Assets'
-      operationId: getLocation
-      parameters:
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      - *id002
-      responses:
-        '200':
-          description: Typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id039
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-test-status: not-tested
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: assets-lifecycle
-        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
-    put:
-      tags:
-      - 'Module: Assets'
-      operationId: updateLocation
       parameters: &id041
       - name: name
         in: path
@@ -2394,7 +2142,7 @@ paths:
     delete:
       tags:
       - 'Module: Assets'
-      operationId: deleteLocation
+      operationId: deleteAssetMovement
       parameters: *id041
       responses:
         '200':
@@ -2411,6 +2159,1440 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-movements/{name}/submit:
+    post:
+      tags:
+      - 'Module: Assets'
+      - Document actions
+      operationId: submitAssetMovement
+      parameters: *id041
+      responses:
+        '200':
+          description: Submit document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: *id039
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-action: submit
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-movements/{name}/cancel:
+    post:
+      tags:
+      - 'Module: Assets'
+      - Document actions
+      operationId: cancelAssetMovement
+      parameters: *id041
+      responses:
+        '200':
+          description: Cancel document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: *id039
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-action: cancel
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-repairs:
+    get:
+      tags:
+      - 'Module: Assets'
+      summary: List Asset Repair records
+      description: List typed Asset Repair documents.
+      operationId: listAssetRepair
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id042
+                      $ref: '#/components/schemas/AssetRepair'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    post:
+      tags:
+      - 'Module: Assets'
+      summary: Create Asset Repair
+      description: Create a Asset Repair using the runtime DocType schema.
+      operationId: createAssetRepair
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id043
+              type: object
+              properties:
+                name: &id222
+                  type: string
+                naming_series: &id223
+                  type: string
+                  enum:
+                  - ACC-ASR-.YYYY.-
+                column_break_2: &id224
+                  type: string
+                failure_date: &id225
+                  type: string
+                  format: date-time
+                completion_date: &id226
+                  type: string
+                  format: date-time
+                repair_status: &id227
+                  type: string
+                  enum:
+                  - Pending
+                  - Completed
+                  - Cancelled
+                section_break_9: &id228
+                  type: string
+                description: &id229
+                  type: string
+                column_break_9: &id230
+                  type: string
+                actions_performed: &id231
+                  type: string
+                asset: &id232
+                  type: string
+                  x-frappe-target-doctype: Asset
+                asset_name: &id233
+                  type: string
+                capitalize_repair_cost: &id234
+                  type: boolean
+                accounting_details: &id235
+                  type: string
+                stock_items: &id236
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AssetRepairConsumedItem'
+                cost_center: &id237
+                  type: string
+                  x-frappe-target-doctype: Cost Center
+                project: &id238
+                  type: string
+                  x-frappe-target-doctype: Project
+                column_break_14: &id239
+                  type: string
+                stock_consumption_details_section: &id240
+                  type: string
+                increase_in_asset_life: &id241
+                  type: integer
+                company: &id242
+                  type: string
+                  x-frappe-target-doctype: Company
+                invoices: &id243
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AssetRepairPurchaseInvoice'
+                section_break_muyc: &id244
+                  type: string
+                column_break_hkem: &id245
+                  type: string
+                capitalizations_section: &id246
+                  type: string
+                column_break_spre: &id247
+                  type: string
+                column_break_ajbh: &id248
+                  type: string
+                section_break_ltbb: &id249
+                  type: string
+                column_break_ewor: &id250
+                  type: string
+                column_break_ceuc: &id251
+                  type: string
+                consumed_items_cost: &id252
+                  type: number
+                column_break_xebe: &id253
+                  type: string
+                accounting_dimensions_section: &id254
+                  type: string
+                connection_tab: &id255
+                  type: string
+              required:
+              - asset
+              - failure_date
+              - name
+              - naming_series
+              additionalProperties: true
+              x-module: Assets
+            example:
+              naming_series: ''
+              failure_date: ''
+              asset: ''
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id042
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-repairs/{name}:
+    get:
+      tags:
+      - 'Module: Assets'
+      operationId: getAssetRepair
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id042
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    put:
+      tags:
+      - 'Module: Assets'
+      operationId: updateAssetRepair
+      parameters: &id044
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id043
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id042
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    delete:
+      tags:
+      - 'Module: Assets'
+      operationId: deleteAssetRepair
+      parameters: *id044
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-repairs/{name}/submit:
+    post:
+      tags:
+      - 'Module: Assets'
+      - Document actions
+      operationId: submitAssetRepair
+      parameters: *id044
+      responses:
+        '200':
+          description: Submit document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: *id042
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-action: submit
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-repairs/{name}/cancel:
+    post:
+      tags:
+      - 'Module: Assets'
+      - Document actions
+      operationId: cancelAssetRepair
+      parameters: *id044
+      responses:
+        '200':
+          description: Cancel document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: *id042
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-action: cancel
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-shift-allocations:
+    get:
+      tags:
+      - 'Module: Assets'
+      summary: List Asset Shift Allocation records
+      description: List typed Asset Shift Allocation documents.
+      operationId: listAssetShiftAllocation
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id045
+                      $ref: '#/components/schemas/AssetShiftAllocation'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    post:
+      tags:
+      - 'Module: Assets'
+      summary: Create Asset Shift Allocation
+      description: Create a Asset Shift Allocation using the runtime DocType schema.
+      operationId: createAssetShiftAllocation
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id046
+              type: object
+              properties:
+                name: &id256
+                  type: string
+                section_break_esaa: &id257
+                  type: string
+                asset: &id258
+                  type: string
+                  x-frappe-target-doctype: Asset
+                column_break_tdae: &id259
+                  type: string
+                finance_book: &id260
+                  type: string
+                  x-frappe-target-doctype: Finance Book
+                depreciation_schedule_section: &id261
+                  type: string
+                naming_series: &id262
+                  type: string
+                  enum:
+                  - ACC-ASA-.YYYY.-
+                column_break_jomc: &id263
+                  type: string
+              required:
+              - asset
+              - name
+              - naming_series
+              additionalProperties: true
+              x-module: Assets
+            example:
+              asset: ''
+              naming_series: ''
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id045
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-shift-allocations/{name}:
+    get:
+      tags:
+      - 'Module: Assets'
+      operationId: getAssetShiftAllocation
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id045
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    put:
+      tags:
+      - 'Module: Assets'
+      operationId: updateAssetShiftAllocation
+      parameters: &id047
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id046
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id045
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    delete:
+      tags:
+      - 'Module: Assets'
+      operationId: deleteAssetShiftAllocation
+      parameters: *id047
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-shift-factors:
+    get:
+      tags:
+      - 'Module: Assets'
+      summary: List Asset Shift Factor records
+      description: List typed Asset Shift Factor documents.
+      operationId: listAssetShiftFactor
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id048
+                      $ref: '#/components/schemas/AssetShiftFactor'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    post:
+      tags:
+      - 'Module: Assets'
+      summary: Create Asset Shift Factor
+      description: Create a Asset Shift Factor using the runtime DocType schema.
+      operationId: createAssetShiftFactor
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id049
+              type: object
+              properties:
+                name: &id264
+                  type: string
+                shift_name: &id265
+                  type: string
+                shift_factor: &id266
+                  type: number
+                default: &id267
+                  type: boolean
+              required:
+              - name
+              - shift_factor
+              - shift_name
+              additionalProperties: true
+              x-module: Assets
+            example:
+              shift_name: ''
+              shift_factor: 0
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id048
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-shift-factors/{name}:
+    get:
+      tags:
+      - 'Module: Assets'
+      operationId: getAssetShiftFactor
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id048
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    put:
+      tags:
+      - 'Module: Assets'
+      operationId: updateAssetShiftFactor
+      parameters: &id050
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id049
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id048
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    delete:
+      tags:
+      - 'Module: Assets'
+      operationId: deleteAssetShiftFactor
+      parameters: *id050
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-value-adjustments:
+    get:
+      tags:
+      - 'Module: Assets'
+      summary: List Asset Value Adjustment records
+      description: List typed Asset Value Adjustment documents.
+      operationId: listAssetValueAdjustment
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id051
+                      $ref: '#/components/schemas/AssetValueAdjustment'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    post:
+      tags:
+      - 'Module: Assets'
+      summary: Create Asset Value Adjustment
+      description: Create a Asset Value Adjustment using the runtime DocType schema.
+      operationId: createAssetValueAdjustment
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id052
+              type: object
+              properties:
+                name: &id268
+                  type: string
+                company: &id269
+                  type: string
+                  x-frappe-target-doctype: Company
+                asset: &id270
+                  type: string
+                  x-frappe-target-doctype: Asset
+                asset_category: &id271
+                  type: string
+                finance_book: &id272
+                  type: string
+                  x-frappe-target-doctype: Finance Book
+                column_break_4: &id273
+                  type: string
+                date: &id274
+                  type: string
+                  format: date
+                new_asset_value: &id275
+                  type: number
+                cost_center: &id276
+                  type: string
+                  x-frappe-target-doctype: Cost Center
+                accounting_dimensions_section: &id277
+                  type: string
+                dimension_col_break: &id278
+                  type: string
+                value_details_section: &id279
+                  type: string
+                column_break_11: &id280
+                  type: string
+                difference_account: &id281
+                  type: string
+                  x-frappe-target-doctype: Account
+              required:
+              - asset
+              - date
+              - difference_account
+              - name
+              - new_asset_value
+              additionalProperties: true
+              x-module: Assets
+            example:
+              asset: ''
+              date: ''
+              new_asset_value: 0
+              difference_account: ''
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id051
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-value-adjustments/{name}:
+    get:
+      tags:
+      - 'Module: Assets'
+      operationId: getAssetValueAdjustment
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id051
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    put:
+      tags:
+      - 'Module: Assets'
+      operationId: updateAssetValueAdjustment
+      parameters: &id053
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id052
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id051
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    delete:
+      tags:
+      - 'Module: Assets'
+      operationId: deleteAssetValueAdjustment
+      parameters: *id053
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-value-adjustments/{name}/submit:
+    post:
+      tags:
+      - 'Module: Assets'
+      - Document actions
+      operationId: submitAssetValueAdjustment
+      parameters: *id053
+      responses:
+        '200':
+          description: Submit document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: *id051
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-action: submit
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/asset-value-adjustments/{name}/cancel:
+    post:
+      tags:
+      - 'Module: Assets'
+      - Document actions
+      operationId: cancelAssetValueAdjustment
+      parameters: *id053
+      responses:
+        '200':
+          description: Cancel document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: *id051
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-action: cancel
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/locations:
+    get:
+      tags:
+      - 'Module: Assets'
+      summary: List Location records
+      description: List typed Location documents.
+      operationId: listLocation
+      parameters:
+      - *id002
+      - *id015
+      - *id016
+      - *id017
+      - *id018
+      - *id019
+      responses:
+        '200':
+          description: Typed resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: &id054
+                      $ref: '#/components/schemas/Location'
+                  message: {}
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    post:
+      tags:
+      - 'Module: Assets'
+      summary: Create Location
+      description: Create a Location using the runtime DocType schema.
+      operationId: createLocation
+      parameters: *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: &id055
+              type: object
+              properties:
+                name: &id282
+                  type: string
+                location_name: &id283
+                  type: string
+                parent_location: &id284
+                  type: string
+                  x-frappe-target-doctype: Location
+                cb_details: &id285
+                  type: string
+                is_container: &id286
+                  type: boolean
+                is_group: &id287
+                  type: boolean
+                sb_location_details: &id288
+                  type: string
+                latitude: &id289
+                  type: number
+                longitude: &id290
+                  type: number
+                cb_latlong: &id291
+                  type: string
+                area_uom: &id292
+                  type: string
+                  x-frappe-target-doctype: UOM
+                sb_geolocation: &id293
+                  type: string
+                location: &id294
+                  type: string
+                tree_details: &id295
+                  type: string
+                  writeOnly: true
+              required:
+              - location_name
+              - name
+              additionalProperties: true
+              x-module: Assets
+            example:
+              location_name: ''
+      responses:
+        '200':
+          description: Created typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id054
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/locations/{name}:
+    get:
+      tags:
+      - 'Module: Assets'
+      operationId: getLocation
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id054
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    put:
+      tags:
+      - 'Module: Assets'
+      operationId: updateLocation
+      parameters: &id056
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id055
+      responses:
+        '200':
+          description: Updated typed resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id054
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+    delete:
+      tags:
+      - 'Module: Assets'
+      operationId: deleteLocation
+      parameters: *id056
+      responses:
+        '200':
+          description: Deleted typed resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/actions/{action}:
+    post:
+      tags:
+      - 'Module: Assets'
+      - Business routes
+      summary: runAssetAction
+      operationId: runAssetAction
+      parameters:
+      - name: action
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.assets.asset_action
+      x-public-operation: update
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/reports/report:
+    get:
+      tags:
+      - 'Module: Assets'
+      - Business routes
+      summary: runAssetReport
+      operationId: runAssetReport
+      parameters:
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.assets.asset_report
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: assets-lifecycle
+        test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
+  /api/v1/assets/dashboard:
+    get:
+      tags:
+      - 'Module: Assets'
+      - Business routes
+      summary: getAssetDashboard
+      operationId: getAssetDashboard
+      parameters:
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.assets.asset_dashboard
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2441,26 +3623,26 @@ components:
     Asset:
       type: object
       properties:
-        name: *id042
-        naming_series: *id043
-        asset_name: *id044
-        item_code: *id045
+        name: *id057
+        naming_series: *id058
+        asset_name: *id059
+        item_code: *id060
         asset_category:
           type: string
           x-frappe-target-doctype: Asset Category
           readOnly: true
-        asset_owner: *id046
-        asset_owner_company: *id047
-        supplier: *id048
-        customer: *id049
-        image: *id050
-        column_break_3: *id051
-        company: *id052
-        location: *id053
-        custodian: *id054
-        cost_center: *id055
-        department: *id056
-        purchase_date: *id057
+        asset_owner: *id061
+        asset_owner_company: *id062
+        supplier: *id063
+        customer: *id064
+        image: *id065
+        column_break_3: *id066
+        company: *id067
+        location: *id068
+        custodian: *id069
+        cost_center: *id070
+        department: *id071
+        purchase_date: *id072
         disposal_date:
           type: string
           format: date
@@ -2469,29 +3651,29 @@ components:
           type: string
           x-frappe-target-doctype: Journal Entry
           readOnly: true
-        available_for_use_date: *id058
-        calculate_depreciation: *id059
-        opening_accumulated_depreciation: *id060
-        finance_books: *id061
-        section_break_33: *id062
-        depreciation_method: *id063
+        available_for_use_date: *id073
+        calculate_depreciation: *id074
+        opening_accumulated_depreciation: *id075
+        finance_books: *id076
+        section_break_33: *id077
+        depreciation_method: *id078
         value_after_depreciation:
           type: number
           x-frappe-options: Company:company:default_currency
           readOnly: true
           writeOnly: true
-        total_number_of_depreciations: *id064
-        column_break_24: *id065
-        frequency_of_depreciation: *id066
-        next_depreciation_date: *id067
-        policy_number: *id068
-        insurer: *id069
-        insured_value: *id070
-        column_break_48: *id071
-        insurance_start_date: *id072
-        insurance_end_date: *id073
-        comprehensive_insurance: *id074
-        maintenance_required: *id075
+        total_number_of_depreciations: *id079
+        column_break_24: *id080
+        frequency_of_depreciation: *id081
+        next_depreciation_date: *id082
+        policy_number: *id083
+        insurer: *id084
+        insured_value: *id085
+        column_break_48: *id086
+        insurance_start_date: *id087
+        insurance_end_date: *id088
+        comprehensive_insurance: *id089
+        maintenance_required: *id090
         status:
           type: string
           enum:
@@ -2513,9 +3695,9 @@ components:
           type: boolean
           readOnly: true
           writeOnly: true
-        column_break_51: *id076
-        purchase_receipt: *id077
-        purchase_invoice: *id078
+        column_break_51: *id091
+        purchase_receipt: *id092
+        purchase_invoice: *id093
         default_finance_book:
           type: string
           x-frappe-target-doctype: Finance Book
@@ -2525,15 +3707,15 @@ components:
           type: string
           x-frappe-target-doctype: Asset
           readOnly: true
-        purchase_details_section: *id079
-        column_break_23: *id080
-        column_break_33: *id081
-        section_break_36: *id082
+        purchase_details_section: *id094
+        column_break_23: *id095
+        column_break_33: *id096
+        section_break_36: *id097
         split_from:
           type: string
           x-frappe-target-doctype: Asset
           readOnly: true
-        asset_quantity: *id083
+        asset_quantity: *id098
         depr_entry_posting_status:
           type: string
           enum:
@@ -2541,9 +3723,9 @@ components:
           - Failed
           readOnly: true
           writeOnly: true
-        depreciation_schedule_sb: *id084
-        depreciation_schedule_view: *id085
-        is_fully_depreciated: *id086
+        depreciation_schedule_sb: *id099
+        depreciation_schedule_view: *id100
+        is_fully_depreciated: *id101
         total_asset_cost:
           type: number
           x-frappe-options: Company:company:default_currency
@@ -2556,25 +3738,25 @@ components:
           type: number
           readOnly: true
           writeOnly: true
-        opening_number_of_booked_depreciations: *id087
-        purchase_receipt_item: *id088
-        purchase_invoice_item: *id089
-        other_info_tab: *id090
-        connections_tab: *id091
-        depreciation_tab: *id092
-        accounting_dimensions_section: *id093
-        section_break_jtou: *id094
-        net_purchase_amount: *id095
-        asset_type: *id096
-        column_break_wqzi: *id097
-        column_break_rjyw: *id098
-        insurance_section: *id099
-        section_break_uiyd: *id100
-        column_break_bbwr: *id101
-        column_break_bfkm: *id102
-        item_name: *id103
-        asset_owner_section: *id104
-        column_break_yeds: *id105
+        opening_number_of_booked_depreciations: *id102
+        purchase_receipt_item: *id103
+        purchase_invoice_item: *id104
+        other_info_tab: *id105
+        connections_tab: *id106
+        depreciation_tab: *id107
+        accounting_dimensions_section: *id108
+        section_break_jtou: *id109
+        net_purchase_amount: *id110
+        asset_type: *id111
+        column_break_wqzi: *id112
+        column_break_rjyw: *id113
+        insurance_section: *id114
+        section_break_uiyd: *id115
+        column_break_bbwr: *id116
+        column_break_bfkm: *id117
+        item_name: *id118
+        asset_owner_section: *id119
+        column_break_yeds: *id120
       required:
       - asset_name
       - company
@@ -2587,31 +3769,31 @@ components:
     AssetCapitalization:
       type: object
       properties:
-        name: *id106
-        title: *id107
+        name: *id121
+        title: *id122
         target_item_code:
           type: string
           x-frappe-target-doctype: Item
           readOnly: true
           writeOnly: true
-        target_asset: *id108
+        target_asset: *id123
         target_asset_name:
           type: string
           readOnly: true
-        column_break_9: *id109
-        company: *id110
-        posting_date: *id111
-        posting_time: *id112
-        set_posting_time: *id113
-        naming_series: *id114
+        column_break_9: *id124
+        company: *id125
+        posting_date: *id126
+        posting_time: *id127
+        set_posting_time: *id128
+        naming_series: *id129
         amended_from:
           type: string
           x-frappe-target-doctype: Asset Capitalization
           readOnly: true
-        section_break_16: *id115
-        stock_items: *id116
-        section_break_26: *id117
-        asset_items: *id118
+        section_break_16: *id130
+        stock_items: *id131
+        section_break_26: *id132
+        asset_items: *id133
         stock_items_total:
           type: number
           x-frappe-options: Company:company:default_currency
@@ -2620,40 +3802,40 @@ components:
           type: number
           x-frappe-options: Company:company:default_currency
           readOnly: true
-        finance_book: *id119
-        service_expenses_section: *id120
-        service_items: *id121
+        finance_book: *id134
+        service_expenses_section: *id135
+        service_items: *id136
         service_items_total:
           type: number
           x-frappe-options: Company:company:default_currency
           readOnly: true
-        totals_section: *id122
+        totals_section: *id137
         total_value:
           type: number
           x-frappe-options: Company:company:default_currency
           readOnly: true
-        column_break_36: *id123
+        column_break_36: *id138
         target_incoming_rate:
           type: number
           x-frappe-options: Company:company:default_currency
           readOnly: true
-        accounting_dimensions_section: *id124
-        cost_center: *id125
-        project: *id126
-        dimension_col_break: *id127
+        accounting_dimensions_section: *id139
+        cost_center: *id140
+        project: *id141
+        dimension_col_break: *id142
         target_fixed_asset_account:
           type: string
           x-frappe-target-doctype: Account
           readOnly: true
-        section_break_urtz: *id128
-        column_break_gqep: *id129
-        column_break_yvlx: *id130
-        section_break_arbh: *id131
-        column_break_boeu: *id132
-        column_break_qecy: *id133
-        section_break_ptna: *id134
-        column_break_szvh: *id135
-        column_break_katv: *id136
+        section_break_urtz: *id143
+        column_break_gqep: *id144
+        column_break_yvlx: *id145
+        section_break_arbh: *id146
+        column_break_boeu: *id147
+        column_break_qecy: *id148
+        section_break_ptna: *id149
+        column_break_szvh: *id150
+        column_break_katv: *id151
       required:
       - company
       - name
@@ -2836,16 +4018,16 @@ components:
     AssetCategory:
       type: object
       properties:
-        name: *id137
-        asset_category_name: *id138
-        column_break_3: *id139
-        finance_book_detail: *id140
-        finance_books: *id141
-        section_break_2: *id142
-        accounts: *id143
-        depreciation_options: *id144
-        enable_cwip_accounting: *id145
-        non_depreciable_category: *id146
+        name: *id152
+        asset_category_name: *id153
+        column_break_3: *id154
+        finance_book_detail: *id155
+        finance_books: *id156
+        section_break_2: *id157
+        accounts: *id158
+        depreciation_options: *id159
+        enable_cwip_accounting: *id160
+        non_depreciable_category: *id161
       required:
       - accounts
       - asset_category_name
@@ -2875,6 +4057,91 @@ components:
       required:
       - company_name
       - fixed_asset_account
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetDepreciationSchedule:
+      type: object
+      properties:
+        name: *id162
+        asset: *id163
+        naming_series: *id164
+        amended_from:
+          type: string
+          x-frappe-target-doctype: Asset Depreciation Schedule
+          readOnly: true
+        column_break_2: *id165
+        depreciation_details_section: *id166
+        finance_book: *id167
+        depreciation_method:
+          type: string
+          enum:
+          - Straight Line
+          - Double Declining Balance
+          - Written Down Value
+          - Manual
+          readOnly: true
+        rate_of_depreciation:
+          type: number
+          readOnly: true
+        column_break_8: *id168
+        total_number_of_depreciations:
+          type: integer
+          readOnly: true
+        depreciation_schedule_section: *id169
+        depreciation_schedule: *id170
+        details_section: *id171
+        notes:
+          type: string
+          readOnly: true
+        status:
+          type: string
+          enum:
+          - Draft
+          - Active
+          - Cancelled
+          readOnly: true
+          writeOnly: true
+        frequency_of_depreciation:
+          type: integer
+          readOnly: true
+        expected_value_after_useful_life:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        finance_book_id:
+          type: integer
+          readOnly: true
+          writeOnly: true
+        opening_accumulated_depreciation:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+          writeOnly: true
+        opening_number_of_booked_depreciations:
+          type: integer
+          readOnly: true
+          writeOnly: true
+        daily_prorata_based:
+          type: boolean
+          readOnly: true
+        shift_based:
+          type: boolean
+          readOnly: true
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+          readOnly: true
+        value_after_depreciation:
+          type: number
+          readOnly: true
+        net_purchase_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+          writeOnly: true
+      required:
+      - asset
       - name
       additionalProperties: true
       x-module: Assets
@@ -2937,29 +4204,76 @@ components:
     AssetMaintenance:
       type: object
       properties:
-        name: *id147
-        asset_name: *id148
-        asset_category: *id149
-        item_code: *id150
-        item_name: *id151
-        column_break_3: *id152
-        company: *id153
-        section_break_6: *id154
-        maintenance_team: *id155
-        column_break_9: *id156
+        name: *id172
+        asset_name: *id173
+        asset_category: *id174
+        item_code: *id175
+        item_name: *id176
+        column_break_3: *id177
+        company: *id178
+        section_break_6: *id179
+        maintenance_team: *id180
+        column_break_9: *id181
         maintenance_manager:
           type: string
           readOnly: true
           writeOnly: true
-        maintenance_manager_name: *id157
-        section_break_8: *id158
-        asset_maintenance_tasks: *id159
+        maintenance_manager_name: *id182
+        section_break_8: *id183
+        asset_maintenance_tasks: *id184
       required:
       - asset_maintenance_tasks
       - asset_name
       - company
       - maintenance_team
       - name
+      additionalProperties: true
+      x-module: Assets
+    AssetMaintenanceLog:
+      type: object
+      properties:
+        name: *id185
+        asset_maintenance: *id186
+        naming_series: *id187
+        asset_name: *id188
+        column_break_2: *id189
+        item_code: *id190
+        item_name: *id191
+        section_break_5: *id192
+        task: *id193
+        maintenance_type: *id194
+        periodicity:
+          type: string
+          readOnly: true
+        assign_to_name: *id195
+        column_break_6: *id196
+        due_date:
+          type: string
+          format: date
+          readOnly: true
+        completion_date: *id197
+        maintenance_status: *id198
+        has_certificate: *id199
+        certificate_attachement: *id200
+        description:
+          type: string
+          readOnly: true
+        column_break_9: *id201
+        actions_performed: *id202
+        amended_from:
+          type: string
+          x-frappe-target-doctype: Asset Maintenance Log
+          readOnly: true
+        task_name:
+          type: string
+          readOnly: true
+        task_assignee_email:
+          type: string
+          readOnly: true
+      required:
+      - maintenance_status
+      - name
+      - naming_series
       additionalProperties: true
       x-module: Assets
     AssetMaintenanceTask:
@@ -3036,24 +4350,42 @@ components:
       - start_date
       additionalProperties: true
       x-module: Assets
+    AssetMaintenanceTeam:
+      type: object
+      properties:
+        name: *id203
+        maintenance_team_name: *id204
+        maintenance_manager: *id205
+        maintenance_manager_name: *id206
+        column_break_2: *id207
+        company: *id208
+        section_break_2: *id209
+        maintenance_team_members: *id210
+      required:
+      - company
+      - maintenance_team_members
+      - maintenance_team_name
+      - name
+      additionalProperties: true
+      x-module: Assets
     AssetMovement:
       type: object
       properties:
-        name: *id160
-        company: *id161
-        purpose: *id162
-        transaction_date: *id163
-        column_break_4: *id164
-        reference: *id165
-        reference_doctype: *id166
-        reference_name: *id167
+        name: *id211
+        company: *id212
+        purpose: *id213
+        transaction_date: *id214
+        column_break_4: *id215
+        reference: *id216
+        reference_doctype: *id217
+        reference_name: *id218
         amended_from:
           type: string
           x-frappe-target-doctype: Asset Movement
           readOnly: true
-        section_break_10: *id168
-        assets: *id169
-        column_break_9: *id170
+        section_break_10: *id219
+        assets: *id220
+        column_break_9: *id221
       required:
       - assets
       - company
@@ -3100,16 +4432,16 @@ components:
     AssetRepair:
       type: object
       properties:
-        name: *id171
-        naming_series: *id172
-        column_break_2: *id173
-        failure_date: *id174
-        completion_date: *id175
-        repair_status: *id176
-        section_break_9: *id177
-        description: *id178
-        column_break_9: *id179
-        actions_performed: *id180
+        name: *id222
+        naming_series: *id223
+        column_break_2: *id224
+        failure_date: *id225
+        completion_date: *id226
+        repair_status: *id227
+        section_break_9: *id228
+        description: *id229
+        column_break_9: *id230
+        actions_performed: *id231
         downtime:
           type: string
           readOnly: true
@@ -3120,33 +4452,33 @@ components:
           type: string
           x-frappe-target-doctype: Asset Repair
           readOnly: true
-        asset: *id181
-        asset_name: *id182
-        capitalize_repair_cost: *id183
-        accounting_details: *id184
-        stock_items: *id185
-        cost_center: *id186
-        project: *id187
-        column_break_14: *id188
-        stock_consumption_details_section: *id189
+        asset: *id232
+        asset_name: *id233
+        capitalize_repair_cost: *id234
+        accounting_details: *id235
+        stock_items: *id236
+        cost_center: *id237
+        project: *id238
+        column_break_14: *id239
+        stock_consumption_details_section: *id240
         total_repair_cost:
           type: number
           readOnly: true
-        increase_in_asset_life: *id190
-        company: *id191
-        invoices: *id192
-        section_break_muyc: *id193
-        column_break_hkem: *id194
-        capitalizations_section: *id195
-        column_break_spre: *id196
-        column_break_ajbh: *id197
-        section_break_ltbb: *id198
-        column_break_ewor: *id199
-        column_break_ceuc: *id200
-        consumed_items_cost: *id201
-        column_break_xebe: *id202
-        accounting_dimensions_section: *id203
-        connection_tab: *id204
+        increase_in_asset_life: *id241
+        company: *id242
+        invoices: *id243
+        section_break_muyc: *id244
+        column_break_hkem: *id245
+        capitalizations_section: *id246
+        column_break_spre: *id247
+        column_break_ajbh: *id248
+        section_break_ltbb: *id249
+        column_break_ewor: *id250
+        column_break_ceuc: *id251
+        consumed_items_cost: *id252
+        column_break_xebe: *id253
+        accounting_dimensions_section: *id254
+        connection_tab: *id255
       required:
       - asset
       - failure_date
@@ -3208,37 +4540,76 @@ components:
       - repair_cost
       additionalProperties: true
       x-module: Assets
+    AssetShiftAllocation:
+      type: object
+      properties:
+        name: *id256
+        section_break_esaa: *id257
+        amended_from:
+          type: string
+          x-frappe-target-doctype: Asset Shift Allocation
+          readOnly: true
+        asset: *id258
+        column_break_tdae: *id259
+        finance_book: *id260
+        depreciation_schedule_section: *id261
+        depreciation_schedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/DepreciationSchedule'
+          readOnly: true
+        naming_series: *id262
+        column_break_jomc: *id263
+      required:
+      - asset
+      - name
+      - naming_series
+      additionalProperties: true
+      x-module: Assets
+    AssetShiftFactor:
+      type: object
+      properties:
+        name: *id264
+        shift_name: *id265
+        shift_factor: *id266
+        default: *id267
+      required:
+      - name
+      - shift_factor
+      - shift_name
+      additionalProperties: true
+      x-module: Assets
     AssetValueAdjustment:
       type: object
       properties:
-        name: *id205
-        company: *id206
-        asset: *id207
-        asset_category: *id208
-        finance_book: *id209
+        name: *id268
+        company: *id269
+        asset: *id270
+        asset_category: *id271
+        finance_book: *id272
         journal_entry:
           type: string
           x-frappe-target-doctype: Journal Entry
           readOnly: true
-        column_break_4: *id210
-        date: *id211
+        column_break_4: *id273
+        date: *id274
         current_asset_value:
           type: number
           readOnly: true
-        new_asset_value: *id212
+        new_asset_value: *id275
         difference_amount:
           type: number
           readOnly: true
-        cost_center: *id213
+        cost_center: *id276
         amended_from:
           type: string
           x-frappe-target-doctype: Asset Value Adjustment
           readOnly: true
-        accounting_dimensions_section: *id214
-        dimension_col_break: *id215
-        value_details_section: *id216
-        column_break_11: *id217
-        difference_account: *id218
+        accounting_dimensions_section: *id277
+        dimension_col_break: *id278
+        value_details_section: *id279
+        column_break_11: *id280
+        difference_account: *id281
       required:
       - asset
       - current_asset_value
@@ -3248,26 +4619,58 @@ components:
       - new_asset_value
       additionalProperties: true
       x-module: Assets
+    DepreciationSchedule:
+      type: object
+      properties:
+        name:
+          type: string
+        schedule_date:
+          type: string
+          format: date
+        depreciation_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+        column_break_3:
+          type: string
+        accumulated_depreciation_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        journal_entry:
+          type: string
+          x-frappe-target-doctype: Journal Entry
+          readOnly: true
+        make_depreciation_entry:
+          type: string
+        shift:
+          type: string
+          x-frappe-target-doctype: Asset Shift Factor
+      required:
+      - depreciation_amount
+      - name
+      - schedule_date
+      additionalProperties: true
+      x-module: Assets
     Location:
       type: object
       properties:
-        name: *id219
-        location_name: *id220
-        parent_location: *id221
-        cb_details: *id222
-        is_container: *id223
-        is_group: *id224
-        sb_location_details: *id225
-        latitude: *id226
-        longitude: *id227
-        cb_latlong: *id228
+        name: *id282
+        location_name: *id283
+        parent_location: *id284
+        cb_details: *id285
+        is_container: *id286
+        is_group: *id287
+        sb_location_details: *id288
+        latitude: *id289
+        longitude: *id290
+        cb_latlong: *id291
         area:
           type: number
           readOnly: true
-        area_uom: *id229
-        sb_geolocation: *id230
-        location: *id231
-        tree_details: *id232
+        area_uom: *id292
+        sb_geolocation: *id293
+        location: *id294
+        tree_details: *id295
         lft:
           type: integer
           readOnly: true
@@ -3283,6 +4686,26 @@ components:
       required:
       - location_name
       - name
+      additionalProperties: true
+      x-module: Assets
+    MaintenanceTeamMember:
+      type: object
+      properties:
+        name:
+          type: string
+        team_member:
+          type: string
+          x-frappe-target-doctype: User
+        full_name:
+          type: string
+          readOnly: true
+        maintenance_role:
+          type: string
+          x-frappe-target-doctype: Role
+      required:
+      - maintenance_role
+      - name
+      - team_member
       additionalProperties: true
       x-module: Assets
     FrappeResponse:
@@ -3425,16 +4848,23 @@ x-contract:
     - Asset Capitalization Stock Item
     - Asset Category
     - Asset Category Account
+    - Asset Depreciation Schedule
     - Asset Finance Book
     - Asset Maintenance
+    - Asset Maintenance Log
     - Asset Maintenance Task
+    - Asset Maintenance Team
     - Asset Movement
     - Asset Movement Item
     - Asset Repair
     - Asset Repair Consumed Item
     - Asset Repair Purchase Invoice
+    - Asset Shift Allocation
+    - Asset Shift Factor
     - Asset Value Adjustment
+    - Depreciation Schedule
     - Location
+    - Maintenance Team Member
     typed_modules:
     - Accounts
     - Assets
@@ -3722,6 +5152,27 @@ x-contract:
       operation: update
       operation_id: updateAccountsSettings
       handler: letron_api.banking.accounts_settings_update
+    - module: Assets
+      resource: actions
+      method: POST
+      path: /api/v1/assets/actions/{action}
+      operation: update
+      operation_id: runAssetAction
+      handler: letron_api.assets.asset_action
+    - module: Assets
+      resource: reports
+      method: GET
+      path: /api/v1/assets/reports/report
+      operation: read
+      operation_id: runAssetReport
+      handler: letron_api.assets.asset_report
+    - module: Assets
+      resource: dashboard
+      method: GET
+      path: /api/v1/assets/dashboard
+      operation: read
+      operation_id: getAssetDashboard
+      handler: letron_api.assets.asset_dashboard
     include_methods:
     - letron_api.api.health
     - letron_api.api.runtime_info
@@ -3741,6 +5192,16 @@ x-contract:
       path: /api/v1/assets/asset-repairs
     - doctype: Asset Value Adjustment
       path: /api/v1/assets/asset-value-adjustments
+    - doctype: Asset Maintenance Team
+      path: /api/v1/assets/asset-maintenance-teams
+    - doctype: Asset Maintenance Log
+      path: /api/v1/assets/asset-maintenance-logs
+    - doctype: Asset Depreciation Schedule
+      path: /api/v1/assets/asset-depreciation-schedules
+    - doctype: Asset Shift Factor
+      path: /api/v1/assets/asset-shift-factors
+    - doctype: Asset Shift Allocation
+      path: /api/v1/assets/asset-shift-allocations
     - doctype: Location
       path: /api/v1/assets/locations
     - doctype: Lead
@@ -3841,7 +5302,7 @@ x-capabilities:
 x-acceptance-summary:
   passed: 0
   partial: 0
-  not-tested: 50
+  not-tested: 78
   blocked: 0
 x-module: Assets
 x-module-index:
@@ -3853,13 +5314,20 @@ x-module-index:
   - Asset Capitalization Stock Item
   - Asset Category
   - Asset Category Account
+  - Asset Depreciation Schedule
   - Asset Finance Book
   - Asset Maintenance
+  - Asset Maintenance Log
   - Asset Maintenance Task
+  - Asset Maintenance Team
   - Asset Movement
   - Asset Movement Item
   - Asset Repair
   - Asset Repair Consumed Item
   - Asset Repair Purchase Invoice
+  - Asset Shift Allocation
+  - Asset Shift Factor
   - Asset Value Adjustment
+  - Depreciation Schedule
   - Location
+  - Maintenance Team Member

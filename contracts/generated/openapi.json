@@ -4809,6 +4809,783 @@
         }
       }
     },
+    "/api/v1/assets/asset-depreciation-schedules": {
+      "get": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "summary": "List Asset Depreciation Schedule records",
+        "description": "List typed Asset Depreciation Schedule documents.",
+        "operationId": "listAssetDepreciationSchedule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON field-name array"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON Frappe filters"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AssetDepreciationSchedule"
+                      }
+                    },
+                    "message": {}
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "post": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "summary": "Create Asset Depreciation Schedule",
+        "description": "Create a Asset Depreciation Schedule using the runtime DocType schema.",
+        "operationId": "createAssetDepreciationSchedule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "asset": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Asset"
+                  },
+                  "naming_series": {
+                    "type": "string",
+                    "enum": [
+                      "ACC-ADS-.YYYY.-"
+                    ]
+                  },
+                  "column_break_2": {
+                    "type": "string"
+                  },
+                  "depreciation_details_section": {
+                    "type": "string"
+                  },
+                  "finance_book": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Finance Book"
+                  },
+                  "column_break_8": {
+                    "type": "string"
+                  },
+                  "depreciation_schedule_section": {
+                    "type": "string"
+                  },
+                  "depreciation_schedule": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DepreciationSchedule"
+                    }
+                  },
+                  "details_section": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "asset",
+                  "name"
+                ],
+                "additionalProperties": true,
+                "x-module": "Assets"
+              },
+              "example": {
+                "asset": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetDepreciationSchedule"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
+    "/api/v1/assets/asset-depreciation-schedules/{name}": {
+      "get": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "getAssetDepreciationSchedule",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetDepreciationSchedule"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "put": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "updateAssetDepreciationSchedule",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "asset": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Asset"
+                  },
+                  "naming_series": {
+                    "type": "string",
+                    "enum": [
+                      "ACC-ADS-.YYYY.-"
+                    ]
+                  },
+                  "column_break_2": {
+                    "type": "string"
+                  },
+                  "depreciation_details_section": {
+                    "type": "string"
+                  },
+                  "finance_book": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Finance Book"
+                  },
+                  "column_break_8": {
+                    "type": "string"
+                  },
+                  "depreciation_schedule_section": {
+                    "type": "string"
+                  },
+                  "depreciation_schedule": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DepreciationSchedule"
+                    }
+                  },
+                  "details_section": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "asset",
+                  "name"
+                ],
+                "additionalProperties": true,
+                "x-module": "Assets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetDepreciationSchedule"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "delete": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "deleteAssetDepreciationSchedule",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
     "/api/v1/assets/asset-maintenance": {
       "get": {
         "tags": [
@@ -5493,6 +6270,1607 @@
           "Module: Assets"
         ],
         "operationId": "deleteAssetMaintenance",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
+    "/api/v1/assets/asset-maintenance-logs": {
+      "get": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "summary": "List Asset Maintenance Log records",
+        "description": "List typed Asset Maintenance Log documents.",
+        "operationId": "listAssetMaintenanceLog",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON field-name array"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON Frappe filters"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AssetMaintenanceLog"
+                      }
+                    },
+                    "message": {}
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "post": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "summary": "Create Asset Maintenance Log",
+        "description": "Create a Asset Maintenance Log using the runtime DocType schema.",
+        "operationId": "createAssetMaintenanceLog",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "asset_maintenance": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Asset Maintenance"
+                  },
+                  "naming_series": {
+                    "type": "string",
+                    "enum": [
+                      "ACC-AML-.YYYY.-"
+                    ]
+                  },
+                  "asset_name": {
+                    "type": "string"
+                  },
+                  "column_break_2": {
+                    "type": "string"
+                  },
+                  "item_code": {
+                    "type": "string"
+                  },
+                  "item_name": {
+                    "type": "string"
+                  },
+                  "section_break_5": {
+                    "type": "string"
+                  },
+                  "task": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Asset Maintenance Task"
+                  },
+                  "maintenance_type": {
+                    "type": "string"
+                  },
+                  "assign_to_name": {
+                    "type": "string"
+                  },
+                  "column_break_6": {
+                    "type": "string"
+                  },
+                  "completion_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "maintenance_status": {
+                    "type": "string",
+                    "enum": [
+                      "Planned",
+                      "Completed",
+                      "Cancelled",
+                      "Overdue"
+                    ]
+                  },
+                  "has_certificate": {
+                    "type": "boolean"
+                  },
+                  "certificate_attachement": {
+                    "type": "string"
+                  },
+                  "column_break_9": {
+                    "type": "string"
+                  },
+                  "actions_performed": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "maintenance_status",
+                  "name",
+                  "naming_series"
+                ],
+                "additionalProperties": true,
+                "x-module": "Assets"
+              },
+              "example": {
+                "naming_series": "",
+                "maintenance_status": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetMaintenanceLog"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
+    "/api/v1/assets/asset-maintenance-logs/{name}": {
+      "get": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "getAssetMaintenanceLog",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetMaintenanceLog"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "put": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "updateAssetMaintenanceLog",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "asset_maintenance": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Asset Maintenance"
+                  },
+                  "naming_series": {
+                    "type": "string",
+                    "enum": [
+                      "ACC-AML-.YYYY.-"
+                    ]
+                  },
+                  "asset_name": {
+                    "type": "string"
+                  },
+                  "column_break_2": {
+                    "type": "string"
+                  },
+                  "item_code": {
+                    "type": "string"
+                  },
+                  "item_name": {
+                    "type": "string"
+                  },
+                  "section_break_5": {
+                    "type": "string"
+                  },
+                  "task": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Asset Maintenance Task"
+                  },
+                  "maintenance_type": {
+                    "type": "string"
+                  },
+                  "assign_to_name": {
+                    "type": "string"
+                  },
+                  "column_break_6": {
+                    "type": "string"
+                  },
+                  "completion_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "maintenance_status": {
+                    "type": "string",
+                    "enum": [
+                      "Planned",
+                      "Completed",
+                      "Cancelled",
+                      "Overdue"
+                    ]
+                  },
+                  "has_certificate": {
+                    "type": "boolean"
+                  },
+                  "certificate_attachement": {
+                    "type": "string"
+                  },
+                  "column_break_9": {
+                    "type": "string"
+                  },
+                  "actions_performed": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "maintenance_status",
+                  "name",
+                  "naming_series"
+                ],
+                "additionalProperties": true,
+                "x-module": "Assets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetMaintenanceLog"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "delete": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "deleteAssetMaintenanceLog",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
+    "/api/v1/assets/asset-maintenance-teams": {
+      "get": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "summary": "List Asset Maintenance Team records",
+        "description": "List typed Asset Maintenance Team documents.",
+        "operationId": "listAssetMaintenanceTeam",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON field-name array"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON Frappe filters"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AssetMaintenanceTeam"
+                      }
+                    },
+                    "message": {}
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "post": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "summary": "Create Asset Maintenance Team",
+        "description": "Create a Asset Maintenance Team using the runtime DocType schema.",
+        "operationId": "createAssetMaintenanceTeam",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "maintenance_team_name": {
+                    "type": "string"
+                  },
+                  "maintenance_manager": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "User"
+                  },
+                  "maintenance_manager_name": {
+                    "type": "string"
+                  },
+                  "column_break_2": {
+                    "type": "string"
+                  },
+                  "company": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Company"
+                  },
+                  "section_break_2": {
+                    "type": "string"
+                  },
+                  "maintenance_team_members": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/MaintenanceTeamMember"
+                    }
+                  }
+                },
+                "required": [
+                  "company",
+                  "maintenance_team_members",
+                  "maintenance_team_name",
+                  "name"
+                ],
+                "additionalProperties": true,
+                "x-module": "Assets"
+              },
+              "example": {
+                "maintenance_team_name": "",
+                "company": "",
+                "maintenance_team_members": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetMaintenanceTeam"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
+    "/api/v1/assets/asset-maintenance-teams/{name}": {
+      "get": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "getAssetMaintenanceTeam",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetMaintenanceTeam"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "put": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "updateAssetMaintenanceTeam",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "maintenance_team_name": {
+                    "type": "string"
+                  },
+                  "maintenance_manager": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "User"
+                  },
+                  "maintenance_manager_name": {
+                    "type": "string"
+                  },
+                  "column_break_2": {
+                    "type": "string"
+                  },
+                  "company": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Company"
+                  },
+                  "section_break_2": {
+                    "type": "string"
+                  },
+                  "maintenance_team_members": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/MaintenanceTeamMember"
+                    }
+                  }
+                },
+                "required": [
+                  "company",
+                  "maintenance_team_members",
+                  "maintenance_team_name",
+                  "name"
+                ],
+                "additionalProperties": true,
+                "x-module": "Assets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetMaintenanceTeam"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "delete": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "deleteAssetMaintenanceTeam",
         "parameters": [
           {
             "name": "name",
@@ -7882,6 +10260,1496 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
+    "/api/v1/assets/asset-shift-allocations": {
+      "get": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "summary": "List Asset Shift Allocation records",
+        "description": "List typed Asset Shift Allocation documents.",
+        "operationId": "listAssetShiftAllocation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON field-name array"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON Frappe filters"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AssetShiftAllocation"
+                      }
+                    },
+                    "message": {}
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "post": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "summary": "Create Asset Shift Allocation",
+        "description": "Create a Asset Shift Allocation using the runtime DocType schema.",
+        "operationId": "createAssetShiftAllocation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "section_break_esaa": {
+                    "type": "string"
+                  },
+                  "asset": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Asset"
+                  },
+                  "column_break_tdae": {
+                    "type": "string"
+                  },
+                  "finance_book": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Finance Book"
+                  },
+                  "depreciation_schedule_section": {
+                    "type": "string"
+                  },
+                  "naming_series": {
+                    "type": "string",
+                    "enum": [
+                      "ACC-ASA-.YYYY.-"
+                    ]
+                  },
+                  "column_break_jomc": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "asset",
+                  "name",
+                  "naming_series"
+                ],
+                "additionalProperties": true,
+                "x-module": "Assets"
+              },
+              "example": {
+                "asset": "",
+                "naming_series": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetShiftAllocation"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
+    "/api/v1/assets/asset-shift-allocations/{name}": {
+      "get": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "getAssetShiftAllocation",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetShiftAllocation"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "put": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "updateAssetShiftAllocation",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "section_break_esaa": {
+                    "type": "string"
+                  },
+                  "asset": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Asset"
+                  },
+                  "column_break_tdae": {
+                    "type": "string"
+                  },
+                  "finance_book": {
+                    "type": "string",
+                    "x-frappe-target-doctype": "Finance Book"
+                  },
+                  "depreciation_schedule_section": {
+                    "type": "string"
+                  },
+                  "naming_series": {
+                    "type": "string",
+                    "enum": [
+                      "ACC-ASA-.YYYY.-"
+                    ]
+                  },
+                  "column_break_jomc": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "asset",
+                  "name",
+                  "naming_series"
+                ],
+                "additionalProperties": true,
+                "x-module": "Assets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetShiftAllocation"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "delete": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "deleteAssetShiftAllocation",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
+    "/api/v1/assets/asset-shift-factors": {
+      "get": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "summary": "List Asset Shift Factor records",
+        "description": "List typed Asset Shift Factor documents.",
+        "operationId": "listAssetShiftFactor",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON field-name array"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON Frappe filters"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AssetShiftFactor"
+                      }
+                    },
+                    "message": {}
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "post": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "summary": "Create Asset Shift Factor",
+        "description": "Create a Asset Shift Factor using the runtime DocType schema.",
+        "operationId": "createAssetShiftFactor",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "shift_name": {
+                    "type": "string"
+                  },
+                  "shift_factor": {
+                    "type": "number"
+                  },
+                  "default": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "shift_factor",
+                  "shift_name"
+                ],
+                "additionalProperties": true,
+                "x-module": "Assets"
+              },
+              "example": {
+                "shift_name": "",
+                "shift_factor": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetShiftFactor"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
+    "/api/v1/assets/asset-shift-factors/{name}": {
+      "get": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "getAssetShiftFactor",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetShiftFactor"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "put": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "updateAssetShiftFactor",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "shift_name": {
+                    "type": "string"
+                  },
+                  "shift_factor": {
+                    "type": "number"
+                  },
+                  "default": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "shift_factor",
+                  "shift_name"
+                ],
+                "additionalProperties": true,
+                "x-module": "Assets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AssetShiftFactor"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      },
+      "delete": {
+        "tags": [
+          "Module: Assets"
+        ],
+        "operationId": "deleteAssetShiftFactor",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted typed resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -57595,6 +61463,373 @@
         }
       }
     },
+    "/api/v1/assets/actions/{action}": {
+      "post": {
+        "tags": [
+          "Module: Assets",
+          "Business routes"
+        ],
+        "summary": "runAssetAction",
+        "operationId": "runAssetAction",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.assets.asset_action",
+        "x-public-operation": "update",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
+    "/api/v1/assets/reports/report": {
+      "get": {
+        "tags": [
+          "Module: Assets",
+          "Business routes"
+        ],
+        "summary": "runAssetReport",
+        "operationId": "runAssetReport",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.assets.asset_report",
+        "x-public-operation": "read",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
+    "/api/v1/assets/dashboard": {
+      "get": {
+        "tags": [
+          "Module: Assets",
+          "Business routes"
+        ],
+        "summary": "getAssetDashboard",
+        "operationId": "getAssetDashboard",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.assets.asset_dashboard",
+        "x-public-operation": "read",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "assets-lifecycle",
+          "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
+        }
+      }
+    },
     "/api/method/upload_file": {
       "post": {
         "tags": [
@@ -58827,6 +63062,140 @@
         "additionalProperties": true,
         "x-module": "Assets"
       },
+      "AssetDepreciationSchedule": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "asset": {
+            "type": "string",
+            "x-frappe-target-doctype": "Asset"
+          },
+          "naming_series": {
+            "type": "string",
+            "enum": [
+              "ACC-ADS-.YYYY.-"
+            ]
+          },
+          "amended_from": {
+            "type": "string",
+            "x-frappe-target-doctype": "Asset Depreciation Schedule",
+            "readOnly": true
+          },
+          "column_break_2": {
+            "type": "string"
+          },
+          "depreciation_details_section": {
+            "type": "string"
+          },
+          "finance_book": {
+            "type": "string",
+            "x-frappe-target-doctype": "Finance Book"
+          },
+          "depreciation_method": {
+            "type": "string",
+            "enum": [
+              "Straight Line",
+              "Double Declining Balance",
+              "Written Down Value",
+              "Manual"
+            ],
+            "readOnly": true
+          },
+          "rate_of_depreciation": {
+            "type": "number",
+            "readOnly": true
+          },
+          "column_break_8": {
+            "type": "string"
+          },
+          "total_number_of_depreciations": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "depreciation_schedule_section": {
+            "type": "string"
+          },
+          "depreciation_schedule": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DepreciationSchedule"
+            }
+          },
+          "details_section": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string",
+            "readOnly": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Active",
+              "Cancelled"
+            ],
+            "readOnly": true,
+            "writeOnly": true
+          },
+          "frequency_of_depreciation": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "expected_value_after_useful_life": {
+            "type": "number",
+            "x-frappe-options": "Company:company:default_currency",
+            "readOnly": true
+          },
+          "finance_book_id": {
+            "type": "integer",
+            "readOnly": true,
+            "writeOnly": true
+          },
+          "opening_accumulated_depreciation": {
+            "type": "number",
+            "x-frappe-options": "Company:company:default_currency",
+            "readOnly": true,
+            "writeOnly": true
+          },
+          "opening_number_of_booked_depreciations": {
+            "type": "integer",
+            "readOnly": true,
+            "writeOnly": true
+          },
+          "daily_prorata_based": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "shift_based": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "company": {
+            "type": "string",
+            "x-frappe-target-doctype": "Company",
+            "readOnly": true
+          },
+          "value_after_depreciation": {
+            "type": "number",
+            "readOnly": true
+          },
+          "net_purchase_amount": {
+            "type": "number",
+            "x-frappe-options": "Company:company:default_currency",
+            "readOnly": true,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "asset",
+          "name"
+        ],
+        "additionalProperties": true,
+        "x-module": "Assets"
+      },
       "AssetFinanceBook": {
         "type": "object",
         "properties": {
@@ -58968,6 +63337,110 @@
         "additionalProperties": true,
         "x-module": "Assets"
       },
+      "AssetMaintenanceLog": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "asset_maintenance": {
+            "type": "string",
+            "x-frappe-target-doctype": "Asset Maintenance"
+          },
+          "naming_series": {
+            "type": "string",
+            "enum": [
+              "ACC-AML-.YYYY.-"
+            ]
+          },
+          "asset_name": {
+            "type": "string"
+          },
+          "column_break_2": {
+            "type": "string"
+          },
+          "item_code": {
+            "type": "string"
+          },
+          "item_name": {
+            "type": "string"
+          },
+          "section_break_5": {
+            "type": "string"
+          },
+          "task": {
+            "type": "string",
+            "x-frappe-target-doctype": "Asset Maintenance Task"
+          },
+          "maintenance_type": {
+            "type": "string"
+          },
+          "periodicity": {
+            "type": "string",
+            "readOnly": true
+          },
+          "assign_to_name": {
+            "type": "string"
+          },
+          "column_break_6": {
+            "type": "string"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "readOnly": true
+          },
+          "completion_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "maintenance_status": {
+            "type": "string",
+            "enum": [
+              "Planned",
+              "Completed",
+              "Cancelled",
+              "Overdue"
+            ]
+          },
+          "has_certificate": {
+            "type": "boolean"
+          },
+          "certificate_attachement": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "readOnly": true
+          },
+          "column_break_9": {
+            "type": "string"
+          },
+          "actions_performed": {
+            "type": "string"
+          },
+          "amended_from": {
+            "type": "string",
+            "x-frappe-target-doctype": "Asset Maintenance Log",
+            "readOnly": true
+          },
+          "task_name": {
+            "type": "string",
+            "readOnly": true
+          },
+          "task_assignee_email": {
+            "type": "string",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "maintenance_status",
+          "name",
+          "naming_series"
+        ],
+        "additionalProperties": true,
+        "x-module": "Assets"
+      },
       "AssetMaintenanceTask": {
         "type": "object",
         "properties": {
@@ -59065,6 +63538,48 @@
           "name",
           "periodicity",
           "start_date"
+        ],
+        "additionalProperties": true,
+        "x-module": "Assets"
+      },
+      "AssetMaintenanceTeam": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "maintenance_team_name": {
+            "type": "string"
+          },
+          "maintenance_manager": {
+            "type": "string",
+            "x-frappe-target-doctype": "User"
+          },
+          "maintenance_manager_name": {
+            "type": "string"
+          },
+          "column_break_2": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string",
+            "x-frappe-target-doctype": "Company"
+          },
+          "section_break_2": {
+            "type": "string"
+          },
+          "maintenance_team_members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MaintenanceTeamMember"
+            }
+          }
+        },
+        "required": [
+          "company",
+          "maintenance_team_members",
+          "maintenance_team_name",
+          "name"
         ],
         "additionalProperties": true,
         "x-module": "Assets"
@@ -59403,6 +63918,83 @@
           "expense_account",
           "name",
           "repair_cost"
+        ],
+        "additionalProperties": true,
+        "x-module": "Assets"
+      },
+      "AssetShiftAllocation": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "section_break_esaa": {
+            "type": "string"
+          },
+          "amended_from": {
+            "type": "string",
+            "x-frappe-target-doctype": "Asset Shift Allocation",
+            "readOnly": true
+          },
+          "asset": {
+            "type": "string",
+            "x-frappe-target-doctype": "Asset"
+          },
+          "column_break_tdae": {
+            "type": "string"
+          },
+          "finance_book": {
+            "type": "string",
+            "x-frappe-target-doctype": "Finance Book"
+          },
+          "depreciation_schedule_section": {
+            "type": "string"
+          },
+          "depreciation_schedule": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DepreciationSchedule"
+            },
+            "readOnly": true
+          },
+          "naming_series": {
+            "type": "string",
+            "enum": [
+              "ACC-ASA-.YYYY.-"
+            ]
+          },
+          "column_break_jomc": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset",
+          "name",
+          "naming_series"
+        ],
+        "additionalProperties": true,
+        "x-module": "Assets"
+      },
+      "AssetShiftFactor": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "shift_name": {
+            "type": "string"
+          },
+          "shift_factor": {
+            "type": "number"
+          },
+          "default": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "shift_factor",
+          "shift_name"
         ],
         "additionalProperties": true,
         "x-module": "Assets"
@@ -61922,6 +66514,49 @@
         "additionalProperties": true,
         "x-module": "Stock"
       },
+      "DepreciationSchedule": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "schedule_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "depreciation_amount": {
+            "type": "number",
+            "x-frappe-options": "Company:company:default_currency"
+          },
+          "column_break_3": {
+            "type": "string"
+          },
+          "accumulated_depreciation_amount": {
+            "type": "number",
+            "x-frappe-options": "Company:company:default_currency",
+            "readOnly": true
+          },
+          "journal_entry": {
+            "type": "string",
+            "x-frappe-target-doctype": "Journal Entry",
+            "readOnly": true
+          },
+          "make_depreciation_entry": {
+            "type": "string"
+          },
+          "shift": {
+            "type": "string",
+            "x-frappe-target-doctype": "Asset Shift Factor"
+          }
+        },
+        "required": [
+          "depreciation_amount",
+          "name",
+          "schedule_date"
+        ],
+        "additionalProperties": true,
+        "x-module": "Assets"
+      },
       "DynamicLink": {
         "type": "object",
         "properties": {
@@ -64096,6 +68731,33 @@
         "required": [
           "location_name",
           "name"
+        ],
+        "additionalProperties": true,
+        "x-module": "Assets"
+      },
+      "MaintenanceTeamMember": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "team_member": {
+            "type": "string",
+            "x-frappe-target-doctype": "User"
+          },
+          "full_name": {
+            "type": "string",
+            "readOnly": true
+          },
+          "maintenance_role": {
+            "type": "string",
+            "x-frappe-target-doctype": "Role"
+          }
+        },
+        "required": [
+          "maintenance_role",
+          "name",
+          "team_member"
         ],
         "additionalProperties": true,
         "x-module": "Assets"
@@ -79552,6 +84214,33 @@
           "operation": "update",
           "operation_id": "updateAccountsSettings",
           "handler": "letron_api.banking.accounts_settings_update"
+        },
+        {
+          "module": "Assets",
+          "resource": "actions",
+          "method": "POST",
+          "path": "/api/v1/assets/actions/{action}",
+          "operation": "update",
+          "operation_id": "runAssetAction",
+          "handler": "letron_api.assets.asset_action"
+        },
+        {
+          "module": "Assets",
+          "resource": "reports",
+          "method": "GET",
+          "path": "/api/v1/assets/reports/report",
+          "operation": "read",
+          "operation_id": "runAssetReport",
+          "handler": "letron_api.assets.asset_report"
+        },
+        {
+          "module": "Assets",
+          "resource": "dashboard",
+          "method": "GET",
+          "path": "/api/v1/assets/dashboard",
+          "operation": "read",
+          "operation_id": "getAssetDashboard",
+          "handler": "letron_api.assets.asset_dashboard"
         }
       ],
       "include_methods": [
@@ -79587,6 +84276,26 @@
         {
           "doctype": "Asset Value Adjustment",
           "path": "/api/v1/assets/asset-value-adjustments"
+        },
+        {
+          "doctype": "Asset Maintenance Team",
+          "path": "/api/v1/assets/asset-maintenance-teams"
+        },
+        {
+          "doctype": "Asset Maintenance Log",
+          "path": "/api/v1/assets/asset-maintenance-logs"
+        },
+        {
+          "doctype": "Asset Depreciation Schedule",
+          "path": "/api/v1/assets/asset-depreciation-schedules"
+        },
+        {
+          "doctype": "Asset Shift Factor",
+          "path": "/api/v1/assets/asset-shift-factors"
+        },
+        {
+          "doctype": "Asset Shift Allocation",
+          "path": "/api/v1/assets/asset-shift-allocations"
         },
         {
           "doctype": "Location",
@@ -79774,7 +84483,7 @@
   "x-acceptance-summary": {
     "passed": 215,
     "partial": 0,
-    "not-tested": 76,
+    "not-tested": 104,
     "blocked": 0
   },
   "x-module": null,

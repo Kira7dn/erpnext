@@ -34,6 +34,10 @@ export type AccountingResource =
 
 export type AccountingVirtualResource = "bank-reconciliation" | "reports" | "statement-imports" | "settings";
 
+export type AssetResource = "assets" | "asset-categories" | "asset-capitalizations" | "asset-maintenance" | "asset-movements" | "asset-repairs" | "asset-value-adjustments" | "asset-maintenance-teams" | "asset-maintenance-logs" | "asset-depreciation-schedules" | "asset-shift-factors" | "asset-shift-allocations" | "locations";
+export type AssetVirtualResource = "actions" | "reports" | "dashboard";
+export type AssetReportKey = "fixed-asset-register" | "asset-depreciation-ledger" | "asset-depreciations-and-balances" | "asset-maintenance" | "asset-activity";
+
 export const ACCOUNTING_RESOURCES = [
   "banks",
   "bank-accounts",
@@ -50,6 +54,9 @@ export const ACCOUNTING_RESOURCES = [
 ] as const satisfies readonly AccountingResource[];
 
 export const ACCOUNTING_VIRTUAL_RESOURCES = ["bank-reconciliation", "reports", "statement-imports", "settings"] as const satisfies readonly AccountingVirtualResource[];
+export const ASSET_RESOURCES = ["assets", "asset-categories", "asset-capitalizations", "asset-maintenance", "asset-movements", "asset-repairs", "asset-value-adjustments", "asset-maintenance-teams", "asset-maintenance-logs", "asset-depreciation-schedules", "asset-shift-factors", "asset-shift-allocations", "locations"] as const satisfies readonly AssetResource[];
+export const ASSET_VIRTUAL_RESOURCES = ["actions", "reports", "dashboard"] as const satisfies readonly AssetVirtualResource[];
+export const ASSET_REPORTS = ["fixed-asset-register", "asset-depreciation-ledger", "asset-depreciations-and-balances", "asset-maintenance", "asset-activity"] as const satisfies readonly AssetReportKey[];
 
 export type AccountingFormField = {
   name: string;
@@ -110,6 +117,33 @@ export function isAccountingResource(value: string): value is AccountingResource
 
 export function isAccountingVirtualResource(value: string): value is AccountingVirtualResource {
   return (ACCOUNTING_VIRTUAL_RESOURCES as readonly string[]).includes(value);
+}
+
+export function isAssetResource(value: string): value is AssetResource {
+  return (ASSET_RESOURCES as readonly string[]).includes(value);
+}
+
+export function isAssetVirtualResource(value: string): value is AssetVirtualResource {
+  return (ASSET_VIRTUAL_RESOURCES as readonly string[]).includes(value);
+}
+
+export function assetsGatewayRequest<T>(path: string, cookieHeader: string, init: RequestInit = {}): Promise<T> {
+  return gatewayRequest<T>(`/api/v1/assets/${path.replace(/^\/+/, "")}`, cookieHeader, init);
+}
+
+export async function listAssetResource(resource: AssetResource, cookieHeader: string, searchParams = ""): Promise<Record<string, unknown>[]> {
+  const suffix = searchParams ? `?${searchParams}` : "";
+  const data = await assetsGatewayRequest<unknown>(`${resource}${suffix}`, cookieHeader);
+  return Array.isArray(data) ? data as Record<string, unknown>[] : [];
+}
+
+export function getAssetFormFields(resource: AssetResource): AccountingFormField[] {
+  const schema = readContract().paths?.[`/api/v1/assets/${resource}`]?.post?.requestBody?.content?.["application/json"]?.schema;
+  if (!schema?.properties) return [];
+  const required = new Set(schema.required ?? []);
+  return Object.entries(schema.properties)
+    .filter(([name, field]) => !/^(section|column|sb|cb|.*_section|.*_tab|.*_html|title$)/i.test(name) && !field.writeOnly)
+    .map(([name, field]) => ({ name, type: ["string", "number", "integer", "boolean", "array"].includes(field.type ?? "") ? field.type as AccountingFormField["type"] : "string", format: field.format, enum: field.enum, required: required.has(name), targetDoctype: field["x-frappe-target-doctype"] }));
 }
 
 export async function accountingGatewayRequest<T>(path: string, cookieHeader: string, init: RequestInit = {}): Promise<T> {

@@ -157367,6 +157367,61 @@
       "parameters": []
     },
     {
+      "dotted_path": "letron_api.assets.asset_action",
+      "source": "assets.py",
+      "method": "asset_action",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "action",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "payload",
+          "annotation": "Any",
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.assets.asset_dashboard",
+      "source": "assets.py",
+      "method": "asset_dashboard",
+      "app": "letron_api",
+      "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.assets.asset_report",
+      "source": "assets.py",
+      "method": "asset_report",
+      "app": "letron_api",
+      "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "report_key",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "filters",
+          "annotation": "Any",
+          "required": false
+        }
+      ]
+    },
+    {
       "dotted_path": "letron_api.backup.scheduled_s3_backup",
       "source": "backup.py",
       "method": "scheduled_s3_backup",

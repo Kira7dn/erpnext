@@ -3,6 +3,8 @@ import uuid
 from threading import Lock
 from typing import Any, cast
 
+import frappe
+
 from letron_api.frappe_compat import install_scheduler_compatibility
 from letron_api.policy import POLICY_DOCTYPES
 
@@ -27,6 +29,11 @@ PUBLIC_RESOURCE_ROUTES = {
     ("assets", "asset-movements"): "Asset Movement",
     ("assets", "asset-repairs"): "Asset Repair",
     ("assets", "asset-value-adjustments"): "Asset Value Adjustment",
+    ("assets", "asset-maintenance-teams"): "Asset Maintenance Team",
+    ("assets", "asset-maintenance-logs"): "Asset Maintenance Log",
+    ("assets", "asset-depreciation-schedules"): "Asset Depreciation Schedule",
+    ("assets", "asset-shift-factors"): "Asset Shift Factor",
+    ("assets", "asset-shift-allocations"): "Asset Shift Allocation",
     ("assets", "locations"): "Location",
     ("selling", "customers"): "Customer",
     ("selling", "quotations"): "Quotation",
@@ -108,7 +115,6 @@ VIRTUAL_BANKING_ROUTES = {
     ("accounts", "statement-imports", "set-header-index"): "letron_api.banking.statement_set_header_index",
 }
 
-
 def _virtual_banking_target(parts: list[str]) -> str | None:
     if len(parts) == 4 and parts[2:4] == ["accounts", "statement-imports"]:
         return "letron_api.banking.statement_imports" if frappe.local.request.method == "GET" else "letron_api.banking.statement_import_create"
@@ -137,6 +143,21 @@ def _virtual_banking_target(parts: list[str]) -> str | None:
     return None
 
 
+def _virtual_asset_target(parts: list[str]) -> str | None:
+    if len(parts) == 4 and parts[2:4] == ["assets", "dashboard"]:
+        return "letron_api.assets.asset_dashboard"
+    if len(parts) == 5 and parts[2:4] == ["assets", "reports"] and parts[4] == "report":
+        frappe.local.form_dict.update({
+            "report_key": frappe.local.request.args.get("report_key"),
+            "filters": frappe.local.request.args.get("filters"),
+        })
+        return "letron_api.assets.asset_report"
+    if len(parts) == 5 and parts[2:4] == ["assets", "actions"]:
+        frappe.local.form_dict.update({"action": parts[4], "payload": frappe.request.get_data(as_text=True)})
+        return "letron_api.assets.asset_action"
+    return None
+
+
 
 def rewrite_public_routes() -> None:
     """Rewrite public business aliases to native Frappe resource routes."""
@@ -155,7 +176,7 @@ def rewrite_public_routes() -> None:
     if not module_slug or not doctype_slug:
         return
     if (module_slug, doctype_slug) not in PUBLIC_RESOURCE_ROUTES:
-        target_method = _virtual_banking_target(parts)
+        target_method = _virtual_asset_target(parts) or _virtual_banking_target(parts)
         if target_method:
             if len(parts) >= 5 and parts[2:4] == ["accounts", "statement-imports"]:
                 frappe.local.form_dict.setdefault("statement_import_id", parts[4])

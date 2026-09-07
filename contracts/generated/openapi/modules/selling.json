@@ -8392,6 +8392,33 @@
           "operation": "update",
           "operation_id": "updateAccountsSettings",
           "handler": "letron_api.banking.accounts_settings_update"
+        },
+        {
+          "module": "Assets",
+          "resource": "actions",
+          "method": "POST",
+          "path": "/api/v1/assets/actions/{action}",
+          "operation": "update",
+          "operation_id": "runAssetAction",
+          "handler": "letron_api.assets.asset_action"
+        },
+        {
+          "module": "Assets",
+          "resource": "reports",
+          "method": "GET",
+          "path": "/api/v1/assets/reports/report",
+          "operation": "read",
+          "operation_id": "runAssetReport",
+          "handler": "letron_api.assets.asset_report"
+        },
+        {
+          "module": "Assets",
+          "resource": "dashboard",
+          "method": "GET",
+          "path": "/api/v1/assets/dashboard",
+          "operation": "read",
+          "operation_id": "getAssetDashboard",
+          "handler": "letron_api.assets.asset_dashboard"
         }
       ],
       "include_methods": [
@@ -8427,6 +8454,26 @@
         {
           "doctype": "Asset Value Adjustment",
           "path": "/api/v1/assets/asset-value-adjustments"
+        },
+        {
+          "doctype": "Asset Maintenance Team",
+          "path": "/api/v1/assets/asset-maintenance-teams"
+        },
+        {
+          "doctype": "Asset Maintenance Log",
+          "path": "/api/v1/assets/asset-maintenance-logs"
+        },
+        {
+          "doctype": "Asset Depreciation Schedule",
+          "path": "/api/v1/assets/asset-depreciation-schedules"
+        },
+        {
+          "doctype": "Asset Shift Factor",
+          "path": "/api/v1/assets/asset-shift-factors"
+        },
+        {
+          "doctype": "Asset Shift Allocation",
+          "path": "/api/v1/assets/asset-shift-allocations"
         },
         {
           "doctype": "Location",

@@ -145,6 +145,9 @@ runtime:
     - {module: Accounts, resource: statement-imports, method: POST, path: '/api/v1/accounts/statement-imports/{name}/set-header-index', operation: update, operation_id: setStatementImportHeaderIndex, handler: letron_api.banking.statement_set_header_index}
     - {module: Accounts, resource: settings, method: GET, path: /api/v1/accounts/settings, operation: read, operation_id: getAccountsSettings, handler: letron_api.banking.accounts_settings}
     - {module: Accounts, resource: settings, method: PUT, path: /api/v1/accounts/settings, operation: update, operation_id: updateAccountsSettings, handler: letron_api.banking.accounts_settings_update}
+    - {module: Assets, resource: actions, method: POST, path: '/api/v1/assets/actions/{action}', operation: update, operation_id: runAssetAction, handler: letron_api.assets.asset_action}
+    - {module: Assets, resource: reports, method: GET, path: /api/v1/assets/reports/report, operation: read, operation_id: runAssetReport, handler: letron_api.assets.asset_report}
+    - {module: Assets, resource: dashboard, method: GET, path: /api/v1/assets/dashboard, operation: read, operation_id: getAssetDashboard, handler: letron_api.assets.asset_dashboard}
   include_methods:
     - letron_api.api.health
     - letron_api.api.runtime_info
@@ -164,6 +167,16 @@ runtime:
       path: /api/v1/assets/asset-repairs
     - doctype: Asset Value Adjustment
       path: /api/v1/assets/asset-value-adjustments
+    - doctype: Asset Maintenance Team
+      path: /api/v1/assets/asset-maintenance-teams
+    - doctype: Asset Maintenance Log
+      path: /api/v1/assets/asset-maintenance-logs
+    - doctype: Asset Depreciation Schedule
+      path: /api/v1/assets/asset-depreciation-schedules
+    - doctype: Asset Shift Factor
+      path: /api/v1/assets/asset-shift-factors
+    - doctype: Asset Shift Allocation
+      path: /api/v1/assets/asset-shift-allocations
     - doctype: Location
       path: /api/v1/assets/locations
     - doctype: Lead
@@ -308,6 +321,9 @@ acceptance:
       level: docker-runtime
       test: tests/integration/test_assets_api_runtime.py::test_assets_contract_surface
   operations:
+    runAssetAction: {status: not-tested, suite: assets-lifecycle}
+    runAssetReport: {status: not-tested, suite: assets-lifecycle}
+    getAssetDashboard: {status: not-tested, suite: assets-lifecycle}
     listBankReconciliationTransactions: {status: not-tested, suite: accounts-reconciliation}
     getBankReconciliationBalance: {status: not-tested, suite: accounts-reconciliation}
     getBankReconciliationLinkedPayments: {status: not-tested, suite: accounts-reconciliation}
@@ -388,6 +404,31 @@ acceptance:
     getLocation: {status: not-tested, suite: assets-lifecycle}
     updateLocation: {status: not-tested, suite: assets-lifecycle}
     deleteLocation: {status: not-tested, suite: assets-lifecycle}
+    listAssetShiftAllocation: {status: not-tested, suite: assets-lifecycle}
+    createAssetShiftAllocation: {status: not-tested, suite: assets-lifecycle}
+    getAssetShiftAllocation: {status: not-tested, suite: assets-lifecycle}
+    updateAssetShiftAllocation: {status: not-tested, suite: assets-lifecycle}
+    deleteAssetShiftAllocation: {status: not-tested, suite: assets-lifecycle}
+    listAssetMaintenanceTeam: {status: not-tested, suite: assets-lifecycle}
+    createAssetMaintenanceTeam: {status: not-tested, suite: assets-lifecycle}
+    getAssetMaintenanceTeam: {status: not-tested, suite: assets-lifecycle}
+    updateAssetMaintenanceTeam: {status: not-tested, suite: assets-lifecycle}
+    deleteAssetMaintenanceTeam: {status: not-tested, suite: assets-lifecycle}
+    listAssetMaintenanceLog: {status: not-tested, suite: assets-lifecycle}
+    createAssetMaintenanceLog: {status: not-tested, suite: assets-lifecycle}
+    getAssetMaintenanceLog: {status: not-tested, suite: assets-lifecycle}
+    updateAssetMaintenanceLog: {status: not-tested, suite: assets-lifecycle}
+    deleteAssetMaintenanceLog: {status: not-tested, suite: assets-lifecycle}
+    listAssetDepreciationSchedule: {status: not-tested, suite: assets-lifecycle}
+    createAssetDepreciationSchedule: {status: not-tested, suite: assets-lifecycle}
+    getAssetDepreciationSchedule: {status: not-tested, suite: assets-lifecycle}
+    updateAssetDepreciationSchedule: {status: not-tested, suite: assets-lifecycle}
+    deleteAssetDepreciationSchedule: {status: not-tested, suite: assets-lifecycle}
+    listAssetShiftFactor: {status: not-tested, suite: assets-lifecycle}
+    createAssetShiftFactor: {status: not-tested, suite: assets-lifecycle}
+    getAssetShiftFactor: {status: not-tested, suite: assets-lifecycle}
+    updateAssetShiftFactor: {status: not-tested, suite: assets-lifecycle}
+    deleteAssetShiftFactor: {status: not-tested, suite: assets-lifecycle}
     listCustomer: {status: passed, suite: public-api}
     createCustomer: {status: passed, suite: public-api}
     getCustomer: {status: passed, suite: extended-api}
