@@ -8,7 +8,7 @@ import { ASSET_REPORTS, assetsGatewayRequest, GatewayAccessDeniedError, GatewayA
 
 export const dynamic = "force-dynamic";
 
-function label(value: string) { return value.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" "); }
+function label(value: string) { const labels: Record<string, string> = { "fixed-asset-register": "Sổ đăng ký tài sản", "asset-depreciation-ledger": "Sổ khấu hao tài sản", "asset-depreciations-and-balances": "Khấu hao và số dư tài sản", "asset-maintenance": "Báo cáo bảo trì tài sản", "asset-activity": "Hoạt động tài sản" }; return labels[value] ?? value; }
 
 export default async function AssetsReportsPage({ searchParams }: { searchParams: Promise<{ report?: string }> }) {
   const selected = (await searchParams).report;

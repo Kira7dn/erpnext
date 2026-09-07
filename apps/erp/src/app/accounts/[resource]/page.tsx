@@ -7,10 +7,11 @@ import { AccountingShell } from "@/components/accounting-shell";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ACCOUNTING_RESOURCES, GatewayAccessDeniedError, GatewayAuthenticationRequiredError, isAccountingResource, listAccountingResource, type AccountingResource } from "@/lib/letron-api";
+import { accountingLabel } from "@/lib/ui-labels";
 
 export const dynamic = "force-dynamic";
 
-const title = (resource: AccountingResource) => resource.split("-").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+const title = (resource: AccountingResource) => accountingLabel(resource);
 
 export function generateStaticParams() {
   return ACCOUNTING_RESOURCES.filter((resource) => resource !== "bank-accounts").map((resource) => ({ resource }));

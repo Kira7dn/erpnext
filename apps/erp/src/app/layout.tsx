@@ -13,14 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Letron ERP",
-  description: "Letron ERP frontend",
+  title: "LeTRON-Kế toán và LeTRON-Tài sản",
+  description: "Frontend tiếng Việt cho các phân hệ Accounting và Assets của LeTRON",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="vi"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

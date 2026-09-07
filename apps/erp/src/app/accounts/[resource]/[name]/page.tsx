@@ -8,10 +8,11 @@ import { AccountingRecordActions } from "@/components/accounting-record-actions"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { GatewayAccessDeniedError, GatewayAuthenticationRequiredError, getAccountingResource, isAccountingResource, type AccountingResource } from "@/lib/letron-api";
+import { accountingLabel } from "@/lib/ui-labels";
 
 export const dynamic = "force-dynamic";
 
-const title = (resource: AccountingResource) => resource.split("-").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+const title = (resource: AccountingResource) => accountingLabel(resource);
 
 export default async function AccountingResourceDetailPage({ params }: { params: Promise<{ resource: string; name: string }> }) {
   const { resource, name } = await params;
