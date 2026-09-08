@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { audit } from "../../../../src/server/audit";
 import { appendSetCookie, disableCaching, firstQueryValue, parseCookies, redirectError, requestId, serializeCookie } from "../../../../src/server/http";
 import { finishInteraction } from "../../../../src/server/interaction";
-import { exchangeLarkCode, fetchLarkGroupIds, fetchLarkIdentity } from "../../../../src/server/lark";
+import { exchangeLarkCode, fetchLarkGroupIds, fetchLarkIdentity, larkCallbackUri } from "../../../../src/server/lark";
 import { consumeOAuthTransaction, LARK_TRANSACTION_COOKIE } from "../../../../src/server/oauth-transaction";
 import { getOidcProvider } from "../../../../src/server/oidc";
 import { rotateSession } from "../../../../src/server/session";
@@ -37,7 +37,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       expires: new Date(0),
       secure: getEnv().AUTH_BASE_URL.startsWith("https://"),
     }));
-    const accessToken = await exchangeLarkCode(code, transaction.codeVerifier, transaction.redirectUri);
+    const forwardedHost = Array.isArray(req.headers["x-forwarded-host"]) ? req.headers["x-forwarded-host"][0] : req.headers["x-forwarded-host"];
+    const host = (forwardedHost ?? req.headers.host ?? "").split(",")[0].trim();
+    const origin = host === "localhost:3000" || host === "127.0.0.1:3000" ? `http://${host}` : `https://${host}`;
+    const accessToken = await exchangeLarkCode(code, transaction.codeVerifier, larkCallbackUri(origin));
     const identity = await fetchLarkIdentity(accessToken);
     const groupIds = getEnv().LARK_GROUP_SYNC_ENABLED
       ? await fetchLarkGroupIds(identity.subject, identity.subjectType)

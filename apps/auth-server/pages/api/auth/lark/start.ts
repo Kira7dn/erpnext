@@ -4,7 +4,7 @@ import { audit } from "../../../../src/server/audit";
 import { pkceChallenge, randomToken } from "../../../../src/server/crypto";
 import { appendSetCookie, disableCaching, firstQueryValue, redirectError, requestId, serializeCookie } from "../../../../src/server/http";
 import { finishInteraction } from "../../../../src/server/interaction";
-import { buildLarkAuthorizationUrl } from "../../../../src/server/lark";
+import { buildLarkAuthorizationUrl, larkCallbackUri } from "../../../../src/server/lark";
 import { LARK_TRANSACTION_COOKIE, LARK_TRANSACTION_TTL_SECONDS, saveOAuthTransaction } from "../../../../src/server/oauth-transaction";
 import { getOidcProvider } from "../../../../src/server/oidc";
 import { getUserBySessionToken, rotateSession, tokenFromRequest } from "../../../../src/server/session";
@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const uid = firstQueryValue(req.query.uid);
   try {
-    const redirectUri = `${requestOrigin(req)}/api/auth/lark/callback`;
+    const redirectUri = larkCallbackUri(requestOrigin(req));
     if (uid) {
       const interaction = await getOidcProvider().interactionDetails(req, res);
       if (interaction.uid !== uid) throw new Error("OIDC_INTERACTION_MISMATCH");
@@ -70,7 +70,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       browserBinding,
       codeVerifier,
       interactionUid: uid,
-      redirectUri,
       returnTo: uid ? undefined : safeReturnTo(firstQueryValue(req.query.return_to)),
     });
     appendSetCookie(res, serializeCookie(LARK_TRANSACTION_COOKIE, browserBinding, {

@@ -36,7 +36,6 @@ model OAuthTransaction {
   id                    BigInt    @id @default(autoincrement())
   stateHash             String    @unique @map("state_hash") @db.Char(64)
   browserBindingHash    String    @map("browser_binding_hash") @db.Char(64)
-  redirectUri           String    @map("redirect_uri") @db.Text
   interactionUid        String?   @map("interaction_uid") @db.VarChar(255)
   returnTo               String?   @map("return_to") @db.Text
   encryptedCodeVerifier String  @map("encrypted_code_verifier") @db.Text

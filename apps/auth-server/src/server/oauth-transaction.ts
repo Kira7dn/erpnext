@@ -9,7 +9,6 @@ export async function saveOAuthTransaction(input: {
   state: string;
   browserBinding: string;
   codeVerifier: string;
-  redirectUri: string;
   interactionUid?: string;
   returnTo?: string;
 }): Promise<void> {
@@ -17,7 +16,6 @@ export async function saveOAuthTransaction(input: {
     data: {
       stateHash: sha256(input.state),
       browserBindingHash: sha256(input.browserBinding),
-      redirectUri: input.redirectUri,
       encryptedCodeVerifier: encrypt(input.codeVerifier),
       interactionUid: input.interactionUid,
       returnTo: input.returnTo,
@@ -28,7 +26,6 @@ export async function saveOAuthTransaction(input: {
 
 export async function consumeOAuthTransaction(state: string, browserBinding: string): Promise<{
   codeVerifier: string;
-  redirectUri: string;
   interactionUid: string | null;
   returnTo: string | null;
 } | null> {
@@ -47,7 +44,6 @@ export async function consumeOAuthTransaction(state: string, browserBinding: str
     const row = await tx.oAuthTransaction.findUniqueOrThrow({ where: { stateHash } });
     return {
       codeVerifier: decrypt(row.encryptedCodeVerifier),
-      redirectUri: row.redirectUri,
       interactionUid: row.interactionUid,
       returnTo: row.returnTo,
     };

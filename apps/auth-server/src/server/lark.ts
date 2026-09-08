@@ -32,6 +32,10 @@ const optionalEmail = z.preprocess((value) => value === "" ? undefined : value, 
 const optionalUrl = z.preprocess((value) => value === "" ? undefined : value, z.string().url().optional());
 export const LARK_LOGIN_SCOPES = "contact:user.email:readonly";
 
+export function larkCallbackUri(origin = getEnv().AUTH_BASE_URL): string {
+  return `${origin.replace(/\/$/, "")}/api/auth/lark/callback`;
+}
+
 const userSchema = z.object({
   tenant_key: z.string().min(1),
   union_id: optionalId,
@@ -75,7 +79,7 @@ export function buildLarkAuthorizationUrl(input: {
   const url = new URL("/open-apis/authen/v1/authorize", env.LARK_DOMAIN);
   url.searchParams.set("client_id", env.LARK_APP_ID);
   url.searchParams.set("response_type", "code");
-  url.searchParams.set("redirect_uri", input.redirectUri ?? `${env.AUTH_BASE_URL}/api/auth/lark/callback`);
+  url.searchParams.set("redirect_uri", input.redirectUri ?? larkCallbackUri());
   url.searchParams.set("state", input.state);
   url.searchParams.set("scope", LARK_LOGIN_SCOPES);
   url.searchParams.set("code_challenge", input.codeChallenge);
@@ -83,7 +87,7 @@ export function buildLarkAuthorizationUrl(input: {
   return url;
 }
 
-export async function exchangeLarkCode(code: string, codeVerifier: string, redirectUri = `${getEnv().AUTH_BASE_URL}/api/auth/lark/callback`): Promise<string> {
+export async function exchangeLarkCode(code: string, codeVerifier: string, redirectUri = larkCallbackUri()): Promise<string> {
   const env = getEnv();
   const response = await fetch(new URL("/open-apis/authen/v2/oauth/token", env.LARK_DOMAIN), {
     method: "POST",
