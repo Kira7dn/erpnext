@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
   await revokeRequestSession(req);
-  clearSessionCookie(res);
+  clearSessionCookie(req, res);
   await audit({ eventType: "session.logout", outcome: "success" }).catch(() => undefined);
   res.redirect(303, "/api/oidc/session/end");
 }

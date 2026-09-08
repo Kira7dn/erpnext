@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { getDb } from "./db";
 import { getEnv } from "./env";
-import { appendSetCookie, parseCookies, serializeCookie } from "./http";
+import { appendSetCookie, parseCookies, requestIsSecure, serializeCookie } from "./http";
 import { randomToken, sha256 } from "./crypto";
 
 export const SESSION_COOKIE = "letron_sso";
@@ -18,8 +18,10 @@ export type AuthenticatedUser = {
   subjectType: string | null;
 };
 
-function secureCookie(): boolean {
-  return getEnv().AUTH_BASE_URL.startsWith("https://");
+function cookieOptions(req: NextApiRequest): { secure: boolean; domain?: string } {
+  const host = (Array.isArray(req.headers.host) ? req.headers.host[0] : req.headers.host ?? "").split(",")[0].trim().split(":")[0];
+  const local = host === "localhost" || host === "127.0.0.1";
+  return { secure: requestIsSecure(req), domain: local ? undefined : getEnv().AUTH_COOKIE_DOMAIN };
 }
 
 export async function createSession(userId: string): Promise<{ token: string; expiresAt: Date }> {
@@ -29,20 +31,18 @@ export async function createSession(userId: string): Promise<{ token: string; ex
   return { token, expiresAt };
 }
 
-export function setSessionCookie(res: NextApiResponse, token: string, expiresAt: Date): void {
+export function setSessionCookie(req: NextApiRequest, res: NextApiResponse, token: string, expiresAt: Date): void {
   appendSetCookie(res, serializeCookie(SESSION_COOKIE, token, {
     expires: expiresAt,
-    secure: secureCookie(),
-    domain: getEnv().AUTH_COOKIE_DOMAIN,
+    ...cookieOptions(req),
   }));
 }
 
-export function clearSessionCookie(res: NextApiResponse): void {
+export function clearSessionCookie(req: NextApiRequest, res: NextApiResponse): void {
   appendSetCookie(res, serializeCookie(SESSION_COOKIE, "", {
     maxAge: 0,
     expires: new Date(0),
-    secure: secureCookie(),
-    domain: getEnv().AUTH_COOKIE_DOMAIN,
+    ...cookieOptions(req),
   }));
 }
 
@@ -100,7 +100,7 @@ export async function rotateSession(req: NextApiRequest, res: NextApiResponse, u
     await tx.ssoSession.create({ data: { tokenHash: sha256(token), userId, expiresAt } });
     return { token, expiresAt };
   });
-  setSessionCookie(res, next.token, next.expiresAt);
+  setSessionCookie(req, res, next.token, next.expiresAt);
 }
 
 export async function revokeRequestSession(req: NextApiRequest): Promise<void> {

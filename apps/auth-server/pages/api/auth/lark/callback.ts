@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { audit } from "../../../../src/server/audit";
-import { appendSetCookie, disableCaching, firstQueryValue, parseCookies, redirectError, requestId, serializeCookie } from "../../../../src/server/http";
+import { appendSetCookie, disableCaching, firstQueryValue, parseCookies, redirectError, requestId, requestIsSecure, serializeCookie } from "../../../../src/server/http";
 import { finishInteraction } from "../../../../src/server/interaction";
 import { exchangeLarkCode, fetchLarkGroupIds, fetchLarkIdentity, larkCallbackUri } from "../../../../src/server/lark";
 import { consumeOAuthTransaction, LARK_TRANSACTION_COOKIE } from "../../../../src/server/oauth-transaction";
@@ -36,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     appendSetCookie(res, serializeCookie(LARK_TRANSACTION_COOKIE, "", {
       maxAge: 0,
       expires: new Date(0),
-      secure: getEnv().AUTH_BASE_URL.startsWith("https://"),
+      secure: requestIsSecure(req),
     }));
     const accessToken = await exchangeLarkCode(code, transaction.codeVerifier, larkCallbackUri(canonicalAuthOrigin(req)));
     const identity = await fetchLarkIdentity(accessToken);

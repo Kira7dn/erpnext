@@ -45,6 +45,12 @@ export function requestId(req: NextApiRequest): string {
   return header?.slice(0, 128) || crypto.randomUUID();
 }
 
+export function requestIsSecure(req: NextApiRequest): boolean {
+  const forwarded = firstQueryValue(req.headers["x-forwarded-proto"]);
+  if (forwarded) return forwarded === "https";
+  return Boolean((req.socket as typeof req.socket & { encrypted?: boolean }).encrypted);
+}
+
 export function redirectError(res: NextApiResponse, code: string): void {
   res.redirect(303, `/error?code=${encodeURIComponent(code)}`);
 }

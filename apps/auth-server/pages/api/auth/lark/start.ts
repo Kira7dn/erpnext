@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { audit } from "../../../../src/server/audit";
 import { pkceChallenge, randomToken } from "../../../../src/server/crypto";
-import { appendSetCookie, disableCaching, firstQueryValue, redirectError, requestId, serializeCookie } from "../../../../src/server/http";
+import { appendSetCookie, disableCaching, firstQueryValue, redirectError, requestId, requestIsSecure, serializeCookie } from "../../../../src/server/http";
 import { finishInteraction } from "../../../../src/server/interaction";
 import { buildLarkAuthorizationUrl, larkCallbackUri } from "../../../../src/server/lark";
 import { LARK_TRANSACTION_COOKIE, LARK_TRANSACTION_TTL_SECONDS, saveOAuthTransaction } from "../../../../src/server/oauth-transaction";
@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
     appendSetCookie(res, serializeCookie(LARK_TRANSACTION_COOKIE, browserBinding, {
       maxAge: LARK_TRANSACTION_TTL_SECONDS,
-      secure: getEnv().AUTH_BASE_URL.startsWith("https://"),
+      secure: requestIsSecure(req),
     }));
     res.redirect(303, buildLarkAuthorizationUrl({ state, codeChallenge: pkceChallenge(codeVerifier), redirectUri }).toString());
   } catch {
