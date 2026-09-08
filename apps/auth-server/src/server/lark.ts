@@ -69,12 +69,13 @@ async function readJson(response: Response): Promise<unknown> {
 export function buildLarkAuthorizationUrl(input: {
   state: string;
   codeChallenge: string;
+  redirectUri?: string;
 }): URL {
   const env = getEnv();
   const url = new URL("/open-apis/authen/v1/authorize", env.LARK_DOMAIN);
   url.searchParams.set("client_id", env.LARK_APP_ID);
   url.searchParams.set("response_type", "code");
-  url.searchParams.set("redirect_uri", `${env.AUTH_BASE_URL}/api/auth/lark/callback`);
+  url.searchParams.set("redirect_uri", input.redirectUri ?? `${env.AUTH_BASE_URL}/api/auth/lark/callback`);
   url.searchParams.set("state", input.state);
   url.searchParams.set("scope", LARK_LOGIN_SCOPES);
   url.searchParams.set("code_challenge", input.codeChallenge);
@@ -82,7 +83,7 @@ export function buildLarkAuthorizationUrl(input: {
   return url;
 }
 
-export async function exchangeLarkCode(code: string, codeVerifier: string): Promise<string> {
+export async function exchangeLarkCode(code: string, codeVerifier: string, redirectUri = `${getEnv().AUTH_BASE_URL}/api/auth/lark/callback`): Promise<string> {
   const env = getEnv();
   const response = await fetch(new URL("/open-apis/authen/v2/oauth/token", env.LARK_DOMAIN), {
     method: "POST",
@@ -92,7 +93,7 @@ export async function exchangeLarkCode(code: string, codeVerifier: string): Prom
       client_id: env.LARK_APP_ID,
       client_secret: env.LARK_APP_SECRET,
       code,
-      redirect_uri: `${env.AUTH_BASE_URL}/api/auth/lark/callback`,
+      redirect_uri: redirectUri,
       code_verifier: codeVerifier,
     }),
     signal: AbortSignal.timeout(10_000),

@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       expires: new Date(0),
       secure: getEnv().AUTH_BASE_URL.startsWith("https://"),
     }));
-    const accessToken = await exchangeLarkCode(code, transaction.codeVerifier);
+    const accessToken = await exchangeLarkCode(code, transaction.codeVerifier, transaction.redirectUri);
     const identity = await fetchLarkIdentity(accessToken);
     const groupIds = getEnv().LARK_GROUP_SYNC_ENABLED
       ? await fetchLarkGroupIds(identity.subject, identity.subjectType)
