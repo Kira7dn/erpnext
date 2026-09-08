@@ -86,6 +86,7 @@ export async function getUserBySessionToken(token: string | undefined): Promise<
         where: { id: identity.id, OR: [{ syncLeaseUntil: null }, { syncLeaseUntil: { lt: now } }] },
         data: { syncLeaseUntil: leaseUntil },
       });
+      let refreshGroups = claimed.count === 1;
       if (claimed.count !== 1) {
         // Another instance owns the lease. Wait briefly for its committed
         // snapshot so concurrent Gateway requests do not duplicate Lark calls
@@ -101,14 +102,17 @@ export async function getUserBySessionToken(token: string | undefined): Promise<
           }
         }
         if (!refreshedSnapshot) return null;
+        refreshGroups = false;
       }
-      try {
-        groupIds = await fetchLarkGroupIds(identity.subject, "union_id");
-        await getDb().externalIdentity.update({ where: { id: identity.id }, data: { groupIds, groupsSyncedAt: new Date(), syncLeaseUntil: null } });
-      } catch {
-        await getDb().externalIdentity.updateMany({ where: { id: identity.id }, data: { syncLeaseUntil: null } }).catch(() => undefined);
-        // Do not authorize Portal pages or APIs with an unverified stale snapshot.
-        return null;
+      if (refreshGroups) {
+        try {
+          groupIds = await fetchLarkGroupIds(identity.subject, "union_id");
+          await getDb().externalIdentity.update({ where: { id: identity.id }, data: { groupIds, groupsSyncedAt: new Date(), syncLeaseUntil: null } });
+        } catch {
+          await getDb().externalIdentity.updateMany({ where: { id: identity.id }, data: { syncLeaseUntil: null } }).catch(() => undefined);
+          // Do not authorize Portal pages or APIs with an unverified stale snapshot.
+          return null;
+        }
       }
     }
   }
