@@ -27,6 +27,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
 }
 
 async function proxy(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
+  const startedAt = performance.now();
   if (!ALLOWED_METHODS.has(request.method)) return NextResponse.json({ error: "method_not_allowed" }, { status: 405 });
   const { path } = await context.params;
   if (!path?.length || !isAccountingResource(path[0])) return NextResponse.json({ error: "unknown_accounting_resource" }, { status: 404 });
@@ -44,5 +45,8 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
     body: request.method === "GET" || request.method === "DELETE" ? undefined : await request.arrayBuffer(),
     cache: "no-store",
   });
-  return new NextResponse(response.body, { status: response.status, headers: { "content-type": response.headers.get("content-type") ?? "application/json" } });
+  const headers = new Headers({ "content-type": response.headers.get("content-type") ?? "application/json" });
+  const gatewayTiming = response.headers.get("server-timing");
+  if (gatewayTiming) headers.set("Server-Timing", `${gatewayTiming}, erp_route;dur=${(performance.now() - startedAt).toFixed(1)}`);
+  return new NextResponse(response.body, { status: response.status, headers });
 }

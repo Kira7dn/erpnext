@@ -12,6 +12,8 @@ import { disableCaching } from "../../../src/server/http";
 
 export const config = { api: { bodyParser: false } };
 
+function duration(start: number): number { return Number((performance.now() - start).toFixed(1)); }
+
 function body(req: NextApiRequest): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
@@ -53,32 +55,47 @@ function forwardedHeaders(req: NextApiRequest, user: { id: string; email: string
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+  const startedAt = performance.now();
+  const timings: Record<string, number> = {};
+  const finish = () => {
+    timings.gateway_total = duration(startedAt);
+    res.setHeader("Server-Timing", Object.entries(timings).map(([name, value]) => `${name};dur=${value}`).join(", "));
+  };
   disableCaching(res);
+  const sessionStartedAt = performance.now();
   let user = await getUserBySessionToken(tokenFromRequest(req));
-  if (!user) { res.status(401).json({ error: "authentication_required" }); return; }
+  timings.session = duration(sessionStartedAt);
+  if (!user) { finish(); res.status(401).json({ error: "authentication_required" }); return; }
   if (getEnv().LARK_GROUP_SYNC_ENABLED) {
+    const larkStartedAt = performance.now();
     try {
       await syncLarkGroupsIfStale(user.id);
       user = await getUserBySessionToken(tokenFromRequest(req));
     } catch {
+      timings.lark_sync = duration(larkStartedAt);
+      finish();
       res.status(503).json({ error: "access_policy_unavailable" });
       return;
     }
-    if (!user) { res.status(401).json({ error: "authentication_required" }); return; }
+    timings.lark_sync = duration(larkStartedAt);
+    if (!user) { finish(); res.status(401).json({ error: "authentication_required" }); return; }
   }
+  const policyStartedAt = performance.now();
   const policy = await getPublishedPolicy();
-  if (!policy) { res.status(503).json({ error: "access_policy_not_published" }); return; }
+  timings.policy = duration(policyStartedAt);
+  if (!policy) { finish(); res.status(503).json({ error: "access_policy_not_published" }); return; }
   const path = `/${Array.isArray(req.query.path) ? req.query.path.join("/") : String(req.query.path ?? "")}`;
   const operation = routeOperation(req.method ?? "GET", path);
   if (!operation || !canAccessPolicy(policy.policy, user.groupIds, operation)) {
     await audit({ eventType: "gateway.authorization", outcome: "failure", userId: user.id, detail: { path, reason: "policy_denied", policy_version: policy.version } }).catch(() => undefined);
+    finish();
     res.status(403).json({ error: "access_denied" });
     return;
   }
   const env = getEnv();
   const baseUrl = env.LETRON_SSO_ERP_BASE_URL;
   const secret = env.LETRON_SSO_SYNC_SECRET ?? env.AUTH_ERP_SYNC_SECRET;
-  if (!baseUrl || !secret) { res.status(503).json({ error: "gateway_not_configured" }); return; }
+  if (!baseUrl || !secret) { finish(); res.status(503).json({ error: "gateway_not_configured" }); return; }
   const roles = policyRolesForGroups(policy.policy, user.groupIds);
   const target = new URL(path, `${baseUrl}/`);
   const query = new URLSearchParams();
@@ -88,6 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   target.search = query.toString();
   let response: Response;
+  const erpStartedAt = performance.now();
   try {
     response = await fetch(target, {
       method: req.method,
@@ -96,11 +114,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       signal: AbortSignal.timeout(30_000),
     });
   } catch {
+    timings.erp_fetch = duration(erpStartedAt);
+    finish();
     res.status(502).json({ error: "erp_gateway_unavailable" });
     return;
   }
-  res.status(response.status);
-  response.headers.forEach((value, key) => { if (!['connection', 'content-encoding', 'transfer-encoding'].includes(key)) res.setHeader(key, value); });
   const data = Buffer.from(await response.arrayBuffer());
+  timings.erp_fetch = duration(erpStartedAt);
+  res.status(response.status);
+  response.headers.forEach((value, key) => { if (!['connection', 'content-encoding', 'transfer-encoding', 'server-timing'].includes(key)) res.setHeader(key, value); });
+  finish();
   res.send(data);
 }
