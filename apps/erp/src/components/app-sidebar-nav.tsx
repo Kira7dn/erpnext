@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Archive, BarChart3, BookOpen, Box, Building2, ClipboardList, Cog, CreditCard, FileBarChart, FileText, Landmark, MapPin, ReceiptText, Settings, Upload, Users, WalletCards, Wrench } from "lucide-react";
 
 const icons = { Archive, BarChart3, BookOpen, Box, Building2, ClipboardList, Cog, CreditCard, FileBarChart, FileText, Landmark, MapPin, ReceiptText, Settings, Upload, Users, WalletCards, Wrench } as const;
+const eagerRoutes = new Set(["/accounts", "/assets", "/accounts/bank-accounts", "/assets/assets"]);
 type SidebarItem = readonly [label: string, href: string, icon: keyof typeof icons];
 
 export function AppSidebarNav({
@@ -28,6 +29,7 @@ export function AppSidebarNav({
         data-active={active ? "true" : "false"}
         href={href}
         key={href}
+        prefetch={eagerRoutes.has(href) ? undefined : false}
       ><Icon aria-hidden="true" className="size-4" />{itemLabel}</Link>;
     })}
   </nav>;
