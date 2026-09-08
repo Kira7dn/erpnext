@@ -1,11 +1,12 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { portalAppBaseUrl, portalAuthBaseUrl } from "@/lib/portal-config";
 
 const SESSION_COOKIE = "letron_sso";
 
 function authLoginUrl(request: NextRequest): URL {
-  const authBaseUrl = (process.env.LETRON_AUTH_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-  const appBaseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin).replace(/\/$/, "");
+  const authBaseUrl = portalAuthBaseUrl();
+  const appBaseUrl = portalAppBaseUrl(request.nextUrl.origin);
   const returnTo = new URL(`${request.nextUrl.pathname}${request.nextUrl.search}`, appBaseUrl);
   const loginUrl = new URL("/login", authBaseUrl);
   loginUrl.searchParams.set("return_to", returnTo.toString());

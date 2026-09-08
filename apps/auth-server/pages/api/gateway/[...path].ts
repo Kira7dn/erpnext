@@ -3,6 +3,7 @@ import { createHmac, randomUUID } from "node:crypto";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { getUserBySessionToken, tokenFromRequest } from "../../../src/server/session";
+import { syncLarkGroupsIfStale } from "../../../src/server/users";
 import { getEnv } from "../../../src/server/env";
 import { getPublishedPolicy } from "../../../src/server/published-policy";
 import { canAccessPolicy, policyRolesForGroups, routeOperation } from "../../../src/server/access-policy";
@@ -53,8 +54,18 @@ function forwardedHeaders(req: NextApiRequest, user: { id: string; email: string
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   disableCaching(res);
-  const user = await getUserBySessionToken(tokenFromRequest(req));
+  let user = await getUserBySessionToken(tokenFromRequest(req));
   if (!user) { res.status(401).json({ error: "authentication_required" }); return; }
+  if (getEnv().LARK_GROUP_SYNC_ENABLED) {
+    try {
+      await syncLarkGroupsIfStale(user.id);
+      user = await getUserBySessionToken(tokenFromRequest(req));
+    } catch {
+      res.status(503).json({ error: "access_policy_unavailable" });
+      return;
+    }
+    if (!user) { res.status(401).json({ error: "authentication_required" }); return; }
+  }
   const policy = await getPublishedPolicy();
   if (!policy) { res.status(503).json({ error: "access_policy_not_published" }); return; }
   const path = `/${Array.isArray(req.query.path) ? req.query.path.join("/") : String(req.query.path ?? "")}`;

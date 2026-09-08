@@ -22,7 +22,6 @@
     "keys:generate": "tsx scripts/generate-secrets.ts",
     "keys:write": "tsx scripts/generate-secrets.ts --write-env",
     "client:create": "tsx scripts/create-client.ts",
-    "client:provision-erp": "tsx scripts/provision-erp-client.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

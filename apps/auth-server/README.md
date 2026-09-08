@@ -42,19 +42,11 @@ npm run dev
 
 Không cần ERPNext hoặc Docker để chạy auth server này.
 
-## Đăng ký OIDC client
+## Global Portal client
 
-```powershell
-npm run client:create -- --id letron-erp --redirect-uri https://erp.example.com/api/method/let.../callback
-```
-
-Lệnh in client secret đúng một lần; trong DB secret được mã hóa bằng `AUTH_DATA_ENCRYPTION_KEY`. Với public client, thêm `--public` và luôn dùng PKCE.
-
-Để provision client ERP local và ghi cấu hình bí mật vào `.env` ở root repo mà không in secret:
-
-```powershell
-npm run client:provision-erp
-```
+ERPNext không còn là OIDC client và không có callback/login native. Ứng dụng ERP
+được mở qua Global Portal; Portal giữ session `letron_sso`, kiểm tra policy và
+chuyển request nghiệp vụ qua Gateway với claims đã ký.
 
 URL đặt làm trang chủ Web App trong Lark để đăng nhập vào ứng dụng nghiệp vụ là:
 
@@ -106,10 +98,9 @@ credential riêng trong Auth Server; ERP origin vẫn phải nằm trong mạng 
 nếu chưa có ERP-side verifier, policy projection readback và direct-origin deny
 acceptance.
 
-Auth Server làm mới group membership trước mỗi OIDC login. Sau khi đăng nhập,
-ERP dùng `auth_hooks` để kiểm tra riêng identity đang gửi request khi snapshot
-cũ hơn `LETRON_SSO_REQUEST_CHECK_INTERVAL_SECONDS` (mặc định 60 giây). User
-không hoạt động không tạo API call Lark và role sync không dùng cron. Endpoint
+Gateway làm mới group membership khi snapshot quá hạn, có lease chống gọi trùng.
+Session lookup không gọi network Lark. User không hoạt động không tạo API call
+Lark và role sync không dùng cron. Endpoint
 nội bộ dùng bearer secret riêng; không dùng Lark App Secret và không được công
 khai cho client.
 
@@ -140,8 +131,8 @@ docker exec `
 Không dùng break-glass để vượt qua việc bị gỡ khỏi group truy cập hoặc local admin block. Mọi lần JIT, backfill, thu hồi, reconcile, stale-lock và break-glass được ghi vào `Letron SSO Audit Log`.
 
 Frappe scheduler vẫn phục vụ các job ERP khác nhưng không tham gia đồng bộ role
-Lark. Không thêm lại cron quét toàn bộ identity; kiểm tra quyền phải chạy theo
-request qua `auth_hooks`.
+Lark. Không thêm lại cron quét toàn bộ identity; Gateway kiểm tra policy trên
+mỗi request và chỉ đồng bộ snapshot khi cần.
 
 ERP chỉ được projection các role kỹ thuật có prefix `Letron Policy - group-`;
 `Administrator`, `All`, `Guest` và `System Manager` không bao giờ được quản lý bởi Portal.

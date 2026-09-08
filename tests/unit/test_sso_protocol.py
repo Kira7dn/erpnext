@@ -1,63 +1,36 @@
 from __future__ import annotations
 
-from urllib.parse import parse_qs, urlparse
-
 import pytest
 from letron_api.sso_protocol import (
-    CALLBACK_PATH,
-    build_authorization_url,
     desired_erp_roles,
     load_configuration,
-    pkce_challenge,
 )
 
 
 def _environment() -> dict[str, str]:
     return {
-        "LETRON_SSO_ISSUER": "http://localhost:3000/api/oidc/",
-        "LETRON_SSO_INTERNAL_ISSUER": "http://host.docker.internal:3000/api/oidc/",
-        "LETRON_SSO_CLIENT_ID": "letron-erp",
-        "LETRON_SSO_CLIENT_SECRET": "x" * 43,
-        "LETRON_SSO_ERP_BASE_URL": "http://localhost:8080/",
+        "LETRON_SSO_ROLE_SYNC_ENABLED": "false",
     }
 
 
-def test_configuration_builds_exact_local_callback() -> None:
+def test_configuration_has_no_native_oidc_contract() -> None:
     config = load_configuration(_environment())
 
-    assert config.redirect_uri == f"http://localhost:8080{CALLBACK_PATH}"
-    assert config.token_url == "http://host.docker.internal:3000/api/oidc/token"
-
-
-def test_authorization_url_requires_code_pkce_and_openid() -> None:
-    config = load_configuration(_environment())
-    url = build_authorization_url(config, state="state", nonce="nonce", verifier="v" * 64)
-    parsed = urlparse(url)
-    query = parse_qs(parsed.query)
-
-    assert f"{parsed.scheme}://{parsed.netloc}{parsed.path}" == "http://localhost:3000/api/oidc/auth"
-    assert query == {
-        "client_id": ["letron-erp"],
-        "response_type": ["code"],
-        "redirect_uri": ["http://localhost:8080/api/method/letron_api.sso.callback"],
-        "scope": ["openid profile email groups"],
-        "state": ["state"],
-        "nonce": ["nonce"],
-        "code_challenge": [pkce_challenge("v" * 64)],
-        "code_challenge_method": ["S256"],
-    }
+    assert config.role_sync.enabled is False
+    assert not hasattr(config, "redirect_uri")
 
 
 @pytest.mark.parametrize(
     ("name", "value"),
     [
-        ("LETRON_SSO_ISSUER", "http://auth.example.com/api/oidc"),
-        ("LETRON_SSO_ERP_BASE_URL", "https://erp.example.com/path?unexpected=1"),
-        ("LETRON_SSO_CLIENT_SECRET", "short"),
+        ("LETRON_SSO_SYNC_URL", "https://auth.example.com/path?unexpected=1"),
     ],
 )
 def test_configuration_rejects_unsafe_or_invalid_values(name: str, value: str) -> None:
     environment = _environment()
+    environment["LETRON_SSO_ROLE_SYNC_ENABLED"] = "true"
+    environment["LETRON_SSO_REQUIRED_LARK_GROUP_ID"] = "g-access"
+    environment["LETRON_SSO_SYNC_SECRET"] = "s" * 32
     environment[name] = value
 
     with pytest.raises(ValueError):

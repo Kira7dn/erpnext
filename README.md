@@ -53,8 +53,8 @@ Letron. Người dùng mở Web App trong Lark, vào Global Portal rồi chọn 
 ```text
 Lark Web App
   -> Letron Global Portal / Auth Server (:3000)
-  -> OIDC Authorization Code + PKCE
-  -> ERP SSO adapter (:8080)
+  -> Global Portal session + signed Gateway claims
+  -> ERP Gateway adapter (:8080)
   -> ERPNext Desk
 ```
 
@@ -67,9 +67,9 @@ Ranh giới nguồn dữ liệu chuẩn:
 | Access policy: group/entitlement, role bundle, managed permission | Global Portal |
 | Projection và enforcement của Role, Role Permission, Workflow, User Permission | ERPNext |
 
-ERP tạo `System User` theo JIT ở lần đăng nhập đầu hợp lệ. Sau đăng nhập,
-`auth_hooks` kiểm tra on-demand identity đang hoạt động, dùng cache 60 giây và
-không chạy cron role sync. Gỡ khỏi group truy cập hoặc disable Auth User sẽ gỡ
+ERP tạo `System User` theo JIT ở lần đăng nhập đầu hợp lệ. Gateway giữ snapshot
+group có lease chống gọi Lark trùng và chỉ làm mới khi quá hạn; session lookup
+không gọi network. Gỡ khỏi group truy cập hoặc disable Auth User sẽ gỡ
 role do Lark quản lý, disable ERP User, xóa session và từ chối request hiện tại.
 Role ngoài allowlist không bị bộ đồng bộ thay đổi. Snapshot đăng nhập quá hạn
 sẽ bị từ chối; lỗi làm mới kéo dài quá 10 phút sẽ stale-lock tài khoản cho tới
@@ -94,7 +94,7 @@ Các URL local:
 Lark Web App / Portal: http://localhost:3000
 Lark OAuth callback:   http://localhost:3000/api/auth/lark/callback
 Auth health:           http://localhost:3000/api/health
-ERP SSO launch:        http://localhost:8080/api/method/letron_api.sso.launch
+ERP SSO:               mở http://localhost:3001 và đăng nhập qua Global Portal
 ERP health:            http://localhost:8080/api/method/letron_api.api.health
 ```
 

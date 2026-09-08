@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { portalAuthBaseUrl } from "./portal-config";
 
 export type PortalUser = {
   email: string;
@@ -9,7 +10,7 @@ export type PortalUser = {
 export async function getPortalUser(): Promise<PortalUser | null> {
   const cookieHeader = (await cookies()).toString();
   if (!cookieHeader) return null;
-  const authBaseUrl = (process.env.LETRON_AUTH_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const authBaseUrl = portalAuthBaseUrl();
   const response = await fetch(`${authBaseUrl}/api/auth/session`, {
     headers: { Cookie: cookieHeader },
     cache: "no-store",

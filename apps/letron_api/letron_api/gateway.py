@@ -91,6 +91,13 @@ def sync_gateway_roles_if_changed(user: str, identity_name: str, encoded_roles: 
     desired = set(roles)
     if not policy_version.isdigit() or int(policy_version) <= 0:
         frappe.throw("Invalid gateway policy version", exc=frappe.AuthenticationError)
+    cache = frappe.cache()
+    lock_key = f"letron:sso:gateway-role-sync:{identity_name}"
+    with cache.lock(lock_key, timeout=15, blocking_timeout=15):
+        _sync_gateway_roles_if_changed_locked(user, identity_name, desired, policy_version)
+
+
+def _sync_gateway_roles_if_changed_locked(user: str, identity_name: str, desired: set[str], policy_version: str) -> None:
     fingerprint = hashlib.sha256(json.dumps(sorted(desired), separators=(",", ":")).encode("utf-8")).hexdigest()
     stored = frappe.db.get_value("Letron SSO Identity", identity_name, ["gateway_roles_fingerprint", "gateway_policy_version"], as_dict=True)
     if stored and stored.gateway_roles_fingerprint == fingerprint and str(stored.gateway_policy_version or "") == policy_version:

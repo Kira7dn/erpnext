@@ -157960,45 +157960,6 @@
           "required": false
         }
       ]
-    },
-    {
-      "dotted_path": "letron_api.sso.callback",
-      "source": "sso.py",
-      "method": "callback",
-      "app": "letron_api",
-      "methods": [],
-      "allow_guest": true,
-      "parameters": [
-        {
-          "name": "code",
-          "annotation": "str | None",
-          "required": false
-        },
-        {
-          "name": "state",
-          "annotation": "str | None",
-          "required": false
-        },
-        {
-          "name": "error",
-          "annotation": "str | None",
-          "required": false
-        },
-        {
-          "name": "error_description",
-          "annotation": "str | None",
-          "required": false
-        }
-      ]
-    },
-    {
-      "dotted_path": "letron_api.sso.launch",
-      "source": "sso.py",
-      "method": "launch",
-      "app": "letron_api",
-      "methods": [],
-      "allow_guest": true,
-      "parameters": []
     }
   ],
   "modules": {

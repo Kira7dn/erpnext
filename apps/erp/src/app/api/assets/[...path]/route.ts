@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 import { isAssetResource, isAssetVirtualResource } from "@/lib/letron-api";
+import { portalAuthBaseUrl } from "@/lib/portal-config";
 
 const METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 
@@ -15,7 +16,7 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   if (!METHODS.has(request.method)) return NextResponse.json({ error: "method_not_allowed" }, { status: 405 });
   const { path } = await context.params;
   if (!path?.length || (!isAssetResource(path[0]) && !isAssetVirtualResource(path[0]))) return NextResponse.json({ error: "unknown_asset_resource" }, { status: 404 });
-  const target = `${process.env.LETRON_AUTH_BASE_URL ?? "http://localhost:3000"}/api/gateway/api/v1/assets/${path.map(encodeURIComponent).join("/")}${request.nextUrl.search}`;
+  const target = `${portalAuthBaseUrl()}/api/gateway/api/v1/assets/${path.map(encodeURIComponent).join("/")}${request.nextUrl.search}`;
   const headers = new Headers({ Accept: "application/json" });
   const cookieHeader = (await cookies()).toString();
   if (cookieHeader) headers.set("Cookie", cookieHeader);

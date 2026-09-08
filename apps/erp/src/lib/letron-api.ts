@@ -2,6 +2,7 @@ import "server-only";
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { portalAuthBaseUrl } from "./portal-config";
 
 export type BankAccount = {
   name: string;
@@ -124,7 +125,7 @@ export class GatewayUnavailableError extends Error {
 }
 
 function authGatewayUrl(path: string): string {
-  const baseUrl = (process.env.LETRON_AUTH_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const baseUrl = portalAuthBaseUrl();
   return `${baseUrl}/api/gateway${path}`;
 }
 

@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 import { isAccountingResource } from "@/lib/letron-api";
+import { portalAuthBaseUrl } from "@/lib/portal-config";
 
 const ALLOWED_METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 
@@ -30,7 +31,7 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   const { path } = await context.params;
   if (!path?.length || !isAccountingResource(path[0])) return NextResponse.json({ error: "unknown_accounting_resource" }, { status: 404 });
 
-  const target = `${process.env.LETRON_AUTH_BASE_URL ?? "http://localhost:3000"}/api/gateway/api/v1/accounts/${path.map(encodeURIComponent).join("/")}${request.nextUrl.search}`;
+  const target = `${portalAuthBaseUrl()}/api/gateway/api/v1/accounts/${path.map(encodeURIComponent).join("/")}${request.nextUrl.search}`;
   const forwardedHeaders = new Headers({ Accept: "application/json" });
   const cookieHeader = (await cookies()).toString();
   if (cookieHeader) forwardedHeaders.set("Cookie", cookieHeader);

@@ -1,4 +1,5 @@
 import { getDb } from "./db";
+import { getEnv } from "./env";
 import { fetchLarkGroupIds, type LarkSubjectType } from "./lark";
 
 export type LarkIdentity = {
@@ -63,7 +64,7 @@ export async function upsertLarkUser(identity: LarkIdentity) {
   });
 }
 
-export async function refreshLarkGroupsForUser(userId: string): Promise<void> {
+export async function syncLarkGroupsIfStale(userId: string): Promise<void> {
   const identity = await getDb().externalIdentity.findFirst({
     where: { provider: "lark", userId },
     orderBy: { id: "asc" },
@@ -71,9 +72,28 @@ export async function refreshLarkGroupsForUser(userId: string): Promise<void> {
   if (!identity || identity.subjectType !== "union_id") {
     throw new Error("LARK_IDENTITY_REAUTH_REQUIRED");
   }
-  const groupIds = await fetchLarkGroupIds(identity.subject, identity.subjectType);
-  await getDb().externalIdentity.update({
-    where: { id: identity.id },
-    data: { groupIds, groupsSyncedAt: new Date() },
+  const staleAt = Date.now() - getEnv().AUTH_GROUP_SYNC_STALE_SECONDS * 1000;
+  if (identity.groupsSyncedAt && identity.groupsSyncedAt.getTime() > staleAt) return;
+
+  const now = new Date();
+  const leaseUntil = new Date(Date.now() + Math.min(getEnv().AUTH_GROUP_SYNC_STALE_SECONDS, 30) * 1000);
+  const claimed = await getDb().externalIdentity.updateMany({
+    where: { id: identity.id, OR: [{ syncLeaseUntil: null }, { syncLeaseUntil: { lt: now } }] },
+    data: { syncLeaseUntil: leaseUntil },
   });
+  if (claimed.count !== 1) {
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      const refreshed = await getDb().externalIdentity.findUnique({ where: { id: identity.id }, select: { groupsSyncedAt: true } });
+      if (refreshed?.groupsSyncedAt && refreshed.groupsSyncedAt.getTime() > staleAt) return;
+    }
+    throw new Error("LARK_GROUP_SYNC_BUSY");
+  }
+  try {
+    const groupIds = await fetchLarkGroupIds(identity.subject, identity.subjectType);
+    await getDb().externalIdentity.update({ where: { id: identity.id }, data: { groupIds, groupsSyncedAt: new Date(), syncLeaseUntil: null } });
+  } catch (error) {
+    await getDb().externalIdentity.updateMany({ where: { id: identity.id }, data: { syncLeaseUntil: null } }).catch(() => undefined);
+    throw error;
+  }
 }

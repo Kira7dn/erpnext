@@ -1,15 +1,11 @@
 from __future__ import annotations
 
-import base64
 import hashlib
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlparse
 
-CALLBACK_PATH = "/api/method/letron_api.sso.callback"
-LAUNCH_PATH = "/api/method/letron_api.sso.launch"
-OIDC_SCOPES = "openid profile email groups"
 POLICY_ROLE_PREFIX = "Letron Policy - "
 FORBIDDEN_LARK_MANAGED_ROLES = {"Administrator", "All", "Guest", "System Manager"}
 
@@ -32,36 +28,7 @@ class RoleSyncConfiguration:
 
 @dataclass(frozen=True)
 class SsoConfiguration:
-    issuer: str
-    internal_issuer: str
-    client_id: str
-    client_secret: str
-    erp_base_url: str
     role_sync: RoleSyncConfiguration
-
-    @property
-    def authorize_url(self) -> str:
-        return f"{self.issuer}/auth"
-
-    @property
-    def token_url(self) -> str:
-        return f"{self.internal_issuer}/token"
-
-    @property
-    def userinfo_url(self) -> str:
-        return f"{self.internal_issuer}/me"
-
-    @property
-    def jwks_url(self) -> str:
-        return f"{self.internal_issuer}/jwks"
-
-    @property
-    def redirect_uri(self) -> str:
-        return f"{self.erp_base_url}{CALLBACK_PATH}"
-
-    @property
-    def launch_url(self) -> str:
-        return f"{self.erp_base_url}{LAUNCH_PATH}"
 
 
 def _required(env: Mapping[str, str], name: str) -> str:
@@ -139,20 +106,7 @@ def _load_role_sync_configuration(env: Mapping[str, str]) -> RoleSyncConfigurati
 
 
 def load_configuration(env: Mapping[str, str]) -> SsoConfiguration:
-    config = SsoConfiguration(
-        issuer=_required(env, "LETRON_SSO_ISSUER"),
-        internal_issuer=_required(env, "LETRON_SSO_INTERNAL_ISSUER"),
-        client_id=_required(env, "LETRON_SSO_CLIENT_ID"),
-        client_secret=_required(env, "LETRON_SSO_CLIENT_SECRET"),
-        erp_base_url=_required(env, "LETRON_SSO_ERP_BASE_URL"),
-        role_sync=_load_role_sync_configuration(env),
-    )
-    _validate_url("LETRON_SSO_ISSUER", config.issuer)
-    _validate_url("LETRON_SSO_INTERNAL_ISSUER", config.internal_issuer)
-    _validate_url("LETRON_SSO_ERP_BASE_URL", config.erp_base_url)
-    if len(config.client_secret) < 32:
-        raise SsoConfigurationError("LETRON_SSO_CLIENT_SECRET must contain at least 32 characters")
-    return config
+    return SsoConfiguration(role_sync=_load_role_sync_configuration(env))
 
 
 def desired_erp_roles(group_ids: set[str], role_sync: RoleSyncConfiguration) -> set[str]:
@@ -168,30 +122,3 @@ def desired_erp_roles(group_ids: set[str], role_sync: RoleSyncConfiguration) -> 
 
 def sha256_hex(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
-
-
-def pkce_challenge(verifier: str) -> str:
-    digest = hashlib.sha256(verifier.encode("ascii")).digest()
-    return base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii")
-
-
-def build_authorization_url(
-    config: SsoConfiguration,
-    *,
-    state: str,
-    nonce: str,
-    verifier: str,
-) -> str:
-    query = urlencode(
-        {
-            "client_id": config.client_id,
-            "response_type": "code",
-            "redirect_uri": config.redirect_uri,
-            "scope": OIDC_SCOPES,
-            "state": state,
-            "nonce": nonce,
-            "code_challenge": pkce_challenge(verifier),
-            "code_challenge_method": "S256",
-        }
-    )
-    return f"{config.authorize_url}?{query}"

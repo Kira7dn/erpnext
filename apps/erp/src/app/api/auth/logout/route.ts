@@ -1,8 +1,9 @@
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { portalAppBaseUrl, portalAuthBaseUrl } from "@/lib/portal-config";
 
-export async function POST(): Promise<NextResponse> {
-  const authBaseUrl = (process.env.LETRON_AUTH_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  const authBaseUrl = portalAuthBaseUrl();
   const cookieHeader = (await cookies()).toString();
   const response = await fetch(`${authBaseUrl}/api/auth/logout`, {
     method: "POST",
@@ -10,7 +11,7 @@ export async function POST(): Promise<NextResponse> {
     redirect: "manual",
     cache: "no-store",
   });
-  const nextResponse = NextResponse.redirect(new URL("/accounts/bank-accounts", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001"));
+  const nextResponse = NextResponse.redirect(new URL("/accounts/bank-accounts", portalAppBaseUrl(new URL(request.url).origin)));
   const setCookie = response.headers.get("set-cookie");
   if (setCookie) nextResponse.headers.set("set-cookie", setCookie);
   return nextResponse;

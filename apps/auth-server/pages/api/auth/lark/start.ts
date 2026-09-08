@@ -9,7 +9,6 @@ import { LARK_TRANSACTION_COOKIE, LARK_TRANSACTION_TTL_SECONDS, saveOAuthTransac
 import { getOidcProvider } from "../../../../src/server/oidc";
 import { getUserBySessionToken, rotateSession, tokenFromRequest } from "../../../../src/server/session";
 import { getEnv } from "../../../../src/server/env";
-import { refreshLarkGroupsForUser } from "../../../../src/server/users";
 
 function safeReturnTo(value: string | undefined): string {
   if (!value) return "/";
@@ -52,7 +51,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const existingUser = await getUserBySessionToken(tokenFromRequest(req));
       if (existingUser) {
         try {
-          if (getEnv().LARK_GROUP_SYNC_ENABLED) await refreshLarkGroupsForUser(existingUser.id);
           await rotateSession(req, res, existingUser.id);
           await finishInteraction(req, res, existingUser.id);
           return;
