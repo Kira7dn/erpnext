@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { NextResponse } from "next/server";
 
-export default function manifest(): MetadataRoute.Manifest {
-  return {
+export function GET(): NextResponse<MetadataRoute.Manifest> {
+  return NextResponse.json({
     id: "/assets",
     name: "LeTRON-Tài sản",
     short_name: "LeTRON Tài sản",
@@ -13,5 +14,5 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#047857",
     lang: "vi",
     icons: [{ src: "/assets/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }],
-  };
+  });
 }
