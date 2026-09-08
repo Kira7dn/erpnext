@@ -66,21 +66,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let user = await getUserBySessionToken(tokenFromRequest(req));
   timings.session = duration(sessionStartedAt);
   if (!user) { finish(); res.status(401).json({ error: "authentication_required" }); return; }
+  const policyStartedAt = performance.now();
+  const policyPromise = getPublishedPolicy();
+  let policy: Awaited<ReturnType<typeof getPublishedPolicy>>;
   if (getEnv().LARK_GROUP_SYNC_ENABLED) {
     const larkStartedAt = performance.now();
     try {
-      user = { ...user, groupIds: await syncLarkGroupsIfStale(user.id) };
+      const [publishedPolicy, groupIds] = await Promise.all([policyPromise, syncLarkGroupsIfStale(user.id)]);
+      policy = publishedPolicy;
+      user = { ...user, groupIds };
+      timings.lark_sync = duration(larkStartedAt);
     } catch {
       timings.lark_sync = duration(larkStartedAt);
       finish();
       res.status(503).json({ error: "access_policy_unavailable" });
       return;
     }
-    timings.lark_sync = duration(larkStartedAt);
-    if (!user) { finish(); res.status(401).json({ error: "authentication_required" }); return; }
+  } else {
+    policy = await policyPromise;
   }
-  const policyStartedAt = performance.now();
-  const policy = await getPublishedPolicy();
   timings.policy = duration(policyStartedAt);
   if (!policy) { finish(); res.status(503).json({ error: "access_policy_not_published" }); return; }
   const path = `/${Array.isArray(req.query.path) ? req.query.path.join("/") : String(req.query.path ?? "")}`;
