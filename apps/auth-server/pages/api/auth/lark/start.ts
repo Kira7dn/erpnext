@@ -9,6 +9,7 @@ import { LARK_TRANSACTION_COOKIE, LARK_TRANSACTION_TTL_SECONDS, saveOAuthTransac
 import { getOidcProvider } from "../../../../src/server/oidc";
 import { getUserBySessionToken, rotateSession, tokenFromRequest } from "../../../../src/server/session";
 import { getEnv } from "../../../../src/server/env";
+import { canonicalAuthOrigin } from "../../../../src/server/auth-origin";
 
 function safeReturnTo(value: string | undefined): string {
   if (!value) return "/";
@@ -24,16 +25,6 @@ function safeReturnTo(value: string | undefined): string {
   }
 }
 
-function requestOrigin(req: NextApiRequest): string {
-  const forwardedHost = Array.isArray(req.headers["x-forwarded-host"]) ? req.headers["x-forwarded-host"][0] : req.headers["x-forwarded-host"];
-  const host = (forwardedHost ?? req.headers.host ?? "").split(",")[0].trim();
-  const allowedHosts = new Set(["localhost:3000", "127.0.0.1:3000", "auth.letron.vn", "erp-one-henna.vercel.app"]);
-  if (!allowedHosts.has(host)) return getEnv().AUTH_BASE_URL;
-  const forwardedProto = Array.isArray(req.headers["x-forwarded-proto"]) ? req.headers["x-forwarded-proto"][0] : req.headers["x-forwarded-proto"];
-  const protocol = forwardedProto?.split(",")[0].trim() || (host.startsWith("localhost:") || host.startsWith("127.0.0.1:") ? "http" : "https");
-  return `${protocol}://${host}`;
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   disableCaching(res);
   if (req.method !== "GET") {
@@ -44,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const uid = firstQueryValue(req.query.uid);
   try {
-    const redirectUri = larkCallbackUri(requestOrigin(req));
+    const redirectUri = larkCallbackUri(canonicalAuthOrigin(req));
     if (uid) {
       const interaction = await getOidcProvider().interactionDetails(req, res);
       if (interaction.uid !== uid) throw new Error("OIDC_INTERACTION_MISMATCH");

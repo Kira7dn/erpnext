@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import hashlib
-import hmac
 import json
-import os
 from typing import Any
 
 import frappe
@@ -60,10 +58,8 @@ OPERATION_FIELDS = {
 
 
 def _authorized() -> None:
-    expected = os.environ.get("LETRON_SSO_SYNC_SECRET", "")
-    supplied = frappe.local.request.headers.get("X-Letron-Policy-Secret", "")
-    if not expected or not hmac.compare_digest(expected, supplied):
-        frappe.throw("Policy publication authorization required", exc=frappe.AuthenticationError)
+    from letron_api.gateway import verify_control_plane_request
+    verify_control_plane_request()
 
 
 def _role_name(value: str) -> str:

@@ -79,6 +79,30 @@ def verify_gateway_request() -> str:
     return user
 
 
+def verify_control_plane_request() -> None:
+    headers = frappe.local.request.headers
+    secret = os.environ.get("LETRON_SSO_SYNC_SECRET", "")
+    timestamp = headers.get("X-Letron-Control-Timestamp", "")
+    expires_at = headers.get("X-Letron-Control-Expires-At", "")
+    request_id = headers.get("X-Letron-Control-Request-Id", "")
+    signature = headers.get("X-Letron-Control-Signature", "")
+    path = "/api/method/letron_api.access_policy.publish"
+    if not secret or not timestamp or not expires_at or not request_id or not signature:
+        frappe.throw("Control-plane authorization required", exc=frappe.AuthenticationError)
+    try:
+        issued_at = int(timestamp)
+        expiry = int(expires_at)
+        age = abs(time.time() - issued_at)
+    except ValueError:
+        frappe.throw("Invalid control-plane timestamp", exc=frappe.AuthenticationError)
+    if age > 60 or expiry < time.time() or expiry <= issued_at:
+        frappe.throw("Expired control-plane authorization", exc=frappe.AuthenticationError)
+    payload = f"{timestamp}.{expires_at}.POST.{path}.{request_id}"
+    expected = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, signature):
+        frappe.throw("Invalid control-plane authorization", exc=frappe.AuthenticationError)
+
+
 def sync_gateway_roles_if_changed(user: str, identity_name: str, encoded_roles: str, policy_version: str) -> None:
     """Project only policy-managed roles for this signed gateway identity."""
     try:

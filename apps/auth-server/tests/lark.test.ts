@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { resetEnvForTests } from "../src/server/env";
+import { canonicalAuthOrigin } from "../src/server/auth-origin";
 import {
   buildLarkAuthorizationUrl,
   fetchLarkIdentity,
@@ -40,6 +41,11 @@ describe("Lark authorization request", () => {
     expect(url.searchParams.get("scope")).toBe(LARK_LOGIN_SCOPES);
     expect(url.searchParams.get("code_challenge")).toBe("challenge-1");
     expect(url.searchParams.get("code_challenge_method")).toBe("S256");
+  });
+
+  it("uses the configured auth origin for untrusted proxy hosts", () => {
+    expect(canonicalAuthOrigin({ headers: { host: "attacker.example" } } as never))
+      .toBe("http://localhost:3000");
   });
 });
 
