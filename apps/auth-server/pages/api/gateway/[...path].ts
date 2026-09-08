@@ -69,8 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (getEnv().LARK_GROUP_SYNC_ENABLED) {
     const larkStartedAt = performance.now();
     try {
-      await syncLarkGroupsIfStale(user.id);
-      user = await getUserBySessionToken(tokenFromRequest(req));
+      user = { ...user, groupIds: await syncLarkGroupsIfStale(user.id) };
     } catch {
       timings.lark_sync = duration(larkStartedAt);
       finish();
