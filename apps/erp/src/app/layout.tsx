@@ -16,6 +16,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "LeTRON-ERP",
   description: "Nền tảng nghiệp vụ LeTRON-ERP",
+  applicationName: "LeTRON-ERP",
+  appleWebApp: {
+    capable: true,
+    title: "LeTRON-ERP",
+    statusBarStyle: "default",
+  },
+  formatDetection: { telephone: false },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
