@@ -11,6 +11,17 @@ Included:
 - App Router and `src/` directory
 - shadcn/ui CLI v4 with the Radix base
 - Geist and Geist Mono font setup
+- TanStack Query with shared client request/error handling
+- Separate lightweight PWA manifests for Accounting and Assets
+
+PWA routes:
+
+- `/accounts/manifest.webmanifest` — LeTRON-Kế toán
+- `/assets/manifest.webmanifest` — LeTRON-Tài sản
+
+The PWA layer intentionally has no service worker and does not cache API
+responses. SSO and all business data remain online through the Global Portal
+Gateway.
 
 Run from this directory:
 

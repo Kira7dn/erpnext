@@ -193,3 +193,21 @@ identity API/DB, không thuộc policy YAML.
    luôn là runtime entity, không được đưa vào policy YAML.
    Completeness thuộc [PRD](ERP_PRD.md); chi tiết nghiệp vụ kế toán thuộc
    [Purchase Accounting API Flow](Purchase_Accounting_API_Flow.md).
+
+### 9.1. Frontend data and install boundary
+
+ERP Next.js là frontend online của Global Portal Gateway. TanStack Query chỉ là
+client cache/orchestration layer; nó không trở thành source of truth và không
+được dùng để bypass Gateway hoặc ERPNext permission.
+
+Accounting và Assets có PWA manifest riêng để cài đặt độc lập trên browser:
+
+```text
+/accounts/manifest.webmanifest -> id=/accounts, scope=/accounts
+/assets/manifest.webmanifest   -> id=/assets, scope=/assets
+```
+
+PWA nhẹ không có service worker, không cache API và không sở hữu session. Lark
+Web App name/icon vẫn do metadata và release của Lark quản lý; manifest không
+điều khiển label hoặc loading navigation trong Lark. Browser/device install
+acceptance phải được kiểm chứng riêng sau static build và deployment readiness.
