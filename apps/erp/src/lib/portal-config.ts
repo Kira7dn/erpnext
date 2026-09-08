@@ -9,5 +9,11 @@ export function portalAuthBaseUrl(): string {
 }
 
 export function portalAppBaseUrl(requestOrigin?: string): string {
+  if (requestOrigin) {
+    const origin = new URL(requestOrigin);
+    if (origin.hostname === "localhost" || origin.hostname === "127.0.0.1") {
+      return requestOrigin.replace(/\/$/, "");
+    }
+  }
   return configuredUrl("NEXT_PUBLIC_APP_URL", requestOrigin ?? "http://localhost:3001");
 }

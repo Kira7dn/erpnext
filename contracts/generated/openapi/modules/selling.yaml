@@ -3589,6 +3589,21 @@ x-contract:
       path_suffix: run-evaluation
       handler: letron_api.banking.run_rule_evaluation
     custom_routes:
+    - module: Files
+      resource: attachments
+      method: POST
+      path: /api/v1/files/attachments
+      operation: create
+      operation_id: createAttachment
+      handler: letron_api.attachments.create_attachment
+      content_type: multipart/form-data
+      multipart_fields:
+      - attached_to_doctype
+      - attached_to_name
+      - is_private
+      required_multipart_fields:
+      - attached_to_doctype
+      - attached_to_name
     - module: Accounts
       resource: bank-reconciliation
       method: GET

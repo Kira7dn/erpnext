@@ -165,13 +165,19 @@ class ApiClient:
             raise AssertionError(f"{method} {path}: expected {expected}, got {status}: {_summary(data)}")
         return Response(status, response_headers, data, actual_request_id)
 
-    def upload(self, file_name: str, content: bytes, *, expected: set[int] | None = None) -> Response:
+    def upload(self, file_name: str, content: bytes, *, attached_to_doctype: str, attached_to_name: str, expected: set[int] | None = None) -> Response:
         boundary = f"----letron-acceptance-{uuid.uuid4().hex}"
         body = (
             f"--{boundary}\r\n"
             f'Content-Disposition: form-data; name="file"; filename="{file_name}"\r\n'
             "Content-Type: text/plain; charset=utf-8\r\n\r\n"
-        ).encode() + content + f"\r\n--{boundary}--\r\n".encode()
+        ).encode() + content + (
+            f"\r\n--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="attached_to_doctype"\r\n\r\n{attached_to_doctype}\r\n'
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="attached_to_name"\r\n\r\n{attached_to_name}\r\n'
+            f"--{boundary}--\r\n"
+        ).encode()
         request_id = f"acceptance-{uuid.uuid4()}"
         headers = {
             "Accept": "application/json",
@@ -180,7 +186,8 @@ class ApiClient:
         }
         if self.authorization:
             headers["Authorization"] = self.authorization
-        request = Request(self.base + "/api/method/upload_file", data=body, headers=headers, method="POST")
+        path = "/api/v1/files/attachments"
+        request = Request(self.base + path, data=body, headers=headers, method="POST")
         try:
             with self.opener.open(request, timeout=self.timeout) as raw:
                 status = raw.status
@@ -191,9 +198,9 @@ class ApiClient:
             response_headers = {key.lower(): value for key, value in error.headers.items()}
             data = json.loads(error.read().decode("utf-8", errors="replace"))
         actual_request_id = response_headers.get("x-request-id")
-        self.evidence.append({"method": "POST", "path": "/api/method/upload_file", "status": status, "request_id": actual_request_id, "payload": _summary(data)})
+        self.evidence.append({"method": "POST", "path": path, "status": status, "request_id": actual_request_id, "payload": _summary(data)})
         if expected is not None and status not in expected:
-            raise AssertionError(f"upload_file: expected {expected}, got {status}: {_summary(data)}")
+            raise AssertionError(f"attachment upload: expected {expected}, got {status}: {_summary(data)}")
         return Response(status, response_headers, data, actual_request_id)
 
     def login(self) -> None:

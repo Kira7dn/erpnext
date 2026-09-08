@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 from typing import Any
 
@@ -56,6 +57,8 @@ OPERATION_FIELDS = {
     "delete": "delete", "report": "report",
 }
 
+VIRTUAL_POLICY_RESOURCES = {"files/attachments"}
+
 
 def _authorized() -> None:
     from letron_api.gateway import verify_control_plane_request
@@ -104,7 +107,7 @@ def publish() -> dict[str, Any]:
         for rule in entitlement.get("rules", []):
             key = f"{rule.get('module')}/{rule.get('resource')}"
             doctype = PUBLIC_RESOURCE_ROUTES.get((rule.get("module"), rule.get("resource"))) or POLICY_RESOURCE_DOCTYPES.get(key)
-            if key == "erp/workspace":
+            if key == "erp/workspace" or key in VIRTUAL_POLICY_RESOURCES:
                 continue
             if not doctype:
                 frappe.throw(f"Unregistered policy resource: {key}", exc=frappe.ValidationError)

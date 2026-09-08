@@ -125,6 +125,7 @@ runtime:
       path_suffix: run-evaluation
       handler: letron_api.banking.run_rule_evaluation
   custom_routes:
+    - {module: Files, resource: attachments, method: POST, path: /api/v1/files/attachments, operation: create, operation_id: createAttachment, handler: letron_api.attachments.create_attachment, content_type: multipart/form-data, multipart_fields: [attached_to_doctype, attached_to_name, is_private], required_multipart_fields: [attached_to_doctype, attached_to_name]}
     - {module: Accounts, resource: bank-reconciliation, method: GET, path: /api/v1/accounts/bank-reconciliation/transactions, operation: list, operation_id: listBankReconciliationTransactions, handler: letron_api.banking.reconciliation_transactions}
     - {module: Accounts, resource: bank-reconciliation, method: GET, path: /api/v1/accounts/bank-reconciliation/balance, operation: read, operation_id: getBankReconciliationBalance, handler: letron_api.banking.reconciliation_balance}
     - {module: Accounts, resource: bank-reconciliation, method: GET, path: /api/v1/accounts/bank-reconciliation/linked-payments, operation: read, operation_id: getBankReconciliationLinkedPayments, handler: letron_api.banking.reconciliation_linked_payments}
@@ -283,8 +284,9 @@ auth:
 
 upload:
   enabled: true
-  path: /api/method/upload_file
+  path: /api/v1/files/attachments
   field: file
+  attachment_fields: [attached_to_doctype, attached_to_name, is_private]
 
 capabilities:
   webhook:
@@ -353,7 +355,7 @@ acceptance:
     letron_api_api_health_get: {status: passed, suite: public-api}
     letron_api_api_runtime_info_get: {status: passed, suite: extended-api}
     letron_api_api_runtime_snapshot_get: {status: passed, suite: public-api}
-    uploadFile: {status: passed, suite: extended-api}
+    createAttachment: {status: passed, suite: extended-api}
     listAsset: {status: not-tested, suite: assets-lifecycle}
     createAsset: {status: not-tested, suite: assets-lifecycle}
     getAsset: {status: not-tested, suite: assets-lifecycle}

@@ -33,11 +33,30 @@ export type AccountingResource =
   | "sales-invoices"
   | "bank-transaction-rules";
 
-export type AccountingVirtualResource = "bank-reconciliation" | "reports" | "statement-imports" | "settings";
+export type AccountingVirtualResource =
+  "bank-reconciliation" | "reports" | "statement-imports" | "settings";
 
-export type AssetResource = "assets" | "asset-categories" | "asset-capitalizations" | "asset-maintenance" | "asset-movements" | "asset-repairs" | "asset-value-adjustments" | "asset-maintenance-teams" | "asset-maintenance-logs" | "asset-depreciation-schedules" | "asset-shift-factors" | "asset-shift-allocations" | "locations";
+export type AssetResource =
+  | "assets"
+  | "asset-categories"
+  | "asset-capitalizations"
+  | "asset-maintenance"
+  | "asset-movements"
+  | "asset-repairs"
+  | "asset-value-adjustments"
+  | "asset-maintenance-teams"
+  | "asset-maintenance-logs"
+  | "asset-depreciation-schedules"
+  | "asset-shift-factors"
+  | "asset-shift-allocations"
+  | "locations";
 export type AssetVirtualResource = "actions" | "reports" | "dashboard";
-export type AssetReportKey = "fixed-asset-register" | "asset-depreciation-ledger" | "asset-depreciations-and-balances" | "asset-maintenance" | "asset-activity";
+export type AssetReportKey =
+  | "fixed-asset-register"
+  | "asset-depreciation-ledger"
+  | "asset-depreciations-and-balances"
+  | "asset-maintenance"
+  | "asset-activity";
 
 export const ACCOUNTING_RESOURCES = [
   "banks",
@@ -54,10 +73,39 @@ export const ACCOUNTING_RESOURCES = [
   "bank-transaction-rules",
 ] as const satisfies readonly AccountingResource[];
 
-export const ACCOUNTING_VIRTUAL_RESOURCES = ["bank-reconciliation", "reports", "statement-imports", "settings"] as const satisfies readonly AccountingVirtualResource[];
-export const ASSET_RESOURCES = ["assets", "asset-categories", "asset-capitalizations", "asset-maintenance", "asset-movements", "asset-repairs", "asset-value-adjustments", "asset-maintenance-teams", "asset-maintenance-logs", "asset-depreciation-schedules", "asset-shift-factors", "asset-shift-allocations", "locations"] as const satisfies readonly AssetResource[];
-export const ASSET_VIRTUAL_RESOURCES = ["actions", "reports", "dashboard"] as const satisfies readonly AssetVirtualResource[];
-export const ASSET_REPORTS = ["fixed-asset-register", "asset-depreciation-ledger", "asset-depreciations-and-balances", "asset-maintenance", "asset-activity"] as const satisfies readonly AssetReportKey[];
+export const ACCOUNTING_VIRTUAL_RESOURCES = [
+  "bank-reconciliation",
+  "reports",
+  "statement-imports",
+  "settings",
+] as const satisfies readonly AccountingVirtualResource[];
+export const ASSET_RESOURCES = [
+  "assets",
+  "asset-categories",
+  "asset-capitalizations",
+  "asset-maintenance",
+  "asset-movements",
+  "asset-repairs",
+  "asset-value-adjustments",
+  "asset-maintenance-teams",
+  "asset-maintenance-logs",
+  "asset-depreciation-schedules",
+  "asset-shift-factors",
+  "asset-shift-allocations",
+  "locations",
+] as const satisfies readonly AssetResource[];
+export const ASSET_VIRTUAL_RESOURCES = [
+  "actions",
+  "reports",
+  "dashboard",
+] as const satisfies readonly AssetVirtualResource[];
+export const ASSET_REPORTS = [
+  "fixed-asset-register",
+  "asset-depreciation-ledger",
+  "asset-depreciations-and-balances",
+  "asset-maintenance",
+  "asset-activity",
+] as const satisfies readonly AssetReportKey[];
 
 export type AccountingFormField = {
   name: string;
@@ -70,7 +118,32 @@ export type AccountingFormField = {
 
 export const RESOURCE_PAGE_SIZE = 25;
 
-export function resourcePageQuery(page: number, pageSize = RESOURCE_PAGE_SIZE): string {
+export type PurchaseResource =
+  | "suppliers"
+  | "contacts"
+  | "addresses"
+  | "items"
+  | "material-requests"
+  | "request-for-quotations"
+  | "attachments";
+export const PURCHASE_RESOURCES = [
+  "suppliers",
+  "contacts",
+  "addresses",
+  "items",
+  "material-requests",
+  "request-for-quotations",
+  "attachments",
+] as const satisfies readonly PurchaseResource[];
+
+export function isPurchaseResource(value: string): value is PurchaseResource {
+  return (PURCHASE_RESOURCES as readonly string[]).includes(value);
+}
+
+export function resourcePageQuery(
+  page: number,
+  pageSize = RESOURCE_PAGE_SIZE,
+): string {
   const safePage = Math.max(1, Math.floor(page));
   return new URLSearchParams({
     limit_page_length: String(pageSize + 1),
@@ -78,24 +151,66 @@ export function resourcePageQuery(page: number, pageSize = RESOURCE_PAGE_SIZE): 
   }).toString();
 }
 
-type ContractSchema = { properties?: Record<string, { type?: string; format?: string; enum?: string[]; writeOnly?: boolean; "x-frappe-target-doctype"?: string }> ; required?: string[] };
-type PublicContract = { paths?: Record<string, Record<string, { requestBody?: { content?: { "application/json"?: { schema?: ContractSchema } } } }>> };
+type ContractSchema = {
+  properties?: Record<
+    string,
+    {
+      type?: string;
+      format?: string;
+      enum?: string[];
+      writeOnly?: boolean;
+      "x-frappe-target-doctype"?: string;
+    }
+  >;
+  required?: string[];
+};
+type PublicContract = {
+  paths?: Record<
+    string,
+    Record<
+      string,
+      {
+        requestBody?: {
+          content?: { "application/json"?: { schema?: ContractSchema } };
+        };
+      }
+    >
+  >;
+};
 
 let contract: PublicContract | undefined;
 function readContract(): PublicContract {
-  contract ??= JSON.parse(readFileSync(resolve(process.cwd(), "../../contracts/openapi/public.json"), "utf8")) as PublicContract;
+  contract ??= JSON.parse(
+    readFileSync(
+      resolve(process.cwd(), "../../contracts/openapi/public.json"),
+      "utf8",
+    ),
+  ) as PublicContract;
   return contract;
 }
 
-export function getAccountingFormFields(resource: AccountingResource): AccountingFormField[] {
-  const schema = readContract().paths?.[`/api/v1/accounts/${resource}`]?.post?.requestBody?.content?.["application/json"]?.schema;
+export function getAccountingFormFields(
+  resource: AccountingResource,
+): AccountingFormField[] {
+  const schema =
+    readContract().paths?.[`/api/v1/accounts/${resource}`]?.post?.requestBody
+      ?.content?.["application/json"]?.schema;
   if (!schema?.properties) return [];
   const required = new Set(schema.required ?? []);
   return Object.entries(schema.properties)
-    .filter(([name, field]) => !/^(section|column|sb|cb|address_and_contact|integration_details|.*_section|.*_tab|.*_html|printing_settings|more_info|connections_tab|automation_section|totals_section|base_totals_section|title$)/i.test(name) && !field.writeOnly)
+    .filter(
+      ([name, field]) =>
+        !/^(section|column|sb|cb|address_and_contact|integration_details|.*_section|.*_tab|.*_html|printing_settings|more_info|connections_tab|automation_section|totals_section|base_totals_section|title$)/i.test(
+          name,
+        ) && !field.writeOnly,
+    )
     .map(([name, field]) => ({
       name,
-      type: ["string", "number", "integer", "boolean", "array"].includes(field.type ?? "") ? field.type as AccountingFormField["type"] : "string",
+      type: ["string", "number", "integer", "boolean", "array"].includes(
+        field.type ?? "",
+      )
+        ? (field.type as AccountingFormField["type"])
+        : "string",
       format: field.format,
       enum: field.enum,
       required: required.has(name),
@@ -119,7 +234,9 @@ export class GatewayAccessDeniedError extends Error {
 
 export class GatewayUnavailableError extends Error {
   constructor() {
-    super("Letron Global Portal Gateway hiện không khả dụng. Vui lòng thử lại sau.");
+    super(
+      "Letron Global Portal Gateway hiện không khả dụng. Vui lòng thử lại sau.",
+    );
     this.name = "GatewayUnavailableError";
   }
 }
@@ -129,11 +246,17 @@ function authGatewayUrl(path: string): string {
   return `${baseUrl}/api/gateway${path}`;
 }
 
-export function isAccountingResource(value: string): value is AccountingResource {
-  return [...ACCOUNTING_RESOURCES, ...ACCOUNTING_VIRTUAL_RESOURCES].includes(value as AccountingResource | AccountingVirtualResource);
+export function isAccountingResource(
+  value: string,
+): value is AccountingResource {
+  return [...ACCOUNTING_RESOURCES, ...ACCOUNTING_VIRTUAL_RESOURCES].includes(
+    value as AccountingResource | AccountingVirtualResource,
+  );
 }
 
-export function isAccountingVirtualResource(value: string): value is AccountingVirtualResource {
+export function isAccountingVirtualResource(
+  value: string,
+): value is AccountingVirtualResource {
   return (ACCOUNTING_VIRTUAL_RESOURCES as readonly string[]).includes(value);
 }
 
@@ -141,31 +264,76 @@ export function isAssetResource(value: string): value is AssetResource {
   return (ASSET_RESOURCES as readonly string[]).includes(value);
 }
 
-export function isAssetVirtualResource(value: string): value is AssetVirtualResource {
+export function isAssetVirtualResource(
+  value: string,
+): value is AssetVirtualResource {
   return (ASSET_VIRTUAL_RESOURCES as readonly string[]).includes(value);
 }
 
-export function assetsGatewayRequest<T>(path: string, cookieHeader: string, init: RequestInit = {}): Promise<T> {
-  return gatewayRequest<T>(`/api/v1/assets/${path.replace(/^\/+/, "")}`, cookieHeader, init);
+export function assetsGatewayRequest<T>(
+  path: string,
+  cookieHeader: string,
+  init: RequestInit = {},
+): Promise<T> {
+  return gatewayRequest<T>(
+    `/api/v1/assets/${path.replace(/^\/+/, "")}`,
+    cookieHeader,
+    init,
+  );
 }
 
-export async function listAssetResource(resource: AssetResource, cookieHeader: string, searchParams = ""): Promise<Record<string, unknown>[]> {
+export async function listAssetResource(
+  resource: AssetResource,
+  cookieHeader: string,
+  searchParams = "",
+): Promise<Record<string, unknown>[]> {
   const suffix = searchParams ? `?${searchParams}` : "";
-  const data = await assetsGatewayRequest<unknown>(`${resource}${suffix}`, cookieHeader);
-  return Array.isArray(data) ? data as Record<string, unknown>[] : [];
+  const data = await assetsGatewayRequest<unknown>(
+    `${resource}${suffix}`,
+    cookieHeader,
+  );
+  return Array.isArray(data) ? (data as Record<string, unknown>[]) : [];
 }
 
-export function getAssetFormFields(resource: AssetResource): AccountingFormField[] {
-  const schema = readContract().paths?.[`/api/v1/assets/${resource}`]?.post?.requestBody?.content?.["application/json"]?.schema;
+export function getAssetFormFields(
+  resource: AssetResource,
+): AccountingFormField[] {
+  const schema =
+    readContract().paths?.[`/api/v1/assets/${resource}`]?.post?.requestBody
+      ?.content?.["application/json"]?.schema;
   if (!schema?.properties) return [];
   const required = new Set(schema.required ?? []);
   return Object.entries(schema.properties)
-    .filter(([name, field]) => !/^(section|column|sb|cb|.*_section|.*_tab|.*_html|title$)/i.test(name) && !field.writeOnly)
-    .map(([name, field]) => ({ name, type: ["string", "number", "integer", "boolean", "array"].includes(field.type ?? "") ? field.type as AccountingFormField["type"] : "string", format: field.format, enum: field.enum, required: required.has(name), targetDoctype: field["x-frappe-target-doctype"] }));
+    .filter(
+      ([name, field]) =>
+        !/^(section|column|sb|cb|.*_section|.*_tab|.*_html|title$)/i.test(
+          name,
+        ) && !field.writeOnly,
+    )
+    .map(([name, field]) => ({
+      name,
+      type: ["string", "number", "integer", "boolean", "array"].includes(
+        field.type ?? "",
+      )
+        ? (field.type as AccountingFormField["type"])
+        : "string",
+      format: field.format,
+      enum: field.enum,
+      required: required.has(name),
+      targetDoctype: field["x-frappe-target-doctype"],
+    }));
 }
 
-export async function accountingGatewayRequest<T>(path: string, cookieHeader: string, init: RequestInit = {}): Promise<T> {
-  return gatewayRequest<T>(`/api/v1/accounts/${path.replace(/^\/+/, "")}`, cookieHeader, init);
+export async function accountingGatewayRequest<T>(
+  path: string,
+  cookieHeader: string,
+  init: RequestInit = {},
+): Promise<T> {
+  return gatewayRequest<T>(
+    `/api/v1/accounts/${path.replace(/^\/+/, "")}`,
+    cookieHeader,
+    init,
+  );
 }
 
 export async function gatewayRequest<T>(
@@ -188,11 +356,27 @@ export async function gatewayRequest<T>(
   }
   if (response.status === 401) throw new GatewayAuthenticationRequiredError();
   if (response.status === 403) throw new GatewayAccessDeniedError();
-  if (response.status === 502 || response.status === 503) throw new GatewayUnavailableError();
+  if (response.status === 502 || response.status === 503)
+    throw new GatewayUnavailableError();
   if (!response.ok) {
-    throw new Error(`Letron Gateway request failed (${response.status}).`);
+    let detail = "";
+    try {
+      const errorPayload = (await response.json()) as {
+        error?: unknown;
+        message?: unknown;
+      };
+      const candidate = errorPayload.error ?? errorPayload.message;
+      if (typeof candidate === "string") detail = candidate.slice(0, 500);
+    } catch {
+      // Keep the status-only fallback for non-JSON gateway responses.
+    }
+    throw new Error(
+      detail
+        ? `Letron Gateway request failed (${response.status}): ${detail}`
+        : `Letron Gateway request failed (${response.status}).`,
+    );
   }
-  const payload = await response.json() as ApiResponse<T>;
+  const payload = (await response.json()) as ApiResponse<T>;
   return (payload.data ?? payload.message) as T;
 }
 
@@ -202,8 +386,11 @@ export async function listAccountingResource(
   searchParams = "",
 ): Promise<Record<string, unknown>[]> {
   const suffix = searchParams ? `?${searchParams}` : "";
-  const data = await gatewayRequest<unknown>(`/api/v1/accounts/${resource}${suffix}`, cookieHeader);
-  return Array.isArray(data) ? data as Record<string, unknown>[] : [];
+  const data = await gatewayRequest<unknown>(
+    `/api/v1/accounts/${resource}${suffix}`,
+    cookieHeader,
+  );
+  return Array.isArray(data) ? (data as Record<string, unknown>[]) : [];
 }
 
 export async function getAccountingResource(
@@ -217,6 +404,13 @@ export async function getAccountingResource(
   );
 }
 
-export async function listBankAccounts(cookieHeader: string, searchParams = ""): Promise<BankAccount[]> {
-  return listAccountingResource("bank-accounts", cookieHeader, searchParams) as Promise<BankAccount[]>;
+export async function listBankAccounts(
+  cookieHeader: string,
+  searchParams = "",
+): Promise<BankAccount[]> {
+  return listAccountingResource(
+    "bank-accounts",
+    cookieHeader,
+    searchParams,
+  ) as Promise<BankAccount[]>;
 }

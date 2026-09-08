@@ -21,5 +21,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/accounts/:path*", "/assets/:path*"],
+  // Protect every ERP page automatically. API routes and static assets have
+  // their own guards or must remain publicly fetchable by the framework.
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

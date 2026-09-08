@@ -58921,6 +58921,154 @@
         }
       }
     },
+    "/api/v1/files/attachments": {
+      "post": {
+        "tags": [
+          "Module: Files",
+          "Business routes"
+        ],
+        "summary": "createAttachment",
+        "operationId": "createAttachment",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.attachments.create_attachment",
+        "x-public-operation": "create",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "attached_to_doctype",
+                  "attached_to_name"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "attached_to_doctype": {
+                    "type": "string"
+                  },
+                  "attached_to_name": {
+                    "type": "string"
+                  },
+                  "is_private": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "extended-api",
+          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
+        }
+      }
+    },
     "/api/v1/accounts/bank-reconciliation/transactions": {
       "get": {
         "tags": [
@@ -61827,148 +61975,6 @@
         "x-test-evidence": {
           "suite": "assets-lifecycle",
           "test": "tests/integration/test_assets_api_runtime.py::test_assets_contract_surface"
-        }
-      }
-    },
-    "/api/method/upload_file": {
-      "post": {
-        "tags": [
-          "Files"
-        ],
-        "operationId": "uploadFile",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/RequestId"
-          },
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "file"
-                ],
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  },
-                  "is_private": {
-                    "type": "boolean"
-                  },
-                  "doctype": {
-                    "type": "string"
-                  },
-                  "docname": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Uploaded file",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FileUploadResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Idempotency or optimistic concurrency conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "417": {
-            "description": "Native Frappe validation failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server or rollback failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          }
-        },
-        "x-test-status": "passed",
-        "x-test-level": "docker-runtime",
-        "x-test-evidence": {
-          "suite": "extended-api",
-          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
         }
       }
     }
@@ -84035,6 +84041,25 @@
       ],
       "custom_routes": [
         {
+          "module": "Files",
+          "resource": "attachments",
+          "method": "POST",
+          "path": "/api/v1/files/attachments",
+          "operation": "create",
+          "operation_id": "createAttachment",
+          "handler": "letron_api.attachments.create_attachment",
+          "content_type": "multipart/form-data",
+          "multipart_fields": [
+            "attached_to_doctype",
+            "attached_to_name",
+            "is_private"
+          ],
+          "required_multipart_fields": [
+            "attached_to_doctype",
+            "attached_to_name"
+          ]
+        },
+        {
           "module": "Accounts",
           "resource": "bank-reconciliation",
           "method": "GET",
@@ -84481,9 +84506,9 @@
     }
   },
   "x-acceptance-summary": {
-    "passed": 215,
+    "passed": 214,
     "partial": 0,
-    "not-tested": 104,
+    "not-tested": 105,
     "blocked": 0
   },
   "x-module": null,

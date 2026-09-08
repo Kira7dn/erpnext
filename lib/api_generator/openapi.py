@@ -291,12 +291,13 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
         }
         if method not in {"get", "head"}:
             if custom.get("content_type") == "multipart/form-data":
-                operation["requestBody"] = {"required": True, "content": {"multipart/form-data": {"schema": {"type": "object", "required": ["file"], "properties": {"file": {"type": "string", "format": "binary"}}}}}}
+                properties = {"file": {"type": "string", "format": "binary"}}
+                for field in custom.get("multipart_fields", []):
+                    properties[field] = {"type": "string"}
+                operation["requestBody"] = {"required": True, "content": {"multipart/form-data": {"schema": {"type": "object", "required": ["file", *custom.get("required_multipart_fields", [])], "properties": properties}}}}
             else:
                 operation["requestBody"] = _json_body({"type": "object", "additionalProperties": True}, required=False)
         paths.setdefault(custom["path"], {})[method] = operation
-    if module_name is None:
-        paths["/api/method/upload_file"] = {"post": {"tags": ["Files"], "operationId": "uploadFile", "parameters": write_headers, "requestBody": {"required": True, "content": {"multipart/form-data": {"schema": {"type": "object", "required": ["file"], "properties": {"file": {"type": "string", "format": "binary"}, "is_private": {"type": "boolean"}, "doctype": {"type": "string"}, "docname": {"type": "string"}}}}}}, "responses": {**_response("Uploaded file", {"$ref": "#/components/schemas/FileUploadResponse"}), **error}}}
     server = os.environ.get("ERPNEXT_API_URL") or runtime["server_url"]
     if server.startswith("${"):
         server = runtime["server_url"]

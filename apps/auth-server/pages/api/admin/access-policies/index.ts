@@ -5,6 +5,7 @@ import { adminUser, isJsonRequest } from "../../../../src/server/admin";
 import { audit } from "../../../../src/server/audit";
 import { getDb } from "../../../../src/server/db";
 import { disableCaching } from "../../../../src/server/http";
+import { invalidatePolicyCache } from "../../../../src/server/cache";
 import { parseAccessPolicy, validatePolicy } from "../../../../src/server/access-policy";
 import { publishPolicyToErp } from "../../../../src/server/policy-publisher";
 import { fetchLarkGroupCatalog } from "../../../../src/server/lark";
@@ -54,6 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await tx.accessPolicy.updateMany({ where: { status: "PUBLISHED" }, data: { status: "SUPERSEDED", supersededAt: new Date() } });
       return tx.accessPolicy.update({ where: { id: draft.id }, data: { status: "PUBLISHED", publishedAt: new Date() } });
     }, { maxWait: 10000, timeout: 30000 });
+    await invalidatePolicyCache();
     await audit({ eventType: "access_policy.published", outcome: "success", userId: actor.id, detail: { policy_id: policy.id, version: policy.version } });
     res.status(201).json({ policy });
   } catch (error) {

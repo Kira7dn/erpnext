@@ -48826,7 +48826,7 @@
           "fieldname": "subject_type",
           "fieldtype": "Select",
           "label": "Subject Type",
-          "options": "union_id\nopen_id",
+          "options": "union_id",
           "reqd": 1,
           "read_only": 1,
           "hidden": 0
@@ -48871,6 +48871,33 @@
           "fieldname": "last_sync_at",
           "fieldtype": "Datetime",
           "label": "Last Successful Sync",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "gateway_roles_fingerprint",
+          "fieldtype": "Data",
+          "label": "Gateway Roles Fingerprint",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "gateway_policy_version",
+          "fieldtype": "Int",
+          "label": "Gateway Policy Version",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "gateway_synced_at",
+          "fieldtype": "Datetime",
+          "label": "Gateway Role Sync At",
           "options": null,
           "reqd": 0,
           "read_only": 1,
@@ -152963,6 +152990,175 @@
       ]
     },
     {
+      "dotted_path": "frappe.desk.reportview.delete_items",
+      "source": "desk\\reportview.py",
+      "method": "delete_items",
+      "app": "frappe",
+      "methods": [
+        "POST",
+        "DELETE"
+      ],
+      "allow_guest": false,
+      "parameters": []
+    },
+    {
+      "dotted_path": "frappe.desk.reportview.delete_report",
+      "source": "desk\\reportview.py",
+      "method": "delete_report",
+      "app": "frappe",
+      "methods": [
+        "POST",
+        "DELETE"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "name",
+          "annotation": null,
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "frappe.desk.reportview.export_query",
+      "source": "desk\\reportview.py",
+      "method": "export_query",
+      "app": "frappe",
+      "methods": [],
+      "allow_guest": false,
+      "parameters": []
+    },
+    {
+      "dotted_path": "frappe.desk.reportview.get",
+      "source": "desk\\reportview.py",
+      "method": "get",
+      "app": "frappe",
+      "methods": [],
+      "allow_guest": false,
+      "parameters": []
+    },
+    {
+      "dotted_path": "frappe.desk.reportview.get_count",
+      "source": "desk\\reportview.py",
+      "method": "get_count",
+      "app": "frappe",
+      "methods": [],
+      "allow_guest": false,
+      "parameters": []
+    },
+    {
+      "dotted_path": "frappe.desk.reportview.get_filter_dashboard_data",
+      "source": "desk\\reportview.py",
+      "method": "get_filter_dashboard_data",
+      "app": "frappe",
+      "methods": [],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "stats",
+          "annotation": null,
+          "required": true
+        },
+        {
+          "name": "doctype",
+          "annotation": null,
+          "required": true
+        },
+        {
+          "name": "filters",
+          "annotation": null,
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "frappe.desk.reportview.get_list",
+      "source": "desk\\reportview.py",
+      "method": "get_list",
+      "app": "frappe",
+      "methods": [],
+      "allow_guest": false,
+      "parameters": []
+    },
+    {
+      "dotted_path": "frappe.desk.reportview.get_sidebar_stats",
+      "source": "desk\\reportview.py",
+      "method": "get_sidebar_stats",
+      "app": "frappe",
+      "methods": [],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "stats",
+          "annotation": null,
+          "required": true
+        },
+        {
+          "name": "doctype",
+          "annotation": null,
+          "required": true
+        },
+        {
+          "name": "filters",
+          "annotation": null,
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "frappe.desk.reportview.get_stats",
+      "source": "desk\\reportview.py",
+      "method": "get_stats",
+      "app": "frappe",
+      "methods": [],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "stats",
+          "annotation": null,
+          "required": true
+        },
+        {
+          "name": "doctype",
+          "annotation": null,
+          "required": true
+        },
+        {
+          "name": "filters",
+          "annotation": null,
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "frappe.desk.reportview.save_report",
+      "source": "desk\\reportview.py",
+      "method": "save_report",
+      "app": "frappe",
+      "methods": [
+        "POST",
+        "PUT"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "name",
+          "annotation": null,
+          "required": true
+        },
+        {
+          "name": "doctype",
+          "annotation": null,
+          "required": true
+        },
+        {
+          "name": "report_settings",
+          "annotation": null,
+          "required": true
+        }
+      ]
+    },
+    {
       "dotted_path": "frappe.desk.search.get_link_title",
       "source": "desk\\search.py",
       "method": "get_link_title",
@@ -157411,8 +157607,8 @@
       "parameters": [
         {
           "name": "report_key",
-          "annotation": "str",
-          "required": true
+          "annotation": "str | None",
+          "required": false
         },
         {
           "name": "filters",
@@ -157420,6 +157616,17 @@
           "required": false
         }
       ]
+    },
+    {
+      "dotted_path": "letron_api.attachments.create_attachment",
+      "source": "attachments.py",
+      "method": "create_attachment",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": []
     },
     {
       "dotted_path": "letron_api.backup.scheduled_s3_backup",

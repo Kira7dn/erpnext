@@ -28,7 +28,8 @@ def test_openapi_contains_frappe_contract_paths():
     assert "/api/resource/{doctype}/{name}" not in spec["paths"]
     assert "/api/method/{method}" not in spec["paths"]
     assert "/api/method/letron_api.api.health" in spec["paths"]
-    assert "/api/method/upload_file" in spec["paths"]
+    assert "/api/method/upload_file" not in spec["paths"]
+    assert "/api/v1/files/attachments" in spec["paths"]
     assert "frappeToken" in spec["components"]["securitySchemes"]
     assert "/api/v1/accounts/sales-invoices/{name}/submit" in spec["paths"]
     expected = {

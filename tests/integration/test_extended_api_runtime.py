@@ -63,7 +63,7 @@ def _create(client: ApiClient, route: str, payload: Mapping[str, object], create
 def _assert_list_controls(client: ApiClient, route: str, name: str) -> None:
     query = urlencode(
         {
-            "fields": json.dumps(["name"]),
+            "fields": json.dumps(["name", "modified"]),
             "filters": json.dumps([["name", "=", name]]),
             "order_by": "modified desc",
             "limit_start": 0,
@@ -71,7 +71,20 @@ def _assert_list_controls(client: ApiClient, route: str, name: str) -> None:
         }
     )
     listed = client.public("GET", f"{route}?{query}", expected={200})
-    assert listed.data["data"] == [{"name": name}]
+    assert len(listed.data["data"]) == 1
+    assert listed.data["data"][0]["name"] == name
+    assert "modified" in listed.data["data"][0]
+
+    no_match_query = urlencode(
+        {
+            "fields": json.dumps(["name"]),
+            "filters": json.dumps([["name", "=", f"{name}-NO-MATCH"]]),
+            "limit_start": 0,
+            "limit_page_length": 1,
+        }
+    )
+    no_match = client.public("GET", f"{route}?{no_match_query}", expected={200})
+    assert no_match.data["data"] == []
 
 
 def _update_and_assert(client: ApiClient, route: str, name: str, field: str, value: object) -> None:
@@ -1038,7 +1051,7 @@ def test_extended_auth_system_resources_and_business_flows(request: pytest.Fixtu
     created.append(("Customer", concurrent_name))
 
     upload_name = prefix + "upload-đà-nẵng.txt"
-    uploaded = client.upload(upload_name, "Nội dung UTF-8 acceptance".encode(), expected={200})
+    uploaded = client.upload(upload_name, "Nội dung UTF-8 acceptance".encode(), attached_to_doctype="Supplier", attached_to_name=supplier, expected={200})
     assert uploaded.data["message"]["file_name"] == upload_name
     file_query = urlencode({"filters": json.dumps([["file_name", "=", upload_name]]), "fields": json.dumps(["name"])})
     files = client.request("GET", f"/api/resource/File?{file_query}", expected={200})

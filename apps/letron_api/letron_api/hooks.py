@@ -158,6 +158,12 @@ def _virtual_asset_target(parts: list[str]) -> str | None:
     return None
 
 
+def _virtual_attachment_target(parts: list[str]) -> str | None:
+    if len(parts) == 4 and parts[2:4] == ["files", "attachments"]:
+        return "letron_api.attachments.create_attachment"
+    return None
+
+
 
 def rewrite_public_routes() -> None:
     """Rewrite public business aliases to native Frappe resource routes."""
@@ -170,7 +176,14 @@ def rewrite_public_routes() -> None:
     request.environ["LETRON_REQUEST_ID"] = request_id
     path = request.path
     parts = path.strip("/").split("/")
-    if len(parts) not in {4, 5, 6} or parts[:2] != ["api", "v1"]:
+    if len(parts) not in {3, 4, 5, 6} or parts[:2] != ["api", "v1"]:
+        return
+    target_method = _virtual_attachment_target(parts)
+    if target_method:
+        if frappe.session.user in {"Guest", ""}:
+            frappe.throw("Authentication required", exc=frappe.AuthenticationError)
+        request.environ["PATH_INFO"] = f"/api/method/{target_method}"
+        request.__dict__["path"] = f"/api/method/{target_method}"
         return
     module_slug, doctype_slug = parts[2:4]
     if not module_slug or not doctype_slug:
@@ -221,6 +234,23 @@ def rewrite_public_routes() -> None:
             # the original UTF-8 bytes so Frappe's router decodes the name once.
             name = parts[4].encode("utf-8").decode("latin-1")
             target += f"/{name}"
+    # Frappe builds form_dict before before_request hooks.  Keep the public
+    # list controls explicit when the alias is rewritten to /api/resource;
+    # otherwise some runtime versions fall back to the native default
+    # (fields=["name"]) and silently ignore filters/order_by.
+    if len(parts) == 4 and request.method == "GET":
+        for key in (
+            "fields",
+            "filters",
+            "order_by",
+            "limit_page_length",
+            "limit_start",
+            "as_dict",
+            "expand",
+        ):
+            value = request.args.get(key)
+            if value is not None:
+                frappe.local.form_dict[key] = value
     request.environ["PATH_INFO"] = target
     request.__dict__["path"] = target
 
@@ -257,6 +287,7 @@ def add_request_headers(response=None, request=None) -> None:
 before_request = ["letron_api.gateway.enforce_gateway_ingress", "letron_api.hooks.rewrite_public_routes"]
 after_request = ["letron_api.hooks.add_request_headers"]
 auth_hooks = []
+after_migrate = ["letron_api.purchase_schema.ensure_schema"]
 
 doc_events = {
     doctype: {
