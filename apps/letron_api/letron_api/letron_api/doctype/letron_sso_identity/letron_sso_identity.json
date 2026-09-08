@@ -7,7 +7,7 @@
   "engine": "InnoDB",
   "field_order": [
     "identity_key", "provider", "tenant_key", "subject", "subject_type", "user",
-    "email", "display_name", "group_ids", "last_sync_at", "sync_state",
+    "email", "display_name", "group_ids", "last_sync_at", "gateway_roles_fingerprint", "gateway_policy_version", "gateway_synced_at", "sync_state",
     "disabled_by_sync", "local_blocked", "last_error", "break_glass_until", "break_glass_reason"
   ],
   "fields": [
@@ -15,12 +15,15 @@
     {"default": "lark", "fieldname": "provider", "fieldtype": "Data", "label": "Provider", "reqd": 1, "read_only": 1},
     {"fieldname": "tenant_key", "fieldtype": "Data", "label": "Tenant Key", "reqd": 1, "read_only": 1},
     {"fieldname": "subject", "fieldtype": "Data", "label": "Subject", "reqd": 1, "read_only": 1},
-    {"fieldname": "subject_type", "fieldtype": "Select", "label": "Subject Type", "options": "union_id\nopen_id", "reqd": 1, "read_only": 1},
+    {"fieldname": "subject_type", "fieldtype": "Select", "label": "Subject Type", "options": "union_id", "reqd": 1, "read_only": 1},
     {"fieldname": "user", "fieldtype": "Link", "label": "ERP User", "options": "User", "reqd": 1, "read_only": 1},
     {"fieldname": "email", "fieldtype": "Data", "label": "Last Lark Email", "reqd": 1, "read_only": 1},
     {"fieldname": "display_name", "fieldtype": "Data", "label": "Display Name", "read_only": 1},
     {"fieldname": "group_ids", "fieldtype": "Long Text", "label": "Group IDs", "read_only": 1},
     {"fieldname": "last_sync_at", "fieldtype": "Datetime", "label": "Last Successful Sync", "read_only": 1},
+    {"fieldname": "gateway_roles_fingerprint", "fieldtype": "Data", "label": "Gateway Roles Fingerprint", "read_only": 1},
+    {"fieldname": "gateway_policy_version", "fieldtype": "Int", "label": "Gateway Policy Version", "read_only": 1},
+    {"fieldname": "gateway_synced_at", "fieldtype": "Datetime", "label": "Gateway Role Sync At", "read_only": 1},
     {"default": "Active", "fieldname": "sync_state", "fieldtype": "Select", "label": "Sync State", "options": "Active\nAccess Removed\nStale Locked\nConflict\nLocal Blocked", "reqd": 1, "read_only": 1},
     {"default": "0", "fieldname": "disabled_by_sync", "fieldtype": "Check", "label": "Disabled by Sync", "read_only": 1},
     {"default": "0", "fieldname": "local_blocked", "fieldtype": "Check", "label": "Local Blocked", "read_only": 1},

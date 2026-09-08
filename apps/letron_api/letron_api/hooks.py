@@ -256,7 +256,7 @@ def add_request_headers(response=None, request=None) -> None:
 
 before_request = ["letron_api.gateway.enforce_gateway_ingress", "letron_api.hooks.rewrite_public_routes"]
 after_request = ["letron_api.hooks.add_request_headers"]
-auth_hooks = ["letron_api.sso.enforce_lark_entitlement"]
+auth_hooks = []
 
 doc_events = {
     doctype: {

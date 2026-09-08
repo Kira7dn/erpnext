@@ -57,6 +57,7 @@ model ExternalIdentity {
   email          String?   @db.VarChar(320)
   groupIds       String[]  @default([]) @map("group_ids")
   groupsSyncedAt DateTime? @map("groups_synced_at") @db.Timestamptz(3)
+  syncLeaseUntil DateTime? @map("sync_lease_until") @db.Timestamptz(3)
   lastSeenAt     DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz(3)
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)

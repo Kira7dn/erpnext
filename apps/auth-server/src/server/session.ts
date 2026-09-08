@@ -14,6 +14,9 @@ export type AuthenticatedUser = {
   displayName: string;
   avatarUrl: string | null;
   groupIds: string[];
+  tenantKey: string | null;
+  subject: string | null;
+  subjectType: string | null;
 };
 
 function secureCookie(): boolean {
@@ -77,10 +80,33 @@ export async function getUserBySessionToken(token: string | undefined): Promise<
     if (identity.subjectType !== "union_id") return null;
     const staleAt = Date.now() - env.AUTH_GROUP_SYNC_STALE_SECONDS * 1000;
     if (!identity.groupsSyncedAt || identity.groupsSyncedAt.getTime() <= staleAt) {
+      const now = new Date();
+      const leaseUntil = new Date(Date.now() + Math.min(env.AUTH_GROUP_SYNC_STALE_SECONDS, 30) * 1000);
+      const claimed = await getDb().externalIdentity.updateMany({
+        where: { id: identity.id, OR: [{ syncLeaseUntil: null }, { syncLeaseUntil: { lt: now } }] },
+        data: { syncLeaseUntil: leaseUntil },
+      });
+      if (claimed.count !== 1) {
+        // Another instance owns the lease. Wait briefly for its committed
+        // snapshot so concurrent Gateway requests do not duplicate Lark calls
+        // or turn a normal refresh into a transient logout.
+        let refreshedSnapshot = false;
+        for (let attempt = 0; attempt < 20; attempt += 1) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          const refreshed = await getDb().externalIdentity.findUnique({ where: { id: identity.id }, select: { groupIds: true, groupsSyncedAt: true } });
+          if (refreshed?.groupsSyncedAt && refreshed.groupsSyncedAt.getTime() > staleAt) {
+            groupIds = refreshed.groupIds;
+            refreshedSnapshot = true;
+            break;
+          }
+        }
+        if (!refreshedSnapshot) return null;
+      }
       try {
         groupIds = await fetchLarkGroupIds(identity.subject, "union_id");
-        await getDb().externalIdentity.update({ where: { id: identity.id }, data: { groupIds, groupsSyncedAt: new Date() } });
+        await getDb().externalIdentity.update({ where: { id: identity.id }, data: { groupIds, groupsSyncedAt: new Date(), syncLeaseUntil: null } });
       } catch {
+        await getDb().externalIdentity.updateMany({ where: { id: identity.id }, data: { syncLeaseUntil: null } }).catch(() => undefined);
         // Do not authorize Portal pages or APIs with an unverified stale snapshot.
         return null;
       }
@@ -92,6 +118,9 @@ export async function getUserBySessionToken(token: string | undefined): Promise<
     displayName: session.user.displayName,
     avatarUrl: session.user.avatarUrl,
     groupIds,
+    tenantKey: identity?.tenantKey ?? null,
+    subject: identity?.subject ?? null,
+    subjectType: identity?.subjectType ?? null,
   };
 }
 

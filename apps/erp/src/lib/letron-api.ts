@@ -116,6 +116,13 @@ export class GatewayAccessDeniedError extends Error {
   }
 }
 
+export class GatewayUnavailableError extends Error {
+  constructor() {
+    super("Letron Global Portal Gateway hiện không khả dụng. Vui lòng thử lại sau.");
+    this.name = "GatewayUnavailableError";
+  }
+}
+
 function authGatewayUrl(path: string): string {
   const baseUrl = (process.env.LETRON_AUTH_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
   return `${baseUrl}/api/gateway${path}`;
@@ -168,16 +175,21 @@ export async function gatewayRequest<T>(
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
   if (cookieHeader) headers.set("Cookie", cookieHeader);
-  const response = await fetch(authGatewayUrl(path), {
-    ...init,
-    headers,
-    cache: "no-store",
-  });
+  let response: Response;
+  try {
+    response = await fetch(authGatewayUrl(path), {
+      ...init,
+      headers,
+      cache: "no-store",
+    });
+  } catch {
+    throw new GatewayUnavailableError();
+  }
   if (response.status === 401) throw new GatewayAuthenticationRequiredError();
   if (response.status === 403) throw new GatewayAccessDeniedError();
+  if (response.status === 502 || response.status === 503) throw new GatewayUnavailableError();
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    throw new Error(`Letron Gateway ${response.status}: ${body.slice(0, 240) || response.statusText}`);
+    throw new Error(`Letron Gateway request failed (${response.status}).`);
   }
   const payload = await response.json() as ApiResponse<T>;
   return (payload.data ?? payload.message) as T;

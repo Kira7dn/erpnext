@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -20,20 +20,28 @@ function body(req: NextApiRequest): Promise<Buffer> {
   });
 }
 
-function forwardedHeaders(req: NextApiRequest, userId: string, email: string, version: number, path: string, roles: string[], secret: string): Record<string, string> {
+function forwardedHeaders(req: NextApiRequest, user: { id: string; email: string; tenantKey: string | null; subject: string | null; subjectType: string | null }, version: number, path: string, roles: string[], secret: string): Record<string, string> {
   const timestamp = Math.floor(Date.now() / 1000).toString();
+  const expires = String(Number(timestamp) + 60);
   const method = req.method ?? "GET";
+  const requestId = (typeof req.headers["x-request-id"] === "string" && req.headers["x-request-id"].slice(0, 128)) || randomUUID();
   const encodedRoles = Buffer.from(JSON.stringify(roles), "utf8").toString("base64url");
-  const payload = `${timestamp}.${method}.${path}.${userId}.${email}.${version}.${encodedRoles}`;
+  const payload = `${timestamp}.${expires}.${method}.${path}.${user.id}.${user.email}.${user.tenantKey ?? ""}.${user.subject ?? ""}.${user.subjectType ?? ""}.${version}.${encodedRoles}.${requestId}`;
   const signature = createHmac("sha256", secret).update(payload).digest("hex");
   const headers: Record<string, string> = {
     "X-Letron-Gateway-Timestamp": timestamp,
-    "X-Letron-Gateway-User": userId,
-    "X-Letron-Gateway-Email": email,
+    "X-Letron-Gateway-User": user.id,
+    "X-Letron-Gateway-Email": user.email,
+    "X-Letron-Gateway-Tenant": user.tenantKey ?? "",
+    "X-Letron-Gateway-Subject": user.subject ?? "",
+    "X-Letron-Gateway-Subject-Type": user.subjectType ?? "",
     "X-Letron-Gateway-Method": method,
     "X-Letron-Gateway-Path": path,
     "X-Letron-Gateway-Policy-Version": String(version),
     "X-Letron-Gateway-Roles": encodedRoles,
+    "X-Letron-Gateway-Issued-At": timestamp,
+    "X-Letron-Gateway-Expires-At": expires,
+    "X-Letron-Gateway-Request-Id": requestId,
     "X-Letron-Gateway-Signature": signature,
   };
   const authorization = req.headers.authorization;
@@ -68,11 +76,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     for (const item of Array.isArray(value) ? value : [value]) if (item !== undefined) query.append(key, item);
   }
   target.search = query.toString();
-  const response = await fetch(target, {
-    method: req.method,
-    headers: forwardedHeaders(req, user.id, user.email, policy.version, path, roles, secret),
-    body: ["GET", "HEAD"].includes(req.method ?? "GET") ? undefined : new Uint8Array(await body(req)),
-  });
+  let response: Response;
+  try {
+    response = await fetch(target, {
+      method: req.method,
+      headers: forwardedHeaders(req, user, policy.version, path, roles, secret),
+      body: ["GET", "HEAD"].includes(req.method ?? "GET") ? undefined : new Uint8Array(await body(req)),
+      signal: AbortSignal.timeout(30_000),
+    });
+  } catch {
+    res.status(502).json({ error: "erp_gateway_unavailable" });
+    return;
+  }
   res.status(response.status);
   response.headers.forEach((value, key) => { if (!['connection', 'content-encoding', 'transfer-encoding'].includes(key)) res.setHeader(key, value); });
   const data = Buffer.from(await response.arrayBuffer());
