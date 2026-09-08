@@ -3,7 +3,6 @@ import { createHmac, randomUUID } from "node:crypto";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { getUserBySessionToken, tokenFromRequest } from "../../../src/server/session";
-import { syncLarkGroupsIfStale } from "../../../src/server/users";
 import { getEnv } from "../../../src/server/env";
 import { getPublishedPolicy } from "../../../src/server/published-policy";
 import { canAccessPolicy, policyRolesForGroups, routeOperation } from "../../../src/server/access-policy";
@@ -63,28 +62,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   };
   disableCaching(res);
   const sessionStartedAt = performance.now();
-  let user = await getUserBySessionToken(tokenFromRequest(req));
+  const user = await getUserBySessionToken(tokenFromRequest(req));
   timings.session = duration(sessionStartedAt);
   if (!user) { finish(); res.status(401).json({ error: "authentication_required" }); return; }
   const policyStartedAt = performance.now();
-  const policyPromise = getPublishedPolicy();
-  let policy: Awaited<ReturnType<typeof getPublishedPolicy>>;
-  if (getEnv().LARK_GROUP_SYNC_ENABLED) {
-    const larkStartedAt = performance.now();
-    try {
-      const [publishedPolicy, groupIds] = await Promise.all([policyPromise, syncLarkGroupsIfStale(user.id)]);
-      policy = publishedPolicy;
-      user = { ...user, groupIds };
-      timings.lark_sync = duration(larkStartedAt);
-    } catch {
-      timings.lark_sync = duration(larkStartedAt);
-      finish();
-      res.status(503).json({ error: "access_policy_unavailable" });
-      return;
-    }
-  } else {
-    policy = await policyPromise;
-  }
+  const policy = await getPublishedPolicy();
   timings.policy = duration(policyStartedAt);
   if (!policy) { finish(); res.status(503).json({ error: "access_policy_not_published" }); return; }
   const path = `/${Array.isArray(req.query.path) ? req.query.path.join("/") : String(req.query.path ?? "")}`;
@@ -122,10 +104,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(502).json({ error: "erp_gateway_unavailable" });
     return;
   }
-  const data = Buffer.from(await response.arrayBuffer());
   timings.erp_fetch = duration(erpStartedAt);
   res.status(response.status);
-  response.headers.forEach((value, key) => { if (!['connection', 'content-encoding', 'transfer-encoding', 'server-timing'].includes(key)) res.setHeader(key, value); });
+  response.headers.forEach((value, key) => { if (!['connection', 'content-encoding', 'content-length', 'transfer-encoding', 'server-timing'].includes(key)) res.setHeader(key, value); });
   finish();
-  res.send(data);
+  if (!response.body) { res.end(); return; }
+  const reader = response.body.getReader();
+  try {
+    for (;;) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      res.write(Buffer.from(chunk.value));
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  res.end();
 }

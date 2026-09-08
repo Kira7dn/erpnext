@@ -1,5 +1,6 @@
 import { createHmac, randomUUID } from "node:crypto";
 import { getEnv } from "./env";
+import { invalidatePolicyCache } from "./cache";
 
 export async function publishPolicyToErp(input: { policy: unknown; version: number; sha256: string }): Promise<void> {
   const env = getEnv();
@@ -28,4 +29,5 @@ export async function publishPolicyToErp(input: { policy: unknown; version: numb
     const detail = body.replace(/\s+/g, " ").slice(0, 240);
     throw new Error(`ERP policy publication failed with HTTP ${response.status}${detail ? `: ${detail}` : ""}`);
   }
+  await invalidatePolicyCache();
 }

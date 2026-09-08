@@ -4,6 +4,7 @@ import { getDb } from "./db";
 import { getEnv } from "./env";
 import { appendSetCookie, parseCookies, requestIsSecure, serializeCookie } from "./http";
 import { randomToken, sha256 } from "./crypto";
+import { cacheDelete, cacheGet, cacheSet, sessionCacheKey } from "./cache";
 
 export const SESSION_COOKIE = "letron_sso";
 
@@ -52,6 +53,9 @@ export function tokenFromRequest(req: NextApiRequest): string | undefined {
 
 export async function getUserBySessionToken(token: string | undefined): Promise<AuthenticatedUser | null> {
   if (!token) return null;
+  const tokenHash = sha256(token);
+  const cached = await cacheGet<{ user: AuthenticatedUser; expiresAt: string }>(sessionCacheKey(tokenHash));
+  if (cached && new Date(cached.expiresAt).getTime() > Date.now()) return cached.user;
   const session = await getDb().ssoSession.findFirst({
     where: {
       tokenHash: sha256(token),
@@ -74,7 +78,7 @@ export async function getUserBySessionToken(token: string | undefined): Promise<
   if (!session) return null;
   const identity = session.user.identities[0];
   const groupIds = identity?.groupIds ?? [];
-  return {
+  const user = {
     id: session.user.id,
     email: session.user.email,
     displayName: session.user.displayName,
@@ -84,10 +88,13 @@ export async function getUserBySessionToken(token: string | undefined): Promise<
     subject: identity?.subject ?? null,
     subjectType: identity?.subjectType ?? null,
   };
+  await cacheSet(sessionCacheKey(tokenHash), { user, expiresAt: session.expiresAt.toISOString() }, Math.min(getEnv().AUTH_SESSION_CACHE_TTL_SECONDS, Math.max(1, Math.ceil((session.expiresAt.getTime() - Date.now()) / 1000))));
+  return user;
 }
 
 export async function rotateSession(req: NextApiRequest, res: NextApiResponse, userId: string): Promise<void> {
   const oldToken = tokenFromRequest(req);
+  if (oldToken) await cacheDelete(sessionCacheKey(sha256(oldToken)));
   const next = await getDb().$transaction(async (tx) => {
     if (oldToken) {
       await tx.ssoSession.updateMany({
@@ -106,6 +113,7 @@ export async function rotateSession(req: NextApiRequest, res: NextApiResponse, u
 export async function revokeRequestSession(req: NextApiRequest): Promise<void> {
   const token = tokenFromRequest(req);
   if (!token) return;
+  await cacheDelete(sessionCacheKey(sha256(token)));
   await getDb().ssoSession.updateMany({
     where: { tokenHash: sha256(token), revokedAt: null },
     data: { revokedAt: new Date() },
