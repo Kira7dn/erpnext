@@ -1,9 +1,9 @@
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getActivePurchaseOrchestrations } from "@/lib/purchase-orchestration";
+import { requestAuthCredential } from "@/lib/request-auth";
 
-export async function GET() {
-  const cookieHeader = (await cookies()).toString();
+export async function GET(request: NextRequest) {
+  const cookieHeader = await requestAuthCredential(request);
   if (!cookieHeader)
     return NextResponse.json(
       { error: "authentication_required" },

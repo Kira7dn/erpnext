@@ -23,12 +23,16 @@ type ItemRow = {
   uom: string;
   stock_uom: string;
   conversion_factor: number;
+  rate: number | string;
 };
 type ActiveOrchestration = {
   id: string;
-  status: "started" | "mr_created" | "partial_failure" | "completed" | "failed";
+  status: "started" | "mr_created" | "partial_failure" | "rfq_created" | "approval_pending" | "approval_failed" | "completed" | "failed";
   material_request_name?: string;
   request_for_quotation_name?: string;
+  supplier_quotation_name?: string;
+  justification?: string;
+  lark_po?: Row;
   retry_count: number;
   error?: string;
   updated_at: string;
@@ -298,6 +302,10 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
   const [error, setError] = useState<string | null>(null);
   const [errorStatus, setErrorStatus] = useState<number | null>(null);
   const [query, setQuery] = useState("");
+  const [orchestrationId, setOrchestrationId] = useState<string | null>(() => {
+    if (kind !== "request" || typeof window === "undefined") return null;
+    return new URLSearchParams(window.location.search).get("orchestration");
+  });
   const [filter, setFilter] = useState<ListFilter>(() => {
     if (typeof window === "undefined") return { field: filterFields[kind][0].field, value: "" };
     const params = new URLSearchParams(window.location.search);
@@ -369,24 +377,91 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
     return () => window.clearTimeout(timer);
   }, [loadActive]);
   useEffect(() => {
+    if (kind !== "request" || !orchestrationId) return;
+    let cancelled = false;
+    const openOrchestration = async () => {
+      setOpening(true);
+      setError(null);
+      setErrorStatus(null);
+      try {
+        let materialRequestName = "";
+        try {
+          const orchestration = (await api(
+            `requests/orchestrations/${encodeURIComponent(orchestrationId)}`,
+          )) as ActiveOrchestration;
+          materialRequestName = String(
+            orchestration.material_request_name ?? "",
+          );
+        } catch (cause) {
+          if (!(cause instanceof PurchaseApiError) || cause.status !== 404)
+            throw cause;
+        }
+        if (!materialRequestName) {
+          const filters = encodeURIComponent(
+            JSON.stringify([
+              [
+                "Material Request",
+                "custom_letron_orchestration_id",
+                "=",
+                orchestrationId,
+              ],
+            ]),
+          );
+          const matches = await api(
+            `material-requests?filters=${filters}&fields=${encodeURIComponent(
+              JSON.stringify(["name"]),
+            )}&limit_page_length=2`,
+          );
+          const match = Array.isArray(matches) ? (matches[0] as Row) : null;
+          materialRequestName = String(match?.name ?? "");
+        }
+        if (!materialRequestName)
+          throw new Error(
+            "Orchestration chưa có Material Request để mở chi tiết.",
+          );
+        const materialRequest = (await api(
+          `material-requests/${encodeURIComponent(materialRequestName)}`,
+        )) as Row;
+        if (!cancelled) setEditing(materialRequest);
+      } catch (cause) {
+        if (!cancelled) {
+          setErrorStatus(cause instanceof PurchaseApiError ? cause.status : null);
+          setError(
+            cause instanceof Error
+              ? cause.message
+              : "Không thể mở Material Request từ orchestration.",
+          );
+        }
+      } finally {
+        if (!cancelled) setOpening(false);
+      }
+    };
+    void openOrchestration();
+    return () => {
+      cancelled = true;
+    };
+  }, [kind, orchestrationId]);
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (query) params.set("q", query); else params.delete("q");
     if (filter.value) { params.set("filter", filter.value); params.set("filter_field", filter.field); } else { params.delete("filter"); params.delete("filter_field"); }
     if (sort !== "modified desc") params.set("sort", sort); else params.delete("sort");
+    if (orchestrationId) params.set("orchestration", orchestrationId); else params.delete("orchestration");
     window.history.replaceState(null, "", `${window.location.pathname}${params.toString() ? `?${params}` : ""}`);
-  }, [filter, query, sort]);
+  }, [filter, orchestrationId, query, sort]);
   async function retryActive(id: string) {
     if (retryingActiveId) return;
     setRetryingActiveId(id);
     setActiveError(null);
     try {
+      const active = activeOrchestrations.find((item) => item.id === id);
       const result = (await api(
         `requests/orchestrations/${encodeURIComponent(id)}/retry-rfq`,
         { method: "POST" },
       )) as ActiveOrchestration;
-      if (result.status === "completed") {
+      if (result.status === "completed" || result.status === "approval_pending") {
         setActiveOrchestrations((current) => current.filter((item) => item.id !== id));
-        setToast({ message: "Đã tạo RFQ thành công.", tone: "success" });
+        setToast({ message: result.status === "approval_pending" ? "Đã tạo Approval request trên Lark." : "Đã tạo RFQ thành công.", tone: "success" });
       } else {
         setActiveOrchestrations((current) =>
           current.map((item) => (item.id === id ? result : item)),
@@ -487,6 +562,12 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
                   <p className="text-muted-foreground">
                     {item.status === "partial_failure"
                       ? "MR đã tạo, RFQ chưa tạo được"
+                      : item.status === "rfq_created"
+                          ? "RFQ đã tạo, đang tạo Lark Approval"
+                        : item.status === "approval_pending"
+                          ? "Đã tạo Lark Approval, chờ người phê duyệt"
+                        : item.status === "approval_failed"
+                          ? "RFQ đã tạo, gửi Lark Approval thất bại"
                       : item.status === "started"
                         ? "Đang xử lý"
                         : "Cần kiểm tra lại"}
@@ -497,10 +578,12 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
                   ) : null}
                 </div>
                 <Button
-                  disabled={Boolean(retryingActiveId) || !item.material_request_name}
+                  disabled={Boolean(retryingActiveId) || (!item.material_request_name && item.status !== "started")}
                   onClick={() => void retryActive(item.id)}
                 >
-                  {retryingActiveId === item.id ? "Đang retry RFQ..." : "Retry RFQ"}
+                  {retryingActiveId === item.id
+                    ? "Đang tiếp tục luồng..."
+                    : "Tiếp tục luồng"}
                 </Button>
               </div>
             ))}
@@ -615,10 +698,12 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
           onClose={() => {
             setCreating(false);
             setEditing(null);
+            setOrchestrationId(null);
           }}
           onSaved={() => {
             setCreating(false);
             setEditing(null);
+            setOrchestrationId(null);
             void load(page);
             void loadActive();
             setToast({ message: `Đã lưu ${meta.title} thành công.`, tone: "success" });
@@ -661,6 +746,7 @@ function ResourceModal({
           uom: text(item.uom) === "—" ? "" : text(item.uom),
           stock_uom: text(item.stock_uom) === "—" ? "" : text(item.stock_uom),
           conversion_factor: Number(item.conversion_factor) || 1,
+          rate: Number(item.rate ?? item.price_list_rate) || 0,
         }))
       : [
           {
@@ -671,6 +757,7 @@ function ResourceModal({
             uom: "",
             stock_uom: "",
             conversion_factor: 1,
+            rate: 0,
           },
         ];
   });
@@ -694,6 +781,7 @@ function ResourceModal({
   const [attachment, setAttachment] = useState<File | null>(null);
   const [createdName, setCreatedName] = useState<string | null>(null);
   const [orchestrationId, setOrchestrationId] = useState<string | null>(null);
+  const [orchestrationStatus, setOrchestrationStatus] = useState<ActiveOrchestration["status"] | null>(null);
   const [requestIdempotencyKey] = useState(() => crypto.randomUUID());
   useEffect(() => {
     if (kind !== "request") return;
@@ -761,6 +849,7 @@ function ResourceModal({
         uom: item.uom || item.stock_uom || undefined,
         stock_uom: item.stock_uom || item.uom || undefined,
         conversion_factor: Number(item.conversion_factor) || 1,
+        rate: Number(item.rate) || 0,
       }));
   async function uploadAttachment(name: string) {
     if (!attachment) return;
@@ -782,16 +871,18 @@ function ResourceModal({
         `requests/orchestrations/${encodeURIComponent(orchestrationId)}/retry-rfq`,
         { method: "POST" },
       )) as Row;
-      if (result.status !== "completed") {
+      if (result.status !== "completed" && result.status !== "approval_pending") {
+        setOrchestrationStatus(result.status as ActiveOrchestration["status"]);
         setError(String(result.error ?? "Không thể tạo RFQ."));
         onToast({ message: String(result.error ?? "Không thể tạo RFQ."), tone: "error" });
         return;
       }
+      setOrchestrationStatus(result.status as ActiveOrchestration["status"]);
       const materialRequestName = String(result.material_request_name ?? "");
       if (attachment && materialRequestName)
         await uploadAttachment(materialRequestName);
       setDirty(false);
-      onToast({ message: "Đã retry RFQ thành công.", tone: "success" });
+      onToast({ message: result.status === "approval_pending" ? "Đã tạo Lark Approval request." : "Đã retry RFQ thành công.", tone: "success" });
       onSaved();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Không thể retry RFQ.");
@@ -870,14 +961,20 @@ function ResourceModal({
           headers: { "X-Idempotency-Key": requestIdempotencyKey },
           body: JSON.stringify({ material_request: payload, suppliers }),
         })) as Row;
-        if (result.status !== "completed") {
+        if (result.status !== "completed" && result.status !== "approval_pending") {
           setOrchestrationId(String(result.id));
+          setOrchestrationStatus(result.status as ActiveOrchestration["status"]);
           onOrchestrationChanged();
           if (result.status === "partial_failure") {
             setStatus(
               "Đã tạo Material Request nhưng RFQ chưa tạo được. Hãy retry RFQ.",
             );
             setError(String(result.error ?? "RFQ chưa được tạo."));
+          } else if (result.status === "rfq_created") {
+            setStatus("Đã tạo Material Request và RFQ; hệ thống đang tiếp tục tạo Lark Approval.");
+          } else if (result.status === "approval_failed") {
+            setStatus("Đã tạo Material Request và RFQ nhưng gửi Lark Approval thất bại.");
+            setError(String(result.error ?? "Lark Approval chưa được tạo."));
           } else if (result.status === "started") {
             setStatus(
               "Yêu cầu đang được xử lý. Giữ nguyên context này và kiểm tra lại trạng thái trước khi thử lại.",
@@ -900,12 +997,15 @@ function ResourceModal({
             throw cause;
           }
         }
+        const approvalPending = result.status === "approval_pending" || Boolean((result.lark_po as Row | undefined)?.instanceCode);
         setStatus(
-          attachment
-            ? "Đã tạo Material Request, RFQ và attachment thành công."
-            : "Đã tạo Material Request và RFQ thành công.",
+          approvalPending
+            ? "Đã tạo Material Request, RFQ và gửi PO Draft sang Lark Approval."
+            : attachment
+              ? "Đã tạo Material Request, RFQ và attachment thành công."
+              : "Đã tạo Material Request và RFQ thành công.",
         );
-        onToast({ message: attachment ? "Đã tạo Material Request, RFQ và attachment." : "Đã tạo Material Request và RFQ.", tone: "success" });
+        onToast({ message: approvalPending ? "Đã tạo Material Request, RFQ và Lark Approval request." : attachment ? "Đã tạo Material Request, RFQ và attachment." : "Đã tạo Material Request và RFQ.", tone: "success" });
         setDirty(false);
         onSaved();
         return;
@@ -1071,6 +1171,7 @@ function ResourceModal({
                   uom: "",
                   stock_uom: "",
                   conversion_factor: 1,
+                  rate: 0,
                 },
               ]);
             }}
@@ -1115,7 +1216,7 @@ function ResourceModal({
             {status}
           </p>
         ) : null}
-        {orchestrationId ? (
+        {orchestrationId && orchestrationStatus !== "approval_pending" && orchestrationStatus !== "completed" ? (
           <div className="mt-3 flex justify-end">
             <Button
               type="button"
@@ -1123,7 +1224,7 @@ function ResourceModal({
               disabled={saving}
               onClick={() => void retryRfq()}
             >
-              {saving ? "Đang retry RFQ..." : "Retry RFQ"}
+              {saving ? "Đang tiếp tục luồng..." : "Tiếp tục luồng"}
             </Button>
           </div>
         ) : null}
@@ -1194,7 +1295,7 @@ function RequestItems({
       <div className="space-y-3">
         {items.map((item, index) => (
           <div
-            className="grid gap-2 rounded-lg border p-3 md:grid-cols-[1fr_100px_1fr_1fr_auto]"
+            className="grid gap-2 rounded-lg border p-3 md:grid-cols-[1fr_100px_120px_1fr_1fr_auto]"
             key={index}
           >
             <Input
@@ -1233,6 +1334,14 @@ function RequestItems({
               step="any"
               value={String(item.qty)}
               onChange={(event) => onChange(index, { qty: event.target.value })}
+            />
+            <Input
+              aria-label="Đơn giá"
+              type="number"
+              min="0"
+              step="any"
+              value={String(item.rate)}
+              onChange={(event) => onChange(index, { rate: event.target.value })}
             />
             <Input
               aria-label="Ngày cần hàng"

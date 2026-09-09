@@ -17483,6 +17483,41 @@ paths:
       x-test-evidence:
         suite: extended-api
         test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  /api/method/letron_api.lark_po.from_approved:
+    post:
+      tags:
+      - 'Module: Buying'
+      - Business routes
+      summary: createPurchaseOrderFromApprovedLark
+      operationId: createPurchaseOrderFromApprovedLark
+      parameters:
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.lark_po.from_approved
+      x-public-operation: create
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
   /api/v1/files/attachments:
     post:
       tags:
@@ -17530,7 +17565,7 @@ paths:
                   type: string
                 is_private:
                   type: string
-      x-test-status: not-tested
+      x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
         suite: extended-api
@@ -31102,6 +31137,13 @@ x-contract:
       path_suffix: run-evaluation
       handler: letron_api.banking.run_rule_evaluation
     custom_routes:
+    - module: Buying
+      resource: purchase-orders/from-approved-lark
+      method: POST
+      path: /api/method/letron_api.lark_po.from_approved
+      operation: create
+      operation_id: createPurchaseOrderFromApprovedLark
+      handler: letron_api.lark_po.from_approved
     - module: Files
       resource: attachments
       method: POST
@@ -31406,7 +31448,7 @@ x-capabilities:
     delivery: durable-outbox
     source_of_truth: false
 x-acceptance-summary:
-  passed: 214
+  passed: 215
   partial: 0
   not-tested: 105
   blocked: 0

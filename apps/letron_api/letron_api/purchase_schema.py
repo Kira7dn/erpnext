@@ -37,13 +37,39 @@ def ensure_schema() -> None:
             }
         )
         field.insert(ignore_permissions=True)
+    for fieldname, fieldtype in (
+        ("custom_lark_draft_id", "Data"),
+        ("custom_lark_approval_instance_code", "Data"),
+        ("custom_lark_approval_attempt", "Int"),
+        ("custom_lark_payload_hash", "Data"),
+    ):
+        if frappe.db.exists(
+            "Custom Field", {"dt": "Purchase Order", "fieldname": fieldname}
+        ):
+            continue
+        field = frappe.get_doc(
+            {
+                "doctype": "Custom Field",
+                "dt": "Purchase Order",
+                "fieldname": fieldname,
+                "label": fieldname.removeprefix("custom_").replace("_", " ").title(),
+                "fieldtype": fieldtype,
+                "insert_after": "supplier",
+                "hidden": 1,
+                "read_only": 1,
+                "no_copy": 1,
+                "unique": 1 if fieldname == "custom_lark_approval_instance_code" else 0,
+                "description": "Immutable metadata from the approved Lark PO handoff.",
+            }
+        )
+        field.insert(ignore_permissions=True)
     frappe.db.commit()
 
 
 def schema_status() -> dict[str, bool]:
     """Return a non-sensitive runtime readback for migration verification."""
 
-    return {
+    status = {
         doctype: bool(
             frappe.db.exists(
                 "Custom Field",
@@ -52,3 +78,15 @@ def schema_status() -> dict[str, bool]:
         )
         for doctype in ("Material Request", "Request for Quotation")
     }
+    status["Purchase Order"] = all(
+        frappe.db.exists(
+            "Custom Field", {"dt": "Purchase Order", "fieldname": fieldname}
+        )
+        for fieldname in (
+            "custom_lark_draft_id",
+            "custom_lark_approval_instance_code",
+            "custom_lark_approval_attempt",
+            "custom_lark_payload_hash",
+        )
+    )
+    return status

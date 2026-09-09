@@ -58921,6 +58921,130 @@
         }
       }
     },
+    "/api/method/letron_api.lark_po.from_approved": {
+      "post": {
+        "tags": [
+          "Module: Buying",
+          "Business routes"
+        ],
+        "summary": "createPurchaseOrderFromApprovedLark",
+        "operationId": "createPurchaseOrderFromApprovedLark",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.lark_po.from_approved",
+        "x-public-operation": "create",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested"
+      }
+    },
     "/api/v1/files/attachments": {
       "post": {
         "tags": [
@@ -59061,7 +59185,7 @@
             }
           }
         },
-        "x-test-status": "not-tested",
+        "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
           "suite": "extended-api",
@@ -84041,6 +84165,15 @@
       ],
       "custom_routes": [
         {
+          "module": "Buying",
+          "resource": "purchase-orders/from-approved-lark",
+          "method": "POST",
+          "path": "/api/method/letron_api.lark_po.from_approved",
+          "operation": "create",
+          "operation_id": "createPurchaseOrderFromApprovedLark",
+          "handler": "letron_api.lark_po.from_approved"
+        },
+        {
           "module": "Files",
           "resource": "attachments",
           "method": "POST",
@@ -84506,7 +84639,7 @@
     }
   },
   "x-acceptance-summary": {
-    "passed": 214,
+    "passed": 215,
     "partial": 0,
     "not-tested": 105,
     "blocked": 0

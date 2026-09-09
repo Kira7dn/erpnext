@@ -36,6 +36,8 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   const forwardedHeaders = new Headers({ Accept: "application/json" });
   const cookieHeader = (await cookies()).toString();
   if (cookieHeader) forwardedHeaders.set("Cookie", cookieHeader);
+  const authorization = request.headers.get("authorization");
+  if (authorization) forwardedHeaders.set("Authorization", authorization);
   const contentType = request.headers.get("content-type");
   if (contentType) forwardedHeaders.set("Content-Type", contentType);
 

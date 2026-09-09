@@ -45,7 +45,10 @@ $bundleValidation = Invoke-UvPython @('-m','letron_api.system_config','bundle-va
 $environmentJson = Invoke-UvPython @('-m','letron_api.system_config','env','--path',$configPath,'--format','json')
 $environment = $environmentJson | ConvertFrom-Json
 foreach ($property in $environment.PSObject.Properties) {
-    [Environment]::SetEnvironmentVariable($property.Name, [string]$property.Value, 'Process')
+    # Compose interpolation reads the current PowerShell process environment.
+    # Write through Env: explicitly so values derived from config/config.yaml
+    # are visible without copying runtime configuration into .env.
+    Set-Item -Path ("Env:{0}" -f $property.Name) -Value ([string]$property.Value)
 }
 $envFile = Join-Path $root '.env'
 if (Test-Path -LiteralPath $envFile) {
@@ -96,12 +99,14 @@ function Invoke-Readiness {
 }
 
 function Invoke-ReloadReadiness {
-    $uri = "http://localhost:$env:HTTP_PORT/api/method/frappe.ping"
+    # frappe.ping is protected by the gateway ingress policy. Use the public
+    # integration health endpoint for a real unauthenticated readiness check.
+    $uri = "http://localhost:$env:HTTP_PORT/api/method/letron_api.api.health"
     $deadline = [DateTime]::UtcNow.AddSeconds(20)
     do {
         try {
             $response = Invoke-WebRequest -UseBasicParsing -TimeoutSec 3 -Uri $uri -Method Get
-            if ($response.StatusCode -eq 200) {
+            if ($response.StatusCode -eq 200 -and $response.Content -match '"ok"\s*:\s*true') {
                 Write-Host "Fast reload verified: $uri"
                 return
             }

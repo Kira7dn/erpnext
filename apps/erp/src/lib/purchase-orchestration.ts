@@ -8,9 +8,11 @@ import {
   GatewayUnavailableError,
   gatewayRequest,
 } from "@/lib/letron-api";
+import { portalAuthBaseUrl } from "@/lib/portal-config";
 
 type Row = Record<string, unknown>;
 type Item = {
+  name?: string;
   item_code: string;
   qty: number;
   schedule_date?: string;
@@ -18,19 +20,27 @@ type Item = {
   uom?: string;
   stock_uom?: string;
   conversion_factor?: number;
+  rate?: number;
+  material_request?: string;
+  material_request_item?: string;
 };
 export type PurchaseOrchestrationInput = {
   material_request: Row;
   suppliers: string[];
+  supplier_quotation_name?: string;
+  justification?: string;
 };
 export type PurchaseOrchestrationState = {
   id: string;
-  status: "started" | "mr_created" | "partial_failure" | "completed" | "failed";
+  status: "started" | "mr_created" | "partial_failure" | "rfq_created" | "approval_pending" | "approval_failed" | "completed" | "failed";
   material_request: Row;
   suppliers: string[];
   rfq_payload: Row;
   material_request_name?: string;
   request_for_quotation_name?: string;
+  supplier_quotation_name?: string;
+  justification?: string;
+  lark_po?: Record<string, unknown>;
   retry_count: number;
   error?: string;
   created_at: string;
@@ -106,6 +116,7 @@ function normalizeInput(input: PurchaseOrchestrationInput): {
     uom: String((item as Row).uom ?? "").trim() || undefined,
     stock_uom: String((item as Row).stock_uom ?? "").trim() || undefined,
     conversion_factor: Number((item as Row).conversion_factor) || 1,
+    rate: Number((item as Row).rate ?? (item as Row).price_list_rate) || 0,
   }));
   if (!materialRequest || typeof materialRequest !== "object")
     throw new PurchaseOrchestrationValidationError(
@@ -149,7 +160,7 @@ function buildRfqPayload(
     subject: materialRequest.title || "RFQ from Material Request",
     status: "Draft",
     suppliers: suppliers.map((supplier) => ({ supplier })),
-    items,
+    items: items.map(({ name: _name, rate: _rate, ...item }) => item),
     ...(orchestrationId
       ? { custom_letron_orchestration_id: orchestrationId }
       : {}),
@@ -209,6 +220,10 @@ function itemsFromCreatedMaterialRequest(
         undefined,
       conversion_factor:
         Number(source.conversion_factor ?? original.conversion_factor) || 1,
+      rate: Number(source.rate ?? source.price_list_rate ?? original.rate) || 0,
+      name: String(source.name ?? original.name ?? "").trim() || undefined,
+      material_request: String(source.material_request ?? materialRequest.name ?? "").trim() || undefined,
+      material_request_item: String(source.material_request_item ?? source.name ?? "").trim() || undefined,
     };
   });
 }
@@ -233,6 +248,53 @@ function stateResult(
 
 function errorMessage(cause: unknown): string {
   return cause instanceof Error ? cause.message : "ERP request failed.";
+}
+
+async function submitLarkApproval(
+  cookieHeader: string,
+  orchestrationId: string,
+  justification?: string,
+): Promise<Record<string, unknown>> {
+  const response = await fetch(
+    `${portalAuthBaseUrl()}/api/integrations/lark/purchase-orchestrations/${encodeURIComponent(orchestrationId)}/submit-approval`,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...( /^Bearer\s+\S+$/i.test(cookieHeader)
+          ? { Authorization: cookieHeader }
+          : { Cookie: cookieHeader }),
+      },
+      body: JSON.stringify({ justification }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(60_000),
+    },
+  );
+  const payload = (await response.json().catch(() => ({}))) as { data?: Record<string, unknown>; error?: unknown };
+  if (!response.ok) {
+    const detail = typeof payload.error === "string" ? payload.error : `Lark approval failed (${response.status}).`;
+    throw new Error(detail);
+  }
+  return (payload.data ?? payload) as Record<string, unknown>;
+}
+
+async function finishLarkApproval(
+  cookieHeader: string,
+  state: PurchaseOrchestrationState,
+): Promise<void> {
+  try {
+    state.lark_po = await submitLarkApproval(
+      cookieHeader,
+      state.id,
+      state.justification,
+    );
+    state.status = "approval_pending";
+    state.error = undefined;
+  } catch (cause) {
+    state.status = "approval_failed";
+    state.error = errorMessage(cause);
+  }
 }
 
 export function orchestrationHttpStatus(cause: unknown): number {
@@ -265,6 +327,8 @@ export async function createPurchaseOrchestration(
     status: "started",
     material_request: normalized.materialRequest,
     suppliers: normalized.suppliers,
+    supplier_quotation_name: String(input.supplier_quotation_name ?? "").trim() || undefined,
+    justification: String(input.justification ?? "").trim() || undefined,
     rfq_payload: buildRfqPayload(
       normalized.materialRequest,
       normalized.suppliers,
@@ -332,8 +396,7 @@ export async function createPurchaseOrchestration(
       },
     );
     state.request_for_quotation_name = String(rfq.name ?? "");
-    state.status = "completed";
-    state.error = undefined;
+    await finishLarkApproval(cookieHeader, state);
     await saveState(key, state);
     return stateResult(state);
   } catch (cause) {
@@ -389,13 +452,37 @@ async function continueStartedOrchestration(
       ? (state.material_request.items as Item[])
       : [];
     state.material_request_name = String(existingMr.name ?? "");
+    const existingRfq = await findByCorrelation(
+      "/api/v1/crm/request-for-quotations",
+      cookieHeader,
+      state.id,
+    );
+    const existingItems = itemsFromCreatedMaterialRequest(existingMr, fallbackItems);
     state.rfq_payload = buildRfqPayload(
       state.material_request,
       state.suppliers,
-      itemsFromCreatedMaterialRequest(existingMr, fallbackItems),
+      existingItems,
       state.id,
     );
     state.status = "mr_created";
+    if (existingRfq) {
+      state.request_for_quotation_name = String(existingRfq.name ?? "");
+    } else {
+      const rfq = await gatewayRequest<Row>(
+        "/api/v1/crm/request-for-quotations",
+        cookieHeader,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Idempotency-Key": `${idempotencyKey}:rfq`,
+          },
+          body: JSON.stringify(state.rfq_payload),
+        },
+      );
+      state.request_for_quotation_name = String(rfq.name ?? "");
+    }
+    await finishLarkApproval(cookieHeader, state);
     await saveState(key, state);
     return stateResult(state);
   }
@@ -428,6 +515,21 @@ async function continueStartedOrchestration(
       state.id,
     );
     state.status = "mr_created";
+    await saveState(key, state);
+    const rfq = await gatewayRequest<Row>(
+      "/api/v1/crm/request-for-quotations",
+      cookieHeader,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Idempotency-Key": `${idempotencyKey}:rfq`,
+        },
+        body: JSON.stringify(state.rfq_payload),
+      },
+    );
+    state.request_for_quotation_name = String(rfq.name ?? "");
+    await finishLarkApproval(cookieHeader, state);
     await saveState(key, state);
     return stateResult(state);
   } catch (cause) {
@@ -478,7 +580,7 @@ export async function retryPurchaseRfq(
     throw new PurchaseOrchestrationValidationError(
       "Orchestration state was not found or has expired.",
     );
-  if (state.status === "completed") return stateResult(state);
+  if (state.status === "completed" || state.status === "approval_pending") return stateResult(state);
   if (!state.material_request_name)
     throw new PurchaseOrchestrationValidationError(
       "Material Request was not created; RFQ cannot be retried.",
@@ -492,9 +594,8 @@ export async function retryPurchaseRfq(
       state.id,
     );
     if (existingRfq) {
-      state.request_for_quotation_name = String(existingRfq.name ?? "");
-      state.status = "completed";
-      state.error = undefined;
+    state.request_for_quotation_name = String(existingRfq.name ?? "");
+      await finishLarkApproval(cookieHeader, state);
       state.retry_count += 1;
       await saveState(key, state);
       return stateResult(state);
@@ -512,8 +613,7 @@ export async function retryPurchaseRfq(
       },
     );
     state.request_for_quotation_name = String(rfq.name ?? "");
-    state.status = "completed";
-    state.error = undefined;
+    await finishLarkApproval(cookieHeader, state);
     state.retry_count += 1;
     await saveState(key, state);
     return stateResult(state);
@@ -528,6 +628,48 @@ export async function retryPurchaseRfq(
     );
   } finally {
     await store().del(retryKey(key));
+  }
+}
+
+export async function submitLarkApprovalById(
+  cookieHeader: string,
+  id: string,
+  supplierQuotationName = "",
+  justification?: string,
+): Promise<PurchaseOrchestrationState> {
+  const key = await keyForOrchestrationId(cookieHeader, id);
+  if (!key)
+    throw new PurchaseOrchestrationValidationError(
+      "Orchestration state was not found or has expired.",
+    );
+  const state = await store().get<PurchaseOrchestrationState>(key);
+  if (!state)
+    throw new PurchaseOrchestrationValidationError(
+      "Orchestration state was not found or has expired.",
+    );
+  if (!state.request_for_quotation_name)
+    throw new PurchaseOrchestrationValidationError(
+      "RFQ must be created before Lark approval can be submitted.",
+    );
+  state.supplier_quotation_name = supplierQuotationName.trim() || undefined;
+  state.justification = justification?.trim() || state.justification;
+  try {
+    state.lark_po = await submitLarkApproval(
+      cookieHeader,
+      state.id,
+      state.justification,
+    );
+    state.status = "approval_pending";
+    state.error = undefined;
+    await saveState(key, state);
+    return stateResult(state);
+  } catch (cause) {
+    state.status = "approval_failed";
+    state.error = errorMessage(cause);
+    await saveState(key, state);
+    throw Object.assign(cause instanceof Error ? cause : new Error(state.error), {
+      orchestration: stateResult(state),
+    });
   }
 }
 

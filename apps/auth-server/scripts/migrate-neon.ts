@@ -1,6 +1,6 @@
 import { Client } from "@neondatabase/serverless";
 import { createHash, randomUUID } from "node:crypto";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { config as loadDotEnv } from "dotenv";
 
@@ -13,7 +13,12 @@ if (!databaseUrl) throw new Error("DATABASE_URL is required for migrations");
 
 const migrationsPath = join(process.cwd(), "prisma", "migrations");
 const migrationNames = readdirSync(migrationsPath, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory() && /^\d+_/.test(entry.name))
+  .filter(
+    (entry) =>
+      entry.isDirectory() &&
+      /^\d+_/.test(entry.name) &&
+      existsSync(join(migrationsPath, entry.name, "migration.sql")),
+  )
   .map((entry) => entry.name)
   .sort();
 

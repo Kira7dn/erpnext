@@ -20,7 +20,7 @@ export function AppSidebarNav({
   return <nav className="space-y-1" aria-label={label}>
     {items.map(([itemLabel, href, iconName]) => {
       const Icon = icons[iconName];
-      const isRoot = href === "/accounts" || href === "/assets";
+      const isRoot = href === "/accounts" || href === "/assets" || href === "/purchase";
       const active = isRoot ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
       return <Link
         aria-current={active ? "page" : undefined}

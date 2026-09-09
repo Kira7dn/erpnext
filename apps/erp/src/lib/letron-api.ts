@@ -343,7 +343,11 @@ export async function gatewayRequest<T>(
 ): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
-  if (cookieHeader) headers.set("Cookie", cookieHeader);
+  if (/^Bearer\s+\S+$/i.test(cookieHeader)) {
+    headers.set("Authorization", cookieHeader);
+  } else if (cookieHeader) {
+    headers.set("Cookie", cookieHeader);
+  }
   let response: Response;
   try {
     response = await fetch(authGatewayUrl(path), {

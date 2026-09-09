@@ -21,6 +21,8 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   const headers = new Headers({ Accept: "application/json" });
   const cookieHeader = (await cookies()).toString();
   if (cookieHeader) headers.set("Cookie", cookieHeader);
+  const authorization = request.headers.get("authorization");
+  if (authorization) headers.set("Authorization", authorization);
   const contentType = request.headers.get("content-type");
   if (contentType) headers.set("Content-Type", contentType);
   const response = await fetch(target, { method: request.method, headers, body: request.method === "GET" || request.method === "DELETE" ? undefined : await request.arrayBuffer(), cache: "no-store" });

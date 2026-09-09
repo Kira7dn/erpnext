@@ -39,7 +39,7 @@ flowchart LR
 
 ## 3. PUR-01 — Supplier
 
-- Route: `/purchase/supplier`
+- Route: `/purchase/suppliers`
 - [x] Danh sách Supplier: search, native filter/sort theo contract và pagination.
 - Modal detail/create/edit Supplier.
 - [x] Contact và Address được tạo trong modal cùng context Supplier.
@@ -62,7 +62,7 @@ flowchart LR
 
 ## 4. PUR-02 — New Material
 
-- Route: `/stock/item`
+- Route: `/purchase/items`
 - [x] Danh sách Item/Material: search, native filter/sort theo contract và pagination.
 - Modal detail/create/edit Item.
 - Field tối thiểu: Item code, name, group, UOM và trạng thái active. Warehouse mặc
@@ -259,7 +259,7 @@ accounting.
 - Trạng thái triển khai: `COMPLETE` — cập nhật ngày `2026-09-08`.
 - Đã kiểm tra browser bằng session thật `letron-prod-test`, không tạo screen
   hoặc session đăng nhập mới.
-- Đã mở thành công cả ba route `/purchase/supplier`, `/stock/item` và
+- Đã mở thành công cả ba route `/purchase/suppliers`, `/purchase/items` và
   `/purchase/requests`; sidebar active đúng và user Global Portal được nhận
   diện.
 - Đã kiểm tra Supplier context: tạo Contact qua official API, cập nhật primary

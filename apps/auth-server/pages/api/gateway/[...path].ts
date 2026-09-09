@@ -15,6 +15,7 @@ import {
 } from "../../../src/server/access-policy";
 import { audit } from "../../../src/server/audit";
 import { disableCaching } from "../../../src/server/http";
+import { authenticateTestCredential } from "../../../src/server/test-credential";
 
 export const config = { api: { bodyParser: false } };
 
@@ -103,7 +104,7 @@ export default async function handler(
   };
   disableCaching(res);
   const sessionStartedAt = performance.now();
-  const user = await getUserBySessionToken(tokenFromRequest(req));
+  const user = (await getUserBySessionToken(tokenFromRequest(req))) ?? (await authenticateTestCredential(req));
   timings.session = duration(sessionStartedAt);
   if (!user) {
     finish();
@@ -156,7 +157,7 @@ export default async function handler(
       headers: forwardedHeaders(req, user, policy.version, path, roles, secret),
       body: ["GET", "HEAD"].includes(req.method ?? "GET")
         ? undefined
-        : new Uint8Array(await body(req)),
+        : (await body(req)) as unknown as BodyInit,
       signal: AbortSignal.timeout(30_000),
     });
   } catch {

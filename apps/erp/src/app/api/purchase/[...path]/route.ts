@@ -65,6 +65,8 @@ async function proxy(
   const headers = new Headers({ Accept: "application/json" });
   const cookieHeader = (await cookies()).toString();
   if (cookieHeader) headers.set("Cookie", cookieHeader);
+  const authorization = request.headers.get("authorization");
+  if (authorization) headers.set("Authorization", authorization);
   const contentType = request.headers.get("content-type");
   if (contentType) headers.set("Content-Type", contentType);
   let response: Response;

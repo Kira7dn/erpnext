@@ -158167,6 +158167,17 @@
           "required": false
         }
       ]
+    },
+    {
+      "dotted_path": "letron_api.lark_po.from_approved",
+      "source": "lark_po.py",
+      "method": "from_approved",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
     }
   ],
   "modules": {

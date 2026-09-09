@@ -1022,6 +1022,13 @@ x-contract:
       path_suffix: run-evaluation
       handler: letron_api.banking.run_rule_evaluation
     custom_routes:
+    - module: Buying
+      resource: purchase-orders/from-approved-lark
+      method: POST
+      path: /api/method/letron_api.lark_po.from_approved
+      operation: create
+      operation_id: createPurchaseOrderFromApprovedLark
+      handler: letron_api.lark_po.from_approved
     - module: Files
       resource: attachments
       method: POST

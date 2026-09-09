@@ -62,10 +62,23 @@ function unwrap(data: unknown): unknown {
 
 async function readJson(response: Response): Promise<unknown> {
   const payload: unknown = await response.json();
-  if (!response.ok) throw new Error(`Lark request failed with HTTP ${response.status}`);
+  if (!response.ok) {
+    const detail = payload && typeof payload === "object"
+      ? [
+          "code" in payload ? String((payload as { code?: unknown }).code) : "",
+          "msg" in payload ? String((payload as { msg?: unknown }).msg) : "",
+        ].filter(Boolean).join(" ")
+      : "";
+    throw new Error(`Lark request failed with HTTP ${response.status}${detail ? ` (${detail})` : ""}`);
+  }
   if (payload && typeof payload === "object" && "code" in payload) {
     const code = (payload as { code?: unknown }).code;
-    if (typeof code === "number" && code !== 0) throw new Error(`Lark rejected request with code ${code}`);
+    if (typeof code === "number" && code !== 0) {
+      const message = "msg" in payload && typeof (payload as { msg?: unknown }).msg === "string"
+        ? `: ${(payload as { msg: string }).msg}`
+        : "";
+      throw new Error(`Lark rejected request with code ${code}${message}`);
+    }
   }
   return payload;
 }
@@ -196,4 +209,36 @@ export async function fetchLarkGroupCatalog(): Promise<Array<{ id: string; name:
 
 export function resetLarkTokenCacheForTests(): void {
   delete (globalThis as LarkGlobal).__letronLarkTenantToken;
+}
+
+export async function fetchLarkUserIdByEmail(
+  email: string,
+  userIdType: "user_id" | "open_id" = "user_id",
+): Promise<string> {
+  const env = getEnv();
+  const tenantAccessToken = await getTenantAccessToken();
+  const response = await fetch(new URL(`/open-apis/contact/v3/users/batch_get_id?user_id_type=${userIdType}`, env.LARK_DOMAIN), {
+    method: "POST",
+    headers: { authorization: `Bearer ${tenantAccessToken}`, "content-type": "application/json" },
+    body: JSON.stringify({ emails: [email] }),
+    signal: AbortSignal.timeout(10_000),
+  });
+  const payload = await readJson(response);
+  const list = (unwrap(payload) as { user_list?: Array<{ user_id?: string }> } | null)?.user_list ?? [];
+  const userId = list[0]?.user_id;
+  if (!userId) throw new Error("LARK_USER_ID_NOT_FOUND");
+  return userId;
+}
+
+export async function larkTenantJson<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const env = getEnv();
+  const token = await getTenantAccessToken();
+  const headers = new Headers(init.headers);
+  headers.set("authorization", `Bearer ${token}`);
+  headers.set("content-type", headers.get("content-type") ?? "application/json");
+  return (await readJson(await fetch(new URL(path, env.LARK_DOMAIN), {
+    ...init,
+    headers,
+    signal: init.signal ?? AbortSignal.timeout(15_000),
+  }))) as T;
 }

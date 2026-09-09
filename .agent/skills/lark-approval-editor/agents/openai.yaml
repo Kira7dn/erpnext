@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lark Approval Editor"
+  short_description: "Edit native Lark Approval forms with CLI"
+  default_prompt: "Use $lark-approval-editor to inspect and safely update this Lark Approval definition via the official CLI."

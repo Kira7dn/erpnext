@@ -79,14 +79,14 @@ def verify_gateway_request() -> str:
     return user
 
 
-def verify_control_plane_request() -> None:
+def verify_control_plane_request(expected_path: str = "/api/method/letron_api.access_policy.publish") -> None:
     headers = frappe.local.request.headers
     secret = os.environ.get("LETRON_SSO_SYNC_SECRET", "")
     timestamp = headers.get("X-Letron-Control-Timestamp", "")
     expires_at = headers.get("X-Letron-Control-Expires-At", "")
     request_id = headers.get("X-Letron-Control-Request-Id", "")
     signature = headers.get("X-Letron-Control-Signature", "")
-    path = "/api/method/letron_api.access_policy.publish"
+    path = expected_path
     if not secret or not timestamp or not expires_at or not request_id or not signature:
         frappe.throw("Control-plane authorization required", exc=frappe.AuthenticationError)
     try:
@@ -158,6 +158,7 @@ def enforce_gateway_ingress() -> None:
         "/api/method/letron_api.api.runtime_info",
         "/api/method/letron_api.api.runtime_snapshot",
         "/api/method/letron_api.access_policy.publish",
+        "/api/method/letron_api.lark_po.from_approved",
     }
     if native_api and path not in native_exemptions:
         frappe.throw("Global Portal gateway required", exc=frappe.AuthenticationError)

@@ -1,15 +1,15 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { requestAuthCredential } from "@/lib/request-auth";
 import {
   orchestrationHttpStatus,
   retryPurchaseRfqById,
 } from "@/lib/purchase-orchestration";
 
 export async function POST(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
-  const cookieHeader = (await cookies()).toString();
+  const cookieHeader = await requestAuthCredential(request);
   if (!cookieHeader)
     return NextResponse.json(
       { error: "authentication_required" },

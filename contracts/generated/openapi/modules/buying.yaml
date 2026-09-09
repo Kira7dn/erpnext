@@ -1657,6 +1657,41 @@ paths:
       x-test-evidence:
         suite: crm-preorder
         test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+  /api/method/letron_api.lark_po.from_approved:
+    post:
+      tags:
+      - 'Module: Buying'
+      - Business routes
+      summary: createPurchaseOrderFromApprovedLark
+      operationId: createPurchaseOrderFromApprovedLark
+      parameters:
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.lark_po.from_approved
+      x-public-operation: create
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
 components:
   securitySchemes:
     frappeToken:
@@ -3786,6 +3821,13 @@ x-contract:
       path_suffix: run-evaluation
       handler: letron_api.banking.run_rule_evaluation
     custom_routes:
+    - module: Buying
+      resource: purchase-orders/from-approved-lark
+      method: POST
+      path: /api/method/letron_api.lark_po.from_approved
+      operation: create
+      operation_id: createPurchaseOrderFromApprovedLark
+      handler: letron_api.lark_po.from_approved
     - module: Files
       resource: attachments
       method: POST
@@ -4092,7 +4134,7 @@ x-capabilities:
 x-acceptance-summary:
   passed: 22
   partial: 0
-  not-tested: 0
+  not-tested: 1
   blocked: 0
 x-module: Buying
 x-module-index:
