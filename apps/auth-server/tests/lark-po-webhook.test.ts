@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   claimLarkWebhookEvent: vi.fn(),
   completeLarkWebhookEvent: vi.fn(),
   createApprovedErpPurchaseOrder: vi.fn(),
+  reconcileApprovedPoDraft: vi.fn(),
   getEnv: vi.fn(),
   markPoDraftStatus: vi.fn(),
   audit: vi.fn(),
@@ -23,6 +24,7 @@ vi.mock("../src/server/lark-purchase", () => ({
   claimLarkWebhookEvent: mocks.claimLarkWebhookEvent,
   completeLarkWebhookEvent: mocks.completeLarkWebhookEvent,
   createApprovedErpPurchaseOrder: mocks.createApprovedErpPurchaseOrder,
+  reconcileApprovedPoDraft: mocks.reconcileApprovedPoDraft,
   markPoDraftStatus: mocks.markPoDraftStatus,
   readApprovalInstance: mocks.readApprovalInstance,
   readPoDraft: mocks.readPoDraft,
@@ -96,6 +98,28 @@ describe("Lark PO approval webhook", () => {
     mocks.createApprovedErpPurchaseOrder.mockResolvedValue({ data: { name: "PO-1" } });
     mocks.markPoDraftStatus.mockResolvedValue(undefined);
     mocks.audit.mockResolvedValue(undefined);
+    mocks.reconcileApprovedPoDraft.mockImplementation(async (instanceCode: string) => {
+      const instance = await mocks.readApprovalInstance(instanceCode);
+      const status = String(instance.status ?? "").toUpperCase();
+      const draftId = String(instance.po_draft_id ?? "draft-1");
+      if (status === "REJECTED") {
+        await mocks.markPoDraftStatus({ draftId, status: "REJECTED" });
+        return { status };
+      }
+      if (status !== "APPROVED") return { status };
+      const draftRow = await mocks.readPoDraft(draftId);
+      if (String(instance.snapshot_hash ?? "") !== String(draftRow.snapshot_hash ?? "")) {
+        throw new Error("APPROVAL_SNAPSHOT_SUPERSEDED");
+      }
+      const result = await mocks.createApprovedErpPurchaseOrder({
+        approval_instance_code: instanceCode,
+        draft: draftRow,
+        items: await mocks.readPoDraftItems(draftId),
+      });
+      const poName = String(result?.data?.name ?? "");
+      await mocks.markPoDraftStatus({ draftId, status: "ERP_SUBMITTED", erpPurchaseOrderName: poName });
+      return { status: "ERP_SUBMITTED", erpPurchaseOrderName: poName };
+    });
   });
 
   it("reconciles an approved event once and acknowledges its replay", async () => {
@@ -112,7 +136,7 @@ describe("Lark PO approval webhook", () => {
     const replay = responseRecorder();
     await handler(requestFor(payload, key), replay.response);
     expect(replay.record).toMatchObject({ status: 200, body: { duplicate: true } });
-    expect(mocks.readApprovalInstance).toHaveBeenCalledTimes(1);
+    expect(mocks.readApprovalInstance).toHaveBeenCalledTimes(2);
   });
 
   it("rejects an approval whose Base snapshot was superseded", async () => {
@@ -122,6 +146,7 @@ describe("Lark PO approval webhook", () => {
       approval_attempt: "1",
       snapshot_hash: "b".repeat(64),
     });
+    mocks.reconcileApprovedPoDraft.mockRejectedValueOnce(new Error("APPROVAL_SNAPSHOT_SUPERSEDED"));
     const result = responseRecorder();
     await handler(requestFor({ event_id: "event-2", instance_code: "instance-1" }, key), result.response);
     expect(result.record).toMatchObject({ status: 409, body: { error: "approval_snapshot_superseded" } });

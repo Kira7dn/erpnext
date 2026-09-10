@@ -63,7 +63,7 @@ function findString(value: unknown, names: string[]): string | undefined {
 }
 
 function statusOf(instance: Record<string, unknown>): string {
-  return String(instance.status ?? instance.instance_status ?? "").toUpperCase();
+  return String(instance.status ?? "").toUpperCase();
 }
 
 function recordAudit(
@@ -131,6 +131,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Leave processed_at NULL so a Lark retry can safely reconcile a transient
     // ERP/Lark failure. The ERP endpoint is itself idempotent by instance code.
     const message = error instanceof Error ? error.message : "approval_reconciliation_failed";
+    if (message === "APPROVAL_SNAPSHOT_SUPERSEDED") {
+      await completeLarkWebhookEvent(eventId).catch(() => undefined);
+    }
     if (currentDraftId && currentStatus === "APPROVED") {
       await markPoDraftStatus({ draftId: currentDraftId, status: "ERP_FAILED", error: message }).catch(() => undefined);
     }
@@ -141,6 +144,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       status: currentStatus || undefined,
       reason: message,
     });
-    res.status(502).json({ error: message });
+    const errorCode = message === "APPROVAL_SNAPSHOT_SUPERSEDED"
+      ? "approval_snapshot_superseded"
+      : message;
+    res.status(errorCode === "approval_snapshot_superseded" ? 409 : 502).json({
+      error: errorCode,
+    });
   }
 }

@@ -14,8 +14,12 @@ const draftSchema = z.object({
   orchestration_id: z.string().min(1),
   material_request_name: z.string().min(1),
   request_for_quotation_name: z.string().optional().default(""),
+  rfq_number: z.string().optional().default(""),
   rfq_status: z.string().min(1).default("Draft"),
   supplier_quotation_name: z.string().optional().default(""),
+  quotation_status: z.string().optional().default(""),
+  erp_purchase_order_name: z.string().optional().default(""),
+  supplier_response_summary: z.string().optional().default(""),
   company: z.string().min(1),
   supplier: z.string().min(1),
   transaction_date: z.string().min(1),
@@ -76,8 +80,10 @@ function canonical(value: unknown): unknown {
 }
 
 export function snapshotHash(input: PoDraftInput): string {
+  const { erp_purchase_order_name: ignoredErpPurchaseOrderName, ...stableInput } = input;
+  void ignoredErpPurchaseOrderName;
   return createHash("sha256")
-    .update(JSON.stringify(canonical(input)))
+    .update(JSON.stringify(canonical(stableInput)))
     .digest("hex");
 }
 
@@ -233,7 +239,7 @@ function draftFields(input: PoDraftInput, hash: string, attempt: number): Row {
     approval_attempt: attempt,
     approval_status: "PENDING",
     approval_instance_code: "",
-    erp_purchase_order_name: "",
+    erp_purchase_order_name: input.erp_purchase_order_name,
     erp_error: "",
     approval_submitted_at: new Date().toISOString(),
   };
@@ -312,29 +318,32 @@ async function submitApproval(
 ): Promise<{
   draftId: string;
   instanceCode: string;
+  erpPurchaseOrderName: string;
   snapshotHash: string;
   attempt: number;
   idempotent: boolean;
 }> {
   const env = config();
-  const draft = await createPoDraft(input, existingDraftId);
+  const erpPurchaseOrderName = input.erp_purchase_order_name || await createErpPurchaseOrderDraft(input);
+  const preparedInput: PoDraftInput = { ...input, erp_purchase_order_name: erpPurchaseOrderName };
+  const draft = await createPoDraft(preparedInput, existingDraftId);
   const current = await readDraftRecord(draft.draftId);
   const currentInstance = String(current.fields.approval_instance_code ?? "");
   if (draft.idempotent && currentInstance) {
     await saveDraftState({
-      orchestrationId: input.orchestration_id,
+      orchestrationId: preparedInput.orchestration_id,
       draftId: draft.draftId,
       approvalInstanceCode: currentInstance,
       approvalAttempt: draft.attempt,
       snapshotHash: draft.snapshotHash,
       status: String(current.fields.approval_status ?? "PENDING"),
     });
-    return { ...draft, instanceCode: currentInstance };
+    return { ...draft, instanceCode: currentInstance, erpPurchaseOrderName: preparedInput.erp_purchase_order_name };
   }
 
   const userId = await fetchLarkUserIdByEmail(submitterEmail);
   const definition = await readApprovalDefinition();
-  const form = buildApprovalForm(definition.form, input, draft);
+  const form = buildApprovalForm(definition.form, preparedInput);
   const approvalNodes = Array.isArray(definition.node_list)
     ? definition.node_list.filter(
         (node): node is Row => Boolean(node && typeof node === "object" && text((node as Row).node_id)),
@@ -363,9 +372,9 @@ async function submitApproval(
         user_id: userId,
         form: JSON.stringify(form),
         uuid: createHash("sha256")
-          .update(`${input.orchestration_id}:${draft.attempt}`)
+          .update(`${preparedInput.orchestration_id}:${draft.attempt}`)
           .digest("hex"),
-        title: `Phê duyệt yêu cầu mua hàng - ${draft.draftId}`,
+        title: `Phê duyệt yêu cầu mua hàng - ${preparedInput.erp_purchase_order_name}`,
         ...(nodeApproverUserIdList
           ? { node_approver_user_id_list: nodeApproverUserIdList }
           : {}),
@@ -390,7 +399,7 @@ async function submitApproval(
     status: "PENDING",
     lastError: null,
   });
-  return { ...draft, instanceCode };
+  return { ...draft, instanceCode, erpPurchaseOrderName: preparedInput.erp_purchase_order_name };
 }
 
 async function readApprovalDefinition(): Promise<Record<string, unknown>> {
@@ -398,105 +407,93 @@ async function readApprovalDefinition(): Promise<Record<string, unknown>> {
   const result = await larkTenantJson<{ data?: Record<string, unknown> }>(
     `/open-apis/approval/v4/approvals/${encodeURIComponent(env.LARK_PO_APPROVAL_CODE)}`,
   );
-  return result.data ?? {};
+  if (!result.data) throw new Error("LARK_APPROVAL_DEFINITION_MISSING");
+  return result.data;
 }
 
 function parseApprovalFormFields(value: unknown): Array<Record<string, unknown>> {
-  let parsed = value;
-  if (typeof parsed === "string") {
-    try {
-      parsed = JSON.parse(parsed);
-    } catch {
-      return [];
-    }
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("LARK_APPROVAL_FORM_INVALID");
+  const content = (value as Row).form_content;
+  if (typeof content !== "string") throw new Error("LARK_APPROVAL_FORM_INVALID");
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch (error) {
+    throw new Error("LARK_APPROVAL_FORM_INVALID", { cause: error });
   }
-  if (Array.isArray(parsed)) return parsed.filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"));
-  if (parsed && typeof parsed === "object" && Array.isArray((parsed as Row).form_content)) {
-    return (parsed as Row).form_content as Array<Record<string, unknown>>;
-  }
-  return [];
+  if (!Array.isArray(parsed)) throw new Error("LARK_APPROVAL_FORM_INVALID");
+  const fields = parsed.filter(
+    (item): item is Record<string, unknown> => Boolean(item && typeof item === "object" && !Array.isArray(item)),
+  );
+  if (fields.length !== parsed.length) throw new Error("LARK_APPROVAL_FORM_INVALID");
+  return fields;
 }
 
 function buildApprovalForm(
   definitionForm: unknown,
   input: PoDraftInput,
-  draft: { draftId: string },
 ): Array<Record<string, unknown>> {
   const fields = parseApprovalFormFields(definitionForm);
   if (!fields.length) throw new Error("LARK_APPROVAL_FORM_NOT_CONFIGURED");
-  const summary = input.portal_url;
+  const summary = [
+    `PO: ${input.erp_purchase_order_name}`,
+    `MR: ${input.material_request_name}`,
+    `RFQ number: ${input.rfq_number || input.request_for_quotation_name}`,
+    `RFQ status: ${input.rfq_status}`,
+    `Quotation: ${input.supplier_quotation_name || "-"}`,
+    `Quotation status: ${input.quotation_status || "-"}`,
+    input.portal_url,
+    input.supplier_response_summary,
+  ].filter(Boolean).join("\n");
   const normalized = (value: unknown) => text(value).replace(/\s+/g, " ").toLowerCase();
-  const hasId = (field: Row, ids: string[]) =>
-    ids.includes(text(field.id)) || ids.includes(text(field.custom_id));
-  const byNameOrId = (name: string, ids: string[] = []) =>
-    fields.find(
-      (field) =>
-        normalized(field.name) === normalized(name) || hasId(field, ids),
-    );
-  const byDesignKey = (designKey: string) => {
+  const byDesignKey = (designKey: string): Row => {
     const wanted = LARK_PO_APPROVAL_DESIGN.fields.find((field: { key: string }) => field.key === designKey);
-    return wanted
-      ? fields.find(
-          (field) =>
-            normalized(field.name) === normalized(wanted.label) || hasId(field, [wanted.sourceId]),
-        )
-      : undefined;
+    if (!wanted) throw new Error(`LARK_APPROVAL_DESIGN_FIELD_UNKNOWN_${designKey}`);
+    const field = fields.find(
+      (candidate) => text(candidate.id) === wanted.sourceId || text(candidate.custom_id) === wanted.sourceId,
+    );
+    if (!field) throw new Error(`LARK_APPROVAL_FIELD_MISSING_${designKey}`);
+    if (normalized(field.type) !== normalized(wanted.type)) {
+      throw new Error(`LARK_APPROVAL_FIELD_TYPE_MISMATCH_${designKey}`);
+    }
+    return field;
   };
-  const purchaseDetails =
-    byNameOrId("Purchase details", ["widget3"]) ??
-    fields.find((field) => normalized(field.type) === "fieldlist");
-  if (purchaseDetails && normalized(purchaseDetails.type) === "fieldlist") {
-    const textareas = fields.filter((field) => normalized(field.type) === "textarea");
-    const reason = byDesignKey("reason") ?? byNameOrId("Reason for purchase", ["widget0"]) ?? textareas[0];
-    const referenceInfo = byDesignKey("reference") ?? byNameOrId("ERP reference information", ["widget16000000000001"]) ?? textareas[1];
-    const purchaseType = byDesignKey("purchaseType") ?? byNameOrId("Purchase type", ["widget15754430770720001"]) ?? fields.find((field) => normalized(field.type) === "radiov2");
-    const deliveryDate = byDesignKey("deliveryDate") ?? byNameOrId("Expected delivery date", ["widget2"]) ?? fields.find((field) => normalized(field.type) === "date");
-    const paymentTerms = byDesignKey("paymentTerms") ?? byNameOrId("Payment terms", ["widget16000000000003"]) ?? textareas[2];
-    const deliveryTerms = byDesignKey("deliveryTerms") ?? byNameOrId("Delivery terms", ["widget16000000000004"]) ?? textareas[3];
-    const childrenValue = Array.isArray(purchaseDetails.children)
-      ? purchaseDetails.children
-      : Array.isArray(purchaseDetails.value)
-        ? purchaseDetails.value
-        : [];
-    const children = childrenValue.filter(
-          (field): field is Row => Boolean(field && typeof field === "object" && text((field as Row).id)),
-        );
-    const childByNameOrId = (name: string, ids: string[]) =>
-      children.find(
-        (field) =>
-          normalized(field.name) === normalized(name) || hasId(field, ids),
-      );
-    const itemSummary = childByNameOrId("Item / specification", ["letron_po_item_summary"]);
-    const supplierRfq = childByNameOrId("Supplier / RFQ", ["letron_po_supplier_rfq"]);
-    const compactQuantity = childByNameOrId("Quantity", ["letron_po_qty"]);
-    const compactUnitPrice = childByNameOrId("Unit price", ["letron_po_unit_price"]);
-    const compactLineTotal = childByNameOrId("Line total", ["letron_po_line_total"]);
-    const itemName = childByNameOrId("Item name", ["widget4"]) ?? children.find((field) => normalized(field.type) === "input");
-    const specification = childByNameOrId("Specification", ["widget5"]) ?? children.filter((field) => normalized(field.type) === "textarea")[0];
-    const quantity = childByNameOrId("Quantity", ["widget6"]) ?? children.find((field) => normalized(field.type) === "number");
-    const itemSupplier = childByNameOrId("Supplier", ["letron_po_supplier"]);
-    const rfqStatus = childByNameOrId("RFQ status", ["letron_po_rfq_status"]);
-    const amountFields = children.filter((field) => normalized(field.type) === "amount");
-    const unitPrice = childByNameOrId("Unit price", ["widget7"]) ?? amountFields[0];
-    const lineTotal = childByNameOrId("Line total", ["widget16000000000005"]) ?? amountFields[1];
-    const configuredCurrencies = Array.isArray((unitPrice?.option as Row | undefined)?.currencyRange)
-      ? ((unitPrice?.option as Row).currencyRange as unknown[]).map(text).filter(Boolean)
-      : [];
-    const approvalCurrency = configuredCurrencies.includes(input.currency)
-      ? input.currency
-      : configuredCurrencies[0] || input.currency;
-    const purchaseTypeOptions = Array.isArray(purchaseType?.option)
-      ? purchaseType.option
-      : Array.isArray(purchaseType?.value)
-        ? purchaseType.value
-        : [];
-    const productionMaterials = purchaseTypeOptions.find(
-          (option) =>
-            (text((option as Row).value) || text((option as Row).key)) === "k3qy4q90-ya5zdx7hyh-3" ||
-            ["production materials", "nguyên vật liệu sản xuất"].includes(
-              normalized((option as Row).text),
-            ),
-        );
+  const reason = byDesignKey("reason");
+  const referenceInfo = byDesignKey("reference");
+  const purchaseType = byDesignKey("purchaseType");
+  const deliveryDate = byDesignKey("deliveryDate");
+  const purchaseDetails = byDesignKey("details");
+  const paymentTerms = byDesignKey("paymentTerms");
+  const deliveryTerms = byDesignKey("deliveryTerms");
+  const childrenValue = purchaseDetails.value;
+  if (!Array.isArray(childrenValue)) throw new Error("LARK_APPROVAL_FIELDLIST_NOT_CONFIGURED");
+  const children = childrenValue.filter(
+    (field): field is Row => Boolean(field && typeof field === "object"),
+  );
+  const childByColumn = (columnKey: string): Row => {
+    const column = LARK_PO_APPROVAL_DESIGN.table.columns.find((item) => item.key === columnKey);
+    if (!column) throw new Error(`LARK_APPROVAL_TABLE_COLUMN_UNKNOWN_${columnKey}`);
+    const field = children.find(
+      (candidate) => text(candidate.id) === column.id || text(candidate.custom_id) === column.id,
+    );
+    if (!field) throw new Error(`LARK_APPROVAL_TABLE_COLUMN_MISSING_${columnKey}`);
+    return field;
+  };
+  const itemSummary = childByColumn("itemSummary");
+  const supplierRfq = childByColumn("supplierRfq");
+  const compactQuantity = childByColumn("quantity");
+  const compactUnitPrice = childByColumn("unitPrice");
+  const compactLineTotal = childByColumn("lineTotal");
+  const configuredCurrencies = Array.isArray((compactUnitPrice.option as Row | undefined)?.currencyRange)
+    ? ((compactUnitPrice.option as Row).currencyRange as unknown[]).map(text).filter(Boolean)
+    : [];
+  if (!configuredCurrencies.includes(input.currency)) throw new Error("LARK_APPROVAL_CURRENCY_NOT_CONFIGURED");
+  const purchaseTypeOptions = Array.isArray(purchaseType.value) ? purchaseType.value : [];
+  const productionMaterials = purchaseTypeOptions.find(
+    (option) => text((option as Row).value) === "k3qy4q90-ya5zdx7hyh-3",
+  );
+  if (!productionMaterials) throw new Error("LARK_APPROVAL_PURCHASE_TYPE_NOT_CONFIGURED");
+  const approvalCurrency = input.currency;
     const itemRows = input.items.map((item) => {
       const itemCode = text(item.item_code);
       const itemLabel = text(item.item_name) || itemCode;
@@ -504,130 +501,31 @@ function buildApprovalForm(
       const itemQuantity = number(item.qty);
       const itemRate = number(item.rate);
       const itemAmount = itemQuantity * itemRate;
-      if (itemSummary && supplierRfq && compactQuantity && compactUnitPrice && compactLineTotal) {
-        return [
-          { id: text(itemSummary.id), type: "input", value: `${itemLabel} | ${specificationText}` },
-          { id: text(supplierRfq.id), type: "input", value: `${input.supplier} | RFQ: ${input.rfq_status}` },
-          { id: text(compactQuantity.id), type: "input", value: String(itemQuantity) },
-          { id: text(compactUnitPrice.id), type: "input", value: displayAmount(itemRate, approvalCurrency) },
-          { id: text(compactLineTotal.id), type: "input", value: displayAmount(itemAmount, approvalCurrency) },
-        ];
-      }
       return [
-        ...(itemName
-          ? [{ id: text(itemName.id), type: text(itemName.type) || "input", value: itemLabel }]
-          : []),
-        ...(itemSupplier
-          ? [{ id: text(itemSupplier.id), type: text(itemSupplier.type) || "input", value: input.supplier }]
-          : []),
-        ...(rfqStatus
-          ? [{ id: text(rfqStatus.id), type: text(rfqStatus.type) || "input", value: input.rfq_status }]
-          : []),
-        ...(specification
-          ? [{ id: text(specification.id), type: text(specification.type) || "input", value: specificationText }]
-          : []),
-        ...(quantity
-          ? [{ id: text(quantity.id), type: text(quantity.type) || "number", value: itemQuantity }]
-          : []),
-        ...(unitPrice
-          ? [{
-              id: text(unitPrice.id),
-              type: text(unitPrice.type) || "amount",
-              value: itemRate,
-              currency: approvalCurrency,
-            }]
-          : []),
-        ...(lineTotal
-          ? [{
-              id: text(lineTotal.id),
-              type: text(lineTotal.type) || "amount",
-              value: itemQuantity * itemRate,
-              currency: approvalCurrency,
-            }]
-          : []),
+        { id: text(itemSummary.id), type: "input", value: `${itemLabel} | ${specificationText}` },
+        { id: text(supplierRfq.id), type: "input", value: `${input.supplier} | RFQ: ${input.request_for_quotation_name} | Status: ${input.rfq_status}` },
+        { id: text(compactQuantity.id), type: "input", value: String(itemQuantity) },
+        { id: text(compactUnitPrice.id), type: "input", value: displayAmount(itemRate, approvalCurrency) },
+        { id: text(compactLineTotal.id), type: "input", value: displayAmount(itemAmount, approvalCurrency) },
       ];
     });
-    if (itemSummary && supplierRfq && compactQuantity && compactUnitPrice && compactLineTotal) {
-      itemRows.push([
-        { id: text(itemSummary.id), type: "input", value: LARK_PO_APPROVAL_DESIGN.table.totalLabel },
-        { id: text(supplierRfq.id), type: "input", value: LARK_PO_APPROVAL_DESIGN.table.totalSupplier },
-        { id: text(compactQuantity.id), type: "input", value: LARK_PO_APPROVAL_DESIGN.table.totalQuantity },
-        { id: text(compactUnitPrice.id), type: "input", value: LARK_PO_APPROVAL_DESIGN.table.totalUnitPrice },
-        { id: text(compactLineTotal.id), type: "input", value: displayAmount(input.net_total, approvalCurrency) },
-      ]);
-    }
+    itemRows.push([
+      { id: text(itemSummary.id), type: "input", value: LARK_PO_APPROVAL_DESIGN.table.totalLabel },
+      { id: text(supplierRfq.id), type: "input", value: LARK_PO_APPROVAL_DESIGN.table.totalSupplier },
+      { id: text(compactQuantity.id), type: "input", value: LARK_PO_APPROVAL_DESIGN.table.totalQuantity },
+      { id: text(compactUnitPrice.id), type: "input", value: LARK_PO_APPROVAL_DESIGN.table.totalUnitPrice },
+      { id: text(compactLineTotal.id), type: "input", value: displayAmount(input.net_total, approvalCurrency) },
+    ]);
     const purchaseForm = [
-      ...(reason
-        ? [{ id: text(reason.id), type: text(reason.type) || "textarea", value: input.justification }]
-        : []),
-      ...(referenceInfo
-        ? [{ id: text(referenceInfo.id), type: text(referenceInfo.type) || "textarea", value: summary }]
-        : []),
-      ...(purchaseType
-        ? [{
-            id: text(purchaseType.id),
-            type: text(purchaseType.type) || "radioV2",
-            value:
-              text((productionMaterials as Row | undefined)?.value) ||
-              text((productionMaterials as Row | undefined)?.key) ||
-              "production materials",
-          }]
-        : []),
-      ...(deliveryDate
-        ? [{
-            id: text(deliveryDate.id),
-            type: text(deliveryDate.type) || "date",
-          value: `${input.schedule_date}T00:00:00+07:00`,
-        }]
-      : []),
-      ...(paymentTerms
-        ? [{ id: text(paymentTerms.id), type: text(paymentTerms.type) || "textarea", value: input.payment_terms || "Không có" }]
-        : []),
-      ...(deliveryTerms
-        ? [{ id: text(deliveryTerms.id), type: text(deliveryTerms.type) || "textarea", value: input.delivery_terms || "Không có" }]
-        : []),
-      ...(purchaseDetails
-        ? [{ id: text(purchaseDetails.id), type: text(purchaseDetails.type), value: itemRows }]
-        : []),
+      { id: text(reason.id), type: text(reason.type), value: input.justification },
+      { id: text(referenceInfo.id), type: text(referenceInfo.type), value: summary },
+      { id: text(purchaseType.id), type: text(purchaseType.type), value: text((productionMaterials as Row).value) },
+      { id: text(deliveryDate.id), type: text(deliveryDate.type), value: `${input.schedule_date}T00:00:00+07:00` },
+      { id: text(paymentTerms.id), type: text(paymentTerms.type), value: input.payment_terms || "Không có" },
+      { id: text(deliveryTerms.id), type: text(deliveryTerms.type), value: input.delivery_terms || "Không có" },
+      { id: text(purchaseDetails.id), type: text(purchaseDetails.type), value: itemRows },
     ];
-    if (purchaseForm.length) return purchaseForm;
-  }
-  const values: Record<string, unknown> = {
-    po_draft_id: draft.draftId,
-    po_ref: summary,
-    material_request: input.material_request_name,
-    material_request_name: input.material_request_name,
-    request_for_quotation: input.request_for_quotation_name,
-    request_for_quotation_name: input.request_for_quotation_name,
-    supplier: input.supplier,
-    company: input.company,
-    transaction_date: input.transaction_date,
-    schedule_date: input.schedule_date,
-    currency: input.currency,
-    total_qty: input.total_qty,
-    net_total: input.net_total,
-    total_taxes: input.total_taxes,
-    grand_total: input.grand_total,
-    item_summary: input.item_summary,
-    justification: input.justification,
-    portal_url: input.portal_url,
-  };
-  const form = fields
-    .map((field) => {
-      const key = text(field.custom_id) || text(field.id);
-      const value = values[key];
-      if (!key || value === undefined) return null;
-      const type = text(field.type) || "input";
-      return {
-        id: text(field.id),
-        type,
-        value: type === "number" || type === "amount" ? Number(value) : String(value),
-        ...(type === "amount" ? { currency: input.currency } : {}),
-      };
-    })
-    .filter((field) => field !== null);
-  if (!form.length) throw new Error("LARK_APPROVAL_FORM_NOT_CONFIGURED");
-  return form;
+  return purchaseForm;
 }
 
 export async function submitPoDraftApproval(
@@ -636,6 +534,7 @@ export async function submitPoDraftApproval(
 ): Promise<{
   draftId: string;
   instanceCode: string;
+  erpPurchaseOrderName: string;
   snapshotHash: string;
   attempt: number;
   idempotent: boolean;
@@ -650,6 +549,7 @@ export async function submitExistingPoDraftApproval(
 ): Promise<{
   draftId: string;
   instanceCode: string;
+  erpPurchaseOrderName: string;
   snapshotHash: string;
   attempt: number;
   idempotent: boolean;
@@ -674,7 +574,8 @@ export async function readApprovalInstance(
   const result = await larkTenantJson<{ data?: Record<string, unknown> }>(
     `/open-apis/approval/v4/instances/${encodeURIComponent(instanceCode)}?user_id_type=user_id`,
   );
-  return result.data ?? {};
+  if (!result.data) throw new Error("LARK_APPROVAL_INSTANCE_MISSING");
+  return result.data;
 }
 
 export async function approvePoDraftApproval(instanceCode: string): Promise<{
@@ -684,7 +585,7 @@ export async function approvePoDraftApproval(instanceCode: string): Promise<{
 }> {
   const env = config();
   const instance = await readApprovalInstance(instanceCode);
-  const status = String(instance.status ?? instance.instance_status ?? "").toUpperCase();
+  const status = String(instance.status ?? "").toUpperCase();
   if (status === "APPROVED") return { status, idempotent: true };
   if (["REJECTED", "CANCELED", "CANCELLED"].includes(status)) {
     throw new Error(`LARK_APPROVAL_ALREADY_${status}`);
@@ -697,11 +598,11 @@ export async function approvePoDraftApproval(instanceCode: string): Promise<{
     ? instance.task_list.filter((task): task is Row => Boolean(task && typeof task === "object"))
     : [];
   const task = tasks.find((candidate) => {
-    const taskStatus = String(candidate.status ?? candidate.task_status ?? "").toUpperCase();
-    const taskUserId = String(candidate.user_id ?? candidate.approver_user_id ?? "");
+    const taskStatus = String(candidate.status ?? "").toUpperCase();
+    const taskUserId = String(candidate.user_id ?? "");
     return taskStatus === "PENDING" && taskUserId === approverId;
   });
-  const taskId = String(task?.id ?? task?.task_id ?? "").trim();
+  const taskId = String(task?.id ?? "").trim();
   if (!taskId) throw new Error("LARK_APPROVAL_PENDING_TASK_NOT_FOUND");
 
   await larkTenantJson(
@@ -792,6 +693,20 @@ export async function markPoDraftStatus(input: {
     erp_error: input.error ?? "",
     approval_completed_at: new Date().toISOString(),
   });
+  if (input.status === "REJECTED" || input.status === "ERP_FAILED") {
+    const erpPurchaseOrderName = String(draft.erp_purchase_order_name ?? "").trim();
+    const materialRequestName = String(draft.material_request_name ?? "").trim();
+    const orchestrationId = String(draft.orchestration_id ?? "").trim();
+    if (erpPurchaseOrderName && materialRequestName && orchestrationId) {
+      await updateErpPurchaseOrderApprovalState({
+        erpPurchaseOrderName,
+        materialRequestName,
+        orchestrationId,
+        status: input.status === "REJECTED" ? "Rejected" : "ERP Failed",
+        error: input.error,
+      });
+    }
+  }
   await getDb().larkPoDraftState.updateMany({
     where: { orchestrationId },
     data: {
@@ -859,12 +774,10 @@ async function gatewayJson<T>(path: string, cookieHeader: string): Promise<T> {
       signal: AbortSignal.timeout(30_000),
     },
   );
-  const payload = (await response.json().catch(() => ({}))) as {
-    data?: T;
-    message?: T;
-  };
+  const payload = (await response.json().catch(() => null)) as { message?: T } | null;
   if (!response.ok) throw new Error(`ERP_SOURCE_READ_FAILED_${response.status}`);
-  return (payload.data ?? payload.message) as T;
+  if (!payload || payload.message === undefined) throw new Error("ERP_SOURCE_RESPONSE_INVALID");
+  return payload.message;
 }
 
 async function supplierSourceJson<T>(payload: Record<string, unknown>): Promise<T> {
@@ -878,9 +791,10 @@ async function supplierSourceJson<T>(payload: Record<string, unknown>): Promise<
     cache: "no-store",
     signal: AbortSignal.timeout(30_000),
   });
-  const result = await response.json().catch(() => ({})) as { message?: T; data?: T };
+  const result = await response.json().catch(() => null) as { message?: T } | null;
   if (!response.ok) throw new Error(`ERP_SOURCE_READ_FAILED_${response.status}`);
-  return (result.data ?? result.message) as T;
+  if (!result || result.message === undefined) throw new Error("ERP_SOURCE_RESPONSE_INVALID");
+  return result.message;
 }
 
 async function sourceByCorrelation(
@@ -953,18 +867,18 @@ function nestedText(value: unknown, names: string[]): string | undefined {
   return undefined;
 }
 
-function number(value: unknown, fallback = 0): number {
+function number(value: unknown, defaultValue = 0): number {
   const result = Number(value);
-  return Number.isFinite(result) ? result : fallback;
+  return Number.isFinite(result) ? result : defaultValue;
 }
 
 function displayAmount(value: number, currency: string): string {
   return `${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
 }
 
-function maxDate(values: string[], fallback: string): string {
+function maxDate(values: string[], defaultDate: string): string {
   const dates = values.filter((value) => /^\d{4}-\d{2}-\d{2}$/.test(value));
-  return dates.sort().at(-1) ?? fallback;
+  return dates.sort().at(-1) ?? defaultDate;
 }
 
 export async function buildPoDraftFromCorrelation(input: {
@@ -986,6 +900,13 @@ export async function buildPoDraftFromCorrelation(input: {
     input.orchestrationId,
     input.cookieHeader,
   );
+  let supplierResponseSummary = "";
+  if (!input.cookieHeader) {
+    const responseSource = await supplierSourceJson<{ supplier_responses?: Array<{ supplier?: unknown; status?: unknown; supplier_quotation?: unknown }> }>({ orchestration_id: input.orchestrationId });
+    supplierResponseSummary = (responseSource.supplier_responses ?? [])
+      .map((row) => `${text(row.supplier)}: ${text(row.status) || "No Response"}${text(row.supplier_quotation) ? ` (${text(row.supplier_quotation)})` : ""}`)
+      .join("; ");
+  }
   const supplierQuotationName = text(input.supplierQuotationName);
   const supplierQuotation = supplierQuotationName
     ? await sourceByName(
@@ -994,6 +915,8 @@ export async function buildPoDraftFromCorrelation(input: {
         input.cookieHeader,
       )
     : null;
+  if (!supplierQuotation) throw new Error("LARK_PO_QUOTATION_REQUIRED");
+  if (Number(supplierQuotation.docstatus ?? 0) !== 1) throw new Error("LARK_PO_QUOTATION_NOT_SUBMITTED");
   const mrName = text(materialRequest.name);
   const rfqName = text(rfq.name);
   const sqName = text(supplierQuotation?.name);
@@ -1094,8 +1017,11 @@ export async function buildPoDraftFromCorrelation(input: {
     orchestration_id: input.orchestrationId,
     material_request_name: mrName,
     request_for_quotation_name: rfqName,
+    rfq_number: rfqName,
     rfq_status: text(rfq.status) || "Draft",
     supplier_quotation_name: sqName,
+    quotation_status: text(supplierQuotation.status) || "Submitted",
+    supplier_response_summary: supplierResponseSummary,
     company,
     supplier,
     transaction_date: transactionDate,
@@ -1132,7 +1058,7 @@ export async function buildPoDraftFromCorrelation(input: {
 
 function controlHeaders(path: string, method = "POST"): Record<string, string> {
   const env = getEnv();
-  const secret = env.LETRON_SSO_SYNC_SECRET ?? env.AUTH_ERP_SYNC_SECRET;
+  const secret = env.LETRON_SSO_SYNC_SECRET;
   if (!env.LETRON_SSO_ERP_BASE_URL || !secret)
     throw new Error("ERP_APPROVED_PO_NOT_CONFIGURED");
   const timestamp = Math.floor(Date.now() / 1000).toString();
@@ -1150,6 +1076,37 @@ function controlHeaders(path: string, method = "POST"): Record<string, string> {
   };
 }
 
+export async function createErpPurchaseOrderDraft(
+  input: PoDraftInput,
+): Promise<string> {
+  const env = getEnv();
+  const path = "/api/method/letron_api.lark_po.create_draft";
+  const response = await fetch(new URL(path, `${env.LETRON_SSO_ERP_BASE_URL}/`), {
+    method: "POST",
+    headers: controlHeaders(path),
+    body: JSON.stringify({
+      approval_instance_code: "",
+      snapshot_hash: snapshotHash(input),
+      attempt: 1,
+      draft: {
+        ...input,
+        draft_id: `PO-DRAFT-${input.orchestration_id}`,
+      },
+      items: input.items,
+    }),
+    signal: AbortSignal.timeout(30_000),
+  });
+  const payload = await response.json().catch(() => null) as { message?: unknown } | null;
+  if (!response.ok) {
+    throw new Error(`ERP_PO_DRAFT_FAILED_${response.status}`);
+  }
+  const name = payload?.message && typeof payload.message === "object"
+    ? String((payload.message as Row).name ?? "").trim()
+    : "";
+  if (!name) throw new Error("ERP_PO_DRAFT_NAME_MISSING");
+  return name;
+}
+
 export async function createApprovedErpPurchaseOrder(input: {
   approval_instance_code: string;
   snapshot_hash: string;
@@ -1165,21 +1122,36 @@ export async function createApprovedErpPurchaseOrder(input: {
     body: JSON.stringify(input),
     signal: AbortSignal.timeout(30_000),
   });
-  const payload = await response.json().catch(() => ({}));
+  const payload = await response.json().catch(() => null) as { message?: unknown } | null;
   if (!response.ok) {
-    const detail = payload && typeof payload === "object"
-      ? String(
-          (payload as Row).exc ??
-          (payload as Row)._server_messages ??
-          (payload as Row).message ??
-          (payload as Row).exception ??
-          (payload as Row).exc_type ??
-          "",
-        ).trim()
-      : "";
-    throw new Error(`ERP_APPROVED_PO_FAILED_${response.status}${detail ? `: ${detail.slice(0, 500)}` : ""}`);
+    throw new Error(`ERP_APPROVED_PO_FAILED_${response.status}`);
   }
-  return payload as Record<string, unknown>;
+  if (!payload || !payload.message || typeof payload.message !== "object") throw new Error("ERP_APPROVED_PO_RESPONSE_INVALID");
+  return payload.message as Record<string, unknown>;
+}
+
+async function updateErpPurchaseOrderApprovalState(input: {
+  erpPurchaseOrderName: string;
+  materialRequestName: string;
+  orchestrationId: string;
+  status: "Rejected" | "ERP Failed";
+  error?: string;
+}): Promise<void> {
+  const path = "/api/method/letron_api.lark_po.update_approval_state";
+  const env = getEnv();
+  const response = await fetch(new URL(path, `${env.LETRON_SSO_ERP_BASE_URL}/`), {
+    method: "POST",
+    headers: controlHeaders(path),
+    body: JSON.stringify({
+      erp_purchase_order_name: input.erpPurchaseOrderName,
+      material_request_name: input.materialRequestName,
+      orchestration_id: input.orchestrationId,
+      status: input.status,
+      error: input.error,
+    }),
+    signal: AbortSignal.timeout(30_000),
+  });
+  if (!response.ok) throw new Error(`ERP_PO_STATUS_FAILED_${response.status}`);
 }
 
 export async function reconcileApprovedPoDraft(instanceCode: string): Promise<{
@@ -1187,7 +1159,7 @@ export async function reconcileApprovedPoDraft(instanceCode: string): Promise<{
   erpPurchaseOrderName?: string;
 }> {
   const instance = await readApprovalInstance(instanceCode);
-  const status = String(instance.status ?? instance.instance_status ?? "").toUpperCase();
+  const status = String(instance.status ?? "").toUpperCase();
   const state = await getDb().larkPoDraftState.findFirst({
     where: { approvalInstanceCode: instanceCode },
   });
@@ -1219,11 +1191,7 @@ export async function reconcileApprovedPoDraft(instanceCode: string): Promise<{
     draft,
     items: await readPoDraftItems(draftId),
   });
-  const resultRow = result as Row;
-  const resultData = resultRow.data ?? resultRow.message ?? resultRow;
-  const poName = String(
-    resultData && typeof resultData === "object" ? (resultData as Row).name ?? "" : "",
-  );
+  const poName = String(result.name ?? "");
   if (!poName) throw new Error("ERP_APPROVED_PO_NAME_MISSING");
   await markPoDraftStatus({ draftId, status: "ERP_SUBMITTED", erpPurchaseOrderName: poName });
   return { status: "ERP_SUBMITTED", erpPurchaseOrderName: poName };

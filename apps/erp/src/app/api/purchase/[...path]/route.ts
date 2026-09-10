@@ -12,6 +12,7 @@ const OFFICIAL_MODULES: Record<string, string> = {
   items: "stock/items",
   "material-requests": "stock/material-requests",
   "request-for-quotations": "crm/request-for-quotations",
+  "purchase-orders": "buying/purchase-orders",
   attachments: "files/attachments",
 };
 export async function GET(
@@ -82,7 +83,7 @@ async function proxy(
     return apiErrorResponse("gateway_unavailable", 503, "Letron Global Portal Gateway is unavailable.", true);
   }
   if (!response.ok)
-    return apiErrorFromResponse(response, "purchase_request_failed", "Purchase request failed.");
+    return apiErrorFromResponse(response, "purchase_request_failed");
   const responseHeaders = new Headers({
     "content-type": response.headers.get("content-type") ?? "application/json",
   });

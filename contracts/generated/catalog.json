@@ -111334,6 +111334,560 @@
       ]
     },
     {
+      "name": "Supplier Portal Access",
+      "module": "Letron API",
+      "source": "letron_api\\doctype\\supplier_portal_access\\supplier_portal_access.json",
+      "is_child_table": 0,
+      "fields": [
+        {
+          "fieldname": "procurement_process",
+          "fieldtype": "Link",
+          "label": "Procurement Process",
+          "options": "Supplier Procurement Process",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "case_id",
+          "fieldtype": "Data",
+          "label": "Case ID",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "orchestration_id",
+          "fieldtype": "Data",
+          "label": "Orchestration ID",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "supplier",
+          "fieldtype": "Link",
+          "label": "Supplier",
+          "options": "Supplier",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "contact",
+          "fieldtype": "Link",
+          "label": "Contact",
+          "options": "Contact",
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "email_snapshot",
+          "fieldtype": "Data",
+          "label": "Email Snapshot",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "request_for_quotation",
+          "fieldtype": "Link",
+          "label": "Request for Quotation",
+          "options": "Request for Quotation",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "supplier_quotation",
+          "fieldtype": "Link",
+          "label": "Supplier Quotation",
+          "options": "Supplier Quotation",
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "purchase_order",
+          "fieldtype": "Link",
+          "label": "Purchase Order",
+          "options": "Purchase Order",
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "purchase_receipt",
+          "fieldtype": "Link",
+          "label": "Purchase Receipt",
+          "options": "Purchase Receipt",
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "purchase_invoice",
+          "fieldtype": "Link",
+          "label": "Purchase Invoice",
+          "options": "Purchase Invoice",
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "magic_token_hash",
+          "fieldtype": "Data",
+          "label": "Magic Token Hash",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 1
+        },
+        {
+          "fieldname": "magic_expires_at",
+          "fieldtype": "Datetime",
+          "label": "Magic Expires At",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "otp_hash",
+          "fieldtype": "Data",
+          "label": "OTP Hash",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 1
+        },
+        {
+          "fieldname": "otp_expires_at",
+          "fieldtype": "Datetime",
+          "label": "OTP Expires At",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 1
+        },
+        {
+          "fieldname": "otp_attempts",
+          "fieldtype": "Int",
+          "label": "OTP Attempts",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 1
+        },
+        {
+          "fieldname": "otp_sent_at",
+          "fieldtype": "Datetime",
+          "label": "OTP Sent At",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 1
+        },
+        {
+          "fieldname": "session_hash",
+          "fieldtype": "Data",
+          "label": "Session Hash",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 1
+        },
+        {
+          "fieldname": "session_expires_at",
+          "fieldtype": "Datetime",
+          "label": "Session Expires At",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 1
+        },
+        {
+          "fieldname": "status",
+          "fieldtype": "Select",
+          "label": "Status",
+          "options": "Issued\nOtpSent\nActive\nSubmitted\nRevoked\nExpired",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "revoked_at",
+          "fieldtype": "Datetime",
+          "label": "Revoked At",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 1
+        },
+        {
+          "fieldname": "last_used_at",
+          "fieldtype": "Datetime",
+          "label": "Last Used At",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 1
+        }
+      ]
+    },
+    {
+      "name": "Supplier Portal Audit Log",
+      "module": "Letron API",
+      "source": "letron_api\\doctype\\supplier_portal_audit_log\\supplier_portal_audit_log.json",
+      "is_child_table": 0,
+      "fields": [
+        {
+          "fieldname": "action",
+          "fieldtype": "Data",
+          "label": "Action",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "status",
+          "fieldtype": "Select",
+          "label": "Status",
+          "options": "Success\nRejected\nFailed",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "procurement_process",
+          "fieldtype": "Link",
+          "label": "Procurement Process",
+          "options": "Supplier Procurement Process",
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "access",
+          "fieldtype": "Link",
+          "label": "Access",
+          "options": "Supplier Portal Access",
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "supplier",
+          "fieldtype": "Link",
+          "label": "Supplier",
+          "options": "Supplier",
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "metadata",
+          "fieldtype": "Long Text",
+          "label": "Metadata",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 1
+        }
+      ]
+    },
+    {
+      "name": "Supplier Portal Submission",
+      "module": "Letron API",
+      "source": "letron_api\\doctype\\supplier_portal_submission\\supplier_portal_submission.json",
+      "is_child_table": 0,
+      "fields": [
+        {
+          "fieldname": "procurement_process",
+          "fieldtype": "Link",
+          "label": "Procurement Process",
+          "options": "Supplier Procurement Process",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "access",
+          "fieldtype": "Link",
+          "label": "Access",
+          "options": "Supplier Portal Access",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "supplier",
+          "fieldtype": "Link",
+          "label": "Supplier",
+          "options": "Supplier",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "submission_type",
+          "fieldtype": "Select",
+          "label": "Submission Type",
+          "options": "Delivery Confirmation\nXML Invoice",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "purchase_order",
+          "fieldtype": "Link",
+          "label": "Purchase Order",
+          "options": "Purchase Order",
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "status",
+          "fieldtype": "Select",
+          "label": "Status",
+          "options": "Pending\nApproved\nRejected\nCancelled",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "payload",
+          "fieldtype": "Long Text",
+          "label": "Payload",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 1
+        },
+        {
+          "fieldname": "payload_hash",
+          "fieldtype": "Data",
+          "label": "Payload Hash",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 1
+        },
+        {
+          "fieldname": "file_url",
+          "fieldtype": "Data",
+          "label": "Private File URL",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "file_name",
+          "fieldtype": "Data",
+          "label": "File Name",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "sha256",
+          "fieldtype": "Data",
+          "label": "SHA-256",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "idempotency_key",
+          "fieldtype": "Data",
+          "label": "Idempotency Key",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "reviewed_by",
+          "fieldtype": "Link",
+          "label": "Reviewed By",
+          "options": "User",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "reviewed_at",
+          "fieldtype": "Datetime",
+          "label": "Reviewed At",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "review_note",
+          "fieldtype": "Small Text",
+          "label": "Review Note",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "result_document",
+          "fieldtype": "Dynamic Link",
+          "label": "Result Document",
+          "options": "result_doctype",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "result_doctype",
+          "fieldtype": "Data",
+          "label": "Result DocType",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 1
+        }
+      ]
+    },
+    {
+      "name": "Supplier Procurement Process",
+      "module": "Letron API",
+      "source": "letron_api\\doctype\\supplier_procurement_process\\supplier_procurement_process.json",
+      "is_child_table": 0,
+      "fields": [
+        {
+          "fieldname": "case_id",
+          "fieldtype": "Data",
+          "label": "Case ID",
+          "options": null,
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "material_request",
+          "fieldtype": "Link",
+          "label": "Material Request",
+          "options": "Material Request",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "orchestration_id",
+          "fieldtype": "Data",
+          "label": "Orchestration ID",
+          "options": null,
+          "reqd": 1,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "request_for_quotation",
+          "fieldtype": "Link",
+          "label": "Request for Quotation",
+          "options": "Request for Quotation",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "deadline_at",
+          "fieldtype": "Datetime",
+          "label": "Quotation Deadline",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "supplier_count",
+          "fieldtype": "Int",
+          "label": "Supplier Count",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "submitted_count",
+          "fieldtype": "Int",
+          "label": "Submitted Count",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "approval_status",
+          "fieldtype": "Select",
+          "label": "Approval Status",
+          "options": "Waiting\nReady\nOpening\nOpened\nApproved\nRejected",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "approval_id",
+          "fieldtype": "Data",
+          "label": "Approval ID",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "selected_supplier_quotation",
+          "fieldtype": "Link",
+          "label": "Selected Supplier Quotation",
+          "options": "Supplier Quotation",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "purchase_order",
+          "fieldtype": "Link",
+          "label": "Purchase Order",
+          "options": "Purchase Order",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "purchase_order_status",
+          "fieldtype": "Select",
+          "label": "Purchase Order Status",
+          "options": "Draft\nPending Approval\nSubmitted\nRejected\nERP Failed",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "approval_opened_at",
+          "fieldtype": "Datetime",
+          "label": "Approval Opened At",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        }
+      ]
+    },
+    {
       "name": "Supplier Quotation",
       "module": "Buying",
       "source": "buying\\doctype\\supplier_quotation\\supplier_quotation.json",
@@ -158169,9 +158723,240 @@
       ]
     },
     {
+      "dotted_path": "letron_api.lark_po.create_draft",
+      "source": "lark_po.py",
+      "method": "create_draft",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
       "dotted_path": "letron_api.lark_po.from_approved",
       "source": "lark_po.py",
       "method": "from_approved",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.lark_po.update_approval_state",
+      "source": "lark_po.py",
+      "method": "update_approval_state",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.claim_approval_opening",
+      "source": "supplier_portal.py",
+      "method": "claim_approval_opening",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.create_delivery_confirmation",
+      "source": "supplier_portal.py",
+      "method": "create_delivery_confirmation",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.evaluate_approval_gate",
+      "source": "supplier_portal.py",
+      "method": "evaluate_approval_gate",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.evaluate_due_processes",
+      "source": "supplier_portal.py",
+      "method": "evaluate_due_processes",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.get_payment_status",
+      "source": "supplier_portal.py",
+      "method": "get_payment_status",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.get_process_summary",
+      "source": "supplier_portal.py",
+      "method": "get_process_summary",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.get_purchase_order",
+      "source": "supplier_portal.py",
+      "method": "get_purchase_order",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.get_submissions",
+      "source": "supplier_portal.py",
+      "method": "get_submissions",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.issue_access",
+      "source": "supplier_portal.py",
+      "method": "issue_access",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.logout_session",
+      "source": "supplier_portal.py",
+      "method": "logout_session",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.mark_approval_opened",
+      "source": "supplier_portal.py",
+      "method": "mark_approval_opened",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.read_approval_source",
+      "source": "supplier_portal.py",
+      "method": "read_approval_source",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.release_approval_opening",
+      "source": "supplier_portal.py",
+      "method": "release_approval_opening",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.request_otp",
+      "source": "supplier_portal.py",
+      "method": "request_otp",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.review_submission",
+      "source": "supplier_portal.py",
+      "method": "review_submission",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.revoke_access",
+      "source": "supplier_portal.py",
+      "method": "revoke_access",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.submit_quotation",
+      "source": "supplier_portal.py",
+      "method": "submit_quotation",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.upload_xml_invoice",
+      "source": "supplier_portal.py",
+      "method": "upload_xml_invoice",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": true,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.supplier_portal.verify_otp",
+      "source": "supplier_portal.py",
+      "method": "verify_otp",
       "app": "letron_api",
       "methods": [
         "POST"
@@ -158717,7 +159502,11 @@
     "Letron API": [
       "Letron Event Outbox",
       "Letron SSO Audit Log",
-      "Letron SSO Identity"
+      "Letron SSO Identity",
+      "Supplier Portal Access",
+      "Supplier Portal Audit Log",
+      "Supplier Portal Submission",
+      "Supplier Procurement Process"
     ],
     "Maintenance": [
       "Maintenance Schedule",

@@ -7,15 +7,13 @@ from datetime import UTC, datetime, timedelta
 import frappe
 
 from letron_api.sso_identity import (
-    LEGACY_NATIVE_ROLES,
+    MANAGED_NATIVE_ROLES,
     _managed_policy_roles,
     IdentitySnapshot,
     SsoAccessDenied,
     apply_break_glass,
-    link_existing_user,
     reconcile_identity,
     record_sync_error,
-    snapshot_from_payload,
 )
 from letron_api.sso_protocol import load_configuration
 
@@ -28,25 +26,6 @@ def _environment_list(csv_name: str, json_name: str) -> list[str]:
     if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() for item in value):
         raise ValueError(f"{json_name} must be a JSON array of non-empty strings")
     return [item.strip() for item in value]
-
-
-def backfill_lark_identity_from_environment() -> dict[str, object]:
-    """Link one verified legacy ERP user to a stable Lark identity."""
-
-    payload = {
-        "tenant_key": os.environ.get("LETRON_BACKFILL_TENANT_KEY", ""),
-        "subject": os.environ.get("LETRON_BACKFILL_SUBJECT", ""),
-        "subject_type": os.environ.get("LETRON_BACKFILL_SUBJECT_TYPE", ""),
-        "email": os.environ.get("LETRON_BACKFILL_EMAIL", ""),
-        "display_name": os.environ.get("LETRON_BACKFILL_DISPLAY_NAME", ""),
-        "groups": _environment_list("LETRON_BACKFILL_GROUP_IDS", "LETRON_BACKFILL_GROUPS"),
-        "groups_synced_at": os.environ.get("LETRON_BACKFILL_SYNCED_AT", ""),
-    }
-    snapshot = snapshot_from_payload(payload)
-    config = load_configuration(os.environ)
-    user = link_existing_user(snapshot, snapshot.email, config.role_sync)
-    frappe.db.commit()
-    return {"linked": True, "user": user, "identity_key": snapshot.identity_key}
 
 
 def break_glass_from_environment() -> dict[str, object]:
@@ -100,7 +79,7 @@ def run_lark_sso_acceptance() -> dict[str, object]:
         assert "Stock User" in {row.role for row in user.roles}
         checks.append("unmanaged_role_preserved")
 
-        managed_roles = LEGACY_NATIVE_ROLES | _managed_policy_roles({row.role for row in user.roles})
+        managed_roles = MANAGED_NATIVE_ROLES | _managed_policy_roles({row.role for row in user.roles})
         user.set("roles", [row for row in user.roles if row.role not in managed_roles])
         try:
             user.save(ignore_permissions=True)

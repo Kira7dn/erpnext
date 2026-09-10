@@ -33,7 +33,7 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
     return apiErrorResponse("gateway_unavailable", 503, "Letron Global Portal Gateway is unavailable.", true);
   }
   if (!response.ok)
-    return apiErrorFromResponse(response, "asset_request_failed", "Asset request failed.");
+    return apiErrorFromResponse(response, "asset_request_failed");
   const responseHeaders = new Headers({ "content-type": response.headers.get("content-type") ?? "application/json" });
   const gatewayTiming = response.headers.get("server-timing");
   if (gatewayTiming) responseHeaders.set("Server-Timing", `${gatewayTiming}, erp_route;dur=${(performance.now() - startedAt).toFixed(1)}`);

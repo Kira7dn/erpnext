@@ -34,10 +34,10 @@ const policy = parseAccessPolicy({
 describe("access policy", () => {
   it("uses only CRUD capabilities", () => {
     expect(PUBLIC_OPERATIONS).toEqual(["list", "read", "create", "update", "delete"]);
-    expect(parseAccessPolicy({
+    expect(() => parseAccessPolicy({
       ...policy,
       entitlements: [{ ...policy.entitlements[0], rules: [{ ...policy.entitlements[0].rules[0], operations: ["submit"] }] }],
-    }).entitlements[0].rules[0].operations).toEqual(["update"]);
+    })).toThrow();
   });
 
   it("normalizes every OpenAPI endpoint into a CRUD capability", () => {

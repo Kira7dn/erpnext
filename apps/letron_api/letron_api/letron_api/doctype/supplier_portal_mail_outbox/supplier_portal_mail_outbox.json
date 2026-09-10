@@ -1,0 +1,33 @@
+{
+  "actions": [],
+  "allow_rename": 0,
+  "autoname": "hash",
+  "creation": "2026-09-10 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": ["idempotency_key", "to_email", "subject", "encrypted_payload", "status", "attempts", "next_attempt_at", "last_error", "provider_message_id", "sent_at"],
+  "fields": [
+    {"fieldname": "idempotency_key", "fieldtype": "Data", "label": "Idempotency Key", "reqd": 1, "unique": 1, "read_only": 1},
+    {"fieldname": "to_email", "fieldtype": "Data", "label": "To Email", "reqd": 1, "read_only": 1},
+    {"fieldname": "subject", "fieldtype": "Data", "label": "Subject", "reqd": 1, "read_only": 1},
+    {"fieldname": "encrypted_payload", "fieldtype": "Long Text", "label": "Encrypted Payload", "reqd": 1, "hidden": 1},
+    {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Pending\nSending\nSent\nFailed", "default": "Pending", "reqd": 1},
+    {"fieldname": "attempts", "fieldtype": "Int", "label": "Attempts", "default": "0", "read_only": 1},
+    {"fieldname": "next_attempt_at", "fieldtype": "Datetime", "label": "Next Attempt At", "read_only": 1},
+    {"fieldname": "last_error", "fieldtype": "Small Text", "label": "Last Error", "read_only": 1},
+    {"fieldname": "provider_message_id", "fieldtype": "Data", "label": "Provider Message ID", "read_only": 1},
+    {"fieldname": "sent_at", "fieldtype": "Datetime", "label": "Sent At", "read_only": 1}
+  ],
+  "index_web_pages_for_search": 0,
+  "is_submittable": 0,
+  "links": [],
+  "modified": "2026-09-10 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Letron API",
+  "name": "Supplier Portal Mail Outbox",
+  "owner": "Administrator",
+  "permissions": [{"role": "System Manager", "read": 1}],
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "states": []
+}

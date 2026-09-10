@@ -144,7 +144,7 @@ export default async function handler(
   }
   const env = getEnv();
   const baseUrl = env.LETRON_SSO_ERP_BASE_URL;
-  const secret = env.LETRON_SSO_SYNC_SECRET ?? env.AUTH_ERP_SYNC_SECRET;
+  const secret = env.LETRON_SSO_SYNC_SECRET;
   if (!baseUrl || !secret) {
     finish();
     errorResponse(res, 503, "gateway_not_configured", "Gateway is not configured.");

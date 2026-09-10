@@ -2,7 +2,8 @@ import "server-only";
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { ApiRequestError, remoteErrorMessage, type RemoteErrorPayload } from "./api-error";
+import { ApiRequestError, type RemoteErrorPayload } from "./api-error";
+import { publicErrorMessage } from "./error-contract";
 import { portalAuthBaseUrl } from "./portal-config";
 
 export type BankAccount = {
@@ -126,6 +127,7 @@ export type PurchaseResource =
   | "items"
   | "material-requests"
   | "request-for-quotations"
+  | "purchase-orders"
   | "attachments";
 export const PURCHASE_RESOURCES = [
   "suppliers",
@@ -134,6 +136,7 @@ export const PURCHASE_RESOURCES = [
   "items",
   "material-requests",
   "request-for-quotations",
+  "purchase-orders",
   "attachments",
 ] as const satisfies readonly PurchaseResource[];
 
@@ -381,7 +384,7 @@ export async function gatewayRequest<T>(
     }
     throw new GatewayRequestError(
       gatewayErrorCode(response.status),
-      remoteErrorMessage(payload, response.status >= 500 ? "ERP service request failed." : "ERP request was rejected."),
+      publicErrorMessage(payload.error, response.status),
       response.status,
       response.status === 429 || response.status >= 500,
     );

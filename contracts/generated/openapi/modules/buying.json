@@ -5256,6 +5256,135 @@
         }
       }
     },
+    "/api/method/letron_api.lark_po.create_draft": {
+      "post": {
+        "tags": [
+          "Module: Buying",
+          "Business routes"
+        ],
+        "summary": "createPurchaseOrderDraftBeforeApproval",
+        "operationId": "createPurchaseOrderDraftBeforeApproval",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.lark_po.create_draft",
+        "x-public-operation": "create",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "extended-api",
+          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
+        }
+      }
+    },
     "/api/method/letron_api.lark_po.from_approved": {
       "post": {
         "tags": [
@@ -5377,7 +5506,141 @@
             }
           }
         },
-        "x-test-status": "not-tested"
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "extended-api",
+          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
+        }
+      }
+    },
+    "/api/method/letron_api.lark_po.update_approval_state": {
+      "post": {
+        "tags": [
+          "Module: Buying",
+          "Business routes"
+        ],
+        "summary": "updatePurchaseOrderApprovalState",
+        "operationId": "updatePurchaseOrderApprovalState",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.lark_po.update_approval_state",
+        "x-public-operation": "update",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "extended-api",
+          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
+        }
       }
     }
   },
@@ -8878,12 +9141,30 @@
       "custom_routes": [
         {
           "module": "Buying",
+          "resource": "purchase-orders/create-draft",
+          "method": "POST",
+          "path": "/api/method/letron_api.lark_po.create_draft",
+          "operation": "create",
+          "operation_id": "createPurchaseOrderDraftBeforeApproval",
+          "handler": "letron_api.lark_po.create_draft"
+        },
+        {
+          "module": "Buying",
           "resource": "purchase-orders/from-approved-lark",
           "method": "POST",
           "path": "/api/method/letron_api.lark_po.from_approved",
           "operation": "create",
           "operation_id": "createPurchaseOrderFromApprovedLark",
           "handler": "letron_api.lark_po.from_approved"
+        },
+        {
+          "module": "Buying",
+          "resource": "purchase-orders/update-approval-state",
+          "method": "POST",
+          "path": "/api/method/letron_api.lark_po.update_approval_state",
+          "operation": "update",
+          "operation_id": "updatePurchaseOrderApprovalState",
+          "handler": "letron_api.lark_po.update_approval_state"
         },
         {
           "module": "Files",
@@ -9353,7 +9634,7 @@
   "x-acceptance-summary": {
     "passed": 22,
     "partial": 0,
-    "not-tested": 1,
+    "not-tested": 3,
     "blocked": 0
   },
   "x-module": "Buying",

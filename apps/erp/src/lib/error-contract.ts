@@ -1,41 +1,35 @@
 export type RemoteErrorPayload = {
   error?: unknown;
-  message?: unknown;
-  _server_messages?: unknown;
+  retryable?: unknown;
+  retry_after_seconds?: unknown;
 };
 
-export function parseFrappeMessage(value: unknown): string | undefined {
-  if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-    const message = (value as { message?: unknown }).message;
-    return typeof message === "string" && message.trim() ? message.trim() : undefined;
-  }
-  if (typeof value !== "string") return undefined;
-  try {
-    const parsed = JSON.parse(value) as unknown;
-    const rows = Array.isArray(parsed) ? parsed : [parsed];
-    for (const row of rows) {
-      if (typeof row === "string") {
-        const nested = parseFrappeMessage(row);
-        if (nested) return nested;
-      }
-      if (row && typeof row === "object" && typeof (row as { message?: unknown }).message === "string")
-        return (row as { message: string }).message;
-    }
-  } catch {
-    return undefined;
-  }
-  return undefined;
+export function validErrorCode(value: unknown): string | undefined {
+  return typeof value === "string" && /^[a-z][a-z0-9_]*$/.test(value) ? value : undefined;
 }
 
-export function remoteErrorMessage(
-  payload: RemoteErrorPayload,
-  fallback: string,
-): string {
-  const frappeMessage = parseFrappeMessage(payload._server_messages);
-  if (frappeMessage) return frappeMessage.slice(0, 500);
-  const message = parseFrappeMessage(payload.message);
-  if (message) return message.slice(0, 500);
-  if (typeof payload.message === "string" && payload.message.trim())
-    return payload.message.trim().slice(0, 500);
-  return fallback;
+export function retryAfterSeconds(value: unknown): number | undefined {
+  const seconds = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(seconds) && seconds > 0 ? Math.ceil(seconds) : undefined;
+}
+
+const USER_FACING_MESSAGES: Record<string, string> = {
+  supplier_otp_rate_limited: "Bạn vừa yêu cầu OTP. Vui lòng thử lại khi bộ đếm kết thúc.",
+  supplier_portal_rate_limited: "Bạn vừa thao tác quá nhanh. Vui lòng thử lại sau.",
+  supplier_portal_not_found: "Magic Link không hợp lệ hoặc đã hết hạn.",
+  supplier_portal_access_denied: "Magic Link không hợp lệ hoặc đã hết hạn.",
+  supplier_portal_authentication_required: "Phiên Supplier Portal không hợp lệ.",
+  supplier_portal_unavailable: "Supplier Portal đang tạm thời không khả dụng.",
+  supplier_session_required: "Phiên Supplier Portal đã hết hạn. Vui lòng mở lại Magic Link.",
+};
+
+export function publicErrorMessage(code: unknown, status: number): string {
+  const validCode = validErrorCode(code);
+  if (validCode && USER_FACING_MESSAGES[validCode]) return USER_FACING_MESSAGES[validCode];
+  if (status === 401) return "Yêu cầu xác thực không hợp lệ.";
+  if (status === 403) return "Bạn không có quyền thực hiện thao tác này.";
+  if (status === 404) return "Không tìm thấy tài nguyên yêu cầu.";
+  if (status === 429) return "Bạn vừa thao tác quá nhanh. Vui lòng thử lại sau.";
+  if (status >= 500) return "Dịch vụ đang tạm thời không khả dụng.";
+  return "Yêu cầu không hợp lệ.";
 }

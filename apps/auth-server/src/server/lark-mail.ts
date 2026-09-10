@@ -24,10 +24,29 @@ const refreshTokenSchema = z.object({
 const appTokenSchema = z.object({ app_access_token: z.string().min(1) });
 
 export const LARK_PUBLIC_MAILBOX = "procurement@letrongroup.com";
+const LARK_MAIL_SENDING_LEASE_MS = 60_000;
+const LARK_MAIL_CONCURRENT_WAIT_MS = 20_000;
+
+let cachedMailToken: { accessToken: string; expiresAt: number } | undefined;
+let mailTokenRefresh: Promise<string> | undefined;
+
+async function withTimeout<T>(operation: Promise<T>, milliseconds: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => reject(new Error("LARK_MAIL_PROVIDER_TIMEOUT")), milliseconds);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
 
 function unwrap(value: unknown): unknown {
-  if (value && typeof value === "object" && "data" in value) return (value as { data: unknown }).data;
-  return value;
+  if (!value || typeof value !== "object" || !("data" in value)) throw new Error("LARK_RESPONSE_DATA_MISSING");
+  return (value as { data: unknown }).data;
 }
 
 async function json(response: Response): Promise<unknown> {
@@ -97,7 +116,7 @@ async function appAccessToken(): Promise<string> {
     body: JSON.stringify({ app_id: env.LARK_APP_ID, app_secret: env.LARK_APP_SECRET }),
     signal: AbortSignal.timeout(10_000),
   });
-  return appTokenSchema.parse(unwrap(await json(response))).app_access_token;
+  return appTokenSchema.parse(await json(response)).app_access_token;
 }
 
 export async function exchangeLarkMailCode(code: string): Promise<z.infer<typeof exchangeTokenSchema>> {
@@ -151,76 +170,164 @@ export async function saveLarkMailCredential(input: {
 }
 
 async function refreshStoredLarkMailCredential(mailboxEmail: string): Promise<string> {
-  return getDb().$transaction(async (tx) => {
-    await tx.$executeRawUnsafe(
-      "SELECT pg_advisory_xact_lock(hashtext($1))",
-      `letron:lark-mail-refresh:${mailboxEmail.toLowerCase()}`,
-    );
-    const credential = await tx.larkMailCredential.findUnique({ where: { mailboxEmail } });
-    if (!credential) throw new Error("LARK_MAIL_OAUTH_REQUIRED");
-    const token = await refreshLarkMailToken(decrypt(credential.encryptedRefreshToken));
-    if (token.refresh_token) {
-      await tx.larkMailCredential.update({
-        where: { id: credential.id },
-        data: {
-          encryptedRefreshToken: encrypt(token.refresh_token),
-          refreshTokenExpiresAt: token.refresh_token_expires_in ? new Date(Date.now() + token.refresh_token_expires_in * 1000) : undefined,
-          grantedScopes: token.scope ?? credential.grantedScopes ?? undefined,
-        },
-      });
-    }
-    return token.access_token;
-  }, { maxWait: 10_000, timeout: 30_000 });
+  if (cachedMailToken && cachedMailToken.expiresAt > Date.now() + 60_000) return cachedMailToken.accessToken;
+  if (mailTokenRefresh) return mailTokenRefresh;
+  mailTokenRefresh = (async () => {
+    const db = getDb();
+    const refreshed = await db.$transaction(async (tx) => {
+      // Refresh tokens are rotated by Lark. Serialize refreshes across all
+      // Next.js instances so two workers cannot consume the same token.
+      await tx.$executeRawUnsafe("SELECT pg_advisory_xact_lock(hashtext($1))", `letron:lark-mail-refresh:${mailboxEmail.toLowerCase()}`);
+      const credential = await tx.larkMailCredential.findUnique({ where: { mailboxEmail: mailboxEmail.toLowerCase() } });
+      if (!credential) throw new Error("LARK_MAIL_OAUTH_REQUIRED");
+      const token = await refreshLarkMailToken(decrypt(credential.encryptedRefreshToken));
+      if (token.refresh_token) {
+        await tx.larkMailCredential.update({
+          where: { id: credential.id },
+          data: {
+            encryptedRefreshToken: encrypt(token.refresh_token),
+            refreshTokenExpiresAt: token.refresh_token_expires_in ? new Date(Date.now() + token.refresh_token_expires_in * 1000) : undefined,
+            grantedScopes: token.scope ?? credential.grantedScopes ?? undefined,
+          },
+        });
+      }
+      return { accessToken: token.access_token, expiresAt: Date.now() + (token.expires_in ?? 3600) * 1000 };
+    }, { maxWait: 10_000, timeout: 30_000 });
+    cachedMailToken = refreshed;
+    return refreshed.accessToken;
+  })();
+  try { return await mailTokenRefresh; } finally { mailTokenRefresh = undefined; }
 }
 
-export async function sendLarkMail(input: { to: string; subject: string; bodyHtml: string; bodyPlainText?: string }): Promise<{ messageId: string }> {
+function invalidateCachedMailToken(): void {
+  cachedMailToken = undefined;
+}
+
+export async function sendLarkMail(input: { to: string; subject: string; bodyHtml: string; bodyPlainText?: string; idempotencyKey: string }): Promise<{ messageId: string; idempotent?: boolean }> {
+  const db = getDb();
+  let delivery = await db.larkMailDelivery.findUnique({ where: { idempotencyKey: input.idempotencyKey } });
+  let newlyClaimed = false;
+  if (!delivery) {
+    try {
+      delivery = await db.larkMailDelivery.create({ data: { idempotencyKey: input.idempotencyKey, recipient: input.to, subject: input.subject, status: "SENDING" } });
+      newlyClaimed = true;
+    } catch (error) {
+      // Another request may have claimed the same key between find and create.
+      // Re-read the unique row so retries remain idempotent instead of leaking
+      // a Prisma unique-constraint error to the caller.
+      const concurrent = await db.larkMailDelivery.findUnique({ where: { idempotencyKey: input.idempotencyKey } });
+      if (!concurrent) throw error;
+      delivery = concurrent;
+    }
+  }
+  if (delivery.status === "SENT" && delivery.providerMessageId) return { messageId: delivery.providerMessageId, idempotent: true };
+  if (!newlyClaimed && delivery.status === "SENDING" && delivery.updatedAt.getTime() > Date.now() - LARK_MAIL_SENDING_LEASE_MS) {
+    const deadline = Date.now() + LARK_MAIL_CONCURRENT_WAIT_MS;
+    while (Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const current = await db.larkMailDelivery.findUnique({ where: { id: delivery.id } });
+      if (current?.status === "SENT" && current.providerMessageId) return { messageId: current.providerMessageId, idempotent: true };
+      if (!current || current.status !== "SENDING") {
+        delivery = current ?? delivery;
+        break;
+      }
+    }
+    if (delivery.status === "SENDING" && delivery.updatedAt.getTime() > Date.now() - LARK_MAIL_SENDING_LEASE_MS) throw new Error("LARK_MAIL_SEND_IN_PROGRESS");
+  }
+  if (!newlyClaimed) {
+    const claimed = await db.larkMailDelivery.updateMany({
+      where: {
+        id: delivery.id,
+        OR: [
+          { status: "FAILED" },
+          { status: "SENDING", updatedAt: { lte: new Date(Date.now() - LARK_MAIL_SENDING_LEASE_MS) } },
+        ],
+      },
+      data: { recipient: input.to, subject: input.subject, status: "SENDING", lastError: null },
+    });
+    if (claimed.count !== 1) {
+      const current = await db.larkMailDelivery.findUnique({ where: { id: delivery.id } });
+      if (current?.status === "SENT" && current.providerMessageId) return { messageId: current.providerMessageId, idempotent: true };
+      throw new Error("LARK_MAIL_SEND_IN_PROGRESS");
+    }
+    delivery = await db.larkMailDelivery.findUniqueOrThrow({ where: { id: delivery.id } });
+  }
   const mailboxEmail = LARK_PUBLIC_MAILBOX;
-  const accessToken = await refreshStoredLarkMailCredential(mailboxEmail);
-  const env = getEnv();
-  const response = await fetch(new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailboxEmail)}/messages/send`, env.LARK_DOMAIN), {
-    method: "POST",
-    headers: { authorization: `Bearer ${accessToken}`, "content-type": "application/json; charset=utf-8" },
-    body: JSON.stringify({
-      subject: input.subject,
-      to: [{ mail_address: input.to }],
-      body_html: input.bodyHtml,
-      body_plain_text: input.bodyPlainText ?? input.bodyHtml.replace(/<[^>]+>/g, ""),
-    }),
-    signal: AbortSignal.timeout(15_000),
-  });
-  const payload = await json(response) as { data?: { message_id?: string }; message_id?: string };
-  const messageId = payload.data?.message_id ?? payload.message_id;
-  if (!messageId) throw new Error("LARK_MAIL_MESSAGE_ID_MISSING");
-  return { messageId };
+  try {
+    const env = getEnv();
+    const messageId = await db.$transaction(async (tx) => {
+      // Lark serializes send requests per mailbox. The transaction advisory
+      // lock keeps that invariant across concurrent Next.js instances.
+      await tx.$executeRawUnsafe("SELECT pg_advisory_xact_lock(hashtext($1))", `letron:lark-mail-send:${mailboxEmail.toLowerCase()}`);
+      let payload: { data?: { message_id?: string }; message_id?: string } = {};
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        const accessToken = await refreshStoredLarkMailCredential(mailboxEmail);
+        try {
+          payload = await withTimeout((async () => {
+            const response = await fetch(new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailboxEmail)}/messages/send`, env.LARK_DOMAIN), {
+              method: "POST",
+              headers: { authorization: `Bearer ${accessToken}`, "content-type": "application/json; charset=utf-8" },
+              body: JSON.stringify({ subject: input.subject, to: [{ mail_address: input.to }], body_html: input.bodyHtml, body_plain_text: input.bodyPlainText ?? input.bodyHtml.replace(/<[^>]+>/g, ""), dedupe_key: input.idempotencyKey }),
+              signal: AbortSignal.timeout(15_000),
+            });
+            return await json(response) as { data?: { message_id?: string }; message_id?: string };
+          })(), 15_000);
+          break;
+        } catch (error) {
+          if (attempt === 0 && error instanceof Error && error.message.startsWith("LARK_MAIL_99991668:")) {
+            invalidateCachedMailToken();
+            continue;
+          }
+          throw error;
+        }
+      }
+      const providerMessageId = payload.data?.message_id;
+      if (!providerMessageId) throw new Error("LARK_MAIL_MESSAGE_ID_MISSING");
+      await tx.larkMailDelivery.update({ where: { id: delivery.id }, data: { status: "SENT", providerMessageId, sentAt: new Date(), lastError: null } });
+      return providerMessageId;
+    }, { maxWait: 10_000, timeout: 30_000 });
+    return { messageId };
+  } catch (error) {
+    await db.larkMailDelivery.update({ where: { id: delivery.id }, data: { status: "FAILED", lastError: error instanceof Error ? error.message.slice(0, 500) : "mail_send_failed" } }).catch(() => undefined);
+    throw error;
+  }
 }
 
 export async function latestLarkMail(input: { subject: string; after?: string }): Promise<Array<{ subject: string; message: string; recipients: string; internalDate: string }>> {
-  const accessToken = await refreshStoredLarkMailCredential(LARK_PUBLIC_MAILBOX);
-  const env = getEnv();
-  const mailbox = env.LARK_PO_APPROVER_EMAIL;
-  if (!mailbox) throw new Error("LARK_MAIL_READER_NOT_CONFIGURED");
-  const listUrl = new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailbox)}/messages`, env.LARK_DOMAIN);
-  listUrl.searchParams.set("page_size", "20");
-  listUrl.searchParams.set("folder_id", "INBOX");
-  const listResponse = await fetch(listUrl, { headers: { authorization: `Bearer ${accessToken}` }, signal: AbortSignal.timeout(15_000) });
-  const listed = await json(listResponse) as { data?: { items?: string[] } };
-  const after = input.after ? Date.parse(input.after) : 0;
-  const results: Array<{ subject: string; message: string; recipients: string; internalDate: string }> = [];
-  for (const messageId of listed.data?.items ?? []) {
-    const detailUrl = new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailbox)}/messages/${encodeURIComponent(messageId)}`, env.LARK_DOMAIN);
-    detailUrl.searchParams.set("format", "full");
-    const detailResponse = await fetch(detailUrl, { headers: { authorization: `Bearer ${accessToken}` }, signal: AbortSignal.timeout(15_000) });
-    const detail = await json(detailResponse) as { data?: { message?: { subject?: string; body_plain_text?: string; internal_date?: string; to?: Array<{ mail_address?: string }> } } };
-    const mail = detail.data?.message;
-    if (!mail || mail.subject !== input.subject || (Number(mail.internal_date ?? 0) && Number(mail.internal_date) < after)) continue;
-    const encoded = mail.body_plain_text ?? "";
-    const message = encoded ? Buffer.from(encoded, "base64url").toString("utf8") : "";
-    results.push({
-      subject: mail.subject ?? "",
-      message,
-      recipients: (mail.to ?? []).map((item) => item.mail_address ?? "").filter(Boolean).join(","),
-      internalDate: mail.internal_date ?? "",
-    });
+  const read = async (accessToken: string): Promise<Array<{ subject: string; message: string; recipients: string; internalDate: string }>> => {
+    const env = getEnv();
+    const mailbox = env.LARK_PO_APPROVER_EMAIL;
+    if (!mailbox) throw new Error("LARK_MAIL_READER_NOT_CONFIGURED");
+    const listUrl = new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailbox)}/messages`, env.LARK_DOMAIN);
+    listUrl.searchParams.set("page_size", "20");
+    listUrl.searchParams.set("folder_id", "INBOX");
+    const listResponse = await fetch(listUrl, { headers: { authorization: `Bearer ${accessToken}` }, signal: AbortSignal.timeout(15_000) });
+    const listed = await json(listResponse) as { data?: { items?: string[] } };
+    const after = input.after ? Date.parse(input.after) : 0;
+    const results: Array<{ subject: string; message: string; recipients: string; internalDate: string }> = [];
+    for (const messageId of listed.data?.items ?? []) {
+      const detailUrl = new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailbox)}/messages/${encodeURIComponent(messageId)}`, env.LARK_DOMAIN);
+      detailUrl.searchParams.set("format", "full");
+      const detailResponse = await fetch(detailUrl, { headers: { authorization: `Bearer ${accessToken}` }, signal: AbortSignal.timeout(15_000) });
+      const detail = await json(detailResponse) as { data?: { message?: { subject?: string; body_plain_text?: string; internal_date?: string; to?: Array<{ mail_address?: string }> } } };
+      const mail = detail.data?.message;
+      if (!mail || mail.subject !== input.subject || (Number(mail.internal_date ?? 0) && Number(mail.internal_date) < after)) continue;
+      const encoded = mail.body_plain_text ?? "";
+      const message = encoded ? Buffer.from(encoded, "base64url").toString("utf8") : "";
+      results.push({
+        subject: mail.subject ?? "",
+        message,
+        recipients: (mail.to ?? []).map((item) => item.mail_address ?? "").filter(Boolean).join(","),
+        internalDate: mail.internal_date ?? "",
+      });
+    }
+    return results;
+  };
+  try {
+    return await read(await refreshStoredLarkMailCredential(LARK_PUBLIC_MAILBOX));
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.startsWith("LARK_MAIL_99991668:")) throw error;
+    invalidateCachedMailToken();
+    return read(await refreshStoredLarkMailCredential(LARK_PUBLIC_MAILBOX));
   }
-  return results;
 }

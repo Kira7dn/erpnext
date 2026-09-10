@@ -1657,6 +1657,45 @@ paths:
       x-test-evidence:
         suite: crm-preorder
         test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+  /api/method/letron_api.lark_po.create_draft:
+    post:
+      tags:
+      - 'Module: Buying'
+      - Business routes
+      summary: createPurchaseOrderDraftBeforeApproval
+      operationId: createPurchaseOrderDraftBeforeApproval
+      parameters:
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.lark_po.create_draft
+      x-public-operation: create
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
   /api/method/letron_api.lark_po.from_approved:
     post:
       tags:
@@ -1692,6 +1731,49 @@ paths:
               type: object
               additionalProperties: true
       x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
+  /api/method/letron_api.lark_po.update_approval_state:
+    post:
+      tags:
+      - 'Module: Buying'
+      - Business routes
+      summary: updatePurchaseOrderApprovalState
+      operationId: updatePurchaseOrderApprovalState
+      parameters:
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrappeResponse'
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.lark_po.update_approval_state
+      x-public-operation: update
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
 components:
   securitySchemes:
     frappeToken:
@@ -3822,12 +3904,26 @@ x-contract:
       handler: letron_api.banking.run_rule_evaluation
     custom_routes:
     - module: Buying
+      resource: purchase-orders/create-draft
+      method: POST
+      path: /api/method/letron_api.lark_po.create_draft
+      operation: create
+      operation_id: createPurchaseOrderDraftBeforeApproval
+      handler: letron_api.lark_po.create_draft
+    - module: Buying
       resource: purchase-orders/from-approved-lark
       method: POST
       path: /api/method/letron_api.lark_po.from_approved
       operation: create
       operation_id: createPurchaseOrderFromApprovedLark
       handler: letron_api.lark_po.from_approved
+    - module: Buying
+      resource: purchase-orders/update-approval-state
+      method: POST
+      path: /api/method/letron_api.lark_po.update_approval_state
+      operation: update
+      operation_id: updatePurchaseOrderApprovalState
+      handler: letron_api.lark_po.update_approval_state
     - module: Files
       resource: attachments
       method: POST
@@ -4134,7 +4230,7 @@ x-capabilities:
 x-acceptance-summary:
   passed: 22
   partial: 0
-  not-tested: 1
+  not-tested: 3
   blocked: 0
 x-module: Buying
 x-module-index:

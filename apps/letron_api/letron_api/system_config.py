@@ -10,7 +10,6 @@ import argparse
 import hashlib
 import json
 import os
-import secrets
 import shlex
 import sys
 from collections.abc import Iterator, Mapping
@@ -686,21 +685,6 @@ def acceptance_force_drift() -> None:
     frappe.db.commit()
 
 
-def migrate_legacy_env(legacy: Path, destination: Path) -> None:
-    if destination.exists():
-        return
-    data = yaml.safe_load(legacy.read_text(encoding="utf-8"))
-    values = {
-        "DB_ROOT_PASSWORD": data["database"]["root_password"],
-        "ADMIN_PASSWORD": data["site"]["admin_password"],
-        "SMTP_PASSWORD": data["email"]["password"],
-        "LETRON_WEBHOOK_SECRET": secrets.token_hex(32),
-        "LETRON_REALTIME_TOKEN": secrets.token_hex(32),
-    }
-    destination.write_text("".join(f"{key}={value}\n" for key, value in values.items()), encoding="utf-8")
-    destination.chmod(0o600)
-
-
 def _main() -> None:
     reconfigure = getattr(sys.stdout, "reconfigure", None)
     if callable(reconfigure):
@@ -715,9 +699,6 @@ def _main() -> None:
     env_parser = subparsers.add_parser("env")
     env_parser.add_argument("--path")
     env_parser.add_argument("--format", choices=("json", "posix"), default="json")
-    migrate_parser = subparsers.add_parser("migrate-legacy-env")
-    migrate_parser.add_argument("--legacy", required=True)
-    migrate_parser.add_argument("--destination", required=True)
     args = parser.parse_args()
     if args.command == "validate":
         print(json.dumps(validate_file(args.path), ensure_ascii=False, sort_keys=True))
@@ -731,7 +712,7 @@ def _main() -> None:
             for key, value in environment.items():
                 print(f"export {key}={shlex.quote(value)}")
     else:
-        migrate_legacy_env(Path(args.legacy), Path(args.destination))
+        raise ConfigError(f"Unsupported command: {args.command}")
 
 
 if __name__ == "__main__":

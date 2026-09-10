@@ -1,8 +1,10 @@
 {
   "erp_base_url": "http://localhost:8080",
-  "next_base_url": "http://localhost:3001",
+  "next_internal_base_url": "http://host.docker.internal:3001",
+  "portal_public_base_url": "http://localhost:3001",
   "auth_base_url": "http://host.docker.internal:3000",
   "approval_submitter_email": "leducanh@ledb.vn",
+  "support_email": "procurement@letrongroup.com",
   "review_user": "Administrator",
   "deadline_interval_minutes": 5
 }

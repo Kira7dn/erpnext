@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const env = getEnv();
   const erpBaseUrl = env.LETRON_SSO_ERP_BASE_URL || "http://localhost:8080";
-  const syncSecret = env.LETRON_SSO_SYNC_SECRET || env.AUTH_ERP_SYNC_SECRET || "";
+  const syncSecret = env.LETRON_SSO_SYNC_SECRET || "";
 
   try {
     const response = await fetch(`${erpBaseUrl}/api/method/letron_api.backup.scheduled_s3_backup`, {

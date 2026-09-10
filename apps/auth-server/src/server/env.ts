@@ -26,8 +26,6 @@ const schema = z.object({
   GLOBAL_ACCESS_ADMIN_GROUP_ID: z.string().min(1).optional(),
   LETRON_API_KEY: z.string().min(32).optional(),
   LETRON_SSO_SYNC_SECRET: z.string().min(32).optional(),
-  AUTH_ERP_SYNC_SECRET: z.string().min(32).optional(),
-  LETRON_SUPPLIER_PORTAL_SECRET: z.string().min(32).optional(),
   AUTH_DATA_ENCRYPTION_KEY: z.string().min(1),
   OIDC_COOKIE_KEYS: z.string().min(1),
   OIDC_JWKS: z.string().min(1),
@@ -57,8 +55,8 @@ export function getEnv(): AuthEnv {
   if (cachedEnv) return cachedEnv;
   loadLocalFiles();
   cachedEnv = schema.parse(process.env);
-  if (cachedEnv.LARK_GROUP_SYNC_ENABLED && !cachedEnv.AUTH_ERP_SYNC_SECRET) {
-    throw new Error("AUTH_ERP_SYNC_SECRET is required when LARK_GROUP_SYNC_ENABLED is true");
+  if (cachedEnv.LARK_GROUP_SYNC_ENABLED && !cachedEnv.LETRON_SSO_SYNC_SECRET) {
+    throw new Error("LETRON_SSO_SYNC_SECRET is required when LARK_GROUP_SYNC_ENABLED is true");
   }
   return cachedEnv;
 }

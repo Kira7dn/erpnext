@@ -1,7 +1,7 @@
 "use client";
 
 import { ErpQueryError } from "@/components/query-provider";
-import { remoteErrorMessage, type RemoteErrorPayload } from "@/lib/error-contract";
+import { publicErrorMessage, type RemoteErrorPayload } from "@/lib/error-contract";
 
 type ApiPayload<T> = { data?: T; message?: T | string } & RemoteErrorPayload;
 
@@ -15,7 +15,7 @@ export async function clientQuery<T>(path: string, init?: RequestInit): Promise<
     const code = typeof payload.error === "string" && /^[a-z0-9_]+$/.test(payload.error)
       ? payload.error
       : `http_${response.status}`;
-    const message = remoteErrorMessage(payload, `Request failed with HTTP ${response.status}.`);
+    const message = publicErrorMessage(payload.error, response.status);
     const retryable = typeof (payload as { retryable?: unknown }).retryable === "boolean"
       ? Boolean((payload as { retryable: boolean }).retryable)
       : response.status >= 500;

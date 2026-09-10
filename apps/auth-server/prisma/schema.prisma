@@ -73,6 +73,22 @@ model LarkMailCredential {
   @@map("lark_mail_credential")
 }
 
+model LarkMailDelivery {
+  id                BigInt   @id @default(autoincrement())
+  idempotencyKey    String   @unique @map("idempotency_key") @db.VarChar(255)
+  recipient         String   @db.VarChar(320)
+  subject           String   @db.VarChar(998)
+  status            String   @db.VarChar(32)
+  providerMessageId String?  @map("provider_message_id") @db.VarChar(255)
+  lastError         String?  @map("last_error") @db.Text
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  sentAt            DateTime? @map("sent_at") @db.Timestamptz(3)
+
+  @@index([status, updatedAt])
+  @@map("lark_mail_delivery")
+}
+
 model ExternalIdentity {
   id             BigInt    @id @default(autoincrement())
   provider       String    @db.VarChar(32)

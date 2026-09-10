@@ -1,40 +1,43 @@
 # Lark PO Draft và Approval
 
-> **Implementation status:** Server-side handoff is connected. When a selected
-> Supplier Quotation is supplied, the orchestration creates/reuses the Lark PO
-> Draft and Approval instance; without one, the RFQ remains pending handoff.
-> Live tenant acceptance is still pending. See [handoff note](Lark_PO_Draft_Approval_Handoff.md).
+> **Implementation status:** ERPNext is the SSOT. After the cheapest submitted
+> Supplier Quotation is selected, the orchestration creates exactly one native
+> ERPNext PO Draft and obtains its real PO number before opening Lark Approval.
+> Approval callback submits that same ERPNext draft; it never creates a second
+> PO. See [handoff note](Lark_PO_Draft_Approval_Handoff.md).
 
 Form Approval chi tiết: [Lark PO Draft Approval Form Design](Lark_PO_Draft_Approval_Form_Design.md).
 
 ## 1. Quyết định kiến trúc
 
-Lark là nơi sở hữu bản nháp và vòng đời phê duyệt Purchase Order. Global
-Portal là integration owner vì đang liên kết với Lark, giữ session và gọi Lark
-Open API. ERPNext chỉ nhận Purchase Order snapshot sau khi đã được Lark duyệt.
+ERPNext sở hữu bản nháp, số chứng từ và vòng đời Purchase Order. Global Portal
+là integration owner của Lark, giữ snapshot/idempotency và gọi Lark Open API.
+Lark chỉ là projection của approval; không phải SSOT và không tự sinh số PO.
 
 ```text
 Material Request → Request for Quotation → Supplier Quotation
-                                      ↓
-                              Lark Base: PO Draft
+                                      ↓ cheapest selected
+                         ERPNext: native PO Draft (real PO number)
                                       ↓
                            Lark Approval: Pending
                                       ↓ Approved
-                         Global Portal → ERPNext PO
+                         Global Portal → ERPNext: submit same PO Draft
 ```
 
-`apps/erp` chỉ hiển thị nghiệp vụ và gọi API của Global Portal; không tạo PO
-ERPNext trước khi có approval hợp lệ.
+`apps/erp` chỉ hiển thị nghiệp vụ và gọi API của Global Portal; PO Draft được
+tạo qua server-side control-plane trước approval, không qua browser.
 
 ## 2. Trách nhiệm từng hệ thống
 
-### Lark Base
+### Lark Base (projection)
 
 - Lưu PO Draft và các dòng item.
-- Cho phép sửa supplier, item, quantity, rate, warehouse và điều khoản mua.
+- Lưu snapshot để hiển thị/audit; không cho sửa nguồn ERPNext sau khi approval
+  đã mở.
 - Lưu trạng thái nghiệp vụ: `Draft`, `Pending Approval`, `Approved`,
   `Rejected`, `Canceled`, `Sent to ERP`, `ERP Submitted`.
-- Lưu liên kết Material Request, RFQ, Supplier Quotation và ERP Purchase Order.
+- Lưu liên kết Material Request, RFQ, Supplier Quotation và ERP Purchase Order
+  thật (`erp_purchase_order_name`).
 
 Nên dùng bảng `PO Draft` và bảng `PO Draft Item` liên kết với nhau; không nhét
 toàn bộ item list vào một JSON field duy nhất.
@@ -51,35 +54,39 @@ toàn bộ item list vào một JSON field duy nhất.
 ### Global Portal
 
 - Đọc MR/RFQ/Supplier Quotation từ ERPNext Gateway.
-- Tạo và cập nhật PO Draft trong Lark Base.
+- Gọi ERPNext tạo PO Draft native trước, sau đó tạo projection PO Draft trong
+  Lark Base có cùng số PO.
 - Tạo Lark Approval instance.
 - Nhận webhook/event, chống trùng theo `event_id`.
-- Khi `Approved`, đọc lại Base và Approval, tạo approved snapshot rồi gọi
-  endpoint ERPNext.
+- Khi `Approved`, đọc lại Base và Approval, kiểm tra snapshot rồi gọi endpoint
+  ERPNext để submit đúng `erp_purchase_order_name`.
 - Lưu integration log/idempotency; không tạo bản PO Draft thứ hai trong Portal.
 
 ### ERPNext
 
 - Tiếp tục là nguồn chuẩn cho master data, tồn kho, ledger và chứng từ đã ghi
   nhận.
-- Chỉ nhận snapshot đã được duyệt.
-- Endpoint nên có dạng:
+- Tạo PO Draft từ payload đã validate trước approval; giữ `docstatus = 0`.
+- Callback chỉ được submit draft đúng correlation/hash/attempt; không insert PO
+  mới. Các route control-plane hiện dùng:
 
 ```text
-POST /api/v1/buying/purchase-orders/from-approved-lark
+POST /api/method/letron_api.lark_po.create_draft
+POST /api/method/letron_api.lark_po.from_approved
+POST /api/method/letron_api.lark_po.update_approval_state
 ```
 
-Endpoint kiểm tra chữ ký nội bộ, `approval_instance_code`, `payload_hash` và
-idempotency trước khi tạo và submit Purchase Order.
+Các endpoint kiểm tra chữ ký nội bộ, correlation, `approval_instance_code`,
+`payload_hash`, attempt và idempotency.
 
 ## 3. Trạng thái và xử lý kết quả
 
 | Lark Approval | Lark Base | ERPNext |
 |---|---|---|
-| `PENDING` | Pending Approval | Chưa có PO |
-| `APPROVED` | Approved / Sent to ERP | Tạo và submit PO |
-| `REJECTED` | Rejected | Chưa có PO; cho phép tạo attempt mới |
-| `CANCELED` | Canceled | Chưa có PO |
+| `PENDING` | Pending Approval | PO Draft native, `docstatus=0` |
+| `APPROVED` | Approved / Sent to ERP | Submit đúng PO Draft, giữ nguyên số |
+| `REJECTED` | Rejected | Giữ PO Draft + trạng thái Rejected để audit/retry |
+| `CANCELED` | Canceled | Giữ PO Draft, không submit |
 
 Khi nhận `APPROVED`, Portal phải đọc lại approval instance và PO Draft, kiểm
 tra snapshot chưa đổi, rồi mới gọi ERPNext. Không tin một webhook đơn lẻ và

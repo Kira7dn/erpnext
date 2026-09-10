@@ -6,52 +6,42 @@ script. They are intentionally not whitelisted or exposed as HTTP endpoints.
 
 from __future__ import annotations
 
+from datetime import timedelta
 from typing import Any
 
 import frappe
 
 
-def email_delivery_status() -> dict[str, Any]:
-    """Return a secret-free legacy SMTP diagnostic; Lark Mail is tested by the TS runner."""
-    if not frappe.db.table_exists("Email Account"):
-        return {"ready": False, "reason": "Email Account table is unavailable"}
+def expire_access(access: str) -> dict[str, Any]:
+    """Local-only fixture helper for the expired Magic Link acceptance case."""
+    doc = frappe.get_doc("Supplier Portal Access", access)
+    doc.magic_expires_at = frappe.utils.now_datetime() - timedelta(seconds=1)
+    doc.save(ignore_permissions=True)
+    return {"access": doc.name, "status": doc.status, "expired_at": str(doc.magic_expires_at)}
 
-    rows = frappe.get_all(
-        "Email Account",
-        filters={"enable_outgoing": 1},
-        fields=["name", "email_id", "default_outgoing", "smtp_server", "smtp_port"],
-        order_by="default_outgoing desc, modified desc",
-        limit_page_length=20,
+
+def set_process_deadline(process: str, deadline: str) -> dict[str, Any]:
+    """Local-only fixture helper for the MR+3-day scheduler acceptance cases."""
+    doc = frappe.get_doc("Supplier Procurement Process", process)
+    doc.deadline_at = frappe.utils.get_datetime(deadline)
+    doc.save(ignore_permissions=True)
+    return {"process": doc.name, "deadline_at": str(doc.deadline_at), "approval_status": doc.approval_status}
+
+
+def submission_storage(submission: str) -> dict[str, Any]:
+    """Return secret-free private-file evidence for an XML submission."""
+    doc = frappe.get_doc("Supplier Portal Submission", submission)
+    files = frappe.get_all(
+        "File",
+        filters={"attached_to_doctype": "Supplier Portal Submission", "attached_to_name": submission},
+        fields=["name", "is_private", "file_url", "file_size"],
     )
-    usable = [
-        row for row in rows
-        if row.get("smtp_server") and row.get("email_id")
-    ]
-    default = next((row for row in usable if row.get("default_outgoing")), None)
-    selected = default or (usable[0] if usable else None)
-    if not selected:
-        return {
-            "ready": False,
-            "reason": "No enabled outgoing Email Account with SMTP server is configured",
-            "enabled_outgoing_accounts": len(rows),
-        }
     return {
-        "ready": True,
-        "account": selected.name,
-        "sender_domain": str(selected.email_id).split("@", 1)[-1],
-        "smtp_port": selected.smtp_port,
+        "submission": doc.name,
+        "sha256_present": bool(doc.sha256),
+        "file_count": len(files),
+        "files": [
+            {"name": row.name, "is_private": bool(row.is_private), "file_url_is_private": str(row.file_url).startswith("/private/files/"), "file_size": row.file_size}
+            for row in files
+        ],
     }
-
-
-def latest_emails(subject: str, after: str | None = None, limit: int = 20) -> list[dict[str, Any]]:
-    """Read legacy ERP mail records only; the supplier flow uses Lark Mail readback."""
-    filters: dict[str, Any] = {"subject": subject}
-    if after:
-        filters["creation"] = [">=", after]
-    return frappe.get_all(
-        "Email Queue",
-        filters=filters,
-        fields=["name", "subject", "recipients", "message", "creation"],
-        order_by="creation desc",
-        limit_page_length=limit,
-    )

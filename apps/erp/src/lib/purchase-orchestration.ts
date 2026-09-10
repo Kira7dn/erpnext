@@ -10,7 +10,7 @@ import {
   gatewayRequest,
 } from "@/lib/letron-api";
 import { ApiRequestError } from "@/lib/api-error";
-import { supplierPortalRequest } from "@/lib/supplier-portal";
+import { sendSupplierPortalMail, supplierPortalRequest, type SupplierPortalMail } from "@/lib/supplier-portal";
 import { supplierPortalConfig } from "@/lib/supplier-portal-config";
 
 type Row = Record<string, unknown>;
@@ -161,13 +161,17 @@ function buildRfqPayload(
   orchestrationId?: string,
 ): Row {
   return {
-    naming_series: "RFQ-.YYYY.-",
+    naming_series: "RFQ-.YYYYMMDD.-.####",
     company: materialRequest.company,
     transaction_date: materialRequest.transaction_date,
     subject: materialRequest.title || "RFQ from Material Request",
     status: "Draft",
     suppliers: suppliers.map((supplier) => ({ supplier })),
-    items: items.map(({ name: _name, rate: _rate, ...item }) => item),
+    items: items.map(({ name, rate, ...item }) => {
+      void name;
+      void rate;
+      return item;
+    }),
     ...(orchestrationId
       ? { custom_letron_orchestration_id: orchestrationId }
       : {}),
@@ -204,31 +208,25 @@ async function findByCorrelation(
 
 function itemsFromCreatedMaterialRequest(
   materialRequest: Row,
-  fallback: Item[],
 ): Item[] {
-  if (!Array.isArray(materialRequest.items) || !materialRequest.items.length) {
-    return fallback;
-  }
+  if (!Array.isArray(materialRequest.items) || !materialRequest.items.length)
+    throw new Error("ERP_MATERIAL_REQUEST_ITEMS_MISSING");
   return materialRequest.items.map((item, index) => {
     const source = item as Row;
-    const original = fallback[index] ?? fallback[0];
+    const itemCode = String(source.item_code ?? "").trim();
+    const qty = Number(source.qty);
+    if (!itemCode || !Number.isFinite(qty) || qty <= 0)
+      throw new Error(`ERP_MATERIAL_REQUEST_ITEM_INVALID_${index + 1}`);
     return {
-      item_code: String(source.item_code ?? original.item_code),
-      qty: Number(source.qty ?? original.qty),
-      schedule_date:
-        String(source.schedule_date ?? original.schedule_date ?? "").trim() ||
-        undefined,
-      warehouse:
-        String(source.warehouse ?? original.warehouse ?? "").trim() ||
-        undefined,
-      uom: String(source.uom ?? original.uom ?? "").trim() || undefined,
-      stock_uom:
-        String(source.stock_uom ?? original.stock_uom ?? "").trim() ||
-        undefined,
-      conversion_factor:
-        Number(source.conversion_factor ?? original.conversion_factor) || 1,
-      rate: Number(source.rate ?? source.price_list_rate ?? original.rate) || 0,
-      name: String(source.name ?? original.name ?? "").trim() || undefined,
+      item_code: itemCode,
+      qty,
+      schedule_date: String(source.schedule_date ?? "").trim() || undefined,
+      warehouse: String(source.warehouse ?? "").trim() || undefined,
+      uom: String(source.uom ?? "").trim() || undefined,
+      stock_uom: String(source.stock_uom ?? "").trim() || undefined,
+      conversion_factor: Number(source.conversion_factor) || 1,
+      rate: Number(source.rate ?? source.price_list_rate) || 0,
+      name: String(source.name ?? "").trim() || undefined,
       material_request: String(source.material_request ?? materialRequest.name ?? "").trim() || undefined,
       material_request_item: String(source.material_request_item ?? source.name ?? "").trim() || undefined,
     };
@@ -265,16 +263,18 @@ async function issueSupplierPortalAccesses(
   const deadline = new Date(createdAt.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
   const accessIds: string[] = [];
   for (const supplier of state.suppliers) {
-    const result = await supplierPortalRequest<{ access_id: string }>("issue_access", {
+    const result = await supplierPortalRequest<{ access_id: string; mail: SupplierPortalMail }>("issue_access", {
       material_request: state.material_request_name,
       request_for_quotation: state.request_for_quotation_name,
       orchestration_id: state.id,
       supplier,
       email_snapshot: state.supplier_email,
       deadline_at: deadline,
-      portal_url_base: `${supplierPortalConfig().next_base_url.replace(/\/$/, "")}/supplier`,
+      portal_url_base: `${supplierPortalConfig().portal_public_base_url.replace(/\/$/, "")}/supplier`,
     });
-    if (result?.access_id) accessIds.push(result.access_id);
+    if (!result?.access_id || !result.mail) throw new ApiRequestError("supplier_mail_payload_missing", "Supplier access email payload is missing.", 502);
+    await sendSupplierPortalMail(result.mail);
+    accessIds.push(result.access_id);
   }
   state.supplier_portal_accesses = accessIds;
   state.supplier_quote_deadline_at = deadline;
@@ -355,6 +355,7 @@ export async function createPurchaseOrchestration(
         },
         body: JSON.stringify({
           ...normalized.materialRequest,
+          naming_series: "MR-.YYYYMMDD.-.####",
           custom_letron_orchestration_id: state.id,
         }),
       },
@@ -363,7 +364,7 @@ export async function createPurchaseOrchestration(
     state.rfq_payload = buildRfqPayload(
       normalized.materialRequest,
       normalized.suppliers,
-      itemsFromCreatedMaterialRequest(materialRequest, normalized.items),
+      itemsFromCreatedMaterialRequest(materialRequest),
       state.id,
     );
     state.status = "mr_created";
@@ -392,6 +393,12 @@ export async function createPurchaseOrchestration(
     const hasMr = Boolean(state.material_request_name);
     state.status = hasMr ? "partial_failure" : "failed";
     state.error = errorMessage(cause);
+    console.error("[purchase-orchestration] orchestration failed", {
+      correlation_id: state.id,
+      stage: state.status,
+      error_code: cause instanceof ApiRequestError ? cause.code : "internal_error",
+      error_message: cause instanceof Error ? cause.message.slice(0, 500) : "unknown_error",
+    });
     await saveState(key, state);
     throw Object.assign(
       cause instanceof Error ? cause : new Error(state.error),
@@ -437,16 +444,13 @@ async function continueStartedOrchestration(
     state.id,
   );
   if (existingMr) {
-    const fallbackItems = Array.isArray(state.material_request.items)
-      ? (state.material_request.items as Item[])
-      : [];
     state.material_request_name = String(existingMr.name ?? "");
     const existingRfq = await findByCorrelation(
       "/api/v1/crm/request-for-quotations",
       cookieHeader,
       state.id,
     );
-    const existingItems = itemsFromCreatedMaterialRequest(existingMr, fallbackItems);
+    const existingItems = itemsFromCreatedMaterialRequest(existingMr);
     state.rfq_payload = buildRfqPayload(
       state.material_request,
       state.suppliers,
@@ -489,6 +493,7 @@ async function continueStartedOrchestration(
         },
         body: JSON.stringify({
           ...state.material_request,
+          naming_series: "MR-.YYYYMMDD.-.####",
           custom_letron_orchestration_id: state.id,
         }),
       },
@@ -499,9 +504,6 @@ async function continueStartedOrchestration(
       state.suppliers,
       itemsFromCreatedMaterialRequest(
         materialRequest,
-        Array.isArray(state.material_request.items)
-          ? (state.material_request.items as Item[])
-          : [],
       ),
       state.id,
     );

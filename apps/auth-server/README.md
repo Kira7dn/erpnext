@@ -128,7 +128,7 @@ docker exec `
   erpnext-backend-1 bench --site frontend execute letron_api.sso_admin.break_glass_from_environment
 ```
 
-Không dùng break-glass để vượt qua việc bị gỡ khỏi group truy cập hoặc local admin block. Mọi lần JIT, backfill, thu hồi, reconcile, stale-lock và break-glass được ghi vào `Letron SSO Audit Log`.
+Không dùng break-glass để vượt qua việc bị gỡ khỏi group truy cập hoặc local admin block. Mọi lần JIT, thu hồi, reconcile, stale-lock và break-glass được ghi vào `Letron SSO Audit Log`.
 
 Frappe scheduler vẫn phục vụ các job ERP khác nhưng không tham gia đồng bộ role
 Lark. Không thêm lại cron quét toàn bộ identity; Gateway kiểm tra policy trên

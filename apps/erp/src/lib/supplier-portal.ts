@@ -1,7 +1,8 @@
 import "server-only";
 
 import { createHmac, randomUUID } from "node:crypto";
-import { ApiRequestError, remoteErrorMessage, type RemoteErrorPayload } from "./api-error";
+import { ApiRequestError, type RemoteErrorPayload } from "./api-error";
+import { publicErrorMessage, retryAfterSeconds, validErrorCode } from "./error-contract";
 import { supplierPortalConfig } from "@/lib/supplier-portal-config";
 
 type SupplierPortalResponse<T> = {
@@ -9,10 +10,17 @@ type SupplierPortalResponse<T> = {
   data?: T;
 } & RemoteErrorPayload;
 
+export type SupplierPortalMail = {
+  to: string;
+  subject: string;
+  body_html: string;
+  body_plain_text: string;
+  idempotency_key: string;
+};
+
 function supplierPortalError(
   status: number,
   payload: RemoteErrorPayload,
-  fallback: string,
   prefix = "supplier_portal",
 ): ApiRequestError {
   let code = `${prefix}_request_rejected`;
@@ -21,11 +29,15 @@ function supplierPortalError(
   else if (status === 404) code = `${prefix}_not_found`;
   else if (status === 429) code = `${prefix}_rate_limited`;
   else if (status >= 500) code = `${prefix}_unavailable`;
+  const upstreamCode = validErrorCode(payload.error);
+  if (upstreamCode?.startsWith("supplier_")) code = upstreamCode;
+  const retryAfter = retryAfterSeconds(payload.retry_after_seconds);
   return new ApiRequestError(
     code,
-    remoteErrorMessage(payload, fallback),
+    publicErrorMessage(code, status),
     status,
     status === 429 || status >= 500,
+    retryAfter,
   );
 }
 
@@ -34,7 +46,7 @@ function supplierPortalUnavailable(message: string): ApiRequestError {
 }
 
 function supplierPortalSecret(): string {
-  return (process.env.LETRON_SUPPLIER_PORTAL_SECRET ?? process.env.LETRON_SSO_SYNC_SECRET ?? "").trim();
+  return (process.env.LETRON_SSO_SYNC_SECRET ?? "").trim();
 }
 
 function erpBaseUrl(): string {
@@ -62,6 +74,7 @@ export async function supplierPortalControlRequest<T>(methodName: string, body: 
   const now = Math.floor(Date.now() / 1000);
   const expires = now + 60;
   const requestId = randomUUID();
+  const signature = controlSign(path, requestId, now, expires);
   let response: Response;
   try {
     response = await fetch(`${erpBaseUrl()}${path}`, {
@@ -69,15 +82,15 @@ export async function supplierPortalControlRequest<T>(methodName: string, body: 
       headers: {
         Accept: "application/json", "Content-Type": "application/json",
         "X-Letron-Control-Timestamp": String(now), "X-Letron-Control-Expires-At": String(expires),
-        "X-Letron-Control-Request-Id": requestId, "X-Letron-Control-Signature": controlSign(path, requestId, now, expires),
+        "X-Letron-Control-Request-Id": requestId, "X-Letron-Control-Signature": signature,
       }, body: JSON.stringify(body), cache: "no-store", signal: AbortSignal.timeout(30_000),
     });
   } catch {
     throw supplierPortalUnavailable("Supplier portal control service is unavailable.");
   }
   const payload = (await response.json().catch(() => ({}))) as SupplierPortalResponse<T>;
-  if (!response.ok) throw supplierPortalError(response.status, payload, "Supplier portal control request failed.");
-  return (payload.data ?? payload.message) as T;
+  if (!response.ok) throw supplierPortalError(response.status, payload);
+  return payload.message as T;
 }
 
 export async function supplierPortalRequest<T>(
@@ -88,6 +101,7 @@ export async function supplierPortalRequest<T>(
   const now = Math.floor(Date.now() / 1000);
   const expires = now + 60;
   const requestId = randomUUID();
+  const signature = sign(path, requestId, now, expires);
   let response: Response;
   try {
     response = await fetch(`${erpBaseUrl()}${path}`, {
@@ -98,7 +112,7 @@ export async function supplierPortalRequest<T>(
         "X-Letron-Supplier-Timestamp": String(now),
         "X-Letron-Supplier-Expires-At": String(expires),
         "X-Letron-Supplier-Request-Id": requestId,
-        "X-Letron-Supplier-Signature": sign(path, requestId, now, expires),
+        "X-Letron-Supplier-Signature": signature,
       },
       body: JSON.stringify(body),
       cache: "no-store",
@@ -109,9 +123,36 @@ export async function supplierPortalRequest<T>(
   }
   const raw = await response.text();
   let payload = {} as SupplierPortalResponse<T>;
-  try { payload = raw ? JSON.parse(raw) as SupplierPortalResponse<T> : payload; } catch { /* Keep the HTTP fallback below. */ }
-  if (!response.ok) throw supplierPortalError(response.status, payload, "Supplier portal request failed.");
-  return (payload.data ?? payload.message) as T;
+  if (raw) payload = JSON.parse(raw) as SupplierPortalResponse<T>;
+  if (!response.ok) throw supplierPortalError(response.status, payload);
+  return payload.message as T;
+}
+
+export async function sendSupplierPortalMail(input: SupplierPortalMail): Promise<{ messageId: string; idempotent?: boolean }> {
+  const authBase = supplierPortalConfig().auth_base_url.replace(/\/$/, "");
+  const apiKey = process.env.LETRON_API_KEY?.trim();
+  if (!authBase || !apiKey) throw new ApiRequestError("configuration_error", "Supplier mail service is not configured.", 503);
+  let response: Response;
+  try {
+    response = await fetch(`${authBase}/api/internal/lark-mail/send`, {
+      method: "POST",
+      headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${apiKey}`, "X-Idempotency-Key": input.idempotency_key },
+      body: JSON.stringify(input),
+      cache: "no-store",
+      signal: AbortSignal.timeout(30_000),
+    });
+  } catch {
+    throw new ApiRequestError("lark_mail_unavailable", "Supplier mail service is unavailable.", 503, true);
+  }
+  const payload = await response.json().catch(() => ({})) as RemoteErrorPayload & { data?: { messageId?: string; idempotent?: boolean } };
+  if (!response.ok) {
+    const retryAfter = retryAfterSeconds(payload.retry_after_seconds) ?? retryAfterSeconds(response.headers.get("Retry-After"));
+    const code = validErrorCode(payload.error) ?? "lark_mail_send_failed";
+    throw new ApiRequestError(code, publicErrorMessage(code, response.status), response.status, response.status === 409 || response.status >= 500, retryAfter);
+  }
+  const result = payload.data;
+  if (!result || !result.messageId) throw new ApiRequestError("lark_mail_send_failed", "Supplier mail delivery returned no message ID.", 502, true);
+  return { messageId: result.messageId, idempotent: result.idempotent };
 }
 
 export async function supplierPortalUpload<T>(
@@ -122,6 +163,7 @@ export async function supplierPortalUpload<T>(
   const now = Math.floor(Date.now() / 1000);
   const expires = now + 60;
   const requestId = randomUUID();
+  const signature = sign(path, requestId, now, expires);
   let response: Response;
   try {
     response = await fetch(`${erpBaseUrl()}${path}`, {
@@ -131,7 +173,7 @@ export async function supplierPortalUpload<T>(
         "X-Letron-Supplier-Timestamp": String(now),
         "X-Letron-Supplier-Expires-At": String(expires),
         "X-Letron-Supplier-Request-Id": requestId,
-        "X-Letron-Supplier-Signature": sign(path, requestId, now, expires),
+        "X-Letron-Supplier-Signature": signature,
       },
       body: form,
       cache: "no-store",
@@ -141,8 +183,8 @@ export async function supplierPortalUpload<T>(
     throw supplierPortalUnavailable("Supplier portal upload service is unavailable.");
   }
   const payload = (await response.json().catch(() => ({}))) as SupplierPortalResponse<T>;
-  if (!response.ok) throw supplierPortalError(response.status, payload, "Supplier portal upload failed.");
-  return (payload.data ?? payload.message) as T;
+  if (!response.ok) throw supplierPortalError(response.status, payload);
+  return payload.message as T;
 }
 
 export async function supplierPortalCronRequest<T>(): Promise<T> {
@@ -169,6 +211,6 @@ export async function openSupplierApproval<T>(input: {
   });
   const payload = await response.json().catch(() => ({})) as RemoteErrorPayload & { data?: T };
   if (!response.ok)
-    throw supplierPortalError(response.status, payload, "Supplier approval service rejected the request.", "supplier_approval");
-  return (payload.data ?? payload) as T;
+    throw supplierPortalError(response.status, payload, "supplier_approval");
+  return payload.data as T;
 }

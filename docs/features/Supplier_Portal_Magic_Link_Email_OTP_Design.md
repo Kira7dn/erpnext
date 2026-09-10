@@ -1,15 +1,31 @@
 # Supplier Portal — Magic Link và Email OTP
 
-> **Trạng thái:** IMPLEMENTED — đã triển khai code path MR → RFQ → Magic Link/OTP → Supplier Quotation → chọn giá thấp nhất → Lark approval → PO → delivery/XML/payment status; runtime acceptance phải giữ điều kiện `REAL_MR_TEST=PASS`.
+> **Trạng thái:** IMPLEMENTED và đã triển khai vào Docker runtime. Full realtest
+> một Supplier đã đạt `REAL_MR_TEST=PASS`; các acceptance gate production còn
+> `[ ]` bên dưới vẫn là phần cần kiểm chứng riêng trước khi mở rộng phạm vi.
 >
-> **Ngày:** 2026-09-09
+> **Ngày:** 2026-09-10
 
-> **Kết luận kiểm tra:** Code đã đủ các route/backend path của vòng đời; chỉ đánh dấu hoàn tất toàn bộ sau khi migration, email provider, scheduler và browser acceptance chạy thành công.
+> **Kết quả runtime gần nhất (2026-09-10):** Docker `up`/readiness và
+> `verify` đạt; config/policy zero drift, setup complete, health `200`. Full
+> realtest một Supplier đạt `REAL_MR_TEST=PASS`: `MR-20260910-0030` →
+> `RFQ-20260910-0030` → `SQ-20260910-0009` (được chọn là rẻ nhất) →
+> Lark approval `8599E9FA-804A-4761-88DA-167278832A82` →
+> `PO-20260910-0008` → `GRN-20260910-0004` → `INV-20260910-0004`,
+> `payment_status=Invoiced`. Email readback tới `leducanh@ledb.vn`, approval
+> test được tự duyệt bởi `leducanh@ledb.vn`.
+
+> **Quyết định triển khai:** Có thể tạm defer các acceptance gate còn `[ ]` khi
+> chạy development/staging với dữ liệu kiểm thử. Không được bỏ qua khi bật
+> production cho Supplier thật: các gate về expiry, isolation, private file,
+> deadline và điều kiện mở approval là bắt buộc. PO failure injection và các
+> kiểm thử duplicate còn lại có thể hoàn thiện sau nếu các cơ chế idempotency
+> vẫn được giữ nguyên.
 
 ## 1. Mục tiêu
 
-Thiết kế một cổng dành cho nhà cung cấp với **một URL duy nhất cho một
-procurement process**. Ngay sau khi Material Request được tạo và Supplier đã
+Thiết kế một cổng dành cho nhà cung cấp với **một URL duy nhất cho mỗi Supplier
+trong một procurement process**. Ngay sau khi Material Request được tạo và Supplier đã
 được xác định, hệ thống tạo quotation request, tạo Magic Link và gửi email cho
 Supplier. Nhà cung cấp dùng cùng URL đó xuyên suốt từ RFQ/Supplier Quotation
 đến Purchase Order, giao hàng, hóa đơn và theo dõi thanh toán; quyền thao tác
@@ -34,17 +50,17 @@ union_id` dành cho nhân viên.
 - [x] Supplier gửi xác nhận giao hàng và chứng từ giao hàng.
 - [x] Supplier upload XML invoice.
 - [x] Internal review trước khi tạo hoặc submit chứng từ kế toán/kho.
-- [ ] Audit đầy đủ; revoke operator và runtime acceptance còn phải kiểm chứng.
+- [x] Audit event và control-plane revoke operator đã triển khai; các runtime acceptance còn lại được đánh dấu trực tiếp trong Phase 3.
 - [x] Expiry và idempotency cho access, OTP, quotation, delivery và XML intake.
 
-### Không có trong phạm vi
+### Không có trong phạm vi (N/A)
 
-- [ ] Supplier tự submit Purchase Receipt.
-- [ ] Supplier tự submit Purchase Invoice.
-- [ ] Supplier tự tạo Payment Entry hoặc xem trạng thái thanh toán chi tiết.
-- [ ] Supplier truy cập ERPNext Desk.
-- [ ] Supplier đăng nhập bằng Lark.
-- [ ] Dùng Delivery Note cho purchase flow.
+- [N/A] Supplier tự submit Purchase Receipt.
+- [N/A] Supplier tự submit Purchase Invoice.
+- [N/A] Supplier tự tạo Payment Entry hoặc xem trạng thái thanh toán chi tiết.
+- [N/A] Supplier truy cập ERPNext Desk.
+- [N/A] Supplier đăng nhập bằng Lark.
+- [N/A] Dùng Delivery Note cho purchase flow.
 
 ## 3. Luồng nghiệp vụ chuẩn
 
@@ -56,6 +72,7 @@ flowchart LR
     GATE{All submitted OR
     MR + 3 days with >=1 submitted?}
     APPROVAL[Lark PO Approval opened]
+    PODRAFT[Purchase Order Draft native ERPNext]
     PO[Purchase Order submitted]
     LINK[One persistent Magic Link]
     OTP[Email OTP]
@@ -68,7 +85,7 @@ flowchart LR
 
     MR --> RFQ --> LINK
     LINK --> SQ --> GATE
-    GATE -->|Đủ điều kiện| APPROVAL --> PO
+    GATE -->|Đủ điều kiện| PODRAFT --> APPROVAL --> PO
     PO --> OTP --> PORTAL
     PORTAL --> GOODS --> PR
     PORTAL --> XML --> PI
@@ -86,8 +103,10 @@ Material Request
 → Cập nhật approval summary: RFQ number + quotation status
 → Chờ tất cả Supplier submit hoặc hết 3 ngày từ lúc MR tạo
 → Next.js chọn quotation có tổng giá thấp nhất
-→ Lark Approval tổng hợp mở kèm kết quả chọn
-→ Purchase Order
+→ ERPNext tạo Purchase Order Draft và cấp số PO thật
+→ Lark Approval tổng hợp mở kèm số PO thật và kết quả chọn
+→ Approver phê duyệt
+→ ERPNext submit đúng PO Draft đã cấp số, không tạo PO thứ hai
 → Purchase Receipt
 → Purchase Invoice
 → Payment Entry
@@ -101,7 +120,7 @@ sau bước kiểm tra nội bộ.
 
 | Thành phần | Ownership |
 |---|---|
-| ERPNext | Supplier, PO, Purchase Receipt, Purchase Invoice, stock, accounting |
+| ERPNext | Supplier, Case, MR, RFQ, Supplier Quotation, PO Draft/PO, Purchase Receipt, Purchase Invoice, stock, accounting và mã chứng từ |
 | `apps/erp` | Supplier Portal UI, public BFF và orchestration chính |
 | `apps/letron_api` | Explicit supplier-portal methods, ERPNext validation và document SOT |
 | Lark/Auth Server | Lark identity, nhân viên, PO approval; không quản lý Supplier identity |
@@ -147,7 +166,8 @@ vào việc Supplier có ERP login hay không. Context phải được khôi ph�
 | Supplier Quotation | Item, quantity, rate thuộc RFQ của access | Global Portal control-plane qua `letron_api` |
 | Delivery confirmation | PO item và số lượng còn nhận | Internal reviewer/service sau khi review |
 | XML invoice | File XML và metadata thuộc PO/Supplier | Internal reviewer/service sau khi review |
-| PO sau approval | Không được tạo PO | Global Portal approval callback qua `letron_api` |
+| PO trước approval | Không được tự tạo/chỉnh sửa | Global Portal gọi `letron_api` tạo PO Draft native ERPNext |
+| PO sau approval | Không được tạo PO mới | Global Portal approval callback gọi `letron_api` submit đúng PO Draft đã cấp số |
 
 Nếu HMAC, access/session scope, process link hoặc internal execution context
 không hợp lệ thì request fail-closed; không cấp thêm ERP quyền và không tạo
@@ -246,7 +266,7 @@ Magic Link: tồn tại theo lifecycle của process; mặc định 90 ngày kh�
 OTP: 5 phút
 Supplier session: 2 giờ
 OTP attempts: tối đa 5 lần
-Resend OTP: tối thiểu 60 giây
+Resend OTP: tối thiểu 15 giây
 ```
 
 Rate-limit counter có thể dùng Redis; access record, audit và trạng thái revoke
@@ -284,17 +304,37 @@ Next.js, Gateway, ERPNext hay Lark:
 {
   "error": "stable_error_code",
   "message": "Thông báo an toàn cho người dùng",
-  "retryable": false
+  "retryable": false,
+  "retry_after_seconds": 15
 }
 ```
 
 `error` là mã máy ổn định để client điều phối; `message` là thông báo đã được
 chuẩn hóa; `retryable` chỉ là gợi ý retry. Lỗi không xác định không được đưa
 `Error.message`, stack trace, token hoặc raw ERPNext response ra ngoài. Adapter
-trung tâm chỉ đọc các format upstream đã được khai báo, bao gồm
-`_server_messages` của Frappe, và chuyển chúng về contract trên. HTTP 401/403,
+trung tâm chỉ đọc error envelope đã được khai báo; không parse
+`_server_messages`, `exception` hoặc stack trace của Frappe. HTTP 401/403,
 404, 409, 429 và 5xx giữ đúng ý nghĩa; lỗi mạng được trả là lỗi hạ tầng có thể
-retry.
+retry. Khi trả 429, server bắt buộc trả thêm `Retry-After` và
+`retry_after_seconds`; client không tự retry trước thời điểm đó.
+
+Error domain của Supplier Portal được khai báo tập trung, không suy đoán từ
+chuỗi exception:
+
+| Code | HTTP | Ý nghĩa | Client action |
+|---|---:|---|---|
+| `supplier_portal_not_found` | 404 | Access không tồn tại | Hiển thị lỗi link generic |
+| `supplier_portal_access_denied` | 403 | Access đã revoke/hết hạn | Hiển thị lỗi link generic |
+| `supplier_otp_rate_limited` | 429 | Access/email đã gửi OTP trong cooldown | Giữ form OTP, chờ `Retry-After` |
+| `supplier_portal_rate_limited` | 429 | Quota IP vượt ngưỡng | Chờ `Retry-After`, không gửi lặp |
+| `supplier_portal_unavailable` | 503 | ERP/cache/provider tạm thời lỗi | Cho phép retry có kiểm soát |
+
+`request_otp` dùng lock và cooldown 15 giây theo từng access record. Không dùng
+quota email toàn cục vì nhiều Supplier có thể dùng chung mailbox nghiệp vụ và
+mỗi magic link phải được xác minh độc lập. Quota IP là counter Redis atomic theo
+cửa sổ 60 giây (30 request), vì nhiều Supplier có
+thể dùng chung NAT. Không có lỗi rate-limit nào được ánh xạ thành “Magic Link
+không hợp lệ”.
 
 Client dùng `error` để xử lý trạng thái và hiển thị `message`; không parse
 `exception`, `exc` hoặc stack trace. Contract này áp dụng cho các route purchase,
@@ -440,8 +480,17 @@ Email phải có một owner duy nhất là Lark public mailbox
 `procurement@letrongroup.com`. Supplier không login và không nhận credential
 Lark. App dùng OAuth một lần của user nội bộ `leducanh@ledb.vn` (đã được cấp
 quyền send-as cho public mailbox), lưu duy nhất `refresh_token` đã mã hóa trong
-Neon; access token chỉ tồn tại trong request gửi mail. Không đưa token hoặc
-credential vào client bundle.
+Neon; access token chỉ được cache trong memory của Auth process và không bao
+giờ lưu vào client, source, log hoặc database.
+
+ERPNext chỉ tạo và trả về mail intent sau khi record nghiệp vụ đã commit. ERP
+Next.js là owner duy nhất của orchestration: với mỗi Access/OTP, Next.js gọi
+Auth Server bằng một `idempotency_key` duy nhất. Auth Server là adapter duy nhất
+gọi Lark và lưu `LarkMailDelivery` để chống gửi trùng. Nếu cùng key đang gửi,
+Auth chờ kết quả hiện tại; nếu đã `Sent` thì trả lại `message_id` idempotently.
+Không còn Frappe mail worker, scheduler mail, Redis mail lock hoặc retry mail
+trong Docker. DocType `Supplier Portal Mail Outbox` cũ chỉ giữ dữ liệu lịch sử,
+không còn được đọc hoặc ghi bởi runtime mới.
 
 Lark tenant token vẫn chỉ dùng cho các API hỗ trợ bot/tenant identity (ví dụ
 Approval và Messenger). Lark Mail `user_mailboxes/.../messages/send` dùng
@@ -460,11 +509,11 @@ Supplier Portal OTP
 
 Email cần chứa:
 
-- [ ] Tên supplier.
-- [ ] Mã tham chiếu PO đã được phép hiển thị.
-- [ ] Thời hạn link hoặc OTP.
-- [ ] Cảnh báo không chia sẻ mã.
-- [ ] Link hỗ trợ nội bộ nếu supplier nhận nhầm.
+- [x] Tên supplier.
+- [x] Mã tham chiếu PO đã được phép hiển thị trong email thông báo PO sau approval.
+- [x] Thời hạn link hoặc OTP.
+- [x] Cảnh báo không chia sẻ mã.
+- [x] Link hỗ trợ nội bộ nếu supplier nhận nhầm.
 
 Cấu hình SMTP/Email Account không còn là prerequisite cho Lark Mail provider.
 Real test phải kiểm tra credential public mailbox và gửi một email probe trước
@@ -477,25 +526,43 @@ Trong real test, sau khi tạo approval thật, test gọi
 production. Production vẫn yêu cầu người có quyền approve trên Lark.
 
 Cấu hình không-secret của Supplier Portal nằm trong
-`config/supplier_portal.json` gồm URL của `apps/erp`, URL Auth Server, email
-submitter approval, user review nội bộ và chu kỳ deadline. Env chỉ chứa secret:
-`LETRON_SUPPLIER_PORTAL_SECRET`, `LETRON_SUPPLIER_PORTAL_CRON_SECRET` và các
-secret control-plane có sẵn của hệ thống.
+`config/supplier_portal.json`, gồm `erp_base_url`,
+`next_internal_base_url`, `portal_public_base_url`, URL Auth Server, email
+submitter approval, user review nội bộ và chu kỳ deadline. Endpoint theo môi
+trường được override bằng các biến URL đã có trong
+`.env.local`/`.env.production`: `LETRON_AUTH_BASE_URL`,
+`LETRON_SSO_ERP_BASE_URL`, `LETRON_NEXT_BASE_URL` và
+`LETRON_SUPPLIER_PORTAL_PUBLIC_BASE_URL`. Local dùng `http://localhost:3001`,
+production dùng HTTPS public domain. Backend nhận endpoint tương ứng qua
+Compose. Chỉ các secret mới bắt buộc nằm trong env:
+`LETRON_SUPPLIER_PORTAL_CRON_SECRET` và các secret control-plane có sẵn của
+hệ thống. Supplier Portal dùng chung `LETRON_SSO_SYNC_SECRET` cho các request
+được ký nội bộ; không còn secret alias riêng.
+
+Khi `NODE_ENV=production`, public URL phải là HTTPS và không được là
+`localhost`, `127.0.0.1` hoặc `host.docker.internal`; service phải fail closed
+nếu vi phạm. Internal URL dùng riêng cho service-to-service và không bao giờ
+được đưa vào Magic Link gửi Supplier.
 
 ## 13. Security invariants
 
-- [ ] Token là random opaque tối thiểu 32 bytes trước khi encode.
-- [ ] Chỉ lưu token/OTP/session dưới dạng hash hoặc HMAC.
-- [ ] Dùng constant-time compare khi verify.
-- [ ] Không đưa token vào analytics, log, error message hoặc referrer.
-- [ ] Đặt `Referrer-Policy: no-referrer` cho supplier page.
-- [ ] Cookie supplier tách biệt: HttpOnly, Secure ở production, SameSite=Lax, Path phù hợp.
-- [ ] OTP request phải rate-limit theo access record, email và IP.
-- [ ] Link hết hạn hoặc bị revoke trả `410` hoặc lỗi generic, không tiết lộ document tồn tại.
-- [ ] Session không được mở rộng scope bằng query string.
-- [ ] Mọi mutation phải idempotent và ghi audit event.
-- [ ] Supplier Portal không được sửa role hoặc User ERPNext.
-- [ ] Không sửa `apps/auth-server/app/login/page.tsx` để thêm supplier login; Lark login của nhân viên giữ nguyên.
+- [x] Token là random opaque tối thiểu 32 bytes trước khi encode.
+- [x] Chỉ lưu token/OTP/session dưới dạng hash hoặc HMAC.
+- [x] Dùng constant-time compare khi verify.
+- [x] Không đưa token vào analytics, log, error message hoặc referrer.
+- [x] Đặt `Referrer-Policy: no-referrer` cho supplier page.
+- [x] Cookie supplier tách biệt: HttpOnly, Secure ở production, SameSite=Lax,
+  Path cố định `/api/supplier` để cookie được gửi đúng cho các BFF session route.
+- [x] OTP request phải rate-limit theo access record, email và IP.
+- [x] Link hết hạn hoặc bị revoke trả lỗi generic, không tiết lộ document tồn tại.
+- [x] Session không được mở rộng scope bằng query string.
+- [x] Mọi mutation chính phải idempotent và ghi audit event.
+- [x] Supplier Portal không được sửa role hoặc User ERPNext.
+- [x] Không sửa `apps/auth-server/app/login/page.tsx` để thêm supplier login; Lark login của nhân viên giữ nguyên.
+
+Các hành vi expiry/isolation/file và các nhánh deadline/approval failure vẫn
+phải có runtime acceptance riêng trong Phase 3 dù phần kiểm soát tương ứng đã
+có trong backend.
 
 ## 14. Trigger phát hành link
 
@@ -506,7 +573,7 @@ Create Material Request
 → Resolve Supplier(s)
 → Create Request for Quotation
 → Create one Supplier Portal Access per Supplier
-→ Enqueue one Magic Link email per Supplier
+→ Next.js dispatch one Magic Link mail intent per Supplier to Auth Server/Lark
 → Start 3-day approval deadline from MR creation time
 ```
 
@@ -514,8 +581,9 @@ Create Material Request
 Supplier có một RFQ/access record/Magic Link riêng; không dùng chung link giữa
 các Supplier. Nếu
 MR tạo thành công nhưng tạo RFQ hoặc access record thất bại thì không gửi email.
-Nếu email queue tạm thời lỗi, access record vẫn giữ trạng thái `Issued` để retry
-gửi email; không tạo access record hoặc URL thứ hai.
+Nếu Lark Mail tạm thời lỗi, access record vẫn giữ trạng thái `Issued`; lần gọi
+orchestration cùng idempotency key gửi lại cùng mail intent, không tạo access
+record hoặc URL thứ hai.
 
 Material Request chưa có Supplier thì chưa thể phát Magic Link. Khi Supplier
 được bổ sung và RFQ được tạo, flow trên được chạy cho Supplier đó; mốc 3 ngày
@@ -543,7 +611,7 @@ Nếu hết 3 ngày mà chưa có Supplier nào submit thì không mở approval
 được thực thi bởi durable scheduler/queue của orchestration layer; không phụ
 thuộc vào việc có Supplier đang mở browser hay không.
 
-## 15. Những điểm đã triển khai và điều kiện còn lại
+## 15. Trạng thái thiết kế, luồng chính và điều kiện còn lại
 
 Lõi approval đã truyền `supplier_quotation_name` xuyên suốt:
 
@@ -551,9 +619,11 @@ Lõi approval đã truyền `supplier_quotation_name` xuyên suốt:
 2. Supplier submit tạo một Supplier Quotation native và submit ngay.
 3. Gate khóa theo Material Request, chọn quotation có tổng tiền thấp nhất rồi
    mới gọi Auth Server/Lark.
-4. PO handoff fail-closed nếu quotation chưa submit hoặc không thuộc RFQ/Supplier.
+4. PO handoff fail-closed nếu quotation chưa submit hoặc không thuộc RFQ/Supplier;
+   ERPNext tạo đúng một PO Draft native trước approval và submit lại chính draft
+   đó sau callback approve.
 
-Phải sửa và kiểm thử liên kết:
+Contract triển khai và kiểm chứng liên kết:
 
 ```text
 Supplier submit quotation
@@ -561,10 +631,10 @@ Supplier submit quotation
 → Cập nhật approval summary theo MR
 → Đánh giá approval gate
 → Chọn quotation có tổng giá thấp nhất
-→ PO draft snapshot từ quotation đã chọn
+→ ERPNext tạo PO Draft native và cấp số PO thật
 → Lark Approval
 → Real test auto-approve task (chỉ môi trường non-production)
-→ ERPNext Purchase Order
+→ ERPNext submit đúng PO Draft, giữ nguyên số PO
 ```
 
 Không được mở Lark PO approval chỉ vì đã tạo MR, RFQ hoặc Supplier Portal Access.
@@ -584,7 +654,32 @@ không tạo approval riêng cho từng Supplier. `selected_supplier_quotation` 
 được ghi vào process trước khi gọi Lark.
 
 `apps/erp` là nơi điều phối và gọi Auth Server/Lark khi gate đạt. ERPNext kiểm
-tra lại correlation, Supplier, RFQ và Supplier Quotation trước khi tạo PO.
+tra lại correlation, Supplier, RFQ và Supplier Quotation trước khi tạo PO Draft;
+callback approval chỉ được submit đúng PO Draft đã cấp số và không được insert
+PO mới.
+
+Trạng thái hiện tại:
+
+- [x] Real API flow với hai Supplier đã chạy đến Purchase Invoice và payment
+  status `Invoiced`; mỗi Supplier có access/Magic Link riêng.
+- [x] Resend OTP trả `429` kèm `Retry-After`; OTP đã verify không thể replay.
+- [x] Quotation có tổng giá thấp nhất được chọn trước khi mở Lark approval;
+  approval test được auto-approve ở non-production, PO Draft có số native trước
+  approval và cùng số đó được readback là `Submitted` sau approval.
+- [x] Idempotency của quotation, delivery confirmation và XML invoice; revoke
+  access xóa OTP/session và request sau revoke bị từ chối.
+- [x] Auth Server, `apps/erp` và Python backend đã qua typecheck/build/lint hoặc
+  compile tương ứng; Docker reload/verify đạt health, zero drift và setup
+  complete.
+- [ ] Chưa hoàn tất runtime acceptance cho expiry link/OTP, Supplier isolation,
+  private-file residue cleanup, hai nhánh deadline 3 ngày, `No Response`
+  readback và PO failure recovery.
+
+Phân loại gate: nhóm expiry, isolation, private-file, deadline, `No Response`,
+điều kiện mở approval và thông tin báo giá thắng là **production blocker**;
+không được đánh dấu hoàn tất chỉ vì luồng happy path đã pass. PO failure
+injection và các kiểm thử duplicate còn lại là **staging follow-up** nếu chưa
+đưa tính năng ra production.
 
 State tối giản:
 
@@ -630,14 +725,21 @@ mở lại approval request đã gửi.
 - [x] Tạo approval request tổng hợp theo MR/procurement process, có trạng thái
   `No Response` cho Supplier chưa submit.
 - [x] Chạy deadline 3 ngày tính từ `material_request.created_at` qua internal scheduler endpoint.
+- [x] Tạo PO Draft native ERPNext trước khi mở Lark approval và truyền số PO thật
+  vào approval form; callback submit cùng `name`, không tạo PO thứ hai.
 - [x] Mở approval khi tất cả Supplier submit hoặc deadline đạt và có ít nhất một
   Supplier submit.
 - [x] Đảm bảo submit cuối cùng và timer 3 ngày chỉ mở một approval request bằng
   atomic/idempotent gate theo Material Request.
 - [x] Chặn mở PO approval cho tới khi approval request pass đầy đủ-field validation.
+- [x] Approval payload có RFQ number, RFQ status và supplier response summary
+  (`Submitted`/`No Response`).
 - [x] Thêm hook/enqueue sau `Purchase Order.on_submit` chỉ để cập nhật liên kết PO
   và capability của access record; không phát hành URL mới.
 - [x] Thêm email templates và audit.
+- [x] Chuyển mail orchestration khỏi Frappe: Next.js nhận mail intent sau commit,
+  Auth Server gọi Lark và `LarkMailDelivery` giữ idempotency.
+- [x] Thêm control-plane revoke access; revoke xóa OTP/session ngay và ghi audit.
 
 ### Phase 2 — `apps/erp` UI/BFF
 
@@ -649,18 +751,23 @@ mở lại approval request đã gửi.
 
 ### Phase 3 — Acceptance
 
-- [ ] Link hợp lệ/hết hạn/revoke.
-- [ ] OTP đúng/sai/hết hạn/replay.
-- [ ] Rate-limit resend và attempts.
+- [x] Link hợp lệ và revoke; revoked link trả `403 supplier_portal_access_denied`.
+- [ ] Link hết hạn tự chuyển `Expired` và bị từ chối.
+- [x] OTP đúng và replay bị từ chối; OTP thành công bị xóa sau lần verify.
+- [x] OTP sai và khóa sau quá số lần thử; realtest xác nhận 5 lần bị từ chối,
+  OTP cũ bị khóa và OTP mới hoạt động sau cooldown.
+- [ ] OTP hết hạn tự bị từ chối.
+- [x] Rate-limit resend theo access (15 giây; 30 request/IP/phút), trả `429` và
+  `Retry-After` dương.
 - [ ] Supplier A không đọc được PO của Supplier B.
-- [ ] Không vượt quantity còn lại.
+- [x] Không vượt quantity còn lại; realtest xác nhận quantity overflow bị từ chối.
 - [x] Duplicate delivery/XML upload không tạo record trùng.
 - [ ] File private, checksum và residue cleanup.
 - [ ] Process chưa có RFQ hợp lệ thì không phát invite.
 - [ ] Supplier chưa submit quotation thì không mở Lark PO approval.
 - [ ] Approval request thiếu `rfq_number` hoặc `quotation_status` thì không mở Lark
   PO approval.
-- [ ] Mỗi Supplier có một RFQ/access/Magic Link riêng, không dùng chung link.
+- [x] Mỗi Supplier có một RFQ/access/Magic Link riêng, không dùng chung link.
 - [x] Supplier submit tạo quotation ngay lập tức và quotation bị khóa sau submit.
 - [x] Tất cả Supplier submit thì approval mở ngay, không chờ đủ 3 ngày.
 - [ ] Hết 3 ngày từ lúc MR tạo, có ít nhất một quotation submit thì approval mở.
@@ -668,17 +775,28 @@ mở lại approval request đã gửi.
 - [ ] Supplier chưa submit được ghi `No Response` trong approval tổng hợp.
 - [ ] Approval hiển thị rõ quotation được chọn và lý do chọn giá thấp nhất.
 - [ ] Cùng một process chuyển trạng thái không được phát URL thứ hai.
-- [ ] PO submit thất bại thì vẫn giữ access record ở trạng thái chờ, không mở
-  capability PO và không phát một invite mới.
-- [x] Lark Mail provider readback thành công từ public mailbox.
-- [ ] Browser acceptance bằng link thật từ email.
+- [ ] PO submit thất bại thì vẫn giữ PO Draft và access record ở trạng thái chờ,
+  không mở capability PO và không phát một invite mới.
+- [ ] Lark Mail provider readback sau refactor thành công từ public mailbox.
+- [x] Browser acceptance bằng link thật từ email: mở link, gửi OTP, verify và
+  tải Supplier workspace thành công; cookie session được gửi cho
+  `/api/supplier/session/process`.
+- [x] Full realtest một Supplier sau refactor: MR → RFQ → Magic Link/OTP → SQ
+  → chọn giá thấp nhất → PO Draft native → Lark approval → PO Submitted →
+  Receipt → Invoice → Payment status `Invoiced`.
+- [x] Full realtest hai Supplier sau refactor: cùng flow với hai access/link
+  riêng, cùng email snapshot `leducanh@ledb.vn`, và approval chỉ chọn SQ có
+  tổng giá thấp nhất.
+- [x] Revoke acceptance riêng: access chuyển `Revoked`, request sau revoke trả
+  `403 supplier_portal_access_denied`.
+- [x] Quality gates tĩnh: Auth Server 24/24 tests, typecheck/lint; ERP
+  typecheck/lint và Python compile.
+  đạt service health, config/policy zero drift và setup complete.
 
-Real API acceptance đã chạy ngày 2026-09-10 bằng
-`npx tsx scripts/real-test-mr.ts`, kết quả `REAL_MR_TEST=PASS`: MR
-`MAT-MR-2026-00064` → RFQ `RFQ-2026-00059` → PO `PUR-ORD-2026-00100`
-→ Receipt `MAT-PRE-2026-00048` → Invoice `ACC-PINV-2026-00146`, payment
-status `Invoiced`. Test dùng supplier `Link Strategy`, email
-`leducanh@ledb.vn`; browser acceptance vẫn là gate riêng chưa chạy.
+Runtime evidence cho error contract: cùng một access hợp lệ trả `200` và gửi
+OTP ở request đầu; request lặp trong cooldown trả `429`, mã
+`supplier_otp_rate_limited` và `Retry-After` dương. UI không xóa form OTP và
+không hiển thị lỗi link cho trường hợp này.
 
 ## 17. Mặc định KISS đã chốt
 

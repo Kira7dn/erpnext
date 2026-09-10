@@ -1023,12 +1023,26 @@ x-contract:
       handler: letron_api.banking.run_rule_evaluation
     custom_routes:
     - module: Buying
+      resource: purchase-orders/create-draft
+      method: POST
+      path: /api/method/letron_api.lark_po.create_draft
+      operation: create
+      operation_id: createPurchaseOrderDraftBeforeApproval
+      handler: letron_api.lark_po.create_draft
+    - module: Buying
       resource: purchase-orders/from-approved-lark
       method: POST
       path: /api/method/letron_api.lark_po.from_approved
       operation: create
       operation_id: createPurchaseOrderFromApprovedLark
       handler: letron_api.lark_po.from_approved
+    - module: Buying
+      resource: purchase-orders/update-approval-state
+      method: POST
+      path: /api/method/letron_api.lark_po.update_approval_state
+      operation: update
+      operation_id: updatePurchaseOrderApprovalState
+      handler: letron_api.lark_po.update_approval_state
     - module: Files
       resource: attachments
       method: POST

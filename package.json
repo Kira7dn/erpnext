@@ -2,7 +2,7 @@
   "name": "letron-erp-local",
   "private": true,
   "scripts": {
-    "dev": "npx --yes concurrently --raw \"npm --prefix apps/auth-server run dev\" \"npm --prefix apps/erp run dev\"",
+    "dev": "node scripts/dev.mjs",
     "dev:auth": "npm --prefix apps/auth-server run dev",
     "dev:erp": "npm --prefix apps/erp run dev"
   }

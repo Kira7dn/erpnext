@@ -1,23 +1,25 @@
 # Thiết kế form `LeTRON PO Draft Approval`
 
-> **Trạng thái triển khai:** Server-side handoff đã nối từ orchestration tới
-> Global Portal khi có Supplier Quotation được chọn; UI cũng cho phép gửi sau
-> nếu RFQ hoàn tất trước. Acceptance với Lark tenant thật vẫn còn pending. Xem
-> [handoff note](Lark_PO_Draft_Approval_Handoff.md).
+> **Trạng thái triển khai:** Handoff server-side đã nối từ orchestration tới
+> Global Portal/Lark. ERPNext tạo PO Draft native và cấp số PO thật trước khi
+> mở approval; callback chỉ submit đúng draft đó. Realtest đã chứng minh mã PO
+> trước/sau approval không đổi. Xem [handoff note](Lark_PO_Draft_Approval_Handoff.md).
 
 ## 1. Mục tiêu và ranh giới
 
-Material Request (MR), Request for Quotation (RFQ) và Supplier Quotation vẫn
-được lấy từ ERPNext qua contract hiện hành. PO Draft được tạo và chỉnh sửa ở
-Lark Base. Global Portal là integration owner: tạo snapshot, tạo Approval
-instance, nhận trạng thái và gọi ERPNext sau khi được duyệt. ERPNext không tạo
-PO trước approval và chỉ là nơi lưu chứng từ chính thức sau cùng.
+Material Request (MR), Request for Quotation (RFQ), Supplier Quotation và PO
+Draft đều được lấy/tạo tại ERPNext qua contract hiện hành. Global Portal là
+integration owner: đọc PO Draft native, tạo projection/snapshot trong Lark,
+tạo Approval instance, nhận trạng thái và gọi ERPNext submit sau khi được duyệt.
+ERPNext là SSOT cho số PO và chứng từ chính thức.
 
 ```text
 ERPNext MR -> ERPNext RFQ -> ERPNext Supplier Quotation
                                       |
                                       v
-                          Global Portal -> Lark Base PO Draft
+                          ERPNext PO Draft (real PO number)
+                                      |
+                         Global Portal -> Lark Base projection
                                       |
                          immutable approval snapshot
                                       v
@@ -25,7 +27,7 @@ ERPNext MR -> ERPNext RFQ -> ERPNext Supplier Quotation
                                       |
                          APPROVED -> Global Portal
                                       v
-                           ERPNext Purchase Order
+                           ERPNext submit same PO Draft
 ```
 
 ## 2. Ánh xạ dữ liệu từ contract
@@ -59,17 +61,18 @@ Contract hiện tại chưa công bố action submit/cancel cho RFQ và Supplier
 Quotation. Vì vậy Portal chỉ dùng chúng làm nguồn lựa chọn và giá; không giả
 định chúng đã có lifecycle API như PO.
 
-### 2.3. Purchase Order sau approval
+### 2.3. Purchase Order trước và sau approval
 
 ```text
-POST /api/v1/buying/purchase-orders
-POST /api/v1/buying/purchase-orders/{name}/submit
+POST /api/method/letron_api.lark_po.create_draft
+POST /api/method/letron_api.lark_po.from_approved
 ```
 
-Payload PO phải có `supplier`, `company`, `transaction_date`, `schedule_date`,
-`currency`, `conversion_rate` và `items`. Mỗi dòng phải giữ một nhóm liên kết
-nguồn: `material_request` + `material_request_item`, hoặc
-`supplier_quotation` + `supplier_quotation_item`.
+`create_draft` tạo PO native với `supplier`, `company`, `transaction_date`,
+`schedule_date`, `currency`, `conversion_rate` và `items`, giữ
+`custom_letron_case_id`/`custom_letron_orchestration_id`. `from_approved` chỉ
+submit `erp_purchase_order_name` đã tồn tại sau khi kiểm tra hash/correlation;
+không được tạo PO mới.
 
 ## 3. Form Approval hoàn chỉnh
 
@@ -173,7 +176,7 @@ erp_error
 
 Luồng submit:
 
-1. Portal đọc lại PO Draft và toàn bộ PO Draft Item từ Base.
+1. Portal đọc lại PO Draft native ERPNext và projection/PO Draft Item từ Base.
 2. Kiểm tra các liên kết MR/RFQ/Supplier Quotation, số lượng dương, supplier,
    company, currency, ngày và tổng tiền.
 3. Canonicalize snapshot, tính `snapshot_hash`, ghi trạng thái
@@ -187,12 +190,14 @@ Luồng approved:
 2. Đọc lại Approval instance và xác nhận `APPROVED`.
 3. Đọc lại Base Draft + Items; hash phải trùng `snapshot_hash` và draft phải
    còn đúng attempt.
-4. Gọi endpoint ERPNext tạo PO với idempotency key ổn định.
-5. Đọc lại PO; nếu policy yêu cầu chứng từ chính thức ngay thì gọi action
-   submit, sau đó ghi `erp_purchase_order_name` và `ERP Submitted` về Base.
+4. Gọi endpoint ERPNext tạo PO Draft trước khi tạo Approval; ghi
+   `erp_purchase_order_name` vào Base/form.
+5. Sau `APPROVED`, gọi `from_approved` để submit đúng PO Draft; retry trả lại
+   cùng `name` và không tạo PO thứ hai.
 
-Nếu hash khác, từ chối phát hành PO, đánh dấu `ERP Failed`/`Approval Superseded`
-và bắt buộc tạo attempt mới. Reject/cancel không gọi ERPNext.
+Nếu hash khác, từ chối submit PO, đánh dấu `ERP Failed`/`Approval Superseded`
+và bắt buộc tạo attempt mới. Reject/cancel chỉ cập nhật trạng thái trên PO Draft
+đã có; không submit và không tạo PO mới.
 
 ## 6. Contract bổ sung đề xuất cho Global Portal
 
@@ -213,9 +218,9 @@ ERPNext nên có một route server-to-server riêng, ví dụ:
 POST /api/v1/buying/purchase-orders/from-approved-lark
 ```
 
-Route này kiểm tra chữ ký nội bộ, `approval_instance_code`, `snapshot_hash`,
-`approval_attempt`, quyền gọi và idempotency trước khi tạo PO. Không cho client
-web gọi trực tiếp route này.
+Các route kiểm tra chữ ký nội bộ, `approval_instance_code`, `snapshot_hash`,
+`approval_attempt`, correlation và idempotency trước khi tạo/submit. Không cho
+client web gọi trực tiếp route này.
 
 ## 7. Kiểm tra chấp nhận
 
@@ -223,9 +228,11 @@ web gọi trực tiếp route này.
 - RFQ liên kết đúng MR; Supplier Quotation liên kết đúng RFQ.
 - Submit cùng một `draft_id` và attempt chỉ tạo một Approval instance.
 - Approval instance chứa đúng snapshot và một task PENDING.
-- Sửa Base sau submit không được tạo PO từ approval cũ.
-- APPROVED hợp lệ tạo đúng một PO; retry không tạo PO thứ hai.
-- REJECTED/CANCELED không tạo PO.
+- Sửa projection/Base sau khi approval đã mở không được submit PO từ approval cũ;
+  ERPNext Draft native và snapshot/hash phải còn khớp.
+- PO Draft được tạo trước approval và giữ nguyên số khi APPROVED submit.
+- APPROVED hợp lệ submit đúng một PO; retry không tạo PO thứ hai.
+- REJECTED/CANCELED không submit PO; Draft vẫn được giữ để audit/retry.
 - PO tạo ra giữ được liên kết nguồn và metadata Lark.
 - Mọi callback sai chữ ký, sai hash, sai attempt hoặc sai trạng thái đều bị từ
   chối và có log audit không chứa secret.

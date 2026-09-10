@@ -89,11 +89,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(405).end();
     return;
   }
-  if (!env.LARK_GROUP_SYNC_ENABLED || !env.AUTH_ERP_SYNC_SECRET) {
+  if (!env.LARK_GROUP_SYNC_ENABLED || !env.LETRON_SSO_SYNC_SECRET) {
     res.status(503).json({ error: "lark_group_sync_disabled" });
     return;
   }
-  if (!authorized(req, env.AUTH_ERP_SYNC_SECRET)) {
+  if (!authorized(req, env.LETRON_SSO_SYNC_SECRET)) {
     res.status(401).json({ error: "unauthorized" });
     return;
   }

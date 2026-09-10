@@ -126,9 +126,7 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
         frappe.throw("Invalid local acceptance fixture prefix", exc=frappe.ValidationError)
 
     companies = frappe.get_all("Company", filters={"name": ["like", f"{prefix}%"]}, pluck="name")
-    # A failed run may delete its Company before invoking this fallback while
-    # ledger rows still retain that company name. Recover the scope from those
-    # ledgers so teardown remains fail-closed.
+    # Recover the scope from ledger rows when a failed run removed its Company.
     for ledger_doctype in ("GL Entry", "Payment Ledger Entry", "Stock Ledger Entry"):
         companies.extend(
             frappe.get_all(
@@ -190,22 +188,6 @@ def acceptance_cleanup(prefix: str) -> dict[str, object]:
                     document.cancel()
                     deleted.append(f"{transaction_doctype}:{name}:cancelled")
                 except Exception as error:  # noqa: BLE001 - report cleanup residue
-                    # Payment Entry cancellation can be rejected by Frappe's
-                    # dynamic-link guard when a failed acceptance run left its
-                    # generated GL rows behind. This branch is strictly
-                    # prefix-scoped disposable teardown: remove only derived
-                    # ledger rows for this voucher, then force-delete the
-                    # fixture document so cleanup itself cannot cascade into
-                    # a tenant-data mutation.
-                    if transaction_doctype == "Payment Entry" and name.startswith(prefix):
-                        for ledger_doctype in ("GL Entry", "Payment Ledger Entry", "Stock Ledger Entry"):
-                            frappe.db.delete(ledger_doctype, {"voucher_no": name})
-                        try:
-                            frappe.delete_doc("Payment Entry", name, force=True, ignore_permissions=True)
-                            deleted.append(f"Payment Entry:{name}:ledger-fallback")
-                            continue
-                        except Exception as fallback_error:  # noqa: BLE001 - report cleanup residue
-                            failures.append(f"Payment Entry:{name}:fallback:{type(fallback_error).__name__}")
                     failures.append(f"{transaction_doctype}:{name}:cancel:{type(error).__name__}")
     frappe.db.commit()
     for ledger_doctype in ("GL Entry", "Payment Ledger Entry", "Stock Ledger Entry"):

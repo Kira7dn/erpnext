@@ -34,7 +34,7 @@ IDENTITY_SYNC_FIELDS = (
     "break_glass_until",
     "break_glass_reason",
 )
-LEGACY_NATIVE_ROLES = frozenset({
+MANAGED_NATIVE_ROLES = frozenset({
     "Desk User", "Accounts User", "Accounts Manager", "Purchase User", "Purchase Manager",
     "Stock User", "Stock Manager", "Sales User", "Sales Manager",
 })
@@ -56,10 +56,6 @@ class SsoIdentityConflict(SsoIdentityError):
     pass
 
 
-class SsoSnapshotStale(SsoIdentityError):
-    pass
-
-
 @dataclass(frozen=True)
 class IdentitySnapshot:
     tenant_key: str
@@ -75,52 +71,10 @@ class IdentitySnapshot:
         return sha256_hex(f"lark\0{self.tenant_key}\0{self.subject}")
 
 
-def _required_string(payload: dict[str, Any], field: str) -> str:
-    value = payload.get(field)
-    if not isinstance(value, str) or not value.strip():
-        raise SsoIdentityError(f"Missing or invalid identity field: {field}")
-    return value.strip()
-
-
-def _parse_timestamp(value: Any) -> datetime:
-    if not isinstance(value, str):
-        raise SsoIdentityError("Missing group snapshot timestamp")
-    try:
-        parsed = datetime.fromisoformat(value)
-    except ValueError as exc:
-        raise SsoIdentityError("Invalid group snapshot timestamp") from exc
-    if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=UTC)
-    return parsed.astimezone(UTC)
-
-
 def _frappe_datetime(value: datetime) -> datetime:
     """Store an instant in Frappe's timezone-naive MariaDB Datetime columns."""
 
     return frappe.utils.convert_utc_to_system_timezone(value).replace(tzinfo=None)
-
-
-def snapshot_from_payload(payload: dict[str, Any], *, max_age_seconds: int | None = None) -> IdentitySnapshot:
-    groups = payload.get("groups")
-    if not isinstance(groups, list) or any(not isinstance(group, str) or not group for group in groups):
-        raise SsoIdentityError("Invalid Lark group snapshot")
-    subject_type = _required_string(payload, "lark_subject_type" if "lark_subject_type" in payload else "subject_type")
-    if subject_type != "union_id":
-        raise SsoIdentityError("Stable Lark union_id is required")
-    synced_at = _parse_timestamp(payload.get("lark_groups_synced_at", payload.get("groups_synced_at")))
-    if max_age_seconds is not None:
-        age = (datetime.now(UTC) - synced_at).total_seconds()
-        if age < -60 or age > max_age_seconds:
-            raise SsoSnapshotStale("Lark group snapshot is stale")
-    return IdentitySnapshot(
-        tenant_key=_required_string(payload, "lark_tenant_key" if "lark_tenant_key" in payload else "tenant_key"),
-        subject=_required_string(payload, "lark_subject" if "lark_subject" in payload else "subject"),
-        subject_type=subject_type,
-        email=_required_string(payload, "email").lower(),
-        display_name=_required_string(payload, "name" if "name" in payload else "display_name"),
-        groups=frozenset(groups),
-        synced_at=synced_at,
-    )
 
 
 def _json_list(values: set[str] | frozenset[str]) -> str:
@@ -325,7 +279,7 @@ def reconcile_identity(
         before, after = _sync_user(
             user,
             desired_roles=set(),
-            managed_roles=LEGACY_NATIVE_ROLES | _managed_policy_roles(before),
+            managed_roles=MANAGED_NATIVE_ROLES | _managed_policy_roles(before),
             enabled=False,
         )
         identity.disabled_by_sync = 1
@@ -363,7 +317,7 @@ def reconcile_identity(
     before, after = _sync_user(
         user,
         desired_roles=desired_roles,
-        managed_roles=LEGACY_NATIVE_ROLES | _managed_policy_roles(existing_roles),
+        managed_roles=MANAGED_NATIVE_ROLES | _managed_policy_roles(existing_roles),
         enabled=True,
     )
     identity.user = user.name
@@ -383,36 +337,6 @@ def reconcile_identity(
             after_roles=after,
         )
     return user.name
-
-
-def link_existing_user(snapshot: IdentitySnapshot, user_name: str, role_sync: RoleSyncConfiguration) -> str:
-    if _identity(snapshot.identity_key):
-        return reconcile_identity(snapshot, role_sync, source="migration", allow_create=False)
-    user = frappe.get_doc("User", user_name)
-    if user.name.lower() != snapshot.email or not user.enabled or user.user_type != "System User":
-        raise SsoIdentityConflict("Existing ERP user is not an active exact-email System User")
-    competing = frappe.db.get_value(IDENTITY_DOCTYPE, {"user": user.name}, "name")
-    if competing:
-        raise SsoIdentityConflict("ERP user is already linked to another external identity")
-    identity = frappe.get_doc(
-        {
-            "doctype": IDENTITY_DOCTYPE,
-            "identity_key": snapshot.identity_key,
-            "provider": "lark",
-            "tenant_key": snapshot.tenant_key,
-            "subject": snapshot.subject,
-            "subject_type": snapshot.subject_type,
-            "user": user.name,
-            "email": snapshot.email,
-            "display_name": snapshot.display_name,
-            "group_ids": _json_list(snapshot.groups),
-            "last_sync_at": _frappe_datetime(snapshot.synced_at),
-            "sync_state": "Active",
-        }
-    )
-    _save(identity)
-    _audit("identity.backfilled", source="migration", outcome="success", identity=identity.name, user=user.name)
-    return reconcile_identity(snapshot, role_sync, source="migration", allow_create=False)
 
 
 def apply_break_glass(
@@ -435,7 +359,7 @@ def apply_break_glass(
         raise SsoAccessDenied("Break-glass cannot bypass ERP access removal or a local block")
     user = frappe.get_doc("User", user_name)
     before = {row.role for row in user.roles}
-    before_managed = LEGACY_NATIVE_ROLES | _managed_policy_roles(before)
+    before_managed = MANAGED_NATIVE_ROLES | _managed_policy_roles(before)
     before, after = _sync_user(user, desired_roles=roles, managed_roles=before_managed, enabled=True)
     identity.break_glass_until = frappe.utils.add_to_date(
         frappe.utils.now_datetime(), seconds=ttl_seconds, as_datetime=True
@@ -481,7 +405,7 @@ def record_sync_error(
             _sync_user(
                 user,
                 desired_roles=current_roles & _managed_policy_roles(current_roles),
-                managed_roles=LEGACY_NATIVE_ROLES | _managed_policy_roles(current_roles),
+                managed_roles=MANAGED_NATIVE_ROLES | _managed_policy_roles(current_roles),
                 enabled=False,
             )
             _clear_sessions(identity.user)
@@ -509,8 +433,8 @@ def protect_lark_managed_user(document: Any, _method: str | None = None) -> None
     role_sync = load_configuration(os.environ).role_sync
     previous_roles = set(frappe.get_all("Has Role", filters={"parent": document.name}, pluck="role"))
     next_roles = {row.role for row in document.roles}
-    managed_before = LEGACY_NATIVE_ROLES | _managed_policy_roles(previous_roles)
-    managed_after = LEGACY_NATIVE_ROLES | _managed_policy_roles(next_roles)
+    managed_before = MANAGED_NATIVE_ROLES | _managed_policy_roles(previous_roles)
+    managed_after = MANAGED_NATIVE_ROLES | _managed_policy_roles(next_roles)
     if (previous_roles & managed_before) != (next_roles & managed_after):
         frappe.throw(
             "Managed ERP roles are controlled by Lark. Use the SSO break-glass command for a temporary override.",

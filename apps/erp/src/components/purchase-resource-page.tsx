@@ -286,7 +286,7 @@ function initialValues(kind: Kind, row?: Row): Row {
         (field.type === "boolean"
           ? false
           : field.name === "naming_series"
-            ? "MAT-MR-.YYYY.-"
+            ? "MR-.YYYYMMDD.-.####"
             : field.type === "date"
               ? dateValue()
               : ""),
@@ -454,7 +454,6 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
     setRetryingActiveId(id);
     setActiveError(null);
     try {
-      const active = activeOrchestrations.find((item) => item.id === id);
       const result = (await api(
         `requests/orchestrations/${encodeURIComponent(id)}/retry-rfq`,
         { method: "POST" },

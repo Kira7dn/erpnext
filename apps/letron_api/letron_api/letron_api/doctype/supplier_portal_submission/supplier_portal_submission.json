@@ -4,8 +4,9 @@
   "autoname": "hash",
   "doctype": "DocType",
   "engine": "InnoDB",
-  "field_order": ["procurement_process", "access", "supplier", "submission_type", "purchase_order", "status", "payload", "payload_hash", "file_url", "file_name", "sha256", "idempotency_key", "reviewed_by", "reviewed_at", "review_note", "result_document"],
+  "field_order": ["submission_key", "procurement_process", "access", "supplier", "submission_type", "purchase_order", "status", "payload", "payload_hash", "file_url", "file_name", "sha256", "idempotency_key", "reviewed_by", "reviewed_at", "review_note", "result_document"],
   "fields": [
+    {"fieldname": "submission_key", "fieldtype": "Data", "label": "Submission Key", "reqd": 1, "unique": 1, "hidden": 1, "read_only": 1},
     {"fieldname": "procurement_process", "fieldtype": "Link", "label": "Procurement Process", "options": "Supplier Procurement Process", "reqd": 1},
     {"fieldname": "access", "fieldtype": "Link", "label": "Access", "options": "Supplier Portal Access", "reqd": 1},
     {"fieldname": "supplier", "fieldtype": "Link", "label": "Supplier", "options": "Supplier", "reqd": 1},

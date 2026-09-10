@@ -17,6 +17,13 @@ app_description = "Technical API integration surface for the ERPNext bench"
 app_email = "engineering@letron.local"
 app_license = "MIT"
 
+# Frappe's native naming-series parser supports application-defined variables.
+# The variable is used only by new Letron purchasing records; existing names are
+# never renamed.
+naming_series_variables = {
+    "YYYYMMDD": "letron_api.naming.parse_yyyymmdd",
+}
+
 required_apps = ["frappe", "erpnext"]
 
 _ROUTE_CACHE: dict[tuple[str, str], str] = {}

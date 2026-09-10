@@ -2,11 +2,11 @@
 
 ## Trạng thái chính xác
 
-Đã triển khai server-side handoff và đã acceptance live tới trạng thái Approval
-đang chờ duyệt trên tenant thật. Runtime hiện dùng definition `Purchase`
-(`FED2698B-DBF9-4D38-97C1-25E59E8A2FA8`) và map theo stable widget id/custom id
-của form đã Việt hóa. Phần tạo Purchase Order chỉ chạy sau khi người duyệt
-thao tác APPROVED và webhook hợp lệ được nhận.
+Đã triển khai server-side handoff và đã acceptance live toàn bộ tới invoice.
+Runtime hiện dùng definition `Purchase` (`FED2698B-DBF9-4D38-97C1-25E59E8A2FA8`)
+và map theo stable widget id/custom id của form đã Việt hóa. ERPNext tạo PO
+Draft native trước khi mở approval; chỉ thao tác submit PO chạy sau khi
+APPROVED và webhook/reconcile hợp lệ được nhận.
 
 Đã có:
 
@@ -18,7 +18,8 @@ thao tác APPROVED và webhook hợp lệ được nhận.
   Approval instance và có nhánh handoff APPROVED sang ERPNext.
 - `apps/letron_api/letron_api/lark_po.py`: control-plane handler tạo và submit
   Purchase Order bằng native ERPNext controller.
-- Contract đã đăng ký route ERPNext `from_approved`.
+- Contract đã đăng ký các route ERPNext `create_draft`, `from_approved` và
+  `update_approval_state`.
 - `POST /api/integrations/lark/purchase-orchestrations/{id}/submit-approval`:
   Global Portal đọc lại MR/RFQ/Supplier Quotation qua Gateway và canonicalize
   PO Draft server-side.
@@ -26,8 +27,9 @@ thao tác APPROVED và webhook hợp lệ được nhận.
   trong PostgreSQL; Redis lock chỉ dùng để serialize request ngắn hạn.
 - ERPNext `purchase_schema.ensure_schema`: metadata Lark trên Purchase Order và
   correlation fields được tạo qua migration.
-- `apps/erp` tạo tự động MR → RFQ → Lark Approval trong cùng orchestration; không
-  cần Supplier Quotation và UI không còn nút gửi Approval thủ công.
+- `apps/erp` tạo tự động MR → RFQ → access/Magic Link → Supplier Quotation →
+  chọn giá thấp nhất → PO Draft native → Lark Approval trong cùng orchestration;
+  UI không còn nút gửi Approval thủ công trước gate.
 - Native Approval definition `Purchase` đã được cập nhật bằng Lark OpenAPI qua
   `lark-cli api POST /open-apis/approval/v4/approvals` với chính
   `approval_code` hiện hữu (full replacement update), không tạo definition mới.
@@ -39,7 +41,7 @@ thao tác APPROVED và webhook hợp lệ được nhận.
   `Tên hàng hóa`, `Quy cách / mô tả`, `Số lượng`, `Đơn giá`, `Thành tiền`, và
   `Tài liệu đính kèm`. Các control tiền tệ chỉ cho phép VND.
 
-Chưa có:
+Các acceptance gate còn lại:
 
 - `LARK_EVENT_ENCRYPT_KEY` vẫn phải có trong runtime Auth trước khi acceptance
   phần webhook APPROVED → ERPNext PO.
@@ -47,29 +49,28 @@ Chưa có:
   tài khoản Lark; các nhãn, nội dung và node thuộc definition đã là tiếng Việt.
   Runtime mapper theo cả `custom_id` và tên tiếng Việt nên không phụ thuộc ID
   runtime mà Lark tự sinh sau khi cập nhật definition.
-- Acceptance live phần MR → RFQ → Base → Approval đã đạt; chưa bấm APPROVED nên
-  chưa có bằng chứng PO cuối chuỗi.
+- Các nhánh expiry/isolation/private-file/deadline và PO failure injection vẫn
+  là acceptance gate riêng; happy path đã có bằng chứng từ MR đến invoice.
 
 ## Việc người tiếp theo phải làm
 
 1. Giữ Approval definition dùng đúng `approval_code`
    `FED2698B-DBF9-4D38-97C1-25E59E8A2FA8`, không dùng App Link definition ID.
-2. Chạy acceptance APPROVED bằng chính người duyệt `leducanh@ledb.vn`, sau đó
-   kiểm tra webhook, PO readback và idempotency.
-3. Bổ sung/giữ test live cho success, duplicate, rejected, canceled, hash
+2. Bổ sung/giữ test live cho webhook thật, duplicate, rejected, canceled, hash
    mismatch, changed draft và ERP failure khi tenant/runtime sẵn sàng.
 
 ## Tiêu chí bàn giao đạt
 
-Chỉ đánh dấu hoàn tất khi có bằng chứng cho cả chuỗi:
+Đối với happy path, tiêu chí bàn giao là:
 
 ```text
 MR created
   -> RFQ created
-  -> exactly one Lark PO Draft (stable record ID)
+  -> exactly one native ERPNext PO Draft (real PO number)
+  -> exactly one Lark projection (stable record ID)
   -> exactly one PENDING Approval instance
   -> APPROVED webhook/reconcile
-  -> exactly one submitted ERPNext Purchase Order
+  -> exactly one submitted ERPNext Purchase Order with the same PO number
 ```
 
 Các trường hợp REJECTED/CANCELED, retry cùng correlation ID và sửa Base sau khi
@@ -87,7 +88,11 @@ route riêng lẻ.
   draft `recvuHqIK9b5y7` → Approval instance
   `2D5E6F8B-720E-409F-B136-70505DFF65B9`, `PENDING`, một task PENDING giao đúng
   `leducanh@ledb.vn`.
-- Live evidence sau khi publish form tiếng Việt: `MAT-MR-2026-00015` →
+- Full realtest evidence: `MR-20260910-0002` → `RFQ-20260910-0002` →
+  `SQ-20260910-0002` → native PO `PO-20260910-0002` (Draft trước approval và
+  Submitted sau approval cùng số) → `GRN-20260910-0001` → `INV-20260910-0001`,
+  payment status `Invoiced`, email `leducanh@ledb.vn`.
+- Legacy live evidence sau khi publish form tiếng Việt: `MAT-MR-2026-00015` →
   `RFQ-2026-00011` → Base draft `recvuHvWkkrPhi` → Approval instance
   `4C764ED6-F6A5-4ABE-9E28-FDD1A137442E`, `PENDING`, một task PENDING giao đúng
   `leducanh@ledb.vn`; readback có 4 nhóm control, một item row và amount

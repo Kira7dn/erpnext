@@ -14,7 +14,7 @@ type Body = {
 
 function authorized(req: NextApiRequest): boolean {
   const env = getEnv();
-  const secret = env.LETRON_SUPPLIER_PORTAL_SECRET ?? env.LETRON_SSO_SYNC_SECRET;
+  const secret = env.LETRON_SSO_SYNC_SECRET;
   const value = String(req.headers.authorization ?? "");
   if (!secret || !/^Bearer\s+\S+$/i.test(value)) return false;
   const supplied = Buffer.from(value.replace(/^Bearer\s+/i, ""), "utf8");
@@ -37,9 +37,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       orchestrationId,
       supplierQuotationName: selected,
       justification: String(body.justification ?? ""),
-      portalUrl: `${config.next_base_url}/supplier`,
+      portalUrl: `${config.next_internal_base_url}/supplier`,
       cookieHeader: "",
     });
+    if (input.rfq_number !== input.request_for_quotation_name || input.quotation_status !== "Submitted") {
+      throw new Error("approval_source_status_incomplete");
+    }
     const result = await submitPoDraftApproval(input, config.approval_submitter_email);
     res.status(result.idempotent ? 200 : 201).json({ status: "PENDING", ...result });
   } catch (error) {

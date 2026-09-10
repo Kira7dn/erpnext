@@ -6,9 +6,7 @@ from typing import Any
 
 import frappe
 
-
-def _text(value: Any) -> str:
-    return str(value or "").strip()
+from letron_api.supplier_portal import _text
 
 
 def _accesses_for_po(po_name: str) -> list[str]:
@@ -36,6 +34,8 @@ def on_purchase_order_submit(doc: Any, method: str | None = None) -> None:
         process = frappe.get_doc("Supplier Procurement Process", process_name)
         if process.approval_status in {"Opening", "Opened"}:
             process.approval_status = "Approved"
+            process.purchase_order = doc.name
+            process.purchase_order_status = "Submitted"
             process.save(ignore_permissions=True)
 
 

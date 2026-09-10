@@ -50,9 +50,11 @@ foreach ($property in $environment.PSObject.Properties) {
     # are visible without copying runtime configuration into .env.
     Set-Item -Path ("Env:{0}" -f $property.Name) -Value ([string]$property.Value)
 }
-$envFile = Join-Path $root '.env'
-if (Test-Path -LiteralPath $envFile) {
-    Get-Content $envFile | ForEach-Object {
+$envFileNames = if ($env:NODE_ENV -eq 'production') { @('.env.production', '.env') } else { @('.env.local', '.env') }
+foreach ($envFileName in $envFileNames) {
+    $envFile = Join-Path $root $envFileName
+    if (!(Test-Path -LiteralPath $envFile)) { continue }
+    Get-Content -LiteralPath $envFile -Encoding utf8 | ForEach-Object {
         $l = $_.Trim()
         if ($l -and -not $l.StartsWith('#') -and $l.Contains('=')) {
             $parts = $l.Split('=', 2)

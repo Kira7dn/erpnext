@@ -32,41 +32,6 @@ export type AccessPolicy = z.infer<typeof accessPolicySchema>;
 export type PermissionRule = z.infer<typeof permissionRuleSchema>;
 export type AccessEntitlement = z.infer<typeof entitlementSchema>;
 
-const legacyOperationMap: Record<string, PublicOperation> = {
-  submit: "update",
-  reconcile: "update",
-  unreconcile: "update",
-  cancel: "delete",
-};
-
-function normalizeLegacyOperations(value: unknown): unknown {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
-  const source = value as Record<string, unknown>;
-  if (!Array.isArray(source.entitlements)) return value;
-  return {
-    ...source,
-    entitlements: source.entitlements.map((item) => {
-      if (!item || typeof item !== "object" || Array.isArray(item)) return item;
-      const entitlement = item as Record<string, unknown>;
-      if (!Array.isArray(entitlement.rules)) return item;
-      return {
-        id: entitlement.id,
-        label: entitlement.label,
-        larkGroupIds: entitlement.larkGroupIds,
-        rules: entitlement.rules.map((rule) => {
-          if (!rule || typeof rule !== "object" || Array.isArray(rule)) return rule;
-          const current = rule as Record<string, unknown>;
-          if (!Array.isArray(current.operations)) return rule;
-          return {
-            ...current,
-            operations: [...new Set(current.operations.map((operation) => typeof operation === "string" ? legacyOperationMap[operation] ?? operation : operation))],
-          };
-        }),
-      };
-    }),
-  };
-}
-
 function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map((item) => canonicalJson(item)).join(",")}]`;
   if (value && typeof value === "object") {
@@ -76,9 +41,7 @@ function canonicalJson(value: unknown): string {
 }
 
 export function parseAccessPolicy(value: unknown): AccessPolicy {
-  // Read compatibility for policies created before CRUD-only capabilities.
-  // New writes are still validated and persisted with only five operations.
-  return accessPolicySchema.parse(normalizeLegacyOperations(value));
+  return accessPolicySchema.parse(value);
 }
 
 export function policyHash(policy: AccessPolicy): string {

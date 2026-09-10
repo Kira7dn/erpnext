@@ -56,8 +56,8 @@ type TenantTokenCache = {
 type LarkGlobal = typeof globalThis & { __letronLarkTenantToken?: TenantTokenCache };
 
 function unwrap(data: unknown): unknown {
-  if (data && typeof data === "object" && "data" in data) return (data as { data: unknown }).data;
-  return data;
+  if (!data || typeof data !== "object" || !("data" in data)) throw new Error("LARK_RESPONSE_DATA_MISSING");
+  return (data as { data: unknown }).data;
 }
 
 async function readJson(response: Response): Promise<unknown> {

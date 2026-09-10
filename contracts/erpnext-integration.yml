@@ -125,7 +125,9 @@ runtime:
       path_suffix: run-evaluation
       handler: letron_api.banking.run_rule_evaluation
   custom_routes:
+    - {module: Buying, resource: purchase-orders/create-draft, method: POST, path: /api/method/letron_api.lark_po.create_draft, operation: create, operation_id: createPurchaseOrderDraftBeforeApproval, handler: letron_api.lark_po.create_draft}
     - {module: Buying, resource: purchase-orders/from-approved-lark, method: POST, path: /api/method/letron_api.lark_po.from_approved, operation: create, operation_id: createPurchaseOrderFromApprovedLark, handler: letron_api.lark_po.from_approved}
+    - {module: Buying, resource: purchase-orders/update-approval-state, method: POST, path: /api/method/letron_api.lark_po.update_approval_state, operation: update, operation_id: updatePurchaseOrderApprovalState, handler: letron_api.lark_po.update_approval_state}
     - {module: Files, resource: attachments, method: POST, path: /api/v1/files/attachments, operation: create, operation_id: createAttachment, handler: letron_api.attachments.create_attachment, content_type: multipart/form-data, multipart_fields: [attached_to_doctype, attached_to_name, is_private], required_multipart_fields: [attached_to_doctype, attached_to_name]}
     - {module: Accounts, resource: bank-reconciliation, method: GET, path: /api/v1/accounts/bank-reconciliation/transactions, operation: list, operation_id: listBankReconciliationTransactions, handler: letron_api.banking.reconciliation_transactions}
     - {module: Accounts, resource: bank-reconciliation, method: GET, path: /api/v1/accounts/bank-reconciliation/balance, operation: read, operation_id: getBankReconciliationBalance, handler: letron_api.banking.reconciliation_balance}
@@ -357,6 +359,9 @@ acceptance:
     letron_api_api_runtime_info_get: {status: passed, suite: extended-api}
     letron_api_api_runtime_snapshot_get: {status: passed, suite: public-api}
     createAttachment: {status: passed, suite: extended-api}
+    createPurchaseOrderDraftBeforeApproval: {status: not-tested, suite: extended-api}
+    createPurchaseOrderFromApprovedLark: {status: not-tested, suite: extended-api}
+    updatePurchaseOrderApprovalState: {status: not-tested, suite: extended-api}
     listAsset: {status: not-tested, suite: assets-lifecycle}
     createAsset: {status: not-tested, suite: assets-lifecycle}
     getAsset: {status: not-tested, suite: assets-lifecycle}
