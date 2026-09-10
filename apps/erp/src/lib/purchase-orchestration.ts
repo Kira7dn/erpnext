@@ -5,10 +5,13 @@ import { Redis } from "@upstash/redis";
 import {
   GatewayAccessDeniedError,
   GatewayAuthenticationRequiredError,
+  GatewayRequestError,
   GatewayUnavailableError,
   gatewayRequest,
 } from "@/lib/letron-api";
-import { portalAuthBaseUrl } from "@/lib/portal-config";
+import { ApiRequestError } from "@/lib/api-error";
+import { supplierPortalRequest } from "@/lib/supplier-portal";
+import { supplierPortalConfig } from "@/lib/supplier-portal-config";
 
 type Row = Record<string, unknown>;
 type Item = {
@@ -27,17 +30,21 @@ type Item = {
 export type PurchaseOrchestrationInput = {
   material_request: Row;
   suppliers: string[];
+  supplier_email?: string;
   supplier_quotation_name?: string;
   justification?: string;
 };
 export type PurchaseOrchestrationState = {
   id: string;
-  status: "started" | "mr_created" | "partial_failure" | "rfq_created" | "approval_pending" | "approval_failed" | "completed" | "failed";
+  status: "started" | "mr_created" | "partial_failure" | "rfq_created" | "waiting_supplier_quotes" | "approval_pending" | "approval_failed" | "completed" | "failed";
   material_request: Row;
   suppliers: string[];
+  supplier_email?: string;
   rfq_payload: Row;
   material_request_name?: string;
   request_for_quotation_name?: string;
+  supplier_quote_deadline_at?: string;
+  supplier_portal_accesses?: string[];
   supplier_quotation_name?: string;
   justification?: string;
   lark_po?: Record<string, unknown>;
@@ -56,7 +63,7 @@ function store(): Redis {
   const url = process.env.KV_REST_API_URL;
   const token = process.env.KV_REST_API_TOKEN;
   if (!url || !token)
-    throw new Error("ERP orchestration Redis is not configured.");
+    throw new ApiRequestError("configuration_error", "Purchase orchestration storage is not configured.", 503);
   redis = new Redis({ url, token });
   return redis;
 }
@@ -247,54 +254,30 @@ function stateResult(
 }
 
 function errorMessage(cause: unknown): string {
-  return cause instanceof Error ? cause.message : "ERP request failed.";
+  return cause instanceof ApiRequestError ? cause.message : "ERP purchase operation failed.";
 }
 
-async function submitLarkApproval(
-  cookieHeader: string,
-  orchestrationId: string,
-  justification?: string,
-): Promise<Record<string, unknown>> {
-  const response = await fetch(
-    `${portalAuthBaseUrl()}/api/integrations/lark/purchase-orchestrations/${encodeURIComponent(orchestrationId)}/submit-approval`,
-    {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        ...( /^Bearer\s+\S+$/i.test(cookieHeader)
-          ? { Authorization: cookieHeader }
-          : { Cookie: cookieHeader }),
-      },
-      body: JSON.stringify({ justification }),
-      cache: "no-store",
-      signal: AbortSignal.timeout(60_000),
-    },
-  );
-  const payload = (await response.json().catch(() => ({}))) as { data?: Record<string, unknown>; error?: unknown };
-  if (!response.ok) {
-    const detail = typeof payload.error === "string" ? payload.error : `Lark approval failed (${response.status}).`;
-    throw new Error(detail);
-  }
-  return (payload.data ?? payload) as Record<string, unknown>;
-}
-
-async function finishLarkApproval(
-  cookieHeader: string,
+async function issueSupplierPortalAccesses(
   state: PurchaseOrchestrationState,
+  materialRequest: Row,
 ): Promise<void> {
-  try {
-    state.lark_po = await submitLarkApproval(
-      cookieHeader,
-      state.id,
-      state.justification,
-    );
-    state.status = "approval_pending";
-    state.error = undefined;
-  } catch (cause) {
-    state.status = "approval_failed";
-    state.error = errorMessage(cause);
+  const createdAt = new Date(String(materialRequest.creation ?? state.created_at));
+  const deadline = new Date(createdAt.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
+  const accessIds: string[] = [];
+  for (const supplier of state.suppliers) {
+    const result = await supplierPortalRequest<{ access_id: string }>("issue_access", {
+      material_request: state.material_request_name,
+      request_for_quotation: state.request_for_quotation_name,
+      orchestration_id: state.id,
+      supplier,
+      email_snapshot: state.supplier_email,
+      deadline_at: deadline,
+      portal_url_base: `${supplierPortalConfig().next_base_url.replace(/\/$/, "")}/supplier`,
+    });
+    if (result?.access_id) accessIds.push(result.access_id);
   }
+  state.supplier_portal_accesses = accessIds;
+  state.supplier_quote_deadline_at = deadline;
 }
 
 export function orchestrationHttpStatus(cause: unknown): number {
@@ -302,6 +285,7 @@ export function orchestrationHttpStatus(cause: unknown): number {
   if (cause instanceof GatewayAuthenticationRequiredError) return 401;
   if (cause instanceof GatewayAccessDeniedError) return 403;
   if (cause instanceof GatewayUnavailableError) return 503;
+  if (cause instanceof GatewayRequestError) return cause.status >= 500 ? 502 : 400;
   return 502;
 }
 
@@ -327,6 +311,7 @@ export async function createPurchaseOrchestration(
     status: "started",
     material_request: normalized.materialRequest,
     suppliers: normalized.suppliers,
+    supplier_email: String(input.supplier_email ?? "").trim() || undefined,
     supplier_quotation_name: String(input.supplier_quotation_name ?? "").trim() || undefined,
     justification: String(input.justification ?? "").trim() || undefined,
     rfq_payload: buildRfqPayload(
@@ -346,7 +331,7 @@ export async function createPurchaseOrchestration(
   if (!claimed) {
     const concurrent = await store().get<PurchaseOrchestrationState>(key);
     if (concurrent) return stateResult(concurrent);
-    throw new Error("Could not claim orchestration state.");
+    throw new ApiRequestError("orchestration_claim_failed", "Purchase orchestration could not be claimed.", 409);
   }
   await store().sadd(activeIndex(cookieHeader), key);
   await store().set(idKey(cookieHeader, state.id), idempotencyKey, {
@@ -396,7 +381,11 @@ export async function createPurchaseOrchestration(
       },
     );
     state.request_for_quotation_name = String(rfq.name ?? "");
-    await finishLarkApproval(cookieHeader, state);
+    await issueSupplierPortalAccesses(state, materialRequest);
+    state.status = "waiting_supplier_quotes";
+    state.supplier_quote_deadline_at = new Date(
+      Date.parse(state.created_at) + 3 * 24 * 60 * 60 * 1000,
+    ).toISOString();
     await saveState(key, state);
     return stateResult(state);
   } catch (cause) {
@@ -467,6 +456,7 @@ async function continueStartedOrchestration(
     state.status = "mr_created";
     if (existingRfq) {
       state.request_for_quotation_name = String(existingRfq.name ?? "");
+      await issueSupplierPortalAccesses(state, existingMr);
     } else {
       const rfq = await gatewayRequest<Row>(
         "/api/v1/crm/request-for-quotations",
@@ -481,8 +471,9 @@ async function continueStartedOrchestration(
         },
       );
       state.request_for_quotation_name = String(rfq.name ?? "");
+      await issueSupplierPortalAccesses(state, existingMr);
     }
-    await finishLarkApproval(cookieHeader, state);
+    state.status = "waiting_supplier_quotes";
     await saveState(key, state);
     return stateResult(state);
   }
@@ -529,7 +520,8 @@ async function continueStartedOrchestration(
       },
     );
     state.request_for_quotation_name = String(rfq.name ?? "");
-    await finishLarkApproval(cookieHeader, state);
+    await issueSupplierPortalAccesses(state, materialRequest);
+    state.status = "waiting_supplier_quotes";
     await saveState(key, state);
     return stateResult(state);
   } catch (cause) {
@@ -585,6 +577,10 @@ export async function retryPurchaseRfq(
     throw new PurchaseOrchestrationValidationError(
       "Material Request was not created; RFQ cannot be retried.",
     );
+  const materialRequest = await gatewayRequest<Row>(
+    `/api/v1/stock/material-requests/${encodeURIComponent(state.material_request_name)}`,
+    cookieHeader,
+  );
   const lock = await store().set(retryKey(key), "locked", { nx: true, ex: 90 });
   if (!lock) return stateResult(state);
   try {
@@ -595,7 +591,8 @@ export async function retryPurchaseRfq(
     );
     if (existingRfq) {
     state.request_for_quotation_name = String(existingRfq.name ?? "");
-      await finishLarkApproval(cookieHeader, state);
+      await issueSupplierPortalAccesses(state, materialRequest);
+      state.status = "waiting_supplier_quotes";
       state.retry_count += 1;
       await saveState(key, state);
       return stateResult(state);
@@ -613,7 +610,8 @@ export async function retryPurchaseRfq(
       },
     );
     state.request_for_quotation_name = String(rfq.name ?? "");
-    await finishLarkApproval(cookieHeader, state);
+    await issueSupplierPortalAccesses(state, materialRequest);
+    state.status = "waiting_supplier_quotes";
     state.retry_count += 1;
     await saveState(key, state);
     return stateResult(state);
@@ -634,8 +632,6 @@ export async function retryPurchaseRfq(
 export async function submitLarkApprovalById(
   cookieHeader: string,
   id: string,
-  supplierQuotationName = "",
-  justification?: string,
 ): Promise<PurchaseOrchestrationState> {
   const key = await keyForOrchestrationId(cookieHeader, id);
   if (!key)
@@ -651,26 +647,9 @@ export async function submitLarkApprovalById(
     throw new PurchaseOrchestrationValidationError(
       "RFQ must be created before Lark approval can be submitted.",
     );
-  state.supplier_quotation_name = supplierQuotationName.trim() || undefined;
-  state.justification = justification?.trim() || state.justification;
-  try {
-    state.lark_po = await submitLarkApproval(
-      cookieHeader,
-      state.id,
-      state.justification,
-    );
-    state.status = "approval_pending";
-    state.error = undefined;
-    await saveState(key, state);
-    return stateResult(state);
-  } catch (cause) {
-    state.status = "approval_failed";
-    state.error = errorMessage(cause);
-    await saveState(key, state);
-    throw Object.assign(cause instanceof Error ? cause : new Error(state.error), {
-      orchestration: stateResult(state),
-    });
-  }
+  throw new PurchaseOrchestrationValidationError(
+    "Lark approval opens only after Supplier quotation gate passes.",
+  );
 }
 
 export async function retryPurchaseRfqById(

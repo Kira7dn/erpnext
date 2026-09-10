@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { apiErrorFromResponse, apiErrorResponse } from "@/lib/api-error";
 import { isPurchaseResource } from "@/lib/letron-api";
 import { portalAuthBaseUrl } from "@/lib/portal-config";
 
@@ -50,13 +51,10 @@ async function proxy(
 ) {
   const startedAt = performance.now();
   if (!METHODS.has(request.method))
-    return NextResponse.json({ error: "method_not_allowed" }, { status: 405 });
+    return apiErrorResponse("method_not_allowed", 405, "Method is not allowed.");
   const { path } = await context.params;
   if (!path?.length || !isPurchaseResource(path[0]))
-    return NextResponse.json(
-      { error: "unknown_purchase_resource" },
-      { status: 404 },
-    );
+    return apiErrorResponse("unknown_purchase_resource", 404, "Purchase resource was not found.");
   const officialPath = `${OFFICIAL_MODULES[path[0]]}${path
     .slice(1)
     .map((part) => `/${encodeURIComponent(part)}`)
@@ -81,8 +79,10 @@ async function proxy(
       cache: "no-store",
     });
   } catch {
-    return NextResponse.json({ error: "gateway_unavailable" }, { status: 503 });
+    return apiErrorResponse("gateway_unavailable", 503, "Letron Global Portal Gateway is unavailable.", true);
   }
+  if (!response.ok)
+    return apiErrorFromResponse(response, "purchase_request_failed", "Purchase request failed.");
   const responseHeaders = new Headers({
     "content-type": response.headers.get("content-type") ?? "application/json",
   });

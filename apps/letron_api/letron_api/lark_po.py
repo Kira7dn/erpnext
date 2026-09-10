@@ -74,6 +74,16 @@ def _validate_payload(payload: Any) -> tuple[str, str, int, dict[str, Any], list
         _require_source("Request for Quotation", rfq, "Request for Quotation")
     if quotation:
         _require_source("Supplier Quotation", quotation, "Supplier Quotation")
+        quotation_doc = frappe.get_doc("Supplier Quotation", quotation)
+        if quotation_doc.docstatus != 1:
+            frappe.throw("Selected Supplier Quotation must be submitted", exc=frappe.ValidationError)
+        if _text(quotation_doc.supplier) != _text(draft.get("supplier")):
+            frappe.throw("Selected Supplier Quotation supplier mismatch", exc=frappe.ValidationError)
+        quotation_rfq = _text(getattr(quotation_doc, "request_for_quotation", ""))
+        if quotation_rfq and quotation_rfq != rfq:
+            frappe.throw("Selected Supplier Quotation RFQ mismatch", exc=frappe.ValidationError)
+        if not quotation_rfq and not any(_text(getattr(item, "request_for_quotation", "")) == rfq for item in quotation_doc.items):
+            frappe.throw("Selected Supplier Quotation is not linked to the RFQ", exc=frappe.ValidationError)
     for raw in raw_items:
         if not isinstance(raw, dict):
             frappe.throw("Approved Lark PO item is invalid", exc=frappe.ValidationError)
@@ -159,6 +169,9 @@ def from_approved() -> dict[str, Any]:
     )
     if not po.supplier or not po.company or not po.transaction_date or not po.schedule_date or not po.currency:
         frappe.throw("Approved Lark PO header is incomplete", exc=frappe.ValidationError)
-    po.insert(ignore_permissions=True)
-    po.submit()
+    from letron_api.supplier_portal import _internal_execution
+
+    with _internal_execution():
+        po.insert(ignore_permissions=True)
+        po.submit()
     return {"name": po.name, "idempotent": False}

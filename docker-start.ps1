@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('up','reload','down','restart','ps','logs','config','bootstrap','inspect','verify','backup','backup-verify','config-validate','config-plan','config-apply','policy-validate','policy-export','policy-plan','policy-apply')]
+    [ValidateSet('up','build','reload','down','restart','ps','logs','config','bootstrap','inspect','verify','backup','backup-verify','config-validate','config-plan','config-apply','policy-validate','policy-export','policy-plan','policy-apply')]
     [string]$Action = 'up',
     [switch]$FollowLogs
 )
@@ -123,12 +123,15 @@ if ($Action -eq 'config') {
     Write-Host 'Compose, config and policy YAML are valid (secrets omitted)'
     return
 }
-if ($Action -in @('up','reload','restart','down','ps','logs','bootstrap','inspect','verify','backup','backup-verify','config-plan','config-apply','policy-export','policy-plan','policy-apply')) {
+if ($Action -in @('up','build','reload','restart','down','ps','logs','bootstrap','inspect','verify','backup','backup-verify','config-plan','config-apply','policy-export','policy-plan','policy-apply')) {
     & docker info --format '{{.ServerVersion}}' *> $null
     if ($LASTEXITCODE -ne 0) { throw 'Docker daemon is not available. Start Docker Desktop and retry.' }
 }
 
 switch ($Action) {
+    'build' {
+        Invoke-Compose @('build','backend')
+    }
     'up' {
         Invoke-Compose @('config','--quiet')
         Invoke-Compose @('up','-d','--remove-orphans')

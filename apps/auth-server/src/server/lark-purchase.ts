@@ -677,6 +677,49 @@ export async function readApprovalInstance(
   return result.data ?? {};
 }
 
+export async function approvePoDraftApproval(instanceCode: string): Promise<{
+  status: string;
+  taskId?: string;
+  idempotent: boolean;
+}> {
+  const env = config();
+  const instance = await readApprovalInstance(instanceCode);
+  const status = String(instance.status ?? instance.instance_status ?? "").toUpperCase();
+  if (status === "APPROVED") return { status, idempotent: true };
+  if (["REJECTED", "CANCELED", "CANCELLED"].includes(status)) {
+    throw new Error(`LARK_APPROVAL_ALREADY_${status}`);
+  }
+
+  const approverEmail = env.LARK_PO_APPROVER_EMAIL;
+  if (!approverEmail) throw new Error("LARK_PO_APPROVER_NOT_CONFIGURED");
+  const approverId = await fetchLarkUserIdByEmail(approverEmail);
+  const tasks = Array.isArray(instance.task_list)
+    ? instance.task_list.filter((task): task is Row => Boolean(task && typeof task === "object"))
+    : [];
+  const task = tasks.find((candidate) => {
+    const taskStatus = String(candidate.status ?? candidate.task_status ?? "").toUpperCase();
+    const taskUserId = String(candidate.user_id ?? candidate.approver_user_id ?? "");
+    return taskStatus === "PENDING" && taskUserId === approverId;
+  });
+  const taskId = String(task?.id ?? task?.task_id ?? "").trim();
+  if (!taskId) throw new Error("LARK_APPROVAL_PENDING_TASK_NOT_FOUND");
+
+  await larkTenantJson(
+    "/open-apis/approval/v4/tasks/approve?user_id_type=user_id",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        approval_code: env.LARK_PO_APPROVAL_CODE,
+        instance_code: instanceCode,
+        user_id: approverId,
+        task_id: taskId,
+        comment: "real-test auto-approved",
+      }),
+    },
+  );
+  return { status: "APPROVED_REQUESTED", taskId, idempotent: false };
+}
+
 export async function updatePoDraft(
   draftId: string,
   fields: Record<string, unknown>,
@@ -801,11 +844,13 @@ export async function completeLarkWebhookEvent(eventId: string): Promise<void> {
 
 async function gatewayJson<T>(path: string, cookieHeader: string): Promise<T> {
   const env = getEnv();
+  const serverHeaders = !cookieHeader ? controlHeaders(path, "GET") : {};
   const response = await fetch(
-    new URL(`/api/gateway${path}`, `${env.AUTH_BASE_URL}/`),
+    new URL(cookieHeader ? `/api/gateway${path}` : path, cookieHeader ? `${env.AUTH_BASE_URL}/` : `${env.LETRON_SSO_ERP_BASE_URL ?? ""}/`),
     {
       headers: {
         Accept: "application/json",
+        ...serverHeaders,
         ...( /^Bearer\s+\S+$/i.test(cookieHeader)
           ? { Authorization: cookieHeader }
           : { Cookie: cookieHeader }),
@@ -822,12 +867,34 @@ async function gatewayJson<T>(path: string, cookieHeader: string): Promise<T> {
   return (payload.data ?? payload.message) as T;
 }
 
+async function supplierSourceJson<T>(payload: Record<string, unknown>): Promise<T> {
+  const env = getEnv();
+  const path = "/api/method/letron_api.supplier_portal.read_approval_source";
+  if (!env.LETRON_SSO_ERP_BASE_URL) throw new Error("ERP_SOURCE_READ_FAILED_503");
+  const response = await fetch(new URL(path, `${env.LETRON_SSO_ERP_BASE_URL}/`), {
+    method: "POST",
+    headers: { Accept: "application/json", ...controlHeaders(path) },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+    signal: AbortSignal.timeout(30_000),
+  });
+  const result = await response.json().catch(() => ({})) as { message?: T; data?: T };
+  if (!response.ok) throw new Error(`ERP_SOURCE_READ_FAILED_${response.status}`);
+  return (result.data ?? result.message) as T;
+}
+
 async function sourceByCorrelation(
   path: string,
   doctype: string,
   orchestrationId: string,
   cookieHeader: string,
 ): Promise<Row> {
+  if (!cookieHeader) {
+    const source = await supplierSourceJson<{ material_request?: Row; rfq?: Row }>({ orchestration_id: orchestrationId });
+    const value = doctype === "Material Request" ? source.material_request : source.rfq;
+    if (!value) throw new Error("ERP_SOURCE_CORRELATION_NOT_FOUND");
+    return value;
+  }
   const query = new URLSearchParams({
     filters: JSON.stringify([
       [doctype, "custom_letron_orchestration_id", "=", orchestrationId],
@@ -853,11 +920,37 @@ async function sourceByName(
   name: string,
   cookieHeader: string,
 ): Promise<Row> {
+  if (!cookieHeader) {
+    const source = await supplierSourceJson<{ supplier_quotation?: Row }>({ supplier_quotation_name: name, orchestration_id: "" });
+    if (!source.supplier_quotation) throw new Error("ERP_SOURCE_NAME_MISSING");
+    return source.supplier_quotation;
+  }
   return gatewayJson<Row>(`${path}/${encodeURIComponent(name)}`, cookieHeader);
 }
 
 function text(value: unknown): string {
   return String(value ?? "").trim();
+}
+
+function nestedText(value: unknown, names: string[]): string | undefined {
+  if (typeof value === "string" && value.trim().startsWith("[")) {
+    try {
+      return nestedText(JSON.parse(value), names);
+    } catch {
+      return undefined;
+    }
+  }
+  if (!value || typeof value !== "object") return undefined;
+  const row = value as Row;
+  for (const name of names) {
+    const candidate = row[name];
+    if (typeof candidate === "string" && candidate.trim()) return candidate.trim();
+  }
+  for (const child of Object.values(row)) {
+    const found = nestedText(child, names);
+    if (found) return found;
+  }
+  return undefined;
 }
 
 function number(value: unknown, fallback = 0): number {
@@ -938,7 +1031,9 @@ export async function buildPoDraftFromCorrelation(input: {
   const items = (supplierQuotation ? quoteItems : rfqItems).map((raw, index) => {
     const source = raw as Row;
     const mrItemName = text(source.material_request_item) || text(mrItems[index]?.name);
-    const rfqItemName = text(source.name) || text(rfqItems[index]?.name);
+    const rfqItemName = supplierQuotation
+      ? text(source.request_for_quotation_item) || text(rfqItems[index]?.name)
+      : text(source.name) || text(rfqItems[index]?.name);
     const mrItem = mrByName.get(mrItemName) || (mrItems[index] as Row | undefined);
     const rfqItem = rfqByName.get(rfqItemName) || (rfqItems[index] as Row | undefined);
     if (!mrItem || !rfqItem || text(rfqItem.material_request) !== mrName)
@@ -1035,7 +1130,7 @@ export async function buildPoDraftFromCorrelation(input: {
   return parsePoDraft(parsed);
 }
 
-function controlHeaders(path: string): Record<string, string> {
+function controlHeaders(path: string, method = "POST"): Record<string, string> {
   const env = getEnv();
   const secret = env.LETRON_SSO_SYNC_SECRET ?? env.AUTH_ERP_SYNC_SECRET;
   if (!env.LETRON_SSO_ERP_BASE_URL || !secret)
@@ -1044,7 +1139,7 @@ function controlHeaders(path: string): Record<string, string> {
   const expires = String(Number(timestamp) + 60);
   const requestId = randomUUID();
   const signature = createHmac("sha256", secret)
-    .update(`${timestamp}.${expires}.POST.${path}.${requestId}`)
+    .update(`${timestamp}.${expires}.${method}.${path}.${requestId}`)
     .digest("hex");
   return {
     "content-type": "application/json",
@@ -1071,6 +1166,65 @@ export async function createApprovedErpPurchaseOrder(input: {
     signal: AbortSignal.timeout(30_000),
   });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(`ERP_APPROVED_PO_FAILED_${response.status}`);
+  if (!response.ok) {
+    const detail = payload && typeof payload === "object"
+      ? String(
+          (payload as Row).exc ??
+          (payload as Row)._server_messages ??
+          (payload as Row).message ??
+          (payload as Row).exception ??
+          (payload as Row).exc_type ??
+          "",
+        ).trim()
+      : "";
+    throw new Error(`ERP_APPROVED_PO_FAILED_${response.status}${detail ? `: ${detail.slice(0, 500)}` : ""}`);
+  }
   return payload as Record<string, unknown>;
+}
+
+export async function reconcileApprovedPoDraft(instanceCode: string): Promise<{
+  status: string;
+  erpPurchaseOrderName?: string;
+}> {
+  const instance = await readApprovalInstance(instanceCode);
+  const status = String(instance.status ?? instance.instance_status ?? "").toUpperCase();
+  const state = await getDb().larkPoDraftState.findFirst({
+    where: { approvalInstanceCode: instanceCode },
+  });
+  const draftId = nestedText(instance, ["po_draft_id"]) ?? state?.draftId ?? undefined;
+  if (!draftId) throw new Error("PO_DRAFT_ID_MISSING");
+  const draft = await readPoDraft(draftId);
+  const draftInstance = String(draft.approval_instance_code ?? "");
+  const draftAttempt = Number(draft.approval_attempt ?? 0);
+  const instanceAttempt = Number(nestedText(instance, ["approval_attempt"]) ?? draftAttempt);
+  const draftHash = String(draft.snapshot_hash ?? "");
+  const instanceHash = nestedText(instance, ["snapshot_hash"]);
+  if (
+    draftInstance !== instanceCode ||
+    draftAttempt !== instanceAttempt ||
+    draftHash.length !== 64 ||
+    (instanceHash !== undefined && instanceHash !== draftHash)
+  ) {
+    throw new Error("APPROVAL_SNAPSHOT_SUPERSEDED");
+  }
+  if (status === "REJECTED" || status === "CANCELED" || status === "CANCELLED") {
+    await markPoDraftStatus({ draftId, status: status === "REJECTED" ? "REJECTED" : "CANCELED" });
+    return { status };
+  }
+  if (status !== "APPROVED") return { status };
+  const result = await createApprovedErpPurchaseOrder({
+    approval_instance_code: instanceCode,
+    snapshot_hash: draftHash,
+    attempt: draftAttempt,
+    draft,
+    items: await readPoDraftItems(draftId),
+  });
+  const resultRow = result as Row;
+  const resultData = resultRow.data ?? resultRow.message ?? resultRow;
+  const poName = String(
+    resultData && typeof resultData === "object" ? (resultData as Row).name ?? "" : "",
+  );
+  if (!poName) throw new Error("ERP_APPROVED_PO_NAME_MISSING");
+  await markPoDraftStatus({ draftId, status: "ERP_SUBMITTED", erpPurchaseOrderName: poName });
+  return { status: "ERP_SUBMITTED", erpPurchaseOrderName: poName };
 }

@@ -8,11 +8,9 @@ import { audit } from "../../../../../src/server/audit";
 import {
   claimLarkWebhookEvent,
   completeLarkWebhookEvent,
-  createApprovedErpPurchaseOrder,
   markPoDraftStatus,
+  reconcileApprovedPoDraft,
   readApprovalInstance,
-  readPoDraft,
-  readPoDraftItems,
 } from "../../../../../src/server/lark-purchase";
 
 export const config = { api: { bodyParser: false }, maxDuration: 60 };
@@ -123,61 +121,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const instance = await readApprovalInstance(instanceCode);
     const status = statusOf(instance);
     currentStatus = status;
-    const draftId = findString(instance, ["po_draft_id"]);
-    currentDraftId = draftId;
-    if (!draftId) {
-      await completeLarkWebhookEvent(eventId);
-      recordAudit("failure", { event_id: eventId, instance_code: instanceCode, reason: "po_draft_id_missing" });
-      res.status(200).json({ accepted: true, ignored: "po_draft_id_missing" });
-      return;
-    }
-    const draft = await readPoDraft(draftId);
-    const draftInstance = String(draft.approval_instance_code ?? "");
-    const draftAttempt = Number(draft.approval_attempt ?? 0);
-    const instanceAttempt = Number(findString(instance, ["approval_attempt"]) ?? draftAttempt);
-    const draftHash = String(draft.snapshot_hash ?? "");
-    const instanceHash = findString(instance, ["snapshot_hash"]);
-    if (
-      draftInstance !== instanceCode ||
-      draftAttempt !== instanceAttempt ||
-      draftHash.length !== 64 ||
-      (instanceHash !== undefined && instanceHash !== draftHash)
-    ) {
-      await completeLarkWebhookEvent(eventId);
-      recordAudit("failure", { event_id: eventId, instance_code: instanceCode, draft_id: draftId, reason: "approval_snapshot_superseded" });
-      res.status(409).json({ error: "approval_snapshot_superseded" });
-      return;
-    }
-    if (["REJECTED", "CANCELED", "CANCELLED"].includes(status)) {
-      await markPoDraftStatus({
-        draftId,
-        status: status === "REJECTED" ? "REJECTED" : "CANCELED",
-      });
-      await completeLarkWebhookEvent(eventId);
-      recordAudit("success", { event_id: eventId, instance_code: instanceCode, draft_id: draftId, status });
-      res.status(200).json({ accepted: true, status });
-      return;
-    }
-    if (status !== "APPROVED") {
-      await completeLarkWebhookEvent(eventId);
-      recordAudit("success", { event_id: eventId, instance_code: instanceCode, draft_id: draftId, status });
-      res.status(200).json({ accepted: true, status });
-      return;
-    }
-    const result = await createApprovedErpPurchaseOrder({
-      approval_instance_code: instanceCode,
-      snapshot_hash: draftHash,
-      attempt: draftAttempt,
-      draft,
-      items: await readPoDraftItems(draftId),
-    });
-    const resultData = result.data as Record<string, unknown> | undefined;
-    const poName = String(resultData?.name ?? result.name ?? "");
-    if (!poName) throw new Error("ERP_APPROVED_PO_NAME_MISSING");
-    await markPoDraftStatus({ draftId, status: "ERP_SUBMITTED", erpPurchaseOrderName: poName });
+    currentDraftId = findString(instance, ["po_draft_id"]);
+    const result = await reconcileApprovedPoDraft(instanceCode);
+    const poName = result.erpPurchaseOrderName;
     await completeLarkWebhookEvent(eventId);
-    recordAudit("success", { event_id: eventId, instance_code: instanceCode, draft_id: draftId, status: "ERP_SUBMITTED", erp_purchase_order_name: poName });
-    res.status(200).json({ accepted: true, status, erp_purchase_order_name: poName });
+    recordAudit("success", { event_id: eventId, instance_code: instanceCode, draft_id: currentDraftId, status: result.status, erp_purchase_order_name: poName });
+    res.status(200).json({ accepted: true, status: result.status, erp_purchase_order_name: poName });
   } catch (error) {
     // Leave processed_at NULL so a Lark retry can safely reconcile a transient
     // ERP/Lark failure. The ERP endpoint is itself idempotent by instance code.

@@ -23,6 +23,16 @@ function duration(start: number): number {
   return Number((performance.now() - start).toFixed(1));
 }
 
+function errorResponse(
+  res: NextApiResponse,
+  status: number,
+  code: string,
+  message: string,
+  retryable = status === 429 || status >= 500,
+): void {
+  res.status(status).json({ error: code, message, retryable });
+}
+
 function body(req: NextApiRequest): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
@@ -108,7 +118,7 @@ export default async function handler(
   timings.session = duration(sessionStartedAt);
   if (!user) {
     finish();
-    res.status(401).json({ error: "authentication_required" });
+    errorResponse(res, 401, "authentication_required", "Authentication is required.");
     return;
   }
   const policyStartedAt = performance.now();
@@ -116,7 +126,7 @@ export default async function handler(
   timings.policy = duration(policyStartedAt);
   if (!policy) {
     finish();
-    res.status(503).json({ error: "access_policy_not_published" });
+    errorResponse(res, 503, "access_policy_not_published", "Access policy is not available.");
     return;
   }
   const path = `/${Array.isArray(req.query.path) ? req.query.path.join("/") : String(req.query.path ?? "")}`;
@@ -129,7 +139,7 @@ export default async function handler(
       detail: { path, reason: "policy_denied", policy_version: policy.version },
     }).catch(() => undefined);
     finish();
-    res.status(403).json({ error: "access_denied" });
+    errorResponse(res, 403, "access_denied", "Access to this resource is denied.");
     return;
   }
   const env = getEnv();
@@ -137,7 +147,7 @@ export default async function handler(
   const secret = env.LETRON_SSO_SYNC_SECRET ?? env.AUTH_ERP_SYNC_SECRET;
   if (!baseUrl || !secret) {
     finish();
-    res.status(503).json({ error: "gateway_not_configured" });
+    errorResponse(res, 503, "gateway_not_configured", "Gateway is not configured.");
     return;
   }
   const roles = policyRolesForGroups(policy.policy, user.groupIds);
@@ -163,7 +173,7 @@ export default async function handler(
   } catch {
     timings.erp_fetch = duration(erpStartedAt);
     finish();
-    res.status(502).json({ error: "erp_gateway_unavailable" });
+    errorResponse(res, 502, "erp_gateway_unavailable", "ERP service is unavailable.", true);
     return;
   }
   timings.erp_fetch = duration(erpStartedAt);

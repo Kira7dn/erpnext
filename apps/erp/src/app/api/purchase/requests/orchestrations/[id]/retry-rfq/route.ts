@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiErrorFromCause, apiErrorResponse } from "@/lib/api-error";
 import { requestAuthCredential } from "@/lib/request-auth";
 import {
   orchestrationHttpStatus,
@@ -11,10 +12,7 @@ export async function POST(
 ) {
   const cookieHeader = await requestAuthCredential(request);
   if (!cookieHeader)
-    return NextResponse.json(
-      { error: "authentication_required" },
-      { status: 401 },
-    );
+    return apiErrorResponse("authentication_required", 401, "Authentication is required.");
   const { id } = await context.params;
   try {
     const state = await retryPurchaseRfqById(cookieHeader, id);
@@ -23,9 +21,6 @@ export async function POST(
     const state = (cause as { orchestration?: unknown }).orchestration;
     if (state)
       return NextResponse.json({ data: state, message: "partial_failure" });
-    return NextResponse.json(
-      { error: cause instanceof Error ? cause.message : "RFQ retry failed." },
-      { status: orchestrationHttpStatus(cause) },
-    );
+    return apiErrorFromCause(cause, "rfq_retry_failed", "RFQ retry failed.", orchestrationHttpStatus(cause));
   }
 }

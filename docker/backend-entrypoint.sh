@@ -55,10 +55,11 @@ bench use "$SITE_NAME"
 ln -sfn "$SITE_NAME" "sites/localhost"
 ln -sfn "$SITE_NAME" "sites/127.0.0.1"
 
-# 6. Đảm bảo dependencies cho background jobs & S3 backup
+# 6. Dependencies are installed in the image at build time.  Startup must not
+# reach the package index: a transient network failure must not block ERPNext.
 if ! /home/frappe/frappe-bench/env/bin/python -c "import boto3" >/dev/null 2>&1; then
-  echo "Ensuring boto3 in bench environment..."
-  /home/frappe/frappe-bench/env/bin/pip install boto3 >/dev/null 2>&1 || true
+  echo "ERROR: boto3 is missing from the backend image; rebuild the image before starting." >&2
+  exit 1
 fi
 
 # 7. Chạy background workers & scheduler

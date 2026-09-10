@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { apiErrorFromCause, apiErrorResponse } from "@/lib/api-error";
 import { requestAuthCredential } from "@/lib/request-auth";
 import {
   createPurchaseOrchestration,
   orchestrationHttpStatus,
-  PurchaseOrchestrationValidationError,
   type PurchaseOrchestrationInput,
 } from "@/lib/purchase-orchestration";
 
 export async function POST(request: NextRequest) {
   const cookieHeader = await requestAuthCredential(request);
   if (!cookieHeader)
-    return NextResponse.json(
-      { error: "authentication_required" },
-      { status: 401 },
-    );
+    return apiErrorResponse("authentication_required", 401, "Authentication is required.");
   const input = (await request.json().catch(() => null)) as Record<
     string,
     unknown
@@ -22,7 +19,7 @@ export async function POST(request: NextRequest) {
     request.headers.get("X-Idempotency-Key") ??
     String(input?.idempotency_key ?? "");
   if (!input)
-    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
+    return apiErrorResponse("invalid_json", 400, "Request body must be valid JSON.");
   try {
     const state = await createPurchaseOrchestration(
       cookieHeader,
@@ -43,14 +40,11 @@ export async function POST(request: NextRequest) {
     ) {
       return NextResponse.json({ data: state, message: "partial_failure" });
     }
-    const message =
-      cause instanceof PurchaseOrchestrationValidationError ||
-      cause instanceof Error
-        ? cause.message
-        : "Purchase orchestration failed.";
-    return NextResponse.json(
-      { error: message },
-      { status: orchestrationHttpStatus(cause) },
+    return apiErrorFromCause(
+      cause,
+      "purchase_orchestration_failed",
+      "Purchase orchestration failed.",
+      orchestrationHttpStatus(cause),
     );
   }
 }

@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { audit } from "../../../../src/server/audit";
+import { sha256 } from "../../../../src/server/crypto";
+import { getDb } from "../../../../src/server/db";
 import { appendSetCookie, disableCaching, firstQueryValue, parseCookies, redirectError, requestId, requestIsSecure, serializeCookie } from "../../../../src/server/http";
 import { finishInteraction } from "../../../../src/server/interaction";
 import { exchangeLarkCode, fetchLarkGroupIds, fetchLarkIdentity, larkCallbackUri } from "../../../../src/server/lark";
@@ -10,6 +12,7 @@ import { rotateSession } from "../../../../src/server/session";
 import { upsertLarkUser } from "../../../../src/server/users";
 import { getEnv } from "../../../../src/server/env";
 import { canonicalAuthOrigin } from "../../../../src/server/auth-origin";
+import { completeLarkMailOAuth, LARK_MAIL_OAUTH_COOKIE } from "../../../../src/server/lark-mail";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   disableCaching(res);
@@ -23,6 +26,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const code = firstQueryValue(req.query.code);
   const state = firstQueryValue(req.query.state);
   const larkError = firstQueryValue(req.query.error);
+  const mailBinding = parseCookies(req.headers.cookie)[LARK_MAIL_OAUTH_COOKIE];
+  const mailTransaction = state
+    ? await getDb().larkMailOAuthTransaction.findUnique({ where: { stateHash: sha256(state) }, select: { id: true } })
+    : null;
+  if (!larkError && code && state && mailBinding && mailTransaction) {
+    try {
+      const expectedMailbox = await completeLarkMailOAuth({ state, binding: mailBinding, code });
+      appendSetCookie(res, serializeCookie(LARK_MAIL_OAUTH_COOKIE, "", { maxAge: 0, expires: new Date(0), secure: requestIsSecure(req) }));
+      await audit({ eventType: "lark.mail_oauth", outcome: "success", detail: { mailbox: expectedMailbox } });
+      res.status(200).json({ ok: true, mailbox: expectedMailbox, message: "Lark Mail authorization stored" });
+    } catch (error) {
+      await audit({ eventType: "lark.mail_oauth", outcome: "failure", detail: { reason: error instanceof Error ? error.message.slice(0, 80) : "unknown" } }).catch(() => undefined);
+      res.status(400).json({ error: "mail_oauth_failed" });
+    }
+    return;
+  }
   const browserBinding = parseCookies(req.headers.cookie)[LARK_TRANSACTION_COOKIE];
   if (larkError || !code || !state || !browserBinding) {
     await audit({ eventType: "lark.login", outcome: "failure", requestId: id, detail: { reason: "callback_rejected" } }).catch(() => undefined);

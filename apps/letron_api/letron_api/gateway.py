@@ -79,14 +79,14 @@ def verify_gateway_request() -> str:
     return user
 
 
-def verify_control_plane_request(expected_path: str = "/api/method/letron_api.access_policy.publish") -> None:
+def verify_control_plane_request(expected_path: str | None = "/api/method/letron_api.access_policy.publish") -> None:
     headers = frappe.local.request.headers
     secret = os.environ.get("LETRON_SSO_SYNC_SECRET", "")
     timestamp = headers.get("X-Letron-Control-Timestamp", "")
     expires_at = headers.get("X-Letron-Control-Expires-At", "")
     request_id = headers.get("X-Letron-Control-Request-Id", "")
     signature = headers.get("X-Letron-Control-Signature", "")
-    path = expected_path
+    path = expected_path or frappe.local.request.path
     if not secret or not timestamp or not expires_at or not request_id or not signature:
         frappe.throw("Control-plane authorization required", exc=frappe.AuthenticationError)
     try:
@@ -97,7 +97,7 @@ def verify_control_plane_request(expected_path: str = "/api/method/letron_api.ac
         frappe.throw("Invalid control-plane timestamp", exc=frappe.AuthenticationError)
     if age > 60 or expiry < time.time() or expiry <= issued_at:
         frappe.throw("Expired control-plane authorization", exc=frappe.AuthenticationError)
-    payload = f"{timestamp}.{expires_at}.POST.{path}.{request_id}"
+    payload = f"{timestamp}.{expires_at}.{frappe.local.request.method}.{path}.{request_id}"
     expected = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
     if not hmac.compare_digest(expected, signature):
         frappe.throw("Invalid control-plane authorization", exc=frappe.AuthenticationError)
@@ -153,6 +153,10 @@ def enforce_gateway_ingress() -> None:
     # Native business APIs are never an authorization path. Global Portal is
     # the only caller that may reach /api/v1/* with signed claims.
     native_api = path.startswith("/api/resource/") or path.startswith("/api/method/")
+    if native_api and frappe.local.request.headers.get("X-Letron-Control-Signature"):
+        verify_control_plane_request(path)
+        frappe.local.letron_control_plane_authorized = True
+        return
     native_exemptions = {
         "/api/method/letron_api.api.health",
         "/api/method/letron_api.api.runtime_info",
@@ -160,5 +164,7 @@ def enforce_gateway_ingress() -> None:
         "/api/method/letron_api.access_policy.publish",
         "/api/method/letron_api.lark_po.from_approved",
     }
+    if path.startswith("/api/method/letron_api.supplier_portal."):
+        return
     if native_api and path not in native_exemptions:
         frappe.throw("Global Portal gateway required", exc=frappe.AuthenticationError)

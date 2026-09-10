@@ -27,7 +27,7 @@ type ItemRow = {
 };
 type ActiveOrchestration = {
   id: string;
-  status: "started" | "mr_created" | "partial_failure" | "rfq_created" | "approval_pending" | "approval_failed" | "completed" | "failed";
+  status: "started" | "mr_created" | "partial_failure" | "rfq_created" | "waiting_supplier_quotes" | "approval_pending" | "approval_failed" | "completed" | "failed";
   material_request_name?: string;
   request_for_quotation_name?: string;
   supplier_quotation_name?: string;

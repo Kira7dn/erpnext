@@ -15,6 +15,7 @@ function authLoginUrl(request: NextRequest): URL {
 
 export function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.endsWith("/manifest.webmanifest") || request.nextUrl.pathname.endsWith("/icon.svg")) return NextResponse.next();
+  if (request.nextUrl.pathname === "/supplier" || request.nextUrl.pathname.startsWith("/supplier/")) return NextResponse.next();
   if (request.cookies.has(SESSION_COOKIE)) return NextResponse.next();
 
   return NextResponse.redirect(authLoginUrl(request));

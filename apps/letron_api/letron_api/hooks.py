@@ -304,6 +304,19 @@ for policy_doctype in POLICY_DOCTYPES:
     handlers["validate"] = "letron_api.policy.protect_managed_configuration"
     handlers["on_trash"] = "letron_api.policy.protect_managed_configuration"
 
+for lifecycle_doctype, lifecycle_handler in {
+    "Purchase Order": "letron_api.supplier_lifecycle.on_purchase_order_submit",
+    "Purchase Receipt": "letron_api.supplier_lifecycle.on_purchase_receipt_submit",
+    "Purchase Invoice": "letron_api.supplier_lifecycle.on_purchase_invoice_submit",
+}.items():
+    submit_handlers = doc_events.setdefault(lifecycle_doctype, {}).get("on_submit")
+    if isinstance(submit_handlers, list):
+        submit_handlers.append(lifecycle_handler)
+    elif submit_handlers:
+        doc_events[lifecycle_doctype]["on_submit"] = [submit_handlers, lifecycle_handler]
+    else:
+        doc_events[lifecycle_doctype]["on_submit"] = lifecycle_handler
+
 system_settings_handlers = doc_events.setdefault("System Settings", {})
 system_settings_handlers["validate"] = "letron_api.system_config.protect_system_settings"
 system_settings_handlers["on_trash"] = "letron_api.system_config.protect_system_settings"
@@ -315,6 +328,9 @@ scheduler_events = {
     "all": ["letron_api.delivery.process_pending_outbox"],
     "hourly": ["letron_api.policy.audit", "letron_api.system_config.audit"],
     "cron": {
+        "*/5 * * * *": [
+            "letron_api.supplier_portal_scheduler.process_supplier_portal_deadlines"
+        ],
         "0 1 * * *": [
             "letron_api.backup.scheduled_s3_backup"
         ]

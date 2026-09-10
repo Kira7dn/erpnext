@@ -18,7 +18,12 @@ export function QueryProvider({ children }: Readonly<{ children: React.ReactNode
 }
 
 export class ErpQueryError extends Error {
-  constructor(readonly status: number, message: string) {
+  constructor(
+    readonly status: number,
+    message: string,
+    readonly code = `http_${status}`,
+    readonly retryable = status >= 500,
+  ) {
     super(message);
     this.name = "ErpQueryError";
   }

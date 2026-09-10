@@ -2,6 +2,7 @@ import "server-only";
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { ApiRequestError, remoteErrorMessage, type RemoteErrorPayload } from "./api-error";
 import { portalAuthBaseUrl } from "./portal-config";
 
 export type BankAccount = {
@@ -218,27 +219,36 @@ export function getAccountingFormFields(
     }));
 }
 
-export class GatewayAuthenticationRequiredError extends Error {
+export class GatewayAuthenticationRequiredError extends ApiRequestError {
   constructor() {
-    super("Bạn cần đăng nhập qua Letron Global Portal.");
-    this.name = "GatewayAuthenticationRequiredError";
+    super("authentication_required", "Bạn cần đăng nhập qua Letron Global Portal.", 401);
   }
 }
 
-export class GatewayAccessDeniedError extends Error {
+export class GatewayAccessDeniedError extends ApiRequestError {
   constructor() {
-    super("Tài khoản hiện tại chưa được cấp quyền cho phân hệ này.");
-    this.name = "GatewayAccessDeniedError";
+    super("access_denied", "Tài khoản hiện tại chưa được cấp quyền cho phân hệ này.", 403);
   }
 }
 
-export class GatewayUnavailableError extends Error {
+export class GatewayUnavailableError extends ApiRequestError {
   constructor() {
     super(
+      "gateway_unavailable",
       "Letron Global Portal Gateway hiện không khả dụng. Vui lòng thử lại sau.",
+      503,
+      true,
     );
-    this.name = "GatewayUnavailableError";
   }
+}
+
+export class GatewayRequestError extends ApiRequestError {}
+
+function gatewayErrorCode(status: number): string {
+  if (status === 404) return "not_found";
+  if (status === 409) return "conflict";
+  if (status >= 500) return "remote_failure";
+  return "validation_failed";
 }
 
 function authGatewayUrl(path: string): string {
@@ -363,21 +373,17 @@ export async function gatewayRequest<T>(
   if (response.status === 502 || response.status === 503)
     throw new GatewayUnavailableError();
   if (!response.ok) {
-    let detail = "";
+    let payload: RemoteErrorPayload = {};
     try {
-      const errorPayload = (await response.json()) as {
-        error?: unknown;
-        message?: unknown;
-      };
-      const candidate = errorPayload.error ?? errorPayload.message;
-      if (typeof candidate === "string") detail = candidate.slice(0, 500);
+      payload = (await response.json()) as RemoteErrorPayload;
     } catch {
-      // Keep the status-only fallback for non-JSON gateway responses.
+      // The typed status contract is still usable for a non-JSON response.
     }
-    throw new Error(
-      detail
-        ? `Letron Gateway request failed (${response.status}): ${detail}`
-        : `Letron Gateway request failed (${response.status}).`,
+    throw new GatewayRequestError(
+      gatewayErrorCode(response.status),
+      remoteErrorMessage(payload, response.status >= 500 ? "ERP service request failed." : "ERP request was rejected."),
+      response.status,
+      response.status === 429 || response.status >= 500,
     );
   }
   const payload = (await response.json()) as ApiResponse<T>;
