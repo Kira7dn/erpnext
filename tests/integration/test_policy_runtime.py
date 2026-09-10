@@ -11,9 +11,9 @@ from typing import Any
 
 import pytest
 import yaml
-from letron_api.policy import load_policy, policy_sha256
-from letron_api.policy_acceptance import DOCUMENT_BUILDERS, SINGLE_BUILDERS
-from letron_api.system_config import load_config
+from letron_api.control.policy import load_policy, policy_sha256
+from letron_api.control.policy_acceptance import DOCUMENT_BUILDERS, SINGLE_BUILDERS
+from letron_api.control.system_config import load_config
 
 from .api_runtime_harness import ApiClient, RuntimeUnavailable, response_data
 
@@ -71,12 +71,12 @@ def test_policy_bundle_matches_native_configuration() -> None:
     bundle = load_policy(_runtime_config_path().parent / "policy.yaml")
     expected_hash = policy_sha256(bundle)
     exported = yaml.safe_load(
-        base64.b64decode(bench_execute("letron_api.policy.export_current_base64"))
+        base64.b64decode(bench_execute("letron_api.control.policy.export_current_base64"))
     )
     assert exported == bundle
     assert len(bundle["documents"]) == 28
     snapshot = client.request(
-        "GET", "/api/method/letron_api.api.runtime_snapshot", expected={200}
+        "GET", "/api/method/letron_api.control.api.runtime_snapshot", expected={200}
     )
     bootstrap = snapshot.data["message"]["bootstrap"]
     assert bootstrap["ok"] is True
@@ -159,17 +159,17 @@ def test_policy_bundle_protects_native_configuration() -> None:
 
 
 def test_policy_drift_and_idempotent_restore() -> None:
-    drift = json.loads(bench_execute("letron_api.policy.acceptance_force_drift"))
+    drift = json.loads(bench_execute("letron_api.control.policy.acceptance_force_drift"))
     assert drift["drift_count"] == 1
     try:
-        restored = json.loads(bench_execute("letron_api.policy.sync"))
+        restored = json.loads(bench_execute("letron_api.control.policy.sync"))
         assert restored["ok"] is True
         assert restored["drift_count"] == 0
     finally:
         # Make cleanup idempotent even when the assertions above fail.
-        bench_execute("letron_api.policy.sync")
+        bench_execute("letron_api.control.policy.sync")
 
-    second_sync = json.loads(bench_execute("letron_api.policy.sync"))
+    second_sync = json.loads(bench_execute("letron_api.control.policy.sync"))
     assert second_sync["applied"] == 0
 
 
@@ -185,7 +185,7 @@ def _control_client() -> ApiClient:
 def _configuration_source(client: ApiClient, kind: str) -> dict[str, Any]:
     return client.request(
         "GET",
-        f"/api/method/letron_api.config_control.get_configuration?kind={kind}",
+        f"/api/method/letron_api.control.config_control.get_configuration?kind={kind}",
         expected={200},
     ).data["message"]
 
@@ -196,12 +196,12 @@ def test_compute_yaml_control_api_access_and_idempotency() -> None:
     guest = ApiClient()
     guest.request(
         "GET",
-        "/api/method/letron_api.config_control.get_configuration?kind=config",
+        "/api/method/letron_api.control.config_control.get_configuration?kind=config",
         expected={401, 403},
     )
 
     snapshot = client.request(
-        "GET", "/api/method/letron_api.api.runtime_snapshot", expected={200}
+        "GET", "/api/method/letron_api.control.api.runtime_snapshot", expected={200}
     ).data["message"]
     assert snapshot["config"]["ok"] is True
     assert snapshot["config"]["drift_count"] == 0
@@ -228,7 +228,7 @@ def test_compute_yaml_control_api_access_and_idempotency() -> None:
             )
         updated = client.request(
             "PUT",
-            "/api/method/letron_api.config_control.put_configuration",
+            "/api/method/letron_api.control.config_control.put_configuration",
             {
                 "kind": kind,
                 "content": current["content"],
@@ -253,7 +253,7 @@ def test_compute_yaml_control_api_update_and_restore() -> None:
     try:
         changed = client.request(
             "PUT",
-            "/api/method/letron_api.config_control.put_configuration",
+            "/api/method/letron_api.control.config_control.put_configuration",
             {
                 "kind": "config",
                 "content": changed_config,
@@ -265,20 +265,20 @@ def test_compute_yaml_control_api_update_and_restore() -> None:
         assert changed["restart_required"] is True
         readback = client.request(
             "GET",
-            "/api/method/letron_api.config_control.get_configuration?kind=config",
+            "/api/method/letron_api.control.config_control.get_configuration?kind=config",
             expected={200},
         ).data["message"]
         assert "proxy_timeout: 121" in readback["content"]
     finally:
         live = client.request(
             "GET",
-            "/api/method/letron_api.config_control.get_configuration?kind=config",
+            "/api/method/letron_api.control.config_control.get_configuration?kind=config",
             expected={200},
         ).data["message"]
         if live["content"] != original_config:
             restored_source = client.request(
                 "PUT",
-                "/api/method/letron_api.config_control.put_configuration",
+                "/api/method/letron_api.control.config_control.put_configuration",
                 {
                     "kind": "config",
                     "content": original_config,
@@ -295,7 +295,7 @@ def test_compute_yaml_control_api_conflict_and_atomic_rollback() -> None:
     current = _configuration_source(client, "config")
     client.request(
         "PUT",
-        "/api/method/letron_api.config_control.put_configuration",
+        "/api/method/letron_api.control.config_control.put_configuration",
         {
             "kind": "config",
             "content": current["content"],
@@ -308,7 +308,7 @@ def test_compute_yaml_control_api_conflict_and_atomic_rollback() -> None:
     # restore both the exact YAML bytes and the previous runtime state.
     before_failure = client.request(
         "GET",
-        "/api/method/letron_api.config_control.get_configuration?kind=config",
+        "/api/method/letron_api.control.config_control.get_configuration?kind=config",
         expected={200},
     ).data["message"]
     invalid_runtime_config = before_failure["content"].replace(
@@ -318,7 +318,7 @@ def test_compute_yaml_control_api_conflict_and_atomic_rollback() -> None:
     )
     client.request(
         "PUT",
-        "/api/method/letron_api.config_control.put_configuration",
+        "/api/method/letron_api.control.config_control.put_configuration",
         {
             "kind": "config",
             "content": invalid_runtime_config,
@@ -329,14 +329,14 @@ def test_compute_yaml_control_api_conflict_and_atomic_rollback() -> None:
     )
     after_failure = client.request(
         "GET",
-        "/api/method/letron_api.config_control.get_configuration?kind=config",
+        "/api/method/letron_api.control.config_control.get_configuration?kind=config",
         expected={200},
     ).data["message"]
     assert after_failure["content"] == before_failure["content"]
     assert after_failure["source_sha256"] == before_failure["source_sha256"]
     assert (
         client.request(
-            "GET", "/api/method/letron_api.api.runtime_snapshot", expected={200}
+            "GET", "/api/method/letron_api.control.api.runtime_snapshot", expected={200}
         ).data["message"]["config"]["ok"]
         is True
     )
@@ -351,7 +351,7 @@ def test_compute_yaml_control_api_policy_boundary_and_drift() -> None:
     )
     client.request(
         "PUT",
-        "/api/method/letron_api.config_control.put_configuration",
+        "/api/method/letron_api.control.config_control.put_configuration",
         {
             "kind": "policy",
             "content": renamed_company,
@@ -362,16 +362,16 @@ def test_compute_yaml_control_api_policy_boundary_and_drift() -> None:
     )
 
     try:
-        bench_execute("letron_api.system_config.acceptance_force_drift")
-        drifted = json.loads(bench_execute("letron_api.system_config.plan"))
+        bench_execute("letron_api.control.system_config.acceptance_force_drift")
+        drifted = json.loads(bench_execute("letron_api.control.system_config.plan"))
         assert drifted["ok"] is False and drifted["drift_count"] == 1
     finally:
-        bench_execute("letron_api.system_config.sync")
-    restored = json.loads(bench_execute("letron_api.system_config.plan"))
+        bench_execute("letron_api.control.system_config.sync")
+    restored = json.loads(bench_execute("letron_api.control.system_config.plan"))
     assert restored["ok"] is True and restored["drift_count"] == 0
     client.request(
         "GET",
-        "/api/method/letron_api.config_control.get_configuration?kind=arbitrary-file",
+        "/api/method/letron_api.control.config_control.get_configuration?kind=arbitrary-file",
         expected={400, 417},
     )
 
@@ -390,7 +390,7 @@ APPLY_SHARDS = [
 def test_registry_driven_native_structural_group(doctypes: list[str]) -> None:
     result = json.loads(
         bench_execute(
-            "letron_api.policy_acceptance.probe_structural_sources",
+            "letron_api.control.policy_acceptance.probe_structural_sources",
             {"doctypes": doctypes},
         )
     )
@@ -402,7 +402,7 @@ def test_registry_driven_native_structural_group(doctypes: list[str]) -> None:
 def test_registry_driven_policy_apply_roundtrip(doctypes: list[str]) -> None:
     apply_result = json.loads(
         bench_execute(
-            "letron_api.policy_acceptance.probe_policy_apply_registry",
+            "letron_api.control.policy_acceptance.probe_policy_apply_registry",
             {"doctypes": doctypes},
         )
     )
@@ -416,7 +416,7 @@ def test_registry_driven_policy_apply_roundtrip(doctypes: list[str]) -> None:
 
 def test_registry_driven_asset_lifecycle() -> None:
     asset_result = json.loads(
-        bench_execute("letron_api.policy_acceptance.probe_asset_lifecycle")
+        bench_execute("letron_api.control.policy_acceptance.probe_asset_lifecycle")
     )
     assert asset_result["ok"] is True
     assert asset_result["public_private"] == 2
@@ -426,7 +426,7 @@ def test_registry_driven_asset_lifecycle() -> None:
     assert asset_result["rollback"] == "byte-clean"
 
     cleanup = json.loads(
-        bench_execute("letron_api.policy_acceptance.cleanup_registry_residue")
+        bench_execute("letron_api.control.policy_acceptance.cleanup_registry_residue")
     )
     assert cleanup["ok"] is True
 
@@ -435,7 +435,7 @@ def test_registry_driven_asset_lifecycle() -> None:
 def test_policy_tax_invoice_gl_effect(rate: int) -> None:
     result = json.loads(
         bench_execute(
-            "letron_api.policy_acceptance.probe_tax_effect_rate", {"rate": rate}
+            "letron_api.control.policy_acceptance.probe_tax_effect_rate", {"rate": rate}
         )
     )
     assert result["ok"] is True
@@ -446,7 +446,7 @@ def test_policy_tax_invoice_gl_effect(rate: int) -> None:
 
 
 def test_policy_configured_tax_categories_and_rules_readback() -> None:
-    result = json.loads(bench_execute("letron_api.policy_acceptance.probe_configured_tax_policy"))
+    result = json.loads(bench_execute("letron_api.control.policy_acceptance.probe_configured_tax_policy"))
     assert result["ok"] is True
     assert result["selected"] == {
         "software_sales": "Vietnam Software Non-VAT - LTVN",
@@ -457,7 +457,7 @@ def test_policy_configured_tax_categories_and_rules_readback() -> None:
 
 
 def test_policy_configured_accounting_period_readback() -> None:
-    result = json.loads(bench_execute("letron_api.policy_acceptance.probe_configured_accounting_period"))
+    result = json.loads(bench_execute("letron_api.control.policy_acceptance.probe_configured_accounting_period"))
     assert result["ok"] is True
     assert result["period_name"] == "FY 2026 - LTVN"
     assert result["closed_documents"] == {
@@ -477,7 +477,7 @@ def test_policy_configured_accounting_period_readback() -> None:
 
 def test_policy_configured_tax_invoice_effects() -> None:
     result = json.loads(
-        bench_execute("letron_api.policy_acceptance.probe_configured_tax_invoice_effects")
+        bench_execute("letron_api.control.policy_acceptance.probe_configured_tax_invoice_effects")
     )
     assert result["ok"] is True
     assert result["observed"] == {
@@ -490,9 +490,9 @@ def test_policy_configured_tax_invoice_effects() -> None:
 @pytest.mark.parametrize(
     "method",
     [
-        "letron_api.policy_acceptance.probe_payment_terms_effect",
-        "letron_api.policy_acceptance.probe_pricing_shipping_effects",
-        "letron_api.policy_acceptance.probe_stock_buying_effects",
+        "letron_api.control.policy_acceptance.probe_payment_terms_effect",
+        "letron_api.control.policy_acceptance.probe_pricing_shipping_effects",
+        "letron_api.control.policy_acceptance.probe_stock_buying_effects",
     ],
 )
 def test_policy_controller_effect_group(method: str) -> None:
@@ -506,7 +506,7 @@ def test_policy_controller_effect_group(method: str) -> None:
 def test_policy_cross_cutting_effect(effect: str) -> None:
     result = json.loads(
         bench_execute(
-            "letron_api.policy_acceptance.probe_cross_cutting_effects",
+            "letron_api.control.policy_acceptance.probe_cross_cutting_effects",
             {"effect": effect},
         )
     )
@@ -527,7 +527,7 @@ def test_policy_cross_cutting_effect(effect: str) -> None:
 def test_policy_failure_rollback(step: str) -> None:
     result = json.loads(
         bench_execute(
-            "letron_api.policy_acceptance.probe_failure_rollback", {"step": step}
+            "letron_api.control.policy_acceptance.probe_failure_rollback", {"step": step}
         )
     )
     assert result == {

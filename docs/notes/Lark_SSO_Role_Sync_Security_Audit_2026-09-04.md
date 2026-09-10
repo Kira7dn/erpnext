@@ -179,8 +179,8 @@ Sự cố Lark hoặc Auth Server có thể làm request ERP treo lâu và tạo
 
 **Bằng chứng**
 
-- [`sso_protocol.py:75`](../../apps/letron_api/letron_api/sso_protocol.py#L75) chấp nhận scheme `http` khi `allow_internal_http` bật.
-- Sync URL gọi validator với tùy chọn này tại [`sso_protocol.py:147`](../../apps/letron_api/letron_api/sso_protocol.py#L147).
+- [`auth/sso_protocol.py:75`](../../apps/letron_api/letron_api/auth/sso_protocol.py#L75) chấp nhận scheme `http` khi `allow_internal_http` bật.
+- Sync URL gọi validator với tùy chọn này tại [`auth/sso_protocol.py:147`](../../apps/letron_api/letron_api/auth/sso_protocol.py#L147).
 
 **Tác động**
 

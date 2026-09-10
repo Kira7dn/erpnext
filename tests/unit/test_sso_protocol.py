@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from letron_api.sso_protocol import (
+from letron_api.auth.sso_protocol import (
     desired_erp_roles,
     load_configuration,
 )

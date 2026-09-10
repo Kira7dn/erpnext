@@ -135,7 +135,7 @@ Không có approve/draft workflow trong UI và không yêu cầu người dùng 
 
 ## ERPNext projection
 
-Portal gửi policy đã validate tới `letron_api.access_policy.publish`. ERPNext:
+Portal gửi policy đã validate tới `letron_api.control.access_policy.publish`. ERPNext:
 
 - chỉ tạo/cập nhật role có prefix `Letron Policy - `;
 - không quản lý `Administrator`, `System Manager`, `All`, `Guest`;

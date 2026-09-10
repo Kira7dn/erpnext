@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from letron_api import system_config
+from letron_api.control import system_config
 
 ROOT = Path(__file__).resolve().parents[2]
 

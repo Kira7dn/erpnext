@@ -27,12 +27,9 @@ type ItemRow = {
 };
 type ActiveOrchestration = {
   id: string;
-  status: "started" | "mr_created" | "partial_failure" | "rfq_created" | "waiting_supplier_quotes" | "approval_pending" | "approval_failed" | "completed" | "failed";
+  status: "started" | "mr_created" | "partial_failure" | "rfq_created" | "waiting_supplier_quotes" | "failed";
   material_request_name?: string;
   request_for_quotation_name?: string;
-  supplier_quotation_name?: string;
-  justification?: string;
-  lark_po?: Row;
   retry_count: number;
   error?: string;
   updated_at: string;
@@ -458,9 +455,9 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
         `requests/orchestrations/${encodeURIComponent(id)}/retry-rfq`,
         { method: "POST" },
       )) as ActiveOrchestration;
-      if (result.status === "completed" || result.status === "approval_pending") {
+      if (result.status === "waiting_supplier_quotes") {
         setActiveOrchestrations((current) => current.filter((item) => item.id !== id));
-        setToast({ message: result.status === "approval_pending" ? "Đã tạo Approval request trên Lark." : "Đã tạo RFQ thành công.", tone: "success" });
+        setToast({ message: "Đã retry RFQ thành công.", tone: "success" });
       } else {
         setActiveOrchestrations((current) =>
           current.map((item) => (item.id === id ? result : item)),
@@ -563,10 +560,6 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
                       ? "MR đã tạo, RFQ chưa tạo được"
                       : item.status === "rfq_created"
                           ? "RFQ đã tạo, đang tạo Lark Approval"
-                        : item.status === "approval_pending"
-                          ? "Đã tạo Lark Approval, chờ người phê duyệt"
-                        : item.status === "approval_failed"
-                          ? "RFQ đã tạo, gửi Lark Approval thất bại"
                       : item.status === "started"
                         ? "Đang xử lý"
                         : "Cần kiểm tra lại"}
@@ -870,7 +863,7 @@ function ResourceModal({
         `requests/orchestrations/${encodeURIComponent(orchestrationId)}/retry-rfq`,
         { method: "POST" },
       )) as Row;
-      if (result.status !== "completed" && result.status !== "approval_pending") {
+      if (result.status !== "waiting_supplier_quotes") {
         setOrchestrationStatus(result.status as ActiveOrchestration["status"]);
         setError(String(result.error ?? "Không thể tạo RFQ."));
         onToast({ message: String(result.error ?? "Không thể tạo RFQ."), tone: "error" });
@@ -881,7 +874,7 @@ function ResourceModal({
       if (attachment && materialRequestName)
         await uploadAttachment(materialRequestName);
       setDirty(false);
-      onToast({ message: result.status === "approval_pending" ? "Đã tạo Lark Approval request." : "Đã retry RFQ thành công.", tone: "success" });
+      onToast({ message: "Đã retry RFQ thành công.", tone: "success" });
       onSaved();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Không thể retry RFQ.");
@@ -960,7 +953,7 @@ function ResourceModal({
           headers: { "X-Idempotency-Key": requestIdempotencyKey },
           body: JSON.stringify({ material_request: payload, suppliers }),
         })) as Row;
-        if (result.status !== "completed" && result.status !== "approval_pending") {
+        if (result.status !== "waiting_supplier_quotes") {
           setOrchestrationId(String(result.id));
           setOrchestrationStatus(result.status as ActiveOrchestration["status"]);
           onOrchestrationChanged();
@@ -969,11 +962,6 @@ function ResourceModal({
               "Đã tạo Material Request nhưng RFQ chưa tạo được. Hãy retry RFQ.",
             );
             setError(String(result.error ?? "RFQ chưa được tạo."));
-          } else if (result.status === "rfq_created") {
-            setStatus("Đã tạo Material Request và RFQ; hệ thống đang tiếp tục tạo Lark Approval.");
-          } else if (result.status === "approval_failed") {
-            setStatus("Đã tạo Material Request và RFQ nhưng gửi Lark Approval thất bại.");
-            setError(String(result.error ?? "Lark Approval chưa được tạo."));
           } else if (result.status === "started") {
             setStatus(
               "Yêu cầu đang được xử lý. Giữ nguyên context này và kiểm tra lại trạng thái trước khi thử lại.",
@@ -996,15 +984,12 @@ function ResourceModal({
             throw cause;
           }
         }
-        const approvalPending = result.status === "approval_pending" || Boolean((result.lark_po as Row | undefined)?.instanceCode);
         setStatus(
-          approvalPending
-            ? "Đã tạo Material Request, RFQ và gửi PO Draft sang Lark Approval."
-            : attachment
+          attachment
               ? "Đã tạo Material Request, RFQ và attachment thành công."
               : "Đã tạo Material Request và RFQ thành công.",
         );
-        onToast({ message: approvalPending ? "Đã tạo Material Request, RFQ và Lark Approval request." : attachment ? "Đã tạo Material Request, RFQ và attachment." : "Đã tạo Material Request và RFQ.", tone: "success" });
+        onToast({ message: attachment ? "Đã tạo Material Request, RFQ và attachment." : "Đã tạo Material Request và RFQ.", tone: "success" });
         setDirty(false);
         onSaved();
         return;
@@ -1215,7 +1200,7 @@ function ResourceModal({
             {status}
           </p>
         ) : null}
-        {orchestrationId && orchestrationStatus !== "approval_pending" && orchestrationStatus !== "completed" ? (
+        {orchestrationId && orchestrationStatus !== "waiting_supplier_quotes" ? (
           <div className="mt-3 flex justify-end">
             <Button
               type="button"

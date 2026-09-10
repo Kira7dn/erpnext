@@ -30,7 +30,7 @@ dev = [
 [tool.ty.environment]
 python = ".venv"
 python-version = "3.14"
-extra-paths = [".cache/frappe-v16", "apps/letron_api"]
+extra-paths = [".cache/frappe-v16", "apps/erpnext", "apps/letron_api"]
 
 [tool.pytest.ini_options]
 pythonpath = [".", "apps/letron_api"]

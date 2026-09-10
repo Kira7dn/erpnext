@@ -46,7 +46,7 @@ erpnext-db-1          mariadb:11.8                   Up (healthy)             33
 - **181 ngày - 3.650 ngày (10 năm)**: S3 Glacier Deep Archive (chi phí siêu tiết kiệm $0.00099/GB/tháng).
 
 ### C. Lịch Sao lưu Tự động Container-Native (01:00 AM)
-- Chạy thông qua Frappe Scheduler hook (`letron_api.backup.scheduled_s3_backup`) lúc **01:00 AM hằng đêm** (Giờ Việt Nam).
+- Chạy thông qua Frappe Scheduler hook (`letron_api.operations.backup.scheduled_s3_backup`) lúc **01:00 AM hằng đêm** (Giờ Việt Nam).
 - **100% OS-Agnostic**: Chạy độc lập bên trong container Docker, không phụ thuộc cron của host (dễ dàng chuyển đổi giữa Windows và Linux VPS).
 - **Zero Local Disk Waste**: Sau khi tạo đủ 5 thành phần (Database, Config, Files VAT, Public Files, Manifest SHA-256) và tải lên S3 thành công, file cục bộ được giải phóng ngay lập tức.
 

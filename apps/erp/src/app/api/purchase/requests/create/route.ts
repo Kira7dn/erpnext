@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     );
     return NextResponse.json({
       data: state,
-      message: state.status === "completed" ? "completed" : state.status,
+      message: state.status,
     });
   } catch (cause) {
     const state = (cause as { orchestration?: unknown }).orchestration;

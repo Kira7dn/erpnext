@@ -122,21 +122,19 @@ sau bước kiểm tra nội bộ.
 |---|---|
 | ERPNext | Supplier, Case, MR, RFQ, Supplier Quotation, PO Draft/PO, Purchase Receipt, Purchase Invoice, stock, accounting và mã chứng từ |
 | `apps/erp` | Supplier Portal UI, public BFF và orchestration chính |
-| `apps/letron_api` | Explicit supplier-portal methods, ERPNext validation và document SOT |
-| Lark/Auth Server | Lark identity, nhân viên, PO approval; không quản lý Supplier identity |
-| Lark/Auth Server | Gửi Magic Link/OTP qua Lark Mail server-side; credential refresh token mã hóa trong Neon |
+| `apps/letron_api` | Native ERPNext schema/lifecycle helpers và system automation boundary |
+| `apps/erp` | Lark PO approval adapter và procurement orchestration; không quản lý Supplier identity |
+| Lark/Auth Server | Gửi Magic Link/OTP qua một Lark Mail adapter server-side; credential refresh token mã hóa trong Neon và refresh được khóa bằng PostgreSQL advisory lock |
 | E-invoice provider | Provider lifecycle sau khi Purchase Invoice đã được kiểm tra/submit |
 
-Supplier Portal không gọi generic `/api/v1` Gateway bằng session supplier. Gateway
-hiện yêu cầu signed Lark identity và `union_id`; supplier backend phải dùng các
-method explicit, server-to-server, có HMAC riêng.
+Supplier Portal không gọi generic `/api/v1` Gateway bằng session supplier. Next.js
+là BFF duy nhất, gọi trực tiếp Frappe native REST bằng system-automation
+signature; supplier session chỉ được dùng để scope dữ liệu và hành động.
 
-Global Portal là control-plane owner và có quyền điều phối cao nhất đối với luồng
-mua hàng. Portal không ghi trực tiếp database ERPNext và không chuyển quyền Portal
-cho browser của Supplier. `apps/erp` ký request, `apps/letron_api` xác thực chữ ký
-và thực thi nghiệp vụ native ERPNext bằng internal execution context đã cấu hình.
-Đây là cùng một quyền điều phối của Portal qua một boundary kiểm soát được, không
-phải quyền ERP riêng của Supplier.
+`apps/erp` là control-plane owner và điều phối luồng qua các client Frappe server
+side. Portal không ghi database trực tiếp và không chuyển credential cho browser
+Supplier. Frappe chỉ xác thực system-automation request và thực thi lifecycle
+native của chứng từ.
 
 ### 4.1. Supplier không có ERP identity
 
@@ -152,26 +150,35 @@ Magic Link token
 ```
 
 Supplier session không phải ERP session và không được dùng để gọi generic CRUD.
-Next.js là BFF của Supplier Portal; mỗi request BFF ký HMAC server-to-server tới
-explicit method của `letron_api`. Backend kiểm tra HMAC, access/session scope,
-Supplier, process, document link và idempotency trước khi thực hiện nghiệp vụ.
+Next.js là BFF của Supplier Portal; mỗi request BFF kiểm tra access/session scope,
+Supplier, process, document link và idempotency trước khi gọi Frappe native REST.
 
-Sau khi kiểm tra hợp lệ, `letron_api` dùng internal execution context của hệ
-thống để gọi nghiệp vụ native ERPNext. Internal execution context là actor duy
+Sau khi kiểm tra hợp lệ, Next.js dùng system automation context để gọi nghiệp vụ
+native ERPNext. Internal execution context là actor duy
 nhất được phép tạo hoặc submit chứng từ; không phải Supplier và không phụ thuộc
 vào việc Supplier có ERP login hay không. Context phải được khôi phục sau request.
 
 | Nghiệp vụ | Request từ Supplier | Actor tạo/submit native document |
 |---|---|---|
-| Supplier Quotation | Item, quantity, rate thuộc RFQ của access | Global Portal control-plane qua `letron_api` |
+| Supplier Quotation | Item, quantity, rate thuộc RFQ của access | `apps/erp` qua native Frappe REST |
 | Delivery confirmation | PO item và số lượng còn nhận | Internal reviewer/service sau khi review |
 | XML invoice | File XML và metadata thuộc PO/Supplier | Internal reviewer/service sau khi review |
-| PO trước approval | Không được tự tạo/chỉnh sửa | Global Portal gọi `letron_api` tạo PO Draft native ERPNext |
-| PO sau approval | Không được tạo PO mới | Global Portal approval callback gọi `letron_api` submit đúng PO Draft đã cấp số |
+| PO trước approval | Không được tự tạo/chỉnh sửa | `apps/erp` tạo PO Draft native ERPNext |
+| PO sau approval | Không được tạo PO mới | Lark callback submit đúng PO Draft đã cấp số |
 
 Nếu HMAC, access/session scope, process link hoặc internal execution context
 không hợp lệ thì request fail-closed; không cấp thêm ERP quyền và không tạo
 document ngoài process.
+
+### 4.2. Mail delivery và mailbox readback
+
+Luồng nghiệp vụ chỉ cần provider acceptance (`message_id`) từ Lark Mail adapter.
+`apps/erp` lưu message ID trong orchestration state và không chờ quét mailbox để
+đánh dấu MR, RFQ, quotation, PO, receipt hoặc invoice. Mailbox readback chỉ là
+bước kiểm chứng chẩn đoán độc lập, có timeout cố định và ba trạng thái rõ ràng:
+`MAIL_PROVIDER_ACCEPTED`, `MAIL_MAILBOX_READBACK_CONFIRMED` hoặc
+`MAIL_MAILBOX_READBACK_TIMEOUT`. Retry cùng idempotency key trả lại message ID cũ;
+không gửi thêm mail và không tạo thêm access record.
 
 ## 5. Trình tự Magic Link và OTP
 
@@ -232,7 +239,8 @@ phải MFA độc lập. Nếu cần MFA thật, factor thứ hai phải dùng k
 
 ## 6. Data model
 
-Tạo một DocType server-side `Supplier Portal Access` trong `letron_api`.
+Access record được lưu trong Redis của Next.js; Frappe không giữ access/session
+portal.
 
 | Field | Ý nghĩa |
 |---|---|
@@ -343,25 +351,24 @@ supplier portal, accounting và assets của ERP app.
 `proxy.ts` cần bypass chính xác `/supplier/*`; mọi page ERP nội bộ tiếp tục yêu
 cầu `letron_sso` và Lark SSO.
 
-## 8. Explicit backend methods
+## 8. Runtime ownership
 
-Thêm module `apps/letron_api/letron_api/supplier_portal.py`:
+Supplier Portal không còn là module nghiệp vụ của Frappe. `apps/erp` giữ access,
+Magic Link, OTP, session, submission, deadline gate và approval handoff trong
+Redis; Next gọi trực tiếp native Frappe REST API bằng system-automation
+signature hiện có (`LETRON_SSO_SYNC_SECRET`). Frappe chỉ xử lý các DocType và
+lifecycle native: Material Request, RFQ, Supplier Quotation, Purchase Order,
+Purchase Receipt và Purchase Invoice.
+
+Không còn các endpoint:
 
 ```text
-issue_access
-request_otp
-verify_otp
-get_process_summary
-submit_quotation
-get_purchase_order
-create_delivery_confirmation
-upload_xml_invoice
-revoke_access
+Frappe không còn `letron_api.supplier_portal.*`.
 ```
 
-Các method phải kiểm tra:
+Các route Next phải kiểm tra:
 
-1. HMAC server-to-server giữa `apps/erp` và ERPNext.
+1. System-automation signature giữa `apps/erp` và ERPNext native API.
 2. Access record còn hiệu lực.
 3. Session đúng access record.
 4. Supplier của session đúng Supplier trên PO.
@@ -489,7 +496,7 @@ Auth Server bằng một `idempotency_key` duy nhất. Auth Server là adapter d
 gọi Lark và lưu `LarkMailDelivery` để chống gửi trùng. Nếu cùng key đang gửi,
 Auth chờ kết quả hiện tại; nếu đã `Sent` thì trả lại `message_id` idempotently.
 Không còn Frappe mail worker, scheduler mail, Redis mail lock hoặc retry mail
-trong Docker. DocType `Supplier Portal Mail Outbox` cũ chỉ giữ dữ liệu lịch sử,
+trong Docker. Mail delivery history được giữ ở Auth Server/Redis,
 không còn được đọc hoặc ghi bởi runtime mới.
 
 Lark tenant token vẫn chỉ dùng cho các API hỗ trợ bot/tenant identity (ví dụ
@@ -503,7 +510,7 @@ refresh credential và gửi qua Lark. Supplier chỉ mở Magic Link và nhập
 Template tối thiểu:
 
 ```text
-Supplier Portal Access
+Next Redis access record
 Supplier Portal OTP
 ```
 
@@ -520,7 +527,7 @@ Real test phải kiểm tra credential public mailbox và gửi một email prob
 khi chạy toàn bộ flow để tránh tạo dữ liệu dang dở khi OAuth credential bị
 revoke hoặc hết hạn.
 Trong real test, sau khi tạo approval thật, test gọi
-`POST /api/internal/lark/approval/approve`; Auth Server dùng tenant token gọi
+`POST /api/internal/lark/approval/approve`; `apps/erp` dùng tenant token gọi
 `POST /open-apis/approval/v4/tasks/approve` cho task của approver. Đây là bước
 để test chạy tự động; route bị khóa bằng `LETRON_API_KEY` và bị vô hiệu hóa ở
 production. Production vẫn yêu cầu người có quyền approve trên Lark.
@@ -572,7 +579,7 @@ Trigger chuẩn:
 Create Material Request
 → Resolve Supplier(s)
 → Create Request for Quotation
-→ Create one Supplier Portal Access per Supplier
+→ Create one Redis access record per Supplier
 → Next.js dispatch one Magic Link mail intent per Supplier to Auth Server/Lark
 → Start 3-day approval deadline from MR creation time
 ```
@@ -637,7 +644,7 @@ Supplier submit quotation
 → ERPNext submit đúng PO Draft, giữ nguyên số PO
 ```
 
-Không được mở Lark PO approval chỉ vì đã tạo MR, RFQ hoặc Supplier Portal Access.
+Không được mở Lark PO approval chỉ vì đã tạo MR hoặc RFQ.
 Approval request chỉ được mở sau khi gate đạt và summary đã ghi đủ:
 
 ```text
@@ -701,7 +708,7 @@ Race condition giữa submit cuối cùng và timer phải dùng một thao tác
 `material_request`; chỉ một request được phép chuyển `Approval` từ `Waiting`/
 `Ready` sang `Opened`.
 
-Supplier Portal Access được tạo trước đó và tiếp tục dùng cùng URL.
+Redis access record được tạo trước đó và tiếp tục dùng cùng URL.
 
 Supplier không được sửa quotation sau khi submit. Nếu cần điều chỉnh, operator
 nội bộ phải reopen quotation; thao tác này phải ghi audit và không được tự động
@@ -714,8 +721,9 @@ mở lại approval request đã gửi.
 - [x] Chuẩn hóa error contract `{ error, message, retryable }` cho BFF, Gateway
   và client; không expose raw exception/stack trace.
 - [x] Sửa truyền `supplier_quotation_name` qua Auth Server.
-- [x] Tạo `Supplier Portal Access` và `Supplier Procurement Process` DocType; migration cần chạy khi deploy.
-- [x] Thêm explicit supplier portal methods cho access, OTP, summary, quotation và approval gate.
+- [x] Access/session/submission portal do Next.js quản lý; Frappe chỉ giữ native
+  procurement documents và không cần migration cho portal DocType.
+- [x] Chuyển access, OTP, summary, quotation và approval gate sang Next.js; không còn explicit portal methods trong Frappe.
 - [x] Thêm orchestration sau khi tạo Material Request để tạo RFQ, access record và
   gửi Magic Link qua Auth Server/Lark Mail.
 - [x] Tạo Supplier Quotation ngay sau khi từng Supplier submit và khóa sau khi

@@ -28,7 +28,7 @@ function Invoke-UvPython([string[]]$Arguments) {
 
 if ($Action -eq 'config-validate') {
     if (!(Test-Path -LiteralPath $configPath)) { throw "Missing config YAML: $configPath" }
-    Write-Host (Invoke-UvPython @('-m','letron_api.system_config','validate','--path',$configPath))
+    Write-Host (Invoke-UvPython @('-m','letron_api.control.system_config','validate','--path',$configPath))
     return
 }
 if ($Action -eq 'policy-validate') {
@@ -39,10 +39,10 @@ if ($Action -eq 'policy-validate') {
 
 if (!(Test-Path -LiteralPath $configPath)) { throw "Missing config YAML: $configPath" }
 if (!(Test-Path -LiteralPath $policyPath)) { throw "Missing policy YAML: $policyPath" }
-$configValidation = Invoke-UvPython @('-m','letron_api.system_config','validate','--path',$configPath)
-$policyValidation = Invoke-UvPython @('-m','letron_api.policy','validate','--path',$policyPath)
-$bundleValidation = Invoke-UvPython @('-m','letron_api.system_config','bundle-validate','--config',$configPath,'--policy',$policyPath)
-$environmentJson = Invoke-UvPython @('-m','letron_api.system_config','env','--path',$configPath,'--format','json')
+$configValidation = Invoke-UvPython @('-m','letron_api.control.system_config','validate','--path',$configPath)
+$policyValidation = Invoke-UvPython @('-m','letron_api.control.policy','validate','--path',$policyPath)
+$bundleValidation = Invoke-UvPython @('-m','letron_api.control.system_config','bundle-validate','--config',$configPath,'--policy',$policyPath)
+$environmentJson = Invoke-UvPython @('-m','letron_api.control.system_config','env','--path',$configPath,'--format','json')
 $environment = $environmentJson | ConvertFrom-Json
 foreach ($property in $environment.PSObject.Properties) {
     # Compose interpolation reads the current PowerShell process environment.
@@ -85,8 +85,8 @@ function Invoke-Readiness {
         try {
             $response = Invoke-WebRequest -UseBasicParsing -Uri $uri -Method Get
             if ($response.StatusCode -eq 200 -and $response.Content -match '"ok"\s*:\s*true') {
-                Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.system_config.audit')
-                Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.api.runtime_snapshot')
+                Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.system_config.audit')
+                Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.api.runtime_snapshot')
                 $response = Invoke-WebRequest -UseBasicParsing -Uri $uri -Method Get
                 if ($response.Content -notmatch '"restart_required"\s*:\s*false') { throw 'Runtime restart acknowledgement is stale' }
                 Write-Host "HTTP health verified: $uri"
@@ -150,8 +150,8 @@ switch ($Action) {
     'logs' { Invoke-Compose ($(if($FollowLogs){@('logs','-f')}else{@('logs','--tail=100')})) }
     'bootstrap' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.tenant_bootstrap.run') }
     'inspect' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.api.runtime_snapshot') }
-    'config-plan' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.system_config.plan') }
-    'config-apply' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.system_config.sync') }
+    'config-plan' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.system_config.plan') }
+    'config-apply' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.system_config.sync') }
     'policy-export' {
         $encoded = (& docker @composeArgs exec -T backend bench --site $env:SITE_NAME execute letron_api.policy.export_current_base64)
         if ($LASTEXITCODE -ne 0) { throw "Policy export failed with exit code $LASTEXITCODE" }

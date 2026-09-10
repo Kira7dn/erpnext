@@ -14,7 +14,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const subject = typeof req.query.subject === "string" ? req.query.subject : "";
     const after = typeof req.query.after === "string" ? req.query.after : undefined;
+    const messageId = typeof req.query.message_id === "string" ? req.query.message_id : undefined;
     if (!subject) { res.status(400).json({ error: "subject_required" }); return; }
-    res.status(200).json({ data: await latestLarkMail({ subject, after }) });
+    res.status(200).json({ data: await latestLarkMail({ subject, after, messageId }) });
   } catch { res.status(502).json({ error: "lark_mail_read_failed" }); }
 }

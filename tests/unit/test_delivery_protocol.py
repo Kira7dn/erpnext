@@ -4,7 +4,7 @@ import hashlib
 import hmac
 
 import pytest
-from letron_api.delivery_protocol import response_disposition, webhook_signature
+from letron_api.delivery.delivery_protocol import response_disposition, webhook_signature
 
 
 def test_webhook_signature_covers_exact_raw_utf8_body() -> None:

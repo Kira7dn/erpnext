@@ -5255,393 +5255,6 @@
           "test": "tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle"
         }
       }
-    },
-    "/api/method/letron_api.lark_po.create_draft": {
-      "post": {
-        "tags": [
-          "Module: Buying",
-          "Business routes"
-        ],
-        "summary": "createPurchaseOrderDraftBeforeApproval",
-        "operationId": "createPurchaseOrderDraftBeforeApproval",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/RequestId"
-          },
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Business route response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Idempotency or optimistic concurrency conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "417": {
-            "description": "Native Frappe validation failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server or rollback failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          }
-        },
-        "x-frappe-handler": "letron_api.lark_po.create_draft",
-        "x-public-operation": "create",
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": true
-              }
-            }
-          }
-        },
-        "x-test-status": "not-tested",
-        "x-test-level": "docker-runtime",
-        "x-test-evidence": {
-          "suite": "extended-api",
-          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
-        }
-      }
-    },
-    "/api/method/letron_api.lark_po.from_approved": {
-      "post": {
-        "tags": [
-          "Module: Buying",
-          "Business routes"
-        ],
-        "summary": "createPurchaseOrderFromApprovedLark",
-        "operationId": "createPurchaseOrderFromApprovedLark",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/RequestId"
-          },
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Business route response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Idempotency or optimistic concurrency conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "417": {
-            "description": "Native Frappe validation failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server or rollback failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          }
-        },
-        "x-frappe-handler": "letron_api.lark_po.from_approved",
-        "x-public-operation": "create",
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": true
-              }
-            }
-          }
-        },
-        "x-test-status": "not-tested",
-        "x-test-level": "docker-runtime",
-        "x-test-evidence": {
-          "suite": "extended-api",
-          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
-        }
-      }
-    },
-    "/api/method/letron_api.lark_po.update_approval_state": {
-      "post": {
-        "tags": [
-          "Module: Buying",
-          "Business routes"
-        ],
-        "summary": "updatePurchaseOrderApprovalState",
-        "operationId": "updatePurchaseOrderApprovalState",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/RequestId"
-          },
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Business route response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Idempotency or optimistic concurrency conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "417": {
-            "description": "Native Frappe validation failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server or rollback failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          }
-        },
-        "x-frappe-handler": "letron_api.lark_po.update_approval_state",
-        "x-public-operation": "update",
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": true
-              }
-            }
-          }
-        },
-        "x-test-status": "not-tested",
-        "x-test-level": "docker-runtime",
-        "x-test-evidence": {
-          "suite": "extended-api",
-          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
-        }
-      }
     }
   },
   "components": {
@@ -9119,7 +8732,7 @@
           "action": "reconcile",
           "operation_id": "reconcileBankTransaction",
           "path_suffix": "reconcile",
-          "handler": "letron_api.accounts_reconciliation.reconcile_bank_transaction"
+          "handler": "letron_api.finance.accounts_reconciliation.reconcile_bank_transaction"
         },
         {
           "doctype": "Bank Transaction",
@@ -9127,7 +8740,7 @@
           "action": "unreconcile",
           "operation_id": "unreconcileBankTransaction",
           "path_suffix": "unreconcile",
-          "handler": "letron_api.accounts_reconciliation.unreconcile_bank_transaction"
+          "handler": "letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction"
         },
         {
           "doctype": "Bank Transaction Rule",
@@ -9135,37 +8748,10 @@
           "action": "run-evaluation",
           "operation_id": "runBankTransactionRules",
           "path_suffix": "run-evaluation",
-          "handler": "letron_api.banking.run_rule_evaluation"
+          "handler": "letron_api.finance.banking.run_rule_evaluation"
         }
       ],
       "custom_routes": [
-        {
-          "module": "Buying",
-          "resource": "purchase-orders/create-draft",
-          "method": "POST",
-          "path": "/api/method/letron_api.lark_po.create_draft",
-          "operation": "create",
-          "operation_id": "createPurchaseOrderDraftBeforeApproval",
-          "handler": "letron_api.lark_po.create_draft"
-        },
-        {
-          "module": "Buying",
-          "resource": "purchase-orders/from-approved-lark",
-          "method": "POST",
-          "path": "/api/method/letron_api.lark_po.from_approved",
-          "operation": "create",
-          "operation_id": "createPurchaseOrderFromApprovedLark",
-          "handler": "letron_api.lark_po.from_approved"
-        },
-        {
-          "module": "Buying",
-          "resource": "purchase-orders/update-approval-state",
-          "method": "POST",
-          "path": "/api/method/letron_api.lark_po.update_approval_state",
-          "operation": "update",
-          "operation_id": "updatePurchaseOrderApprovalState",
-          "handler": "letron_api.lark_po.update_approval_state"
-        },
         {
           "module": "Files",
           "resource": "attachments",
@@ -9173,7 +8759,7 @@
           "path": "/api/v1/files/attachments",
           "operation": "create",
           "operation_id": "createAttachment",
-          "handler": "letron_api.attachments.create_attachment",
+          "handler": "letron_api.delivery.attachments.create_attachment",
           "content_type": "multipart/form-data",
           "multipart_fields": [
             "attached_to_doctype",
@@ -9192,7 +8778,7 @@
           "path": "/api/v1/accounts/bank-reconciliation/transactions",
           "operation": "list",
           "operation_id": "listBankReconciliationTransactions",
-          "handler": "letron_api.banking.reconciliation_transactions"
+          "handler": "letron_api.finance.banking.reconciliation_transactions"
         },
         {
           "module": "Accounts",
@@ -9201,7 +8787,7 @@
           "path": "/api/v1/accounts/bank-reconciliation/balance",
           "operation": "read",
           "operation_id": "getBankReconciliationBalance",
-          "handler": "letron_api.banking.reconciliation_balance"
+          "handler": "letron_api.finance.banking.reconciliation_balance"
         },
         {
           "module": "Accounts",
@@ -9210,7 +8796,7 @@
           "path": "/api/v1/accounts/bank-reconciliation/linked-payments",
           "operation": "read",
           "operation_id": "getBankReconciliationLinkedPayments",
-          "handler": "letron_api.banking.reconciliation_linked_payments"
+          "handler": "letron_api.finance.banking.reconciliation_linked_payments"
         },
         {
           "module": "Accounts",
@@ -9219,7 +8805,7 @@
           "path": "/api/v1/accounts/bank-reconciliation/clearance",
           "operation": "update",
           "operation_id": "updateBankReconciliationClearance",
-          "handler": "letron_api.banking.reconciliation_update_clearance"
+          "handler": "letron_api.finance.banking.reconciliation_update_clearance"
         },
         {
           "module": "Accounts",
@@ -9228,7 +8814,7 @@
           "path": "/api/v1/accounts/bank-reconciliation/clear-clearance",
           "operation": "update",
           "operation_id": "clearBankReconciliationClearance",
-          "handler": "letron_api.banking.reconciliation_clear_clearance"
+          "handler": "letron_api.finance.banking.reconciliation_clear_clearance"
         },
         {
           "module": "Accounts",
@@ -9237,7 +8823,7 @@
           "path": "/api/v1/accounts/bank-reconciliation/actions/{action}",
           "operation": "update",
           "operation_id": "runBankReconciliationAction",
-          "handler": "letron_api.banking.reconciliation_action"
+          "handler": "letron_api.finance.banking.reconciliation_action"
         },
         {
           "module": "Accounts",
@@ -9246,7 +8832,7 @@
           "path": "/api/v1/accounts/reports/report",
           "operation": "read",
           "operation_id": "runAccountsReport",
-          "handler": "letron_api.banking.report"
+          "handler": "letron_api.finance.banking.report"
         },
         {
           "module": "Accounts",
@@ -9255,7 +8841,7 @@
           "path": "/api/v1/accounts/statement-imports",
           "operation": "list",
           "operation_id": "listStatementImports",
-          "handler": "letron_api.banking.statement_imports"
+          "handler": "letron_api.finance.banking.statement_imports"
         },
         {
           "module": "Accounts",
@@ -9264,7 +8850,7 @@
           "path": "/api/v1/accounts/statement-imports",
           "operation": "create",
           "operation_id": "createStatementImport",
-          "handler": "letron_api.banking.statement_import_create"
+          "handler": "letron_api.finance.banking.statement_import_create"
         },
         {
           "module": "Accounts",
@@ -9273,7 +8859,7 @@
           "path": "/api/v1/accounts/statement-imports/upload",
           "operation": "create",
           "operation_id": "uploadStatementImport",
-          "handler": "letron_api.banking.statement_import_upload",
+          "handler": "letron_api.finance.banking.statement_import_upload",
           "content_type": "multipart/form-data"
         },
         {
@@ -9283,7 +8869,7 @@
           "path": "/api/v1/accounts/statement-imports/{name}",
           "operation": "read",
           "operation_id": "getStatementImport",
-          "handler": "letron_api.banking.statement_import_get"
+          "handler": "letron_api.finance.banking.statement_import_get"
         },
         {
           "module": "Accounts",
@@ -9292,7 +8878,7 @@
           "path": "/api/v1/accounts/statement-imports/{name}",
           "operation": "update",
           "operation_id": "updateStatementImport",
-          "handler": "letron_api.banking.statement_import_update"
+          "handler": "letron_api.finance.banking.statement_import_update"
         },
         {
           "module": "Accounts",
@@ -9301,7 +8887,7 @@
           "path": "/api/v1/accounts/statement-imports/{name}/details",
           "operation": "read",
           "operation_id": "getStatementImportDetails",
-          "handler": "letron_api.banking.statement_details"
+          "handler": "letron_api.finance.banking.statement_details"
         },
         {
           "module": "Accounts",
@@ -9310,7 +8896,7 @@
           "path": "/api/v1/accounts/statement-imports/{name}/update-pdf-tables",
           "operation": "update",
           "operation_id": "updateStatementImportPdfTables",
-          "handler": "letron_api.banking.statement_update_pdf_tables"
+          "handler": "letron_api.finance.banking.statement_update_pdf_tables"
         },
         {
           "module": "Accounts",
@@ -9319,7 +8905,7 @@
           "path": "/api/v1/accounts/statement-imports/{name}/reextract-pdf-table",
           "operation": "update",
           "operation_id": "reextractStatementImportPdfTable",
-          "handler": "letron_api.banking.statement_reextract_pdf_table"
+          "handler": "letron_api.finance.banking.statement_reextract_pdf_table"
         },
         {
           "module": "Accounts",
@@ -9328,7 +8914,7 @@
           "path": "/api/v1/accounts/statement-imports/{name}/set-pdf-table-header",
           "operation": "update",
           "operation_id": "setStatementImportPdfTableHeader",
-          "handler": "letron_api.banking.statement_set_pdf_table_header"
+          "handler": "letron_api.finance.banking.statement_set_pdf_table_header"
         },
         {
           "module": "Accounts",
@@ -9337,7 +8923,7 @@
           "path": "/api/v1/accounts/statement-imports/{name}/update-column-mapping",
           "operation": "update",
           "operation_id": "updateStatementImportColumnMapping",
-          "handler": "letron_api.banking.statement_update_column_mapping"
+          "handler": "letron_api.finance.banking.statement_update_column_mapping"
         },
         {
           "module": "Accounts",
@@ -9346,7 +8932,7 @@
           "path": "/api/v1/accounts/statement-imports/{name}/set-header-index",
           "operation": "update",
           "operation_id": "setStatementImportHeaderIndex",
-          "handler": "letron_api.banking.statement_set_header_index"
+          "handler": "letron_api.finance.banking.statement_set_header_index"
         },
         {
           "module": "Accounts",
@@ -9355,7 +8941,7 @@
           "path": "/api/v1/accounts/settings",
           "operation": "read",
           "operation_id": "getAccountsSettings",
-          "handler": "letron_api.banking.accounts_settings"
+          "handler": "letron_api.finance.banking.accounts_settings"
         },
         {
           "module": "Accounts",
@@ -9364,7 +8950,7 @@
           "path": "/api/v1/accounts/settings",
           "operation": "update",
           "operation_id": "updateAccountsSettings",
-          "handler": "letron_api.banking.accounts_settings_update"
+          "handler": "letron_api.finance.banking.accounts_settings_update"
         },
         {
           "module": "Assets",
@@ -9373,7 +8959,7 @@
           "path": "/api/v1/assets/actions/{action}",
           "operation": "update",
           "operation_id": "runAssetAction",
-          "handler": "letron_api.assets.asset_action"
+          "handler": "letron_api.assets.assets.asset_action"
         },
         {
           "module": "Assets",
@@ -9382,7 +8968,7 @@
           "path": "/api/v1/assets/reports/report",
           "operation": "read",
           "operation_id": "runAssetReport",
-          "handler": "letron_api.assets.asset_report"
+          "handler": "letron_api.assets.assets.asset_report"
         },
         {
           "module": "Assets",
@@ -9391,13 +8977,13 @@
           "path": "/api/v1/assets/dashboard",
           "operation": "read",
           "operation_id": "getAssetDashboard",
-          "handler": "letron_api.assets.asset_dashboard"
+          "handler": "letron_api.assets.assets.asset_dashboard"
         }
       ],
       "include_methods": [
-        "letron_api.api.health",
-        "letron_api.api.runtime_info",
-        "letron_api.api.runtime_snapshot"
+        "letron_api.control.api.health",
+        "letron_api.control.api.runtime_info",
+        "letron_api.control.api.runtime_snapshot"
       ],
       "public_resources": [
         {
@@ -9634,7 +9220,7 @@
   "x-acceptance-summary": {
     "passed": 22,
     "partial": 0,
-    "not-tested": 3,
+    "not-tested": 0,
     "blocked": 0
   },
   "x-module": "Buying",

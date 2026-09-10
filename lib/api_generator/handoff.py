@@ -42,7 +42,7 @@ def build_control_plane(server_url: str) -> dict[str, Any]:
         "servers": [{"url": server_url}],
         "security": [{"frappeToken": []}],
         "paths": {
-            "/api/method/letron_api.config_control.get_configuration": {
+            "/api/method/letron_api.control.config_control.get_configuration": {
                 "get": {
                     "operationId": "getConfiguration",
                     "tags": ["Configuration control"],
@@ -53,7 +53,7 @@ def build_control_plane(server_url: str) -> dict[str, Any]:
                     "responses": {"200": {"description": "Current validated YAML source", "content": {"application/json": {"schema": response}}}, **error},
                 }
             },
-            "/api/method/letron_api.config_control.put_configuration": {
+            "/api/method/letron_api.control.config_control.put_configuration": {
                 "put": {
                     "operationId": "putConfiguration",
                     "tags": ["Configuration control"],

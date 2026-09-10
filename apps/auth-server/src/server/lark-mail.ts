@@ -293,33 +293,43 @@ export async function sendLarkMail(input: { to: string; subject: string; bodyHtm
   }
 }
 
-export async function latestLarkMail(input: { subject: string; after?: string }): Promise<Array<{ subject: string; message: string; recipients: string; internalDate: string }>> {
-  const read = async (accessToken: string): Promise<Array<{ subject: string; message: string; recipients: string; internalDate: string }>> => {
+export async function latestLarkMail(input: { subject: string; after?: string; messageId?: string }): Promise<Array<{ messageId: string; subject: string; message: string; recipients: string; internalDate: string }>> {
+  const read = async (accessToken: string): Promise<Array<{ messageId: string; subject: string; message: string; recipients: string; internalDate: string }>> => {
     const env = getEnv();
     const mailbox = env.LARK_PO_APPROVER_EMAIL;
     if (!mailbox) throw new Error("LARK_MAIL_READER_NOT_CONFIGURED");
     const listUrl = new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailbox)}/messages`, env.LARK_DOMAIN);
-    listUrl.searchParams.set("page_size", "20");
+    listUrl.searchParams.set("page_size", "50");
     listUrl.searchParams.set("folder_id", "INBOX");
     const listResponse = await fetch(listUrl, { headers: { authorization: `Bearer ${accessToken}` }, signal: AbortSignal.timeout(15_000) });
     const listed = await json(listResponse) as { data?: { items?: string[] } };
     const after = input.after ? Date.parse(input.after) : 0;
-    const results: Array<{ subject: string; message: string; recipients: string; internalDate: string }> = [];
-    for (const messageId of listed.data?.items ?? []) {
+    const results: Array<{ messageId: string; subject: string; message: string; recipients: string; internalDate: string }> = [];
+    const listedIds = listed.data?.items ?? [];
+    const messageIds = input.messageId && listedIds.includes(input.messageId)
+      ? [input.messageId]
+      : listedIds.slice(0, 50);
+    const concurrency = 8;
+    for (let offset = 0; offset < messageIds.length; offset += concurrency) {
+      const batch = messageIds.slice(offset, offset + concurrency);
+      const details = await Promise.allSettled(batch.map(async (messageId) => {
       const detailUrl = new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailbox)}/messages/${encodeURIComponent(messageId)}`, env.LARK_DOMAIN);
       detailUrl.searchParams.set("format", "full");
       const detailResponse = await fetch(detailUrl, { headers: { authorization: `Bearer ${accessToken}` }, signal: AbortSignal.timeout(15_000) });
       const detail = await json(detailResponse) as { data?: { message?: { subject?: string; body_plain_text?: string; internal_date?: string; to?: Array<{ mail_address?: string }> } } };
       const mail = detail.data?.message;
-      if (!mail || mail.subject !== input.subject || (Number(mail.internal_date ?? 0) && Number(mail.internal_date) < after)) continue;
+      if (!mail || mail.subject !== input.subject || (Number(mail.internal_date ?? 0) && Number(mail.internal_date) < after)) return undefined;
       const encoded = mail.body_plain_text ?? "";
       const message = encoded ? Buffer.from(encoded, "base64url").toString("utf8") : "";
-      results.push({
+      return {
+        messageId,
         subject: mail.subject ?? "",
         message,
         recipients: (mail.to ?? []).map((item) => item.mail_address ?? "").filter(Boolean).join(","),
         internalDate: mail.internal_date ?? "",
-      });
+      };
+      }));
+      for (const detail of details) if (detail.status === "fulfilled" && detail.value) results.push(detail.value);
     }
     return results;
   };

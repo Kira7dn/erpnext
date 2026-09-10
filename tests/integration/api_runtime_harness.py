@@ -19,7 +19,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, build_opener
 
-from letron_api.system_config import load_config
+from letron_api.control.system_config import load_config
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -218,7 +218,7 @@ class ApiClient:
         return self.request(method, path, payload, **kwargs)
 
     def health_and_login(self) -> None:
-        health = self.request("GET", "/api/method/letron_api.api.health", expected={200})
+        health = self.request("GET", "/api/method/letron_api.control.api.health", expected={200})
         if not isinstance(health.data, dict) or health.data.get("message", {}).get("ok") is not True:
             raise RuntimeUnavailable("health endpoint did not return ok=true")
         self.login()
@@ -298,7 +298,7 @@ def cleanup(client: ApiClient, created: list[tuple[str, str]], prefix: str) -> N
     # Always run the scoped teardown endpoint. Normal document deletion does
     # not remove durable outbox rows, so using this only as a fallback leaves
     # acceptance evidence behind after an otherwise successful run.
-    fallback = client.request("POST", "/api/method/letron_api.api.acceptance_cleanup", {"prefix": prefix}, expected={200})
+    fallback = client.request("POST", "/api/method/letron_api.control.api.acceptance_cleanup", {"prefix": prefix}, expected={200})
     cleanup_result = fallback.data.get("message", {}) if isinstance(fallback.data, dict) else {}
     endpoint_failures = cleanup_result.get("failures", [])
     if endpoint_failures:

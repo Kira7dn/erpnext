@@ -7,7 +7,7 @@ export async function publishPolicyToErp(input: { policy: unknown; version: numb
   const baseUrl = env.LETRON_SSO_ERP_BASE_URL;
   const secret = env.LETRON_SSO_SYNC_SECRET;
   if (!baseUrl || !secret) throw new Error("ERP policy publication is not configured");
-  const path = "/api/method/letron_api.access_policy.publish";
+  const path = "/api/method/letron_api.control.access_policy.publish";
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const expires = String(Number(timestamp) + 60);
   const requestId = randomUUID();

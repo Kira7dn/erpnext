@@ -6,15 +6,15 @@ from pathlib import Path
 
 import pytest
 import yaml
-from letron_api import policy
-from letron_api.einvoice_handoff import (
+from letron_api.control import policy
+from letron_api.procurement.einvoice_handoff import (
     EInvoiceHandoffError,
     idempotency_key,
     load_contract,
     validate_handoff,
     validate_provider_result,
 )
-from letron_api.policy_acceptance import (
+from letron_api.control.policy_acceptance import (
     CONTROLLER_EFFECT_ASSERTIONS,
     resolve_builder,
     resolve_controller_effect_assertion,
@@ -254,14 +254,14 @@ def test_scope_registry_has_explicit_fingerprints_and_concrete_acceptance_builde
             assert isinstance(kwargs, dict)
             assert callable(
                 getattr(
-                    __import__("letron_api.policy_acceptance", fromlist=[method_name]),
+                    __import__("letron_api.control.policy_acceptance", fromlist=[method_name]),
                     method_name,
                 )
             )
 
 
 def test_required_controller_effect_assertions_are_executable() -> None:
-    from letron_api import policy_acceptance
+    from letron_api.control import policy_acceptance
 
     required = {
         "Payment Terms Template",

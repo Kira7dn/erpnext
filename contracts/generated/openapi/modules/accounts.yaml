@@ -909,7 +909,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.accounts_reconciliation.reconcile_bank_transaction
+      x-frappe-handler: letron_api.finance.accounts_reconciliation.reconcile_bank_transaction
       x-native-action: reconcile
       x-test-status: passed
       x-test-level: docker-runtime
@@ -951,7 +951,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.accounts_reconciliation.unreconcile_bank_transaction
+      x-frappe-handler: letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction
       x-native-action: unreconcile
       x-test-status: passed
       x-test-level: docker-runtime
@@ -1251,7 +1251,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.run_rule_evaluation
+      x-frappe-handler: letron_api.finance.banking.run_rule_evaluation
       x-native-action: run-evaluation
       x-test-status: not-tested
       x-test-level: docker-runtime
@@ -4642,7 +4642,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.reconciliation_transactions
+      x-frappe-handler: letron_api.finance.banking.reconciliation_transactions
       x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
@@ -4673,7 +4673,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.reconciliation_balance
+      x-frappe-handler: letron_api.finance.banking.reconciliation_balance
       x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
@@ -4704,7 +4704,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.reconciliation_linked_payments
+      x-frappe-handler: letron_api.finance.banking.reconciliation_linked_payments
       x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
@@ -4736,7 +4736,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.reconciliation_update_clearance
+      x-frappe-handler: letron_api.finance.banking.reconciliation_update_clearance
       x-public-operation: update
       requestBody:
         required: false
@@ -4775,7 +4775,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.reconciliation_clear_clearance
+      x-frappe-handler: letron_api.finance.banking.reconciliation_clear_clearance
       x-public-operation: update
       requestBody:
         required: false
@@ -4819,7 +4819,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.reconciliation_action
+      x-frappe-handler: letron_api.finance.banking.reconciliation_action
       x-public-operation: update
       requestBody:
         required: false
@@ -4857,7 +4857,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.report
+      x-frappe-handler: letron_api.finance.banking.report
       x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
@@ -4888,7 +4888,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.statement_imports
+      x-frappe-handler: letron_api.finance.banking.statement_imports
       x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
@@ -4919,7 +4919,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.statement_import_create
+      x-frappe-handler: letron_api.finance.banking.statement_import_create
       x-public-operation: create
       requestBody:
         required: false
@@ -4958,7 +4958,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.statement_import_upload
+      x-frappe-handler: letron_api.finance.banking.statement_import_upload
       x-public-operation: create
       requestBody:
         required: true
@@ -5006,7 +5006,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.statement_import_get
+      x-frappe-handler: letron_api.finance.banking.statement_import_get
       x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
@@ -5042,7 +5042,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.statement_import_update
+      x-frappe-handler: letron_api.finance.banking.statement_import_update
       x-public-operation: update
       requestBody:
         required: false
@@ -5085,7 +5085,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.statement_details
+      x-frappe-handler: letron_api.finance.banking.statement_details
       x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
@@ -5122,7 +5122,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.statement_update_pdf_tables
+      x-frappe-handler: letron_api.finance.banking.statement_update_pdf_tables
       x-public-operation: update
       requestBody:
         required: false
@@ -5166,7 +5166,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.statement_reextract_pdf_table
+      x-frappe-handler: letron_api.finance.banking.statement_reextract_pdf_table
       x-public-operation: update
       requestBody:
         required: false
@@ -5210,7 +5210,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.statement_set_pdf_table_header
+      x-frappe-handler: letron_api.finance.banking.statement_set_pdf_table_header
       x-public-operation: update
       requestBody:
         required: false
@@ -5254,7 +5254,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.statement_update_column_mapping
+      x-frappe-handler: letron_api.finance.banking.statement_update_column_mapping
       x-public-operation: update
       requestBody:
         required: false
@@ -5298,7 +5298,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.statement_set_header_index
+      x-frappe-handler: letron_api.finance.banking.statement_set_header_index
       x-public-operation: update
       requestBody:
         required: false
@@ -5336,7 +5336,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.accounts_settings
+      x-frappe-handler: letron_api.finance.banking.accounts_settings
       x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
@@ -5367,7 +5367,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.banking.accounts_settings_update
+      x-frappe-handler: letron_api.finance.banking.accounts_settings_update
       x-public-operation: update
       requestBody:
         required: false
@@ -9265,48 +9265,27 @@ x-contract:
       action: reconcile
       operation_id: reconcileBankTransaction
       path_suffix: reconcile
-      handler: letron_api.accounts_reconciliation.reconcile_bank_transaction
+      handler: letron_api.finance.accounts_reconciliation.reconcile_bank_transaction
     - doctype: Bank Transaction
       module: Accounts
       action: unreconcile
       operation_id: unreconcileBankTransaction
       path_suffix: unreconcile
-      handler: letron_api.accounts_reconciliation.unreconcile_bank_transaction
+      handler: letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction
     - doctype: Bank Transaction Rule
       module: Accounts
       action: run-evaluation
       operation_id: runBankTransactionRules
       path_suffix: run-evaluation
-      handler: letron_api.banking.run_rule_evaluation
+      handler: letron_api.finance.banking.run_rule_evaluation
     custom_routes:
-    - module: Buying
-      resource: purchase-orders/create-draft
-      method: POST
-      path: /api/method/letron_api.lark_po.create_draft
-      operation: create
-      operation_id: createPurchaseOrderDraftBeforeApproval
-      handler: letron_api.lark_po.create_draft
-    - module: Buying
-      resource: purchase-orders/from-approved-lark
-      method: POST
-      path: /api/method/letron_api.lark_po.from_approved
-      operation: create
-      operation_id: createPurchaseOrderFromApprovedLark
-      handler: letron_api.lark_po.from_approved
-    - module: Buying
-      resource: purchase-orders/update-approval-state
-      method: POST
-      path: /api/method/letron_api.lark_po.update_approval_state
-      operation: update
-      operation_id: updatePurchaseOrderApprovalState
-      handler: letron_api.lark_po.update_approval_state
     - module: Files
       resource: attachments
       method: POST
       path: /api/v1/files/attachments
       operation: create
       operation_id: createAttachment
-      handler: letron_api.attachments.create_attachment
+      handler: letron_api.delivery.attachments.create_attachment
       content_type: multipart/form-data
       multipart_fields:
       - attached_to_doctype
@@ -9321,70 +9300,70 @@ x-contract:
       path: /api/v1/accounts/bank-reconciliation/transactions
       operation: list
       operation_id: listBankReconciliationTransactions
-      handler: letron_api.banking.reconciliation_transactions
+      handler: letron_api.finance.banking.reconciliation_transactions
     - module: Accounts
       resource: bank-reconciliation
       method: GET
       path: /api/v1/accounts/bank-reconciliation/balance
       operation: read
       operation_id: getBankReconciliationBalance
-      handler: letron_api.banking.reconciliation_balance
+      handler: letron_api.finance.banking.reconciliation_balance
     - module: Accounts
       resource: bank-reconciliation
       method: GET
       path: /api/v1/accounts/bank-reconciliation/linked-payments
       operation: read
       operation_id: getBankReconciliationLinkedPayments
-      handler: letron_api.banking.reconciliation_linked_payments
+      handler: letron_api.finance.banking.reconciliation_linked_payments
     - module: Accounts
       resource: bank-reconciliation
       method: POST
       path: /api/v1/accounts/bank-reconciliation/clearance
       operation: update
       operation_id: updateBankReconciliationClearance
-      handler: letron_api.banking.reconciliation_update_clearance
+      handler: letron_api.finance.banking.reconciliation_update_clearance
     - module: Accounts
       resource: bank-reconciliation
       method: POST
       path: /api/v1/accounts/bank-reconciliation/clear-clearance
       operation: update
       operation_id: clearBankReconciliationClearance
-      handler: letron_api.banking.reconciliation_clear_clearance
+      handler: letron_api.finance.banking.reconciliation_clear_clearance
     - module: Accounts
       resource: bank-reconciliation
       method: POST
       path: /api/v1/accounts/bank-reconciliation/actions/{action}
       operation: update
       operation_id: runBankReconciliationAction
-      handler: letron_api.banking.reconciliation_action
+      handler: letron_api.finance.banking.reconciliation_action
     - module: Accounts
       resource: reports
       method: GET
       path: /api/v1/accounts/reports/report
       operation: read
       operation_id: runAccountsReport
-      handler: letron_api.banking.report
+      handler: letron_api.finance.banking.report
     - module: Accounts
       resource: statement-imports
       method: GET
       path: /api/v1/accounts/statement-imports
       operation: list
       operation_id: listStatementImports
-      handler: letron_api.banking.statement_imports
+      handler: letron_api.finance.banking.statement_imports
     - module: Accounts
       resource: statement-imports
       method: POST
       path: /api/v1/accounts/statement-imports
       operation: create
       operation_id: createStatementImport
-      handler: letron_api.banking.statement_import_create
+      handler: letron_api.finance.banking.statement_import_create
     - module: Accounts
       resource: statement-imports
       method: POST
       path: /api/v1/accounts/statement-imports/upload
       operation: create
       operation_id: uploadStatementImport
-      handler: letron_api.banking.statement_import_upload
+      handler: letron_api.finance.banking.statement_import_upload
       content_type: multipart/form-data
     - module: Accounts
       resource: statement-imports
@@ -9392,95 +9371,95 @@ x-contract:
       path: /api/v1/accounts/statement-imports/{name}
       operation: read
       operation_id: getStatementImport
-      handler: letron_api.banking.statement_import_get
+      handler: letron_api.finance.banking.statement_import_get
     - module: Accounts
       resource: statement-imports
       method: PUT
       path: /api/v1/accounts/statement-imports/{name}
       operation: update
       operation_id: updateStatementImport
-      handler: letron_api.banking.statement_import_update
+      handler: letron_api.finance.banking.statement_import_update
     - module: Accounts
       resource: statement-imports
       method: GET
       path: /api/v1/accounts/statement-imports/{name}/details
       operation: read
       operation_id: getStatementImportDetails
-      handler: letron_api.banking.statement_details
+      handler: letron_api.finance.banking.statement_details
     - module: Accounts
       resource: statement-imports
       method: POST
       path: /api/v1/accounts/statement-imports/{name}/update-pdf-tables
       operation: update
       operation_id: updateStatementImportPdfTables
-      handler: letron_api.banking.statement_update_pdf_tables
+      handler: letron_api.finance.banking.statement_update_pdf_tables
     - module: Accounts
       resource: statement-imports
       method: POST
       path: /api/v1/accounts/statement-imports/{name}/reextract-pdf-table
       operation: update
       operation_id: reextractStatementImportPdfTable
-      handler: letron_api.banking.statement_reextract_pdf_table
+      handler: letron_api.finance.banking.statement_reextract_pdf_table
     - module: Accounts
       resource: statement-imports
       method: POST
       path: /api/v1/accounts/statement-imports/{name}/set-pdf-table-header
       operation: update
       operation_id: setStatementImportPdfTableHeader
-      handler: letron_api.banking.statement_set_pdf_table_header
+      handler: letron_api.finance.banking.statement_set_pdf_table_header
     - module: Accounts
       resource: statement-imports
       method: POST
       path: /api/v1/accounts/statement-imports/{name}/update-column-mapping
       operation: update
       operation_id: updateStatementImportColumnMapping
-      handler: letron_api.banking.statement_update_column_mapping
+      handler: letron_api.finance.banking.statement_update_column_mapping
     - module: Accounts
       resource: statement-imports
       method: POST
       path: /api/v1/accounts/statement-imports/{name}/set-header-index
       operation: update
       operation_id: setStatementImportHeaderIndex
-      handler: letron_api.banking.statement_set_header_index
+      handler: letron_api.finance.banking.statement_set_header_index
     - module: Accounts
       resource: settings
       method: GET
       path: /api/v1/accounts/settings
       operation: read
       operation_id: getAccountsSettings
-      handler: letron_api.banking.accounts_settings
+      handler: letron_api.finance.banking.accounts_settings
     - module: Accounts
       resource: settings
       method: PUT
       path: /api/v1/accounts/settings
       operation: update
       operation_id: updateAccountsSettings
-      handler: letron_api.banking.accounts_settings_update
+      handler: letron_api.finance.banking.accounts_settings_update
     - module: Assets
       resource: actions
       method: POST
       path: /api/v1/assets/actions/{action}
       operation: update
       operation_id: runAssetAction
-      handler: letron_api.assets.asset_action
+      handler: letron_api.assets.assets.asset_action
     - module: Assets
       resource: reports
       method: GET
       path: /api/v1/assets/reports/report
       operation: read
       operation_id: runAssetReport
-      handler: letron_api.assets.asset_report
+      handler: letron_api.assets.assets.asset_report
     - module: Assets
       resource: dashboard
       method: GET
       path: /api/v1/assets/dashboard
       operation: read
       operation_id: getAssetDashboard
-      handler: letron_api.assets.asset_dashboard
+      handler: letron_api.assets.assets.asset_dashboard
     include_methods:
-    - letron_api.api.health
-    - letron_api.api.runtime_info
-    - letron_api.api.runtime_snapshot
+    - letron_api.control.api.health
+    - letron_api.control.api.runtime_info
+    - letron_api.control.api.runtime_snapshot
     public_resources:
     - doctype: Asset
       path: /api/v1/assets/assets

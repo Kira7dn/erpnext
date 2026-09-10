@@ -25,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const syncSecret = env.LETRON_SSO_SYNC_SECRET || "";
 
   try {
-    const response = await fetch(`${erpBaseUrl}/api/method/letron_api.backup.scheduled_s3_backup`, {
+    const response = await fetch(`${erpBaseUrl}/api/method/letron_api.operations.backup.scheduled_s3_backup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

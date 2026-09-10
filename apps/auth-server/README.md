@@ -125,7 +125,7 @@ docker exec `
   -e LETRON_BREAK_GLASS_ROLE_NAMES="Desk User,Accounts User" `
   -e LETRON_BREAK_GLASS_REASON="Incident reference" `
   -e LETRON_BREAK_GLASS_TTL_SECONDS=900 `
-  erpnext-backend-1 bench --site frontend execute letron_api.sso_admin.break_glass_from_environment
+  erpnext-backend-1 bench --site frontend execute letron_api.auth.sso_admin.break_glass_from_environment
 ```
 
 Không dùng break-glass để vượt qua việc bị gỡ khỏi group truy cập hoặc local admin block. Mọi lần JIT, thu hồi, reconcile, stale-lock và break-glass được ghi vào `Letron SSO Audit Log`.
@@ -155,7 +155,7 @@ production build. Sau khi cả Auth Server và ERP chạy, kiểm tra:
 
 ```text
 GET http://localhost:3000/api/health
-GET http://localhost:8080/api/method/letron_api.api.health
+GET http://localhost:8080/api/method/letron_api.control.api.health
 ```
 
 Health Auth phải báo group sync enabled. Health ERP phải báo

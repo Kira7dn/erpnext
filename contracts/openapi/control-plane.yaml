@@ -9,7 +9,7 @@ servers:
 security:
 - frappeToken: []
 paths:
-  /api/method/letron_api.config_control.get_configuration:
+  /api/method/letron_api.control.config_control.get_configuration:
     get:
       operationId: getConfiguration
       tags:
@@ -64,7 +64,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FrappeError'
-  /api/method/letron_api.config_control.put_configuration:
+  /api/method/letron_api.control.config_control.put_configuration:
     put:
       operationId: putConfiguration
       tags:

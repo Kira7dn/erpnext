@@ -167,7 +167,7 @@ def main():
         "/home/frappe/frappe-bench/env/bin/python", "-c",
         f"""
 import sys
-from letron_api.restore import download_backup_set
+from letron_api.operations.restore import download_backup_set
 download_backup_set('{chosen_ts}', '{staging_in_container}')
 print('DOWNLOAD_SUCCESS')
 """
@@ -223,7 +223,7 @@ print('DOWNLOAD_SUCCESS')
 
             print(f"▶ 4. [Drill] Xác thực runtime & tính toàn vẹn hệ thống...")
             audit_res = subprocess.run([
-                "docker", "exec", args.container, "bench", "--site", drill_site, "execute", "letron_api.api.runtime_info"
+                "docker", "exec", args.container, "bench", "--site", drill_site, "execute", "letron_api.control.api.runtime_info"
             ], capture_output=True, text=True, check=True)
             print("   Runtime audit:", audit_res.stdout.strip()[:120], "...")
 
@@ -258,7 +258,7 @@ print('DOWNLOAD_SUCCESS')
                 "docker", "exec", args.container, "bench", "--site", target_site, "migrate"
             ], check=True)
             subprocess.run([
-                "docker", "exec", args.container, "bench", "--site", target_site, "execute", "letron_api.system_config.sync"
+                "docker", "exec", args.container, "bench", "--site", target_site, "execute", "letron_api.control.system_config.sync"
             ], check=True)
 
             print(f"\n{'='*75}")

@@ -10,8 +10,9 @@ import {
   gatewayRequest,
 } from "@/lib/letron-api";
 import { ApiRequestError } from "@/lib/api-error";
-import { sendSupplierPortalMail, supplierPortalRequest, type SupplierPortalMail } from "@/lib/supplier-portal";
-import { supplierPortalConfig } from "@/lib/supplier-portal-config";
+import { sendSupplierPortalMail } from "@/lib/supplier-portal";
+import { buildAccessMail } from "@/lib/supplier-portal-session";
+import { ensureSupplierPortalAccess, resolveSupplierEmail } from "@/lib/supplier-portal-core";
 
 type Row = Record<string, unknown>;
 type Item = {
@@ -31,12 +32,11 @@ export type PurchaseOrchestrationInput = {
   material_request: Row;
   suppliers: string[];
   supplier_email?: string;
-  supplier_quotation_name?: string;
   justification?: string;
 };
 export type PurchaseOrchestrationState = {
   id: string;
-  status: "started" | "mr_created" | "partial_failure" | "rfq_created" | "waiting_supplier_quotes" | "approval_pending" | "approval_failed" | "completed" | "failed";
+  status: "started" | "mr_created" | "partial_failure" | "rfq_created" | "waiting_supplier_quotes" | "failed";
   material_request: Row;
   suppliers: string[];
   supplier_email?: string;
@@ -44,10 +44,7 @@ export type PurchaseOrchestrationState = {
   material_request_name?: string;
   request_for_quotation_name?: string;
   supplier_quote_deadline_at?: string;
-  supplier_portal_accesses?: string[];
-  supplier_quotation_name?: string;
   justification?: string;
-  lark_po?: Record<string, unknown>;
   retry_count: number;
   error?: string;
   created_at: string;
@@ -241,8 +238,7 @@ async function saveState(
   await store().set(key, state, { ex: STATE_TTL_SECONDS });
   const owner = key.slice(PREFIX.length).split(":")[0];
   const index = `${PREFIX}active:${owner}`;
-  if (state.status === "completed") await store().srem(index, key);
-  else await store().sadd(index, key);
+  await store().sadd(index, key);
 }
 
 function stateResult(
@@ -260,24 +256,23 @@ async function issueSupplierPortalAccesses(
   materialRequest: Row,
 ): Promise<void> {
   const createdAt = new Date(String(materialRequest.creation ?? state.created_at));
-  const deadline = new Date(createdAt.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
-  const accessIds: string[] = [];
+  const quotationDeadline = new Date(createdAt.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
+  const accessExpiry = new Date(createdAt.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
   for (const supplier of state.suppliers) {
-    const result = await supplierPortalRequest<{ access_id: string; mail: SupplierPortalMail }>("issue_access", {
-      material_request: state.material_request_name,
-      request_for_quotation: state.request_for_quotation_name,
+    const result = await ensureSupplierPortalAccess({
+      material_request: state.material_request_name ?? "",
+      request_for_quotation: state.request_for_quotation_name ?? "",
       orchestration_id: state.id,
       supplier,
-      email_snapshot: state.supplier_email,
-      deadline_at: deadline,
-      portal_url_base: `${supplierPortalConfig().portal_public_base_url.replace(/\/$/, "")}/supplier`,
+      email: await resolveSupplierEmail(supplier, state.supplier_email),
+      deadline_at: quotationDeadline,
+      access_expires_at: accessExpiry,
     });
-    if (!result?.access_id || !result.mail) throw new ApiRequestError("supplier_mail_payload_missing", "Supplier access email payload is missing.", 502);
-    await sendSupplierPortalMail(result.mail);
-    accessIds.push(result.access_id);
+    if (!result.access.access_id || !result.access.email) throw new ApiRequestError("supplier_portal_access_missing", "Supplier portal access is missing.", 502);
+    const delivery = await sendSupplierPortalMail(buildAccessMail(result.access, result.magic_token));
+    void delivery;
   }
-  state.supplier_portal_accesses = accessIds;
-  state.supplier_quote_deadline_at = deadline;
+  state.supplier_quote_deadline_at = quotationDeadline;
 }
 
 export function orchestrationHttpStatus(cause: unknown): number {
@@ -312,7 +307,6 @@ export async function createPurchaseOrchestration(
     material_request: normalized.materialRequest,
     suppliers: normalized.suppliers,
     supplier_email: String(input.supplier_email ?? "").trim() || undefined,
-    supplier_quotation_name: String(input.supplier_quotation_name ?? "").trim() || undefined,
     justification: String(input.justification ?? "").trim() || undefined,
     rfq_payload: buildRfqPayload(
       normalized.materialRequest,
@@ -416,10 +410,6 @@ export async function getActivePurchaseOrchestrations(
     keys.slice(0, 100).map(async (key) => {
       const state = await store().get<PurchaseOrchestrationState>(key);
       if (!state) {
-        await store().srem(index, key);
-        return null;
-      }
-      if (state.status === "completed") {
         await store().srem(index, key);
         return null;
       }
@@ -574,7 +564,7 @@ export async function retryPurchaseRfq(
     throw new PurchaseOrchestrationValidationError(
       "Orchestration state was not found or has expired.",
     );
-  if (state.status === "completed" || state.status === "approval_pending") return stateResult(state);
+  if (state.status === "waiting_supplier_quotes") return stateResult(state);
   if (!state.material_request_name)
     throw new PurchaseOrchestrationValidationError(
       "Material Request was not created; RFQ cannot be retried.",
@@ -629,29 +619,6 @@ export async function retryPurchaseRfq(
   } finally {
     await store().del(retryKey(key));
   }
-}
-
-export async function submitLarkApprovalById(
-  cookieHeader: string,
-  id: string,
-): Promise<PurchaseOrchestrationState> {
-  const key = await keyForOrchestrationId(cookieHeader, id);
-  if (!key)
-    throw new PurchaseOrchestrationValidationError(
-      "Orchestration state was not found or has expired.",
-    );
-  const state = await store().get<PurchaseOrchestrationState>(key);
-  if (!state)
-    throw new PurchaseOrchestrationValidationError(
-      "Orchestration state was not found or has expired.",
-    );
-  if (!state.request_for_quotation_name)
-    throw new PurchaseOrchestrationValidationError(
-      "RFQ must be created before Lark approval can be submitted.",
-    );
-  throw new PurchaseOrchestrationValidationError(
-    "Lark approval opens only after Supplier quotation gate passes.",
-  );
 }
 
 export async function retryPurchaseRfqById(

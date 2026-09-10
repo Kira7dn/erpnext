@@ -14,7 +14,7 @@ from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 import pytest
-from letron_api.delivery_protocol import webhook_signature
+from letron_api.delivery.delivery_protocol import webhook_signature
 
 from .api_runtime_harness import (
     ApiClient,
@@ -123,10 +123,10 @@ def test_extended_auth_system_resources_and_business_flows(request: pytest.Fixtu
 
     # Runtime APIs remain authenticated; health is explicitly guest-safe.
     guest = ApiClient()
-    guest.request("GET", "/api/method/letron_api.api.health", expected={200})
-    guest.request("GET", "/api/method/letron_api.api.runtime_info", expected={401, 403})
-    client.request("GET", "/api/method/letron_api.api.runtime_info", expected={200})
-    client.request("GET", "/api/method/letron_api.api.runtime_snapshot", expected={200})
+    guest.request("GET", "/api/method/letron_api.control.api.health", expected={200})
+    guest.request("GET", "/api/method/letron_api.control.api.runtime_info", expected={401, 403})
+    client.request("GET", "/api/method/letron_api.control.api.runtime_info", expected={200})
+    client.request("GET", "/api/method/letron_api.control.api.runtime_snapshot", expected={200})
 
     # A run-scoped User gets native Frappe API keys. Evidence redaction excludes both values.
     token_user = prefix.lower() + "token@example.com"
@@ -151,10 +151,10 @@ def test_extended_auth_system_resources_and_business_flows(request: pytest.Fixtu
     ).data["message"]
     token = ApiClient()
     token.authorization = f"token {keys['api_key']}:{keys['api_secret']}"
-    token.request("GET", "/api/method/letron_api.api.runtime_info", expected={200})
+    token.request("GET", "/api/method/letron_api.control.api.runtime_info", expected={200})
     wrong = ApiClient()
     wrong.authorization = "token invalid-key:invalid-secret"
-    wrong.request("GET", "/api/method/letron_api.api.runtime_info", expected={401, 403})
+    wrong.request("GET", "/api/method/letron_api.control.api.runtime_info", expected={401, 403})
     client.evidence.extend(token.evidence)
     client.evidence.extend(wrong.evidence)
 

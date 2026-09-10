@@ -63,7 +63,7 @@ def test_stock_traceability_contract_and_lifecycle(request: pytest.FixtureReques
     created: list[tuple[str, str]] = []
     policy_snapshot = client.request(
         "GET",
-        "/api/method/letron_api.config_control.get_configuration?kind=policy",
+        "/api/method/letron_api.control.config_control.get_configuration?kind=policy",
         expected={200},
     ).data["message"]
     policy_content = str(policy_snapshot.get("content", ""))
@@ -79,7 +79,7 @@ def test_stock_traceability_contract_and_lifecycle(request: pytest.FixtureReques
         try:
             policy_response = client.request(
                 "PUT",
-                "/api/method/letron_api.config_control.put_configuration",
+                "/api/method/letron_api.control.config_control.put_configuration",
                 {
                     "kind": "policy",
                     "content": modified_content,
@@ -99,12 +99,12 @@ def test_stock_traceability_contract_and_lifecycle(request: pytest.FixtureReques
             try:
                 current_policy = client.request(
                     "GET",
-                    "/api/method/letron_api.config_control.get_configuration?kind=policy",
+                    "/api/method/letron_api.control.config_control.get_configuration?kind=policy",
                     expected={200},
                 ).data["message"]
                 client.request(
                     "PUT",
-                    "/api/method/letron_api.config_control.put_configuration",
+                    "/api/method/letron_api.control.config_control.put_configuration",
                     {
                         "kind": "policy",
                         "content": str(policy_snapshot.get("content", "")),

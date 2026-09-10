@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = process.cwd();
-const secretKeys = ["LETRON_API_KEY", "LETRON_SSO_SYNC_SECRET"];
+const secretKeys = ["LETRON_API_KEY", "LETRON_SSO_SYNC_SECRET", "LARK_APP_ID", "LARK_APP_SECRET", "LARK_DOMAIN", "LARK_PO_APPROVAL_CODE", "LARK_PO_APPROVER_EMAIL", "LARK_EVENT_ENCRYPT_KEY", "KV_REST_API_URL", "KV_REST_API_TOKEN"];
 
 function parseEnv(content) {
   const values = new Map();

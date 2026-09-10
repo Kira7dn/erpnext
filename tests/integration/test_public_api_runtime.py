@@ -25,13 +25,13 @@ def test_public_contract_and_lifecycle(request: pytest.FixtureRequest) -> None:
         client.health_and_login()
     except RuntimeUnavailable as error:
         pytest.fail(f"blocked runtime: {error}")
-    snapshot = client.request("GET", "/api/method/letron_api.api.runtime_snapshot", expected={200})
+    snapshot = client.request("GET", "/api/method/letron_api.control.api.runtime_snapshot", expected={200})
     installed_apps = snapshot.data.get("message", {}).get("installed_apps", [])
     assert {"frappe", "erpnext", "letron_api"}.issubset(installed_apps)
     unauthenticated = ApiClient()
     unauthenticated.public("GET", "/api/v1/selling/customers", expected={401})
     client.evidence.extend(unauthenticated.evidence)
-    explicit = client.request("GET", "/api/method/letron_api.api.health", expected={200}, headers={"X-Request-Id": "acceptance-explicit-request-id"})
+    explicit = client.request("GET", "/api/method/letron_api.control.api.health", expected={200}, headers={"X-Request-Id": "acceptance-explicit-request-id"})
     assert explicit.request_id == "acceptance-explicit-request-id"
 
     created: list[tuple[str, str]] = []

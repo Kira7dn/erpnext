@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { apiErrorFromCause, apiErrorResponse, ApiRequestError } from "@/lib/api-error";
 import { openSupplierApproval, supplierPortalCronRequest, supplierPortalRequest } from "@/lib/supplier-portal";
+import { createPurchaseOrderDraft } from "@/lib/supplier-portal-core";
 
 export async function POST(request: NextRequest) {
   const supplied = request.headers.get("x-letron-cron-secret") ?? "";
@@ -23,9 +24,11 @@ export async function POST(request: NextRequest) {
       if (!claim.claimed) continue;
       let approvalCreated = false;
       try {
+        const po = await createPurchaseOrderDraft(item.process, item.selected_supplier_quotation);
         const approval = await openSupplierApproval({
           orchestration_id: item.orchestration_id,
           selected_supplier_quotation_name: item.selected_supplier_quotation,
+          erp_purchase_order_name: String(po.name ?? ""),
           justification: `Tự động chọn báo giá ${item.selected_supplier_quotation} có tổng giá thấp nhất trong ${item.submitted_count} báo giá đã nhận; mở sau thời hạn 3 ngày của Material Request.`,
         });
         const approvalId = String((approval as { instanceCode?: unknown; instance_code?: unknown }).instanceCode ?? (approval as { instance_code?: unknown }).instance_code ?? "").trim();

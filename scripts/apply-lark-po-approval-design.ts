@@ -1,9 +1,11 @@
 import { larkTenantJson } from "../apps/auth-server/src/server/lark.ts";
 import { getEnv } from "../apps/auth-server/src/server/env.ts";
-import { LARK_PO_APPROVAL_DESIGN, larkI18nKey } from "../apps/auth-server/src/server/lark-po-approval-design.ts";
+import { LARK_PO_APPROVAL_DESIGN, larkI18nKey } from "../apps/erp/src/lib/lark-approval-design.ts";
 
 type Row = Record<string, any>;
-const code = getEnv().LARK_PO_APPROVAL_CODE;
+getEnv();
+const code = process.env.LARK_PO_APPROVAL_CODE?.trim();
+if (!code) throw new Error("LARK_PO_APPROVAL_CODE is required");
 const key = (suffix: string) => larkI18nKey(suffix);
 
 const labels: Record<string, string> = Object.fromEntries([

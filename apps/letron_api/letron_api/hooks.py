@@ -5,8 +5,8 @@ from typing import Any, cast
 
 import frappe
 
-from letron_api.frappe_compat import install_scheduler_compatibility
-from letron_api.policy import POLICY_DOCTYPES
+from letron_api.infrastructure.frappe_compat import install_scheduler_compatibility
+from letron_api.control.policy import POLICY_DOCTYPES
 
 install_scheduler_compatibility()
 
@@ -21,7 +21,7 @@ app_license = "MIT"
 # The variable is used only by new Letron purchasing records; existing names are
 # never renamed.
 naming_series_variables = {
-    "YYYYMMDD": "letron_api.naming.parse_yyyymmdd",
+    "YYYYMMDD": "letron_api.procurement.naming.parse_yyyymmdd",
 }
 
 required_apps = ["frappe", "erpnext"]
@@ -101,50 +101,50 @@ DOCUMENT_ACTIONS = {
     ("accounts", "bank-transactions"): {"submit", "cancel"},
 }
 CUSTOM_ACTIONS = {
-    ("accounts", "bank-transactions", "reconcile"): "letron_api.accounts_reconciliation.reconcile_bank_transaction",
-    ("accounts", "bank-transactions", "unreconcile"): "letron_api.accounts_reconciliation.unreconcile_bank_transaction",
-    ("accounts", "bank-transaction-rules", "run-evaluation"): "letron_api.banking.run_rule_evaluation",
+    ("accounts", "bank-transactions", "reconcile"): "letron_api.finance.accounts_reconciliation.reconcile_bank_transaction",
+    ("accounts", "bank-transactions", "unreconcile"): "letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction",
+    ("accounts", "bank-transaction-rules", "run-evaluation"): "letron_api.finance.banking.run_rule_evaluation",
 }
 
 VIRTUAL_BANKING_ROUTES = {
-    ("accounts", "bank-reconciliation", "transactions"): "letron_api.banking.reconciliation_transactions",
-    ("accounts", "bank-reconciliation", "balance"): "letron_api.banking.reconciliation_balance",
-    ("accounts", "bank-reconciliation", "linked-payments"): "letron_api.banking.reconciliation_linked_payments",
-    ("accounts", "bank-reconciliation", "clearance"): "letron_api.banking.reconciliation_update_clearance",
-    ("accounts", "bank-reconciliation", "clear-clearance"): "letron_api.banking.reconciliation_clear_clearance",
-    ("accounts", "bank-reconciliation", "actions"): "letron_api.banking.reconciliation_action",
-    ("accounts", "reports", "report"): "letron_api.banking.report",
-    ("accounts", "statement-imports", "details"): "letron_api.banking.statement_details",
-    ("accounts", "statement-imports", "update-pdf-tables"): "letron_api.banking.statement_update_pdf_tables",
-    ("accounts", "statement-imports", "reextract-pdf-table"): "letron_api.banking.statement_reextract_pdf_table",
-    ("accounts", "statement-imports", "set-pdf-table-header"): "letron_api.banking.statement_set_pdf_table_header",
-    ("accounts", "statement-imports", "update-column-mapping"): "letron_api.banking.statement_update_column_mapping",
-    ("accounts", "statement-imports", "set-header-index"): "letron_api.banking.statement_set_header_index",
+    ("accounts", "bank-reconciliation", "transactions"): "letron_api.finance.banking.reconciliation_transactions",
+    ("accounts", "bank-reconciliation", "balance"): "letron_api.finance.banking.reconciliation_balance",
+    ("accounts", "bank-reconciliation", "linked-payments"): "letron_api.finance.banking.reconciliation_linked_payments",
+    ("accounts", "bank-reconciliation", "clearance"): "letron_api.finance.banking.reconciliation_update_clearance",
+    ("accounts", "bank-reconciliation", "clear-clearance"): "letron_api.finance.banking.reconciliation_clear_clearance",
+    ("accounts", "bank-reconciliation", "actions"): "letron_api.finance.banking.reconciliation_action",
+    ("accounts", "reports", "report"): "letron_api.finance.banking.report",
+    ("accounts", "statement-imports", "details"): "letron_api.finance.banking.statement_details",
+    ("accounts", "statement-imports", "update-pdf-tables"): "letron_api.finance.banking.statement_update_pdf_tables",
+    ("accounts", "statement-imports", "reextract-pdf-table"): "letron_api.finance.banking.statement_reextract_pdf_table",
+    ("accounts", "statement-imports", "set-pdf-table-header"): "letron_api.finance.banking.statement_set_pdf_table_header",
+    ("accounts", "statement-imports", "update-column-mapping"): "letron_api.finance.banking.statement_update_column_mapping",
+    ("accounts", "statement-imports", "set-header-index"): "letron_api.finance.banking.statement_set_header_index",
 }
 
 def _virtual_banking_target(parts: list[str]) -> str | None:
     if len(parts) == 4 and parts[2:4] == ["accounts", "statement-imports"]:
-        return "letron_api.banking.statement_imports" if frappe.local.request.method == "GET" else "letron_api.banking.statement_import_create"
+        return "letron_api.finance.banking.statement_imports" if frappe.local.request.method == "GET" else "letron_api.finance.banking.statement_import_create"
     if len(parts) == 4 and parts[2:4] == ["accounts", "settings"]:
-        return "letron_api.banking.accounts_settings" if frappe.local.request.method == "GET" else "letron_api.banking.accounts_settings_update"
+        return "letron_api.finance.banking.accounts_settings" if frappe.local.request.method == "GET" else "letron_api.finance.banking.accounts_settings_update"
     if len(parts) == 5:
         if parts[2:4] == ["accounts", "statement-imports"] and parts[4] == "upload":
-            return "letron_api.banking.statement_import_upload"
+            return "letron_api.finance.banking.statement_import_upload"
         if parts[2:4] == ["accounts", "statement-imports"]:
-            return "letron_api.banking.statement_import_get" if frappe.local.request.method == "GET" else "letron_api.banking.statement_import_update"
+            return "letron_api.finance.banking.statement_import_get" if frappe.local.request.method == "GET" else "letron_api.finance.banking.statement_import_update"
         return VIRTUAL_BANKING_ROUTES.get((parts[2], parts[3], parts[4]))
     if len(parts) == 6 and parts[2:4] == ["accounts", "bank-reconciliation"] and parts[4] == "actions":
         frappe.local.form_dict.update({"action": parts[5], "payload": frappe.request.get_data(as_text=True)})
-        return "letron_api.banking.reconciliation_action"
+        return "letron_api.finance.banking.reconciliation_action"
     if len(parts) == 6 and parts[2:4] == ["accounts", "statement-imports"]:
         action = parts[5]
         method = {
-            "details": "letron_api.banking.statement_details",
-            "update-pdf-tables": "letron_api.banking.statement_update_pdf_tables",
-            "reextract-pdf-table": "letron_api.banking.statement_reextract_pdf_table",
-            "set-pdf-table-header": "letron_api.banking.statement_set_pdf_table_header",
-            "update-column-mapping": "letron_api.banking.statement_update_column_mapping",
-            "set-header-index": "letron_api.banking.statement_set_header_index",
+            "details": "letron_api.finance.banking.statement_details",
+            "update-pdf-tables": "letron_api.finance.banking.statement_update_pdf_tables",
+            "reextract-pdf-table": "letron_api.finance.banking.statement_reextract_pdf_table",
+            "set-pdf-table-header": "letron_api.finance.banking.statement_set_pdf_table_header",
+            "update-column-mapping": "letron_api.finance.banking.statement_update_column_mapping",
+            "set-header-index": "letron_api.finance.banking.statement_set_header_index",
         }.get(action)
         return method
     return None
@@ -152,22 +152,22 @@ def _virtual_banking_target(parts: list[str]) -> str | None:
 
 def _virtual_asset_target(parts: list[str]) -> str | None:
     if len(parts) == 4 and parts[2:4] == ["assets", "dashboard"]:
-        return "letron_api.assets.asset_dashboard"
+        return "letron_api.assets.assets.asset_dashboard"
     if len(parts) == 5 and parts[2:4] == ["assets", "reports"] and parts[4] == "report":
         frappe.local.form_dict.update({
             "report_key": frappe.local.request.args.get("report_key"),
             "filters": frappe.local.request.args.get("filters"),
         })
-        return "letron_api.assets.asset_report"
+        return "letron_api.assets.assets.asset_report"
     if len(parts) == 5 and parts[2:4] == ["assets", "actions"]:
         frappe.local.form_dict.update({"action": parts[4], "payload": frappe.request.get_data(as_text=True)})
-        return "letron_api.assets.asset_action"
+        return "letron_api.assets.assets.asset_action"
     return None
 
 
 def _virtual_attachment_target(parts: list[str]) -> str | None:
     if len(parts) == 4 and parts[2:4] == ["files", "attachments"]:
-        return "letron_api.attachments.create_attachment"
+        return "letron_api.delivery.attachments.create_attachment"
     return None
 
 
@@ -227,7 +227,7 @@ def rewrite_public_routes() -> None:
         target = (
             f"/api/method/{CUSTOM_ACTIONS[(module_slug, doctype_slug, action)]}"
             if custom_action
-            else "/api/method/letron_api.api.document_action"
+            else "/api/method/letron_api.control.api.document_action"
         )
         query = urlencode({"doctype": doctype, "name": name, "action": action})
         request.environ["QUERY_STRING"] = query
@@ -291,10 +291,10 @@ def add_request_headers(response=None, request=None) -> None:
             cache.set_value(cache_key, "completed", expires_in_sec=86400)
 
 
-before_request = ["letron_api.gateway.enforce_gateway_ingress", "letron_api.hooks.rewrite_public_routes"]
+before_request = ["letron_api.auth.gateway.enforce_gateway_ingress", "letron_api.hooks.rewrite_public_routes"]
 after_request = ["letron_api.hooks.add_request_headers"]
 auth_hooks = []
-after_migrate = ["letron_api.purchase_schema.ensure_schema"]
+after_migrate = ["letron_api.procurement.purchase_schema.ensure_schema"]
 
 doc_events = {
     doctype: {
@@ -308,38 +308,24 @@ doc_events = {
 
 for policy_doctype in POLICY_DOCTYPES:
     handlers = doc_events.setdefault(policy_doctype, {})
-    handlers["validate"] = "letron_api.policy.protect_managed_configuration"
-    handlers["on_trash"] = "letron_api.policy.protect_managed_configuration"
-
-for lifecycle_doctype, lifecycle_handler in {
-    "Purchase Order": "letron_api.supplier_lifecycle.on_purchase_order_submit",
-    "Purchase Receipt": "letron_api.supplier_lifecycle.on_purchase_receipt_submit",
-    "Purchase Invoice": "letron_api.supplier_lifecycle.on_purchase_invoice_submit",
-}.items():
-    submit_handlers = doc_events.setdefault(lifecycle_doctype, {}).get("on_submit")
-    if isinstance(submit_handlers, list):
-        submit_handlers.append(lifecycle_handler)
-    elif submit_handlers:
-        doc_events[lifecycle_doctype]["on_submit"] = [submit_handlers, lifecycle_handler]
-    else:
-        doc_events[lifecycle_doctype]["on_submit"] = lifecycle_handler
+    handlers["validate"] = "letron_api.control.policy.protect_managed_configuration"
+    handlers["on_trash"] = "letron_api.control.policy.protect_managed_configuration"
 
 system_settings_handlers = doc_events.setdefault("System Settings", {})
-system_settings_handlers["validate"] = "letron_api.system_config.protect_system_settings"
-system_settings_handlers["on_trash"] = "letron_api.system_config.protect_system_settings"
+system_settings_handlers["validate"] = "letron_api.control.system_config.protect_system_settings"
+system_settings_handlers["on_trash"] = "letron_api.control.system_config.protect_system_settings"
 
 user_handlers = doc_events.setdefault("User", {})
-user_handlers["validate"] = "letron_api.sso_identity.protect_lark_managed_user"
+user_handlers["validate"] = "letron_api.auth.sso_identity.protect_lark_managed_user"
 
 scheduler_events = {
     "all": ["letron_api.delivery.process_pending_outbox"],
-    "hourly": ["letron_api.policy.audit", "letron_api.system_config.audit"],
+    "hourly": ["letron_api.control.policy.audit", "letron_api.control.system_config.audit"],
     "cron": {
         "*/5 * * * *": [
-            "letron_api.supplier_portal_scheduler.process_supplier_portal_deadlines"
         ],
         "0 1 * * *": [
-            "letron_api.backup.scheduled_s3_backup"
+            "letron_api.operations.backup.scheduled_s3_backup"
         ]
     },
 }

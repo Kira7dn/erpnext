@@ -171,37 +171,6 @@ model AuditEvent {
   @@map("audit_event")
 }
 
-model LarkPoDraftState {
-  id                   BigInt   @id @default(autoincrement())
-  orchestrationId      String   @unique @map("orchestration_id") @db.VarChar(128)
-  draftId              String?  @map("draft_id") @db.VarChar(128)
-  approvalInstanceCode String?  @map("approval_instance_code") @db.VarChar(128)
-  approvalAttempt      Int      @default(1) @map("approval_attempt")
-  snapshotHash         String?  @map("snapshot_hash") @db.Char(64)
-  status               String   @db.VarChar(32)
-  erpPurchaseOrderName String?  @map("erp_purchase_order_name") @db.VarChar(140)
-  lastError            String?  @map("last_error") @db.Text
-  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
-
-  @@index([draftId])
-  @@index([approvalInstanceCode])
-  @@map("lark_po_draft_state")
-}
-
-model LarkWebhookEvent {
-  id           BigInt   @id @default(autoincrement())
-  eventId      String   @unique @map("event_id") @db.VarChar(255)
-  eventType    String?  @map("event_type") @db.VarChar(128)
-  instanceCode String?  @map("instance_code") @db.VarChar(128)
-  processedAt  DateTime? @map("processed_at") @db.Timestamptz(3)
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-
-  @@index([createdAt])
-  @@index([instanceCode])
-  @@map("lark_webhook_event")
-}
-
 model AccessPolicy {
   id             String            @id @default(uuid()) @db.Uuid
   version        Int

@@ -1,14 +1,14 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { apiErrorFromCause, apiErrorResponse } from "@/lib/api-error";
 import { supplierPortalRequest } from "@/lib/supplier-portal";
+import { getSupplierPortalSession } from "@/lib/supplier-portal-session";
 
 export async function POST() {
-  const sessionToken = (await cookies()).get("letron_supplier_session")?.value;
-  if (!sessionToken) return apiErrorResponse("supplier_session_required", 401, "Supplier session is required.");
+  const portalSession = await getSupplierPortalSession();
+  if (!portalSession) return apiErrorResponse("supplier_session_required", 401, "Supplier session is required.");
   try {
-    const process = await supplierPortalRequest<{ material_request: string }>("get_process_summary", { session_token: sessionToken });
-    const data = await supplierPortalRequest("evaluate_approval_gate", { material_request: process.material_request });
+    const process = await supplierPortalRequest<{ process: string }>("get_process_summary", { portal_access_id: portalSession.access.access_id });
+    const data = await supplierPortalRequest("evaluate_approval_gate", { orchestration_id: process.process });
     return NextResponse.json({ data });
   } catch (error) { return apiErrorFromCause(error, "approval_gate_evaluation_failed", "Approval gate could not be evaluated."); }
 }

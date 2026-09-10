@@ -246,10 +246,10 @@ Control plane hiện tại gồm:
 
 ```text
 policy-bootstrap (Docker one-shot service)
-GET  /api/method/letron_api.api.health
-GET  /api/method/letron_api.api.runtime_snapshot
-GET  /api/method/letron_api.config_control.get_configuration?kind=policy
-PUT  /api/method/letron_api.config_control.put_configuration
+GET  /api/method/letron_api.control.api.health
+GET  /api/method/letron_api.control.api.runtime_snapshot
+GET  /api/method/letron_api.control.config_control.get_configuration?kind=policy
+PUT  /api/method/letron_api.control.config_control.put_configuration
 ```
 
 Bootstrap không nhận một request body riêng và không có đường ghi thứ hai:

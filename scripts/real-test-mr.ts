@@ -14,6 +14,7 @@ const supplier2 = process.env.MR_SUPPLIER_2?.trim() || "";
 const supplierEmail = process.env.MR_SUPPLIER_EMAIL?.trim() || "leducanh@ledb.vn";
 const authBaseUrl = process.env.AUTH_BASE_URL ?? "http://localhost:3000";
 const idempotencyKey = `${process.env.MR_IDEMPOTENCY_KEY?.trim() || "real-mr-approval"}-${Date.now()}`;
+const mailboxReadbackTimeoutMs = Math.max(5_000, Number(process.env.MR_MAILBOX_READBACK_TIMEOUT_MS ?? 45_000));
 
 function object(value: Json): Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value)
@@ -54,17 +55,21 @@ async function request(url: string, init: RequestInit = {}): Promise<{ status: n
   return { status: response.status, body, raw, cookie: response.headers.get("set-cookie")?.split(";", 1)[0] ?? "" };
 }
 
-async function latestEmail(subject: string, after: string, predicate: (message: string, recipients: string) => boolean = () => true): Promise<{ message: string; recipients: string }> {
-  for (let attempt = 0; attempt < 12; attempt += 1) {
-    const response = await request(`${authBaseUrl}/api/internal/lark-mail/latest?subject=${encodeURIComponent(subject)}&after=${encodeURIComponent(after)}`, { headers: { Authorization: `Bearer ${await env("LETRON_API_KEY")}` } });
+async function latestEmail(subject: string, after: string, predicate: (message: string, recipients: string) => boolean = () => true, messageId?: string): Promise<{ message: string; recipients: string; readback_status: "MAIL_MAILBOX_READBACK_CONFIRMED" }> {
+  const deadline = Date.now() + mailboxReadbackTimeoutMs;
+  const authHeader = { Authorization: `Bearer ${await env("LETRON_API_KEY")}` };
+  while (Date.now() < deadline) {
+    const messageQuery = messageId ? `&message_id=${encodeURIComponent(messageId)}` : "";
+    const response = await request(`${authBaseUrl}/api/internal/lark-mail/latest?subject=${encodeURIComponent(subject)}&after=${encodeURIComponent(after)}${messageQuery}`, { headers: authHeader });
     if (response.status !== 200) throw new Error(`Lark Mail readback failed (${response.status}): ${response.raw}`);
     const rows = apiData(response.body);
     const items = Array.isArray(rows) ? rows : [];
     const row = items.find((item) => text(object(item as Json).message).trim() && predicate(text(object(item as Json).message), text(object(item as Json).recipients)));
-    if (row) return { message: text(object(row as Json).message), recipients: text(object(row as Json).recipients) };
-    await new Promise((resolveDelay) => setTimeout(resolveDelay, 1000));
+    if (row) return { message: text(object(row as Json).message), recipients: text(object(row as Json).recipients), readback_status: "MAIL_MAILBOX_READBACK_CONFIRMED" };
+    await new Promise((resolveDelay) => setTimeout(resolveDelay, Math.min(1000, Math.max(100, deadline - Date.now()))));
   }
-  throw new Error(`Lark Mail readback did not contain subject: ${subject}`);
+  console.error(`MAIL_MAILBOX_READBACK_TIMEOUT subject=${subject} timeout_ms=${mailboxReadbackTimeoutMs}`);
+  throw new Error(`MAIL_MAILBOX_READBACK_TIMEOUT subject=${subject} timeout_ms=${mailboxReadbackTimeoutMs}`);
 }
 
 function tokenFromEmail(message: string): string {
@@ -95,11 +100,12 @@ async function supplierFlow(
   accessEmailAfter: string,
   rate: number,
   usedTokens: Set<string>,
+  acceptedMail: { message_id: string; to: string },
 ): Promise<{ quotation: string; gate: Record<string, unknown>; approval: Record<string, unknown>; accessEmail: string; otpEmail: string; sessionCookie: string; otpReplayRejected: boolean; otpLockRejections: number }> {
   const accessEmail = await latestEmail("Letron Supplier Portal access", accessEmailAfter, (message) => {
     const token = tokenFromEmail(message);
     return !usedTokens.has(token);
-  });
+  }, acceptedMail.message_id);
   assertMagicLinkOrigin(accessEmail.message, supplier);
   const magicToken = tokenFromEmail(accessEmail.message);
   if (!accessEmail.recipients.toLowerCase().includes(supplierEmail.toLowerCase())) {
@@ -109,12 +115,15 @@ async function supplierFlow(
   const otpEmailAfter = new Date().toISOString();
   const otpRequested = await request(`${erpBaseUrl}/api/supplier/${encodeURIComponent(magicToken)}/otp/request`, { method: "POST" });
   if (otpRequested.status !== 200) throw new Error(`OTP request failed for ${supplier} (${otpRequested.status}): ${otpRequested.raw}`);
+  const otpDelivery = object(object(apiData(otpRequested.body)).mail_delivery as Json);
+  const otpMessageId = text(otpDelivery.message_id);
+  if (!otpMessageId) throw new Error(`OTP provider acceptance missing for ${supplier}: ${otpRequested.raw}`);
   const duplicateOtpRequest = await request(`${erpBaseUrl}/api/supplier/${encodeURIComponent(magicToken)}/otp/request`, { method: "POST" });
   const duplicateOtpData = object(duplicateOtpRequest.body);
   if (duplicateOtpRequest.status !== 429 || text(duplicateOtpData.error) !== "supplier_otp_rate_limited" || Number(duplicateOtpData.retry_after_seconds ?? 0) <= 0) {
     throw new Error(`OTP resend rate limit contract failed for ${supplier}: ${duplicateOtpRequest.raw}`);
   }
-  const otpEmail = await latestEmail("Letron Supplier Portal OTP", otpEmailAfter, (_message, recipients) => recipients === accessEmail.recipients);
+  const otpEmail = await latestEmail("Letron Supplier Portal OTP", otpEmailAfter, (_message, recipients) => recipients === accessEmail.recipients, otpMessageId);
   const otp = otpFromEmail(otpEmail.message);
   let otpLockRejections = 0;
   for (let attempt = 1; attempt <= 5; attempt += 1) {
@@ -135,7 +144,10 @@ async function supplierFlow(
   const replacementOtpAfter = new Date().toISOString();
   const replacementRequested = await request(`${erpBaseUrl}/api/supplier/${encodeURIComponent(magicToken)}/otp/request`, { method: "POST" });
   if (replacementRequested.status !== 200) throw new Error(`OTP replacement request failed for ${supplier} (${replacementRequested.status}): ${replacementRequested.raw}`);
-  const replacementEmail = await latestEmail("Letron Supplier Portal OTP", replacementOtpAfter, (_message, recipients) => recipients === accessEmail.recipients);
+  const replacementDelivery = object(object(apiData(replacementRequested.body)).mail_delivery as Json);
+  const replacementMessageId = text(replacementDelivery.message_id);
+  if (!replacementMessageId) throw new Error(`Replacement OTP provider acceptance missing for ${supplier}: ${replacementRequested.raw}`);
+  const replacementEmail = await latestEmail("Letron Supplier Portal OTP", replacementOtpAfter, (_message, recipients) => recipients === accessEmail.recipients, replacementMessageId);
   const replacementOtp = otpFromEmail(replacementEmail.message);
   const verified = await request(`${erpBaseUrl}/api/supplier/${encodeURIComponent(magicToken)}/otp/verify`, {
     method: "POST",
@@ -209,7 +221,7 @@ async function waitForPurchaseOrder(flow: { sessionCookie: string }, instanceCod
 }
 
 async function autoApproveLarkInstance(instanceCode: string): Promise<void> {
-  const response = await request(`${authBaseUrl}/api/internal/lark/approval/approve`, {
+  const response = await request(`${erpBaseUrl}/api/internal/lark/approval/approve`, {
     method: "POST",
     headers: { Authorization: `Bearer ${await env("LETRON_API_KEY")}` },
     body: JSON.stringify({ instance_code: instanceCode }),
@@ -220,7 +232,7 @@ async function autoApproveLarkInstance(instanceCode: string): Promise<void> {
 }
 
 async function reconcileLarkApproval(instanceCode: string): Promise<void> {
-  const response = await request(`${authBaseUrl}/api/internal/lark/approval/reconcile`, {
+  const response = await request(`${erpBaseUrl}/api/internal/lark/approval/reconcile`, {
     method: "POST",
     headers: { Authorization: `Bearer ${await env("LETRON_API_KEY")}` },
     body: JSON.stringify({ instance_code: instanceCode }),
@@ -347,6 +359,19 @@ if (!/^RFQ-\d{8}-\d{4}$/.test(rfqName)) throw new Error(`Request for Quotation n
 if (text(result.status) !== "waiting_supplier_quotes") {
   throw new Error(`orchestration did not stop at supplier quotation gate: ${created.raw}`);
 }
+const duplicateCreate = await request(`${erpBaseUrl}/api/purchase/requests/create`, {
+  method: "POST",
+  headers: { ...auth, "X-Idempotency-Key": idempotencyKey },
+  body: JSON.stringify(payload),
+});
+if (duplicateCreate.status < 200 || duplicateCreate.status >= 300) throw new Error(`duplicate MR orchestration failed (${duplicateCreate.status}): ${duplicateCreate.raw}`);
+const duplicateResult = object(apiData(duplicateCreate.body));
+if (text(duplicateResult.material_request_name) !== mrName || text(duplicateResult.request_for_quotation_name) !== rfqName) {
+  throw new Error(`duplicate MR orchestration was not idempotent: ${duplicateCreate.raw}`);
+}
+const originalMailIds = (Array.isArray(result.mail_deliveries) ? result.mail_deliveries : []).map((item) => text(object(item as Json).message_id)).sort().join(",");
+const duplicateMailIds = (Array.isArray(duplicateResult.mail_deliveries) ? duplicateResult.mail_deliveries : []).map((item) => text(object(item as Json).message_id)).sort().join(",");
+if (!originalMailIds || originalMailIds !== duplicateMailIds) throw new Error(`duplicate MR orchestration changed mail delivery IDs: ${duplicateCreate.raw}`);
 
 const readback = await request(`${erpBaseUrl}/api/purchase/material-requests/${encodeURIComponent(mrName)}`, { headers: auth });
 if (readback.status !== 200) throw new Error(`MR readback failed (${readback.status}): ${readback.raw}`);
@@ -357,7 +382,14 @@ if (itemCount !== 2) throw new Error(`MR ${mrName} has ${itemCount} items; expec
 const usedTokens = new Set<string>();
 const supplierResults = [];
 for (let index = 0; index < suppliers.length; index += 1) {
-  supplierResults.push(await supplierFlow(suppliers[index], emailAfter, index === 0 ? 1000 : 900, usedTokens));
+    const acceptedMail = object((Array.isArray(result.mail_deliveries) ? result.mail_deliveries : []).find((item) => {
+      const row = object(item as Json);
+      return text(row.subject) === "Letron Supplier Portal access" && text(row.supplier) === suppliers[index] && text(row.to).toLowerCase() === supplierEmail.toLowerCase();
+    }) as Json);
+    const accessMessageId = text(acceptedMail.message_id);
+    if (!accessMessageId) throw new Error(`MAIL_PROVIDER_ACCEPTED missing for ${suppliers[index]}`);
+    console.log(`MAIL_PROVIDER_ACCEPTED supplier=${suppliers[index]} message_id=${accessMessageId}`);
+    supplierResults.push(await supplierFlow(suppliers[index], emailAfter, index === 0 ? 1000 : 900, usedTokens, { message_id: accessMessageId, to: text(acceptedMail.to) }));
 }
 const gate = supplierResults[supplierResults.length - 1].gate;
 const cheapestResult = supplier2 ? supplierResults[1] : supplierResults[0];
@@ -474,6 +506,8 @@ console.log(`otp_replay_rejections=${supplierResults.filter((item) => item.otpRe
 console.log(`otp_lock_rejections=${supplierResults.reduce((total, item) => total + item.otpLockRejections, 0)}`);
 console.log(`selected_cheapest_quotation=${text(gate.selected_supplier_quotation)}`);
 console.log(`supplier_email_readback=${supplierResults.map((item) => item.accessEmail).join(",")}`);
+console.log("mail_provider_acceptance=PASS");
+console.log("mail_mailbox_readback=CONFIRMED");
 console.log(`purchase_order=${poName}`);
 console.log(`purchase_receipt=${receiptName}`);
 console.log(`purchase_invoice=${invoiceName}`);

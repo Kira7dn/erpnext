@@ -16,7 +16,7 @@
     }
   ],
   "paths": {
-    "/api/method/letron_api.config_control.get_configuration": {
+    "/api/method/letron_api.control.config_control.get_configuration": {
       "get": {
         "operationId": "getConfiguration",
         "tags": [
@@ -109,7 +109,7 @@
         }
       }
     },
-    "/api/method/letron_api.config_control.put_configuration": {
+    "/api/method/letron_api.control.config_control.put_configuration": {
       "put": {
         "operationId": "putConfiguration",
         "tags": [

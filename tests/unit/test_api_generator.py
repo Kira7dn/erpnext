@@ -16,7 +16,7 @@ def test_catalog_discovers_erpnext_and_custom_method():
     doctypes, methods = collect(ROOT)
     assert len(doctypes) > 100
     assert any(item.name == "Payment Entry" for item in doctypes)
-    assert any(item.dotted_path == "letron_api.api.health" for item in methods)
+    assert any(item.dotted_path == "letron_api.control.api.health" for item in methods)
 
 
 def test_openapi_contains_frappe_contract_paths():
@@ -27,7 +27,7 @@ def test_openapi_contains_frappe_contract_paths():
     assert "/api/resource/{doctype}" not in spec["paths"]
     assert "/api/resource/{doctype}/{name}" not in spec["paths"]
     assert "/api/method/{method}" not in spec["paths"]
-    assert "/api/method/letron_api.api.health" in spec["paths"]
+    assert "/api/method/letron_api.control.api.health" in spec["paths"]
     assert "/api/method/upload_file" not in spec["paths"]
     assert "/api/v1/files/attachments" in spec["paths"]
     assert "frappeToken" in spec["components"]["securitySchemes"]
@@ -106,12 +106,12 @@ def test_openapi_contains_frappe_contract_paths():
         for item in doctypes
         if item.name in {resource["doctype"] for resource in contract["runtime"]["public_resources"]}
     } == {"Accounts", "Assets", "Buying", "Contacts", "Selling", "Stock", "CRM"}
-    assert len(operations) == 322
+    assert len(operations) == 319
     status_counts = {
         status: sum(operation["x-test-status"] == status for operation in operations)
         for status in ("passed", "partial", "not-tested", "blocked")
     }
-    assert status_counts == {"passed": 215, "partial": 0, "not-tested": 107, "blocked": 0}
+    assert status_counts == {"passed": 215, "partial": 0, "not-tested": 104, "blocked": 0}
     assert all(operation["x-test-level"] == "docker-runtime" for operation in operations)
     assert all(operation.get("x-test-evidence", {}).get("test") for operation in operations)
     assert spec["x-acceptance-summary"] == status_counts
@@ -126,7 +126,7 @@ def test_openapi_contains_frappe_contract_paths():
     create_headers = spec["paths"]["/api/v1/stock/items"]["post"]["parameters"]
     assert not any(item.get("$ref", "").endswith("IdempotencyKey") for item in list_headers)
     assert any(item.get("$ref", "").endswith("IdempotencyKey") for item in create_headers)
-    assert spec["paths"]["/api/method/letron_api.api.health"]["get"]["responses"]["200"]["content"]["application/json"]["schema"] == {"$ref": "#/components/schemas/HealthResponse"}
+    assert spec["paths"]["/api/method/letron_api.control.api.health"]["get"]["responses"]["200"]["content"]["application/json"]["schema"] == {"$ref": "#/components/schemas/HealthResponse"}
 
     aggregate_status = {
         operation["operationId"]: (
@@ -179,10 +179,10 @@ def test_control_plane_is_typed_and_separate_from_business_operations():
     spec = build_control_plane("http://127.0.0.1:8080")
 
     assert set(spec["paths"]) == {
-        "/api/method/letron_api.config_control.get_configuration",
-        "/api/method/letron_api.config_control.put_configuration",
+        "/api/method/letron_api.control.config_control.get_configuration",
+        "/api/method/letron_api.control.config_control.put_configuration",
     }
-    put = spec["paths"]["/api/method/letron_api.config_control.put_configuration"]["put"]
+    put = spec["paths"]["/api/method/letron_api.control.config_control.put_configuration"]["put"]
     assert put["requestBody"]["content"]["application/json"]["schema"] == {
         "$ref": "#/components/schemas/PutConfigurationRequest"
     }
@@ -192,5 +192,5 @@ def test_control_plane_is_typed_and_separate_from_business_operations():
 def test_committed_handoff_manifest_keeps_business_and_control_counts_separate():
     manifest = json.loads((ROOT / "contracts" / "openapi" / "manifest.json").read_text(encoding="utf-8"))
 
-    assert manifest["artifacts"]["public"]["operations"] == 322
+    assert manifest["artifacts"]["public"]["operations"] == 319
     assert manifest["artifacts"]["control-plane"]["operations"] == 2

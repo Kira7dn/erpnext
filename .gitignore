@@ -23,3 +23,5 @@ backups/
 *.out.log
 *.err.log
 .playwright-mcp/
+.tmp
+.agent

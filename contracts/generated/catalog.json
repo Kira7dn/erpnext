@@ -111334,560 +111334,6 @@
       ]
     },
     {
-      "name": "Supplier Portal Access",
-      "module": "Letron API",
-      "source": "letron_api\\doctype\\supplier_portal_access\\supplier_portal_access.json",
-      "is_child_table": 0,
-      "fields": [
-        {
-          "fieldname": "procurement_process",
-          "fieldtype": "Link",
-          "label": "Procurement Process",
-          "options": "Supplier Procurement Process",
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "case_id",
-          "fieldtype": "Data",
-          "label": "Case ID",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "orchestration_id",
-          "fieldtype": "Data",
-          "label": "Orchestration ID",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "supplier",
-          "fieldtype": "Link",
-          "label": "Supplier",
-          "options": "Supplier",
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "contact",
-          "fieldtype": "Link",
-          "label": "Contact",
-          "options": "Contact",
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "email_snapshot",
-          "fieldtype": "Data",
-          "label": "Email Snapshot",
-          "options": null,
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "request_for_quotation",
-          "fieldtype": "Link",
-          "label": "Request for Quotation",
-          "options": "Request for Quotation",
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "supplier_quotation",
-          "fieldtype": "Link",
-          "label": "Supplier Quotation",
-          "options": "Supplier Quotation",
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "purchase_order",
-          "fieldtype": "Link",
-          "label": "Purchase Order",
-          "options": "Purchase Order",
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "purchase_receipt",
-          "fieldtype": "Link",
-          "label": "Purchase Receipt",
-          "options": "Purchase Receipt",
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "purchase_invoice",
-          "fieldtype": "Link",
-          "label": "Purchase Invoice",
-          "options": "Purchase Invoice",
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "magic_token_hash",
-          "fieldtype": "Data",
-          "label": "Magic Token Hash",
-          "options": null,
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 1
-        },
-        {
-          "fieldname": "magic_expires_at",
-          "fieldtype": "Datetime",
-          "label": "Magic Expires At",
-          "options": null,
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "otp_hash",
-          "fieldtype": "Data",
-          "label": "OTP Hash",
-          "options": null,
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 1
-        },
-        {
-          "fieldname": "otp_expires_at",
-          "fieldtype": "Datetime",
-          "label": "OTP Expires At",
-          "options": null,
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 1
-        },
-        {
-          "fieldname": "otp_attempts",
-          "fieldtype": "Int",
-          "label": "OTP Attempts",
-          "options": null,
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 1
-        },
-        {
-          "fieldname": "otp_sent_at",
-          "fieldtype": "Datetime",
-          "label": "OTP Sent At",
-          "options": null,
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 1
-        },
-        {
-          "fieldname": "session_hash",
-          "fieldtype": "Data",
-          "label": "Session Hash",
-          "options": null,
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 1
-        },
-        {
-          "fieldname": "session_expires_at",
-          "fieldtype": "Datetime",
-          "label": "Session Expires At",
-          "options": null,
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 1
-        },
-        {
-          "fieldname": "status",
-          "fieldtype": "Select",
-          "label": "Status",
-          "options": "Issued\nOtpSent\nActive\nSubmitted\nRevoked\nExpired",
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "revoked_at",
-          "fieldtype": "Datetime",
-          "label": "Revoked At",
-          "options": null,
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 1
-        },
-        {
-          "fieldname": "last_used_at",
-          "fieldtype": "Datetime",
-          "label": "Last Used At",
-          "options": null,
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 1
-        }
-      ]
-    },
-    {
-      "name": "Supplier Portal Audit Log",
-      "module": "Letron API",
-      "source": "letron_api\\doctype\\supplier_portal_audit_log\\supplier_portal_audit_log.json",
-      "is_child_table": 0,
-      "fields": [
-        {
-          "fieldname": "action",
-          "fieldtype": "Data",
-          "label": "Action",
-          "options": null,
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "status",
-          "fieldtype": "Select",
-          "label": "Status",
-          "options": "Success\nRejected\nFailed",
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "procurement_process",
-          "fieldtype": "Link",
-          "label": "Procurement Process",
-          "options": "Supplier Procurement Process",
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "access",
-          "fieldtype": "Link",
-          "label": "Access",
-          "options": "Supplier Portal Access",
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "supplier",
-          "fieldtype": "Link",
-          "label": "Supplier",
-          "options": "Supplier",
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "metadata",
-          "fieldtype": "Long Text",
-          "label": "Metadata",
-          "options": null,
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 1
-        }
-      ]
-    },
-    {
-      "name": "Supplier Portal Submission",
-      "module": "Letron API",
-      "source": "letron_api\\doctype\\supplier_portal_submission\\supplier_portal_submission.json",
-      "is_child_table": 0,
-      "fields": [
-        {
-          "fieldname": "procurement_process",
-          "fieldtype": "Link",
-          "label": "Procurement Process",
-          "options": "Supplier Procurement Process",
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "access",
-          "fieldtype": "Link",
-          "label": "Access",
-          "options": "Supplier Portal Access",
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "supplier",
-          "fieldtype": "Link",
-          "label": "Supplier",
-          "options": "Supplier",
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "submission_type",
-          "fieldtype": "Select",
-          "label": "Submission Type",
-          "options": "Delivery Confirmation\nXML Invoice",
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "purchase_order",
-          "fieldtype": "Link",
-          "label": "Purchase Order",
-          "options": "Purchase Order",
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "status",
-          "fieldtype": "Select",
-          "label": "Status",
-          "options": "Pending\nApproved\nRejected\nCancelled",
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "payload",
-          "fieldtype": "Long Text",
-          "label": "Payload",
-          "options": null,
-          "reqd": 0,
-          "read_only": 0,
-          "hidden": 1
-        },
-        {
-          "fieldname": "payload_hash",
-          "fieldtype": "Data",
-          "label": "Payload Hash",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 1
-        },
-        {
-          "fieldname": "file_url",
-          "fieldtype": "Data",
-          "label": "Private File URL",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "file_name",
-          "fieldtype": "Data",
-          "label": "File Name",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "sha256",
-          "fieldtype": "Data",
-          "label": "SHA-256",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "idempotency_key",
-          "fieldtype": "Data",
-          "label": "Idempotency Key",
-          "options": null,
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "reviewed_by",
-          "fieldtype": "Link",
-          "label": "Reviewed By",
-          "options": "User",
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "reviewed_at",
-          "fieldtype": "Datetime",
-          "label": "Reviewed At",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "review_note",
-          "fieldtype": "Small Text",
-          "label": "Review Note",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "result_document",
-          "fieldtype": "Dynamic Link",
-          "label": "Result Document",
-          "options": "result_doctype",
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "result_doctype",
-          "fieldtype": "Data",
-          "label": "Result DocType",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 1
-        }
-      ]
-    },
-    {
-      "name": "Supplier Procurement Process",
-      "module": "Letron API",
-      "source": "letron_api\\doctype\\supplier_procurement_process\\supplier_procurement_process.json",
-      "is_child_table": 0,
-      "fields": [
-        {
-          "fieldname": "case_id",
-          "fieldtype": "Data",
-          "label": "Case ID",
-          "options": null,
-          "reqd": 1,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "material_request",
-          "fieldtype": "Link",
-          "label": "Material Request",
-          "options": "Material Request",
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "orchestration_id",
-          "fieldtype": "Data",
-          "label": "Orchestration ID",
-          "options": null,
-          "reqd": 1,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "request_for_quotation",
-          "fieldtype": "Link",
-          "label": "Request for Quotation",
-          "options": "Request for Quotation",
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "deadline_at",
-          "fieldtype": "Datetime",
-          "label": "Quotation Deadline",
-          "options": null,
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "supplier_count",
-          "fieldtype": "Int",
-          "label": "Supplier Count",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "submitted_count",
-          "fieldtype": "Int",
-          "label": "Submitted Count",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "approval_status",
-          "fieldtype": "Select",
-          "label": "Approval Status",
-          "options": "Waiting\nReady\nOpening\nOpened\nApproved\nRejected",
-          "reqd": 1,
-          "read_only": 0,
-          "hidden": 0
-        },
-        {
-          "fieldname": "approval_id",
-          "fieldtype": "Data",
-          "label": "Approval ID",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "selected_supplier_quotation",
-          "fieldtype": "Link",
-          "label": "Selected Supplier Quotation",
-          "options": "Supplier Quotation",
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "purchase_order",
-          "fieldtype": "Link",
-          "label": "Purchase Order",
-          "options": "Purchase Order",
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "purchase_order_status",
-          "fieldtype": "Select",
-          "label": "Purchase Order Status",
-          "options": "Draft\nPending Approval\nSubmitted\nRejected\nERP Failed",
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        },
-        {
-          "fieldname": "approval_opened_at",
-          "fieldtype": "Datetime",
-          "label": "Approval Opened At",
-          "options": null,
-          "reqd": 0,
-          "read_only": 1,
-          "hidden": 0
-        }
-      ]
-    },
-    {
       "name": "Supplier Quotation",
       "module": "Buying",
       "source": "buying\\doctype\\supplier_quotation\\supplier_quotation.json",
@@ -157992,8 +157438,63 @@
       ]
     },
     {
-      "dotted_path": "letron_api.access_policy.publish",
-      "source": "access_policy.py",
+      "dotted_path": "letron_api.assets.assets.asset_action",
+      "source": "assets\\assets.py",
+      "method": "asset_action",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "action",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "payload",
+          "annotation": "Any",
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.assets.assets.asset_dashboard",
+      "source": "assets\\assets.py",
+      "method": "asset_dashboard",
+      "app": "letron_api",
+      "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": []
+    },
+    {
+      "dotted_path": "letron_api.assets.assets.asset_report",
+      "source": "assets\\assets.py",
+      "method": "asset_report",
+      "app": "letron_api",
+      "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "report_key",
+          "annotation": "str | None",
+          "required": false
+        },
+        {
+          "name": "filters",
+          "annotation": "Any",
+          "required": false
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.control.access_policy.publish",
+      "source": "control\\access_policy.py",
       "method": "publish",
       "app": "letron_api",
       "methods": [],
@@ -158001,47 +157502,8 @@
       "parameters": []
     },
     {
-      "dotted_path": "letron_api.accounts_reconciliation.reconcile_bank_transaction",
-      "source": "accounts_reconciliation.py",
-      "method": "reconcile_bank_transaction",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": false,
-      "parameters": [
-        {
-          "name": "name",
-          "annotation": "str",
-          "required": true
-        },
-        {
-          "name": "allocations",
-          "annotation": "Any",
-          "required": false
-        }
-      ]
-    },
-    {
-      "dotted_path": "letron_api.accounts_reconciliation.unreconcile_bank_transaction",
-      "source": "accounts_reconciliation.py",
-      "method": "unreconcile_bank_transaction",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": false,
-      "parameters": [
-        {
-          "name": "name",
-          "annotation": "str",
-          "required": true
-        }
-      ]
-    },
-    {
-      "dotted_path": "letron_api.api.acceptance_cleanup",
-      "source": "api.py",
+      "dotted_path": "letron_api.control.api.acceptance_cleanup",
+      "source": "control\\api.py",
       "method": "acceptance_cleanup",
       "app": "letron_api",
       "methods": [
@@ -158057,8 +157519,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.api.document_action",
-      "source": "api.py",
+      "dotted_path": "letron_api.control.api.document_action",
+      "source": "control\\api.py",
       "method": "document_action",
       "app": "letron_api",
       "methods": [
@@ -158084,8 +157546,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.api.health",
-      "source": "api.py",
+      "dotted_path": "letron_api.control.api.health",
+      "source": "control\\api.py",
       "method": "health",
       "app": "letron_api",
       "methods": [
@@ -158095,8 +157557,8 @@
       "parameters": []
     },
     {
-      "dotted_path": "letron_api.api.runtime_info",
-      "source": "api.py",
+      "dotted_path": "letron_api.control.api.runtime_info",
+      "source": "control\\api.py",
       "method": "runtime_info",
       "app": "letron_api",
       "methods": [
@@ -158106,8 +157568,8 @@
       "parameters": []
     },
     {
-      "dotted_path": "letron_api.api.runtime_snapshot",
-      "source": "api.py",
+      "dotted_path": "letron_api.control.api.runtime_snapshot",
+      "source": "control\\api.py",
       "method": "runtime_snapshot",
       "app": "letron_api",
       "methods": [
@@ -158117,63 +157579,58 @@
       "parameters": []
     },
     {
-      "dotted_path": "letron_api.assets.asset_action",
-      "source": "assets.py",
-      "method": "asset_action",
+      "dotted_path": "letron_api.control.config_control.get_configuration",
+      "source": "control\\config_control.py",
+      "method": "get_configuration",
       "app": "letron_api",
       "methods": [
+        "GET"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "kind",
+          "annotation": "str",
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.control.config_control.put_configuration",
+      "source": "control\\config_control.py",
+      "method": "put_configuration",
+      "app": "letron_api",
+      "methods": [
+        "PUT",
         "POST"
       ],
       "allow_guest": false,
       "parameters": [
         {
-          "name": "action",
+          "name": "kind",
           "annotation": "str",
           "required": true
         },
         {
-          "name": "payload",
-          "annotation": "Any",
-          "required": false
-        }
-      ]
-    },
-    {
-      "dotted_path": "letron_api.assets.asset_dashboard",
-      "source": "assets.py",
-      "method": "asset_dashboard",
-      "app": "letron_api",
-      "methods": [
-        "GET"
-      ],
-      "allow_guest": false,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.assets.asset_report",
-      "source": "assets.py",
-      "method": "asset_report",
-      "app": "letron_api",
-      "methods": [
-        "GET"
-      ],
-      "allow_guest": false,
-      "parameters": [
-        {
-          "name": "report_key",
-          "annotation": "str | None",
-          "required": false
+          "name": "content",
+          "annotation": "str",
+          "required": true
         },
         {
-          "name": "filters",
-          "annotation": "Any",
+          "name": "expected_source_sha256",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "apply_now",
+          "annotation": "int | str | bool",
           "required": false
         }
       ]
     },
     {
-      "dotted_path": "letron_api.attachments.create_attachment",
-      "source": "attachments.py",
+      "dotted_path": "letron_api.delivery.attachments.create_attachment",
+      "source": "delivery\\attachments.py",
       "method": "create_attachment",
       "app": "letron_api",
       "methods": [
@@ -158183,19 +157640,47 @@
       "parameters": []
     },
     {
-      "dotted_path": "letron_api.backup.scheduled_s3_backup",
-      "source": "backup.py",
-      "method": "scheduled_s3_backup",
+      "dotted_path": "letron_api.finance.accounts_reconciliation.reconcile_bank_transaction",
+      "source": "finance\\accounts_reconciliation.py",
+      "method": "reconcile_bank_transaction",
       "app": "letron_api",
       "methods": [
         "POST"
       ],
-      "allow_guest": true,
-      "parameters": []
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "name",
+          "annotation": "str",
+          "required": true
+        },
+        {
+          "name": "allocations",
+          "annotation": "Any",
+          "required": false
+        }
+      ]
     },
     {
-      "dotted_path": "letron_api.banking.accounts_settings",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction",
+      "source": "finance\\accounts_reconciliation.py",
+      "method": "unreconcile_bank_transaction",
+      "app": "letron_api",
+      "methods": [
+        "POST"
+      ],
+      "allow_guest": false,
+      "parameters": [
+        {
+          "name": "name",
+          "annotation": "str",
+          "required": true
+        }
+      ]
+    },
+    {
+      "dotted_path": "letron_api.finance.banking.accounts_settings",
+      "source": "finance\\banking.py",
       "method": "accounts_settings",
       "app": "letron_api",
       "methods": [
@@ -158205,8 +157690,8 @@
       "parameters": []
     },
     {
-      "dotted_path": "letron_api.banking.accounts_settings_update",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.accounts_settings_update",
+      "source": "finance\\banking.py",
       "method": "accounts_settings_update",
       "app": "letron_api",
       "methods": [
@@ -158216,8 +157701,8 @@
       "parameters": []
     },
     {
-      "dotted_path": "letron_api.banking.reconciliation_action",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.reconciliation_action",
+      "source": "finance\\banking.py",
       "method": "reconciliation_action",
       "app": "letron_api",
       "methods": [
@@ -158238,8 +157723,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.reconciliation_balance",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.reconciliation_balance",
+      "source": "finance\\banking.py",
       "method": "reconciliation_balance",
       "app": "letron_api",
       "methods": [
@@ -158265,8 +157750,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.reconciliation_clear_clearance",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.reconciliation_clear_clearance",
+      "source": "finance\\banking.py",
       "method": "reconciliation_clear_clearance",
       "app": "letron_api",
       "methods": [
@@ -158287,8 +157772,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.reconciliation_linked_payments",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.reconciliation_linked_payments",
+      "source": "finance\\banking.py",
       "method": "reconciliation_linked_payments",
       "app": "letron_api",
       "methods": [
@@ -158334,8 +157819,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.reconciliation_transactions",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.reconciliation_transactions",
+      "source": "finance\\banking.py",
       "method": "reconciliation_transactions",
       "app": "letron_api",
       "methods": [
@@ -158366,8 +157851,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.reconciliation_update_clearance",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.reconciliation_update_clearance",
+      "source": "finance\\banking.py",
       "method": "reconciliation_update_clearance",
       "app": "letron_api",
       "methods": [
@@ -158398,8 +157883,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.report",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.report",
+      "source": "finance\\banking.py",
       "method": "report",
       "app": "letron_api",
       "methods": [
@@ -158420,8 +157905,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.run_rule_evaluation",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.run_rule_evaluation",
+      "source": "finance\\banking.py",
       "method": "run_rule_evaluation",
       "app": "letron_api",
       "methods": [
@@ -158437,8 +157922,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.statement_details",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.statement_details",
+      "source": "finance\\banking.py",
       "method": "statement_details",
       "app": "letron_api",
       "methods": [
@@ -158454,8 +157939,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.statement_import_create",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.statement_import_create",
+      "source": "finance\\banking.py",
       "method": "statement_import_create",
       "app": "letron_api",
       "methods": [
@@ -158476,8 +157961,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.statement_import_get",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.statement_import_get",
+      "source": "finance\\banking.py",
       "method": "statement_import_get",
       "app": "letron_api",
       "methods": [
@@ -158493,8 +157978,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.statement_import_update",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.statement_import_update",
+      "source": "finance\\banking.py",
       "method": "statement_import_update",
       "app": "letron_api",
       "methods": [
@@ -158510,8 +157995,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.statement_import_upload",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.statement_import_upload",
+      "source": "finance\\banking.py",
       "method": "statement_import_upload",
       "app": "letron_api",
       "methods": [
@@ -158521,8 +158006,8 @@
       "parameters": []
     },
     {
-      "dotted_path": "letron_api.banking.statement_imports",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.statement_imports",
+      "source": "finance\\banking.py",
       "method": "statement_imports",
       "app": "letron_api",
       "methods": [
@@ -158543,8 +158028,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.statement_reextract_pdf_table",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.statement_reextract_pdf_table",
+      "source": "finance\\banking.py",
       "method": "statement_reextract_pdf_table",
       "app": "letron_api",
       "methods": [
@@ -158575,8 +158060,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.statement_set_header_index",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.statement_set_header_index",
+      "source": "finance\\banking.py",
       "method": "statement_set_header_index",
       "app": "letron_api",
       "methods": [
@@ -158597,8 +158082,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.statement_set_pdf_table_header",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.statement_set_pdf_table_header",
+      "source": "finance\\banking.py",
       "method": "statement_set_pdf_table_header",
       "app": "letron_api",
       "methods": [
@@ -158629,8 +158114,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.statement_update_column_mapping",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.statement_update_column_mapping",
+      "source": "finance\\banking.py",
       "method": "statement_update_column_mapping",
       "app": "letron_api",
       "methods": [
@@ -158651,8 +158136,8 @@
       ]
     },
     {
-      "dotted_path": "letron_api.banking.statement_update_pdf_tables",
-      "source": "banking.py",
+      "dotted_path": "letron_api.finance.banking.statement_update_pdf_tables",
+      "source": "finance\\banking.py",
       "method": "statement_update_pdf_tables",
       "app": "letron_api",
       "methods": [
@@ -158673,290 +158158,9 @@
       ]
     },
     {
-      "dotted_path": "letron_api.config_control.get_configuration",
-      "source": "config_control.py",
-      "method": "get_configuration",
-      "app": "letron_api",
-      "methods": [
-        "GET"
-      ],
-      "allow_guest": false,
-      "parameters": [
-        {
-          "name": "kind",
-          "annotation": "str",
-          "required": true
-        }
-      ]
-    },
-    {
-      "dotted_path": "letron_api.config_control.put_configuration",
-      "source": "config_control.py",
-      "method": "put_configuration",
-      "app": "letron_api",
-      "methods": [
-        "PUT",
-        "POST"
-      ],
-      "allow_guest": false,
-      "parameters": [
-        {
-          "name": "kind",
-          "annotation": "str",
-          "required": true
-        },
-        {
-          "name": "content",
-          "annotation": "str",
-          "required": true
-        },
-        {
-          "name": "expected_source_sha256",
-          "annotation": "str",
-          "required": true
-        },
-        {
-          "name": "apply_now",
-          "annotation": "int | str | bool",
-          "required": false
-        }
-      ]
-    },
-    {
-      "dotted_path": "letron_api.lark_po.create_draft",
-      "source": "lark_po.py",
-      "method": "create_draft",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.lark_po.from_approved",
-      "source": "lark_po.py",
-      "method": "from_approved",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.lark_po.update_approval_state",
-      "source": "lark_po.py",
-      "method": "update_approval_state",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.claim_approval_opening",
-      "source": "supplier_portal.py",
-      "method": "claim_approval_opening",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.create_delivery_confirmation",
-      "source": "supplier_portal.py",
-      "method": "create_delivery_confirmation",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.evaluate_approval_gate",
-      "source": "supplier_portal.py",
-      "method": "evaluate_approval_gate",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.evaluate_due_processes",
-      "source": "supplier_portal.py",
-      "method": "evaluate_due_processes",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.get_payment_status",
-      "source": "supplier_portal.py",
-      "method": "get_payment_status",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.get_process_summary",
-      "source": "supplier_portal.py",
-      "method": "get_process_summary",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.get_purchase_order",
-      "source": "supplier_portal.py",
-      "method": "get_purchase_order",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.get_submissions",
-      "source": "supplier_portal.py",
-      "method": "get_submissions",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.issue_access",
-      "source": "supplier_portal.py",
-      "method": "issue_access",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.logout_session",
-      "source": "supplier_portal.py",
-      "method": "logout_session",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.mark_approval_opened",
-      "source": "supplier_portal.py",
-      "method": "mark_approval_opened",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.read_approval_source",
-      "source": "supplier_portal.py",
-      "method": "read_approval_source",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.release_approval_opening",
-      "source": "supplier_portal.py",
-      "method": "release_approval_opening",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.request_otp",
-      "source": "supplier_portal.py",
-      "method": "request_otp",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.review_submission",
-      "source": "supplier_portal.py",
-      "method": "review_submission",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.revoke_access",
-      "source": "supplier_portal.py",
-      "method": "revoke_access",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.submit_quotation",
-      "source": "supplier_portal.py",
-      "method": "submit_quotation",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.upload_xml_invoice",
-      "source": "supplier_portal.py",
-      "method": "upload_xml_invoice",
-      "app": "letron_api",
-      "methods": [
-        "POST"
-      ],
-      "allow_guest": true,
-      "parameters": []
-    },
-    {
-      "dotted_path": "letron_api.supplier_portal.verify_otp",
-      "source": "supplier_portal.py",
-      "method": "verify_otp",
+      "dotted_path": "letron_api.operations.backup.scheduled_s3_backup",
+      "source": "operations\\backup.py",
+      "method": "scheduled_s3_backup",
       "app": "letron_api",
       "methods": [
         "POST"
@@ -159502,11 +158706,7 @@
     "Letron API": [
       "Letron Event Outbox",
       "Letron SSO Audit Log",
-      "Letron SSO Identity",
-      "Supplier Portal Access",
-      "Supplier Portal Audit Log",
-      "Supplier Portal Submission",
-      "Supplier Procurement Process"
+      "Letron SSO Identity"
     ],
     "Maintenance": [
       "Maintenance Schedule",

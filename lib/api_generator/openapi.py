@@ -217,7 +217,7 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
         if method.dotted_path not in include:
             continue
         body, source = _rpc_body(method)
-        response_schema = {"$ref": "#/components/schemas/HealthResponse"} if method.dotted_path == "letron_api.api.health" else {"$ref": "#/components/schemas/FrappeResponse"}
+        response_schema = {"$ref": "#/components/schemas/HealthResponse"} if method.dotted_path == "letron_api.control.api.health" else {"$ref": "#/components/schemas/FrappeResponse"}
         operation = {"tags": ["Whitelisted methods"], "operationId": method.dotted_path.replace(".", "_"), "parameters": request_headers, "requestBody": _json_body(body, bool(method.parameters)), "responses": {**_response("Frappe method response", response_schema), **error}, "x-source": method.source, "x-schema-source": source}
         if method.allow_guest:
             operation["security"] = []
