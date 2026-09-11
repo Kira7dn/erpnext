@@ -1,12 +1,10 @@
 import { getDb } from "./db";
 import { randomToken, sha256 } from "./crypto";
-import { getEnv } from "./env";
+import { AUTH_FEATURE_CONFIG } from "./env";
 
 const HANDOFF_TTL_MS = 2 * 60 * 1000;
 
-export async function createErpHandoff(
-  userId: string,
-): Promise<{ code: string; expiresAt: Date }> {
+export async function createErpHandoff(userId: string): Promise<{ code: string; expiresAt: Date }> {
   const code = randomToken(32);
   const expiresAt = new Date(Date.now() + HANDOFF_TTL_MS);
   await getDb().erpHandoff.create({
@@ -18,24 +16,13 @@ export async function createErpHandoff(
 export async function consumeErpHandoff(code: string): Promise<{
   gatewayToken: string;
   gatewayExpiresAt: Date;
-  user: {
-    id: string;
-    email: string;
-    displayName: string;
-    avatarUrl: string | null;
-  };
+  user: { id: string; email: string; displayName: string; avatarUrl: string | null };
 } | null> {
   const gatewayToken = randomToken(32);
-  const gatewayExpiresAt = new Date(
-    Date.now() + getEnv().LETRON_ERP_SESSION_TTL_SECONDS * 1000,
-  );
+  const gatewayExpiresAt = new Date(Date.now() + AUTH_FEATURE_CONFIG.sessionTtlSeconds * 1000);
   return getDb().$transaction(async (tx) => {
     const row = await tx.erpHandoff.findFirst({
-      where: {
-        codeHash: sha256(code),
-        consumedAt: null,
-        expiresAt: { gt: new Date() },
-      },
+      where: { codeHash: sha256(code), consumedAt: null, expiresAt: { gt: new Date() } },
       include: { user: true },
     });
     if (!row || row.user.status !== "ACTIVE") return null;
