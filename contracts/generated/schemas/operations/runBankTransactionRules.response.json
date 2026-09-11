@@ -3,11 +3,11 @@
   "$id": "https://letron.local/schemas/operations/runBankTransactionRules.response.json",
   "type": "object",
   "properties": {
-    "data": {
-      "$ref": "BankTransactionRuleResponse.json"
+    "message": {
+      "$ref": "FrappeResponse.json"
     }
   },
   "required": [
-    "data"
+    "message"
   ]
 }

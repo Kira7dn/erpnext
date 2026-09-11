@@ -391,7 +391,19 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
             if custom["doctype"] != dt.name:
                 continue
             action_path = f"{detail_route}/{custom['path_suffix']}"
-            action_body = {"$ref": "#/components/schemas/BankTransactionReconcileRequest"} if custom["operation_id"] == "reconcileBankTransaction" else {"type": "object", "additionalProperties": False, "description": f"Payload for {custom['action']} {dt.name}."}
+            action_body_spec = custom.get("request_schema", {"type": "object", "additionalProperties": False})
+            action_body = (
+                {"$ref": f"#/components/schemas/{action_body_spec}"}
+                if isinstance(action_body_spec, str)
+                else copy.deepcopy(action_body_spec)
+            )
+            response_spec = custom.get("response_schema", f"{names[dt.name]}Response")
+            response_schema = (
+                {"$ref": f"#/components/schemas/{response_spec}"}
+                if isinstance(response_spec, str)
+                else copy.deepcopy(response_spec)
+            )
+            response_envelope = custom.get("response_envelope", "data")
             paths[action_path] = {
                 "post": {
                     "tags": [f"Module: {dt.module or 'Uncategorized'}", "Business actions"],
@@ -399,7 +411,13 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
                     "operationId": custom["operation_id"],
                     "parameters": detail_write_parameters,
                     "requestBody": _json_body(action_body),
-                    "responses": {**_response(f"{custom['action'].title()} {dt.name}", _document_response(typed_schema)), **error},
+                    "responses": {
+                        **_response(
+                            f"{custom['action'].title()} {dt.name}",
+                            _document_response(response_schema, response_envelope),
+                        ),
+                        **error,
+                    },
                     "x-frappe-handler": custom["handler"],
                     "x-native-action": custom["action"],
                     "x-public-operation": "update",

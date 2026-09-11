@@ -71,6 +71,7 @@ function upstreamError(payload: FrappeEnvelope<unknown>): string {
   if (exception || type) return exception || type;
   if (typeof payload.exc === "string" && payload.exc.trim()) return payload.exc.trim();
   if (typeof payload._server_messages === "string" && payload._server_messages.trim()) return payload._server_messages.trim();
+  if (typeof payload.message === "string" && payload.message.trim()) return payload.message.trim();
   return "upstream validation failed";
 }
 

@@ -3,11 +3,11 @@
   "$id": "https://letron.local/schemas/operations/unreconcileBankTransaction.response.json",
   "type": "object",
   "properties": {
-    "data": {
+    "message": {
       "$ref": "BankTransactionResponse.json"
     }
   },
   "required": [
-    "data"
+    "message"
   ]
 }

@@ -3658,9 +3658,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id064
+                  message:
+                    $ref: '#/components/schemas/BankTransactionResponse'
                 required:
-                - data
+                - message
         '400': *id003
         '401': *id004
         '403': *id005
@@ -3692,7 +3693,6 @@ paths:
             schema:
               type: object
               additionalProperties: false
-              description: Payload for unreconcile Bank Transaction.
       responses:
         '200':
           description: Unreconcile Bank Transaction
@@ -3701,9 +3701,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id064
+                  message:
+                    $ref: '#/components/schemas/BankTransactionResponse'
                 required:
-                - data
+                - message
         '400': *id003
         '401': *id004
         '403': *id005
@@ -3928,7 +3929,6 @@ paths:
             schema:
               type: object
               additionalProperties: false
-              description: Payload for run-evaluation Bank Transaction Rule.
       responses:
         '200':
           description: Run-Evaluation Bank Transaction Rule
@@ -3937,9 +3937,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id067
+                  message:
+                    $ref: '#/components/schemas/FrappeResponse'
                 required:
-                - data
+                - message
         '400': *id003
         '401': *id004
         '403': *id005
@@ -11097,7 +11098,6 @@ paths:
             schema:
               type: object
               additionalProperties: false
-              description: Payload for make-purchase-order Supplier Quotation.
       responses:
         '200':
           description: Make-Purchase-Order Supplier Quotation
@@ -11106,9 +11106,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id166
+                  message:
+                    $ref: '#/components/schemas/PurchaseOrderResponse'
                 required:
-                - data
+                - message
         '400': *id003
         '401': *id004
         '403': *id005
@@ -51969,6 +51970,12 @@ components:
           type: string
         custom_lark_approval_status:
           type: string
+        stock_uom:
+          type: string
+        purchase_order:
+          type: string
+        purchase_order_item:
+          type: string
       required:
       - item_code
       - item_name
@@ -67498,24 +67505,42 @@ x-contract:
       operation_id: makePurchaseOrderFromSupplierQuotation
       path_suffix: make-purchase-order
       handler: letron_api.control.api.make_purchase_order
+      request_schema:
+        type: object
+        additionalProperties: false
+      response_schema: PurchaseOrderResponse
+      response_envelope: message
     - doctype: Bank Transaction
       module: Accounts
       action: reconcile
       operation_id: reconcileBankTransaction
       path_suffix: reconcile
       handler: letron_api.finance.accounts_reconciliation.reconcile_bank_transaction
+      request_schema: BankTransactionReconcileRequest
+      response_schema: BankTransactionResponse
+      response_envelope: message
     - doctype: Bank Transaction
       module: Accounts
       action: unreconcile
       operation_id: unreconcileBankTransaction
       path_suffix: unreconcile
       handler: letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction
+      request_schema:
+        type: object
+        additionalProperties: false
+      response_schema: BankTransactionResponse
+      response_envelope: message
     - doctype: Bank Transaction Rule
       module: Accounts
       action: run-evaluation
       operation_id: runBankTransactionRules
       path_suffix: run-evaluation
       handler: letron_api.finance.banking.run_rule_evaluation
+      request_schema:
+        type: object
+        additionalProperties: false
+      response_schema: FrappeResponse
+      response_envelope: message
     custom_routes:
     - module: Files
       resource: attachments
@@ -67710,6 +67735,14 @@ x-contract:
         material_request:
           type: string
         material_request_item:
+          type: string
+    - doctype: Purchase Receipt Item
+      allowed_write_fields:
+        stock_uom:
+          type: string
+        purchase_order:
+          type: string
+        purchase_order_item:
           type: string
     generated_schemas:
       PurchaseOrchestrationRequest: *id172

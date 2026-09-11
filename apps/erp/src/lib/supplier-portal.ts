@@ -49,6 +49,6 @@ export async function notifySupplierInvoiceRequest(receiptName: string): Promise
   const { access } = await registerWarehouseReceipt(receiptName);
   return sendSupplierPortalMail(buildInvoiceRequestMail(access, decryptSupplierPortalToken(access), receiptName));
 }
-export async function openSupplierApproval<T>(input: { orchestration_id: string; selected_supplier_quotation_name: string; erp_purchase_order_name: string; justification: string }): Promise<T> {
-  return await openPurchaseApproval({ orchestrationId: input.orchestration_id, supplierQuotationName: input.selected_supplier_quotation_name, erpPurchaseOrderName: input.erp_purchase_order_name, justification: input.justification }) as T;
+export async function openSupplierApproval<T>(input: { orchestration_id: string; selected_supplier_quotation_name: string; erp_purchase_order_name: string; material_request_name?: string; request_for_quotation_name?: string; justification: string }): Promise<T> {
+  return await openPurchaseApproval({ orchestrationId: input.orchestration_id, supplierQuotationName: input.selected_supplier_quotation_name, erpPurchaseOrderName: input.erp_purchase_order_name, materialRequestName: input.material_request_name, rfqName: input.request_for_quotation_name, justification: input.justification }) as T;
 }

@@ -9162,6 +9162,9 @@ export type PurchaseReceiptItemWrite = {
   distributed_discount_amount?: number;
   custom_letron_orchestration_id?: string;
   custom_lark_approval_status?: string;
+  stock_uom?: string;
+  purchase_order?: string;
+  purchase_order_item?: string;
 };
 
 export type PurchaseReceiptResponse = {

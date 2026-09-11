@@ -3,11 +3,11 @@
   "$id": "https://letron.local/schemas/operations/makePurchaseOrderFromSupplierQuotation.response.json",
   "type": "object",
   "properties": {
-    "data": {
-      "$ref": "SupplierQuotationResponse.json"
+    "message": {
+      "$ref": "PurchaseOrderResponse.json"
     }
   },
   "required": [
-    "data"
+    "message"
   ]
 }

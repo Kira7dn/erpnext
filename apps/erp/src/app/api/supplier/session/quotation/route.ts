@@ -32,6 +32,8 @@ export async function POST(request: NextRequest) {
           orchestration_id: gate.orchestration_id,
           selected_supplier_quotation_name: gate.selected_supplier_quotation ?? "",
           erp_purchase_order_name: String(po.name),
+          material_request_name: portalSession.access.material_request,
+          request_for_quotation_name: portalSession.access.request_for_quotation,
           justification: `Tự động chọn báo giá có tổng giá thấp nhất: ${gate.selected_supplier_quotation}.`,
         })
       : null;

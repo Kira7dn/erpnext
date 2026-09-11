@@ -2,6 +2,5 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://letron.local/schemas/operations/makePurchaseOrderFromSupplierQuotation.request.json",
   "type": "object",
-  "additionalProperties": false,
-  "description": "Payload for make-purchase-order Supplier Quotation."
+  "additionalProperties": false
 }

@@ -62,6 +62,14 @@ def validate_contract(data: dict[str, Any], doctypes: list[Any] | None = None, m
         required_custom = ("doctype", "module", "action", "operation_id", "path_suffix", "handler")
         if any(not isinstance(item.get(key), str) or not item[key].strip() for key in required_custom):
             raise ValueError("runtime.custom_actions require doctype, module, action, operation_id, path_suffix and handler")
+        for schema_key in ("request_schema", "response_schema"):
+            schema_value = item.get(schema_key)
+            if not isinstance(schema_value, (str, dict)):
+                raise ValueError(f"runtime.custom_actions require {schema_key} as a schema name or object")
+            if isinstance(schema_value, str) and not schema_value.strip():
+                raise ValueError(f"runtime.custom_actions {schema_key} cannot be empty")
+        if item.get("response_envelope") not in {"data", "message"}:
+            raise ValueError("runtime.custom_actions response_envelope must be data or message")
         key = (item["doctype"], item["action"])
         if key in custom_action_keys:
             raise ValueError(f"runtime.custom_actions collision: {item['doctype']} {item['action']}")

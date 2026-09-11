@@ -159454,18 +159454,17 @@
       "dependencies": [],
       "request_schema": {
         "type": "object",
-        "additionalProperties": false,
-        "description": "Payload for run-evaluation Bank Transaction Rule."
+        "additionalProperties": false
       },
       "response_schema": {
         "type": "object",
         "properties": {
-          "data": {
-            "$ref": "#/components/schemas/BankTransactionRuleResponse"
+          "message": {
+            "$ref": "#/components/schemas/FrappeResponse"
           }
         },
         "required": [
-          "data"
+          "message"
         ]
       }
     },
@@ -159640,12 +159639,12 @@
       "response_schema": {
         "type": "object",
         "properties": {
-          "data": {
+          "message": {
             "$ref": "#/components/schemas/BankTransactionResponse"
           }
         },
         "required": [
-          "data"
+          "message"
         ]
       }
     },
@@ -159691,18 +159690,17 @@
       "dependencies": [],
       "request_schema": {
         "type": "object",
-        "additionalProperties": false,
-        "description": "Payload for unreconcile Bank Transaction."
+        "additionalProperties": false
       },
       "response_schema": {
         "type": "object",
         "properties": {
-          "data": {
+          "message": {
             "$ref": "#/components/schemas/BankTransactionResponse"
           }
         },
         "required": [
-          "data"
+          "message"
         ]
       }
     },
@@ -164438,18 +164436,17 @@
       "dependencies": [],
       "request_schema": {
         "type": "object",
-        "additionalProperties": false,
-        "description": "Payload for make-purchase-order Supplier Quotation."
+        "additionalProperties": false
       },
       "response_schema": {
         "type": "object",
         "properties": {
-          "data": {
-            "$ref": "#/components/schemas/SupplierQuotationResponse"
+          "message": {
+            "$ref": "#/components/schemas/PurchaseOrderResponse"
           }
         },
         "required": [
-          "data"
+          "message"
         ]
       }
     },

@@ -4,7 +4,7 @@ import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { Redis } from "@upstash/redis";
 
 import { ApiRequestError } from "./api-error";
-import { frappeDocumentAction, frappeGet, frappeUpdate } from "./frappe-client";
+import { frappeDocumentAction, frappeGet, frappeList, frappeUpdate } from "./frappe-client";
 import { LARK_PO_APPROVAL_DESIGN } from "./lark-po-approval-design";
 import { LARK_DOMAIN, LARK_PO_APPROVAL_CODE, LARK_PO_APPROVER_EMAIL } from "./lark-runtime-config";
 import { supplierPortalConfig } from "./supplier-portal-config";
@@ -84,8 +84,8 @@ type PurchaseOrder = ErpBaseDocument & {
   items: PurchaseOrderItem[];
 };
 
-type MaterialRequest = ErpBaseDocument;
-type RequestForQuotation = ErpBaseDocument & { status?: string | null };
+type MaterialRequest = ErpBaseDocument & { items?: Array<Record<string, unknown>> };
+type RequestForQuotation = ErpBaseDocument & { status?: string | null; items?: Array<Record<string, unknown>> };
 
 type LarkApprovalDefinition = {
   form: string;
@@ -96,6 +96,8 @@ type LarkApprovalInstance = { status: string; task_list?: LarkApprovalTask[] };
 type ApprovalInstanceMapping = {
   purchase_order: string;
   supplier_quotation: string;
+  material_request: string;
+  request_for_quotation: string;
   source_fingerprint: string;
 };
 
@@ -141,7 +143,7 @@ type ApprovalSource = {
 
 let redis: Redis | undefined;
 
-function stringValue(value: Scalar): string {
+function stringValue(value: unknown): string {
   return typeof value === "string" ? value.trim() : String(value ?? "").trim();
 }
 
@@ -314,6 +316,8 @@ async function approvalSource(input: {
   orchestrationId: string;
   supplierQuotationName: string;
   erpPurchaseOrderName: string;
+  materialRequestName?: string;
+  rfqName?: string;
   justification?: string;
 }): Promise<ApprovalSource> {
   const [quotation, purchaseOrder] = await Promise.all([
@@ -321,18 +325,43 @@ async function approvalSource(input: {
     frappeGet<PurchaseOrder>("Purchase Order", input.erpPurchaseOrderName),
   ]);
   const rawItems = quotation.items;
-  const rfqName = supplierQuotationRfqName(quotation);
+  const [materialRequestRows, rfqRows] = await Promise.all([
+    frappeList<MaterialRequest>(
+      "Material Request",
+      [["custom_letron_orchestration_id", "=", input.orchestrationId]],
+      ["name", "custom_letron_orchestration_id"],
+      2,
+    ),
+    frappeList<RequestForQuotation>(
+      "Request for Quotation",
+      [["custom_letron_orchestration_id", "=", input.orchestrationId]],
+      ["name", "custom_letron_orchestration_id"],
+      2,
+    ),
+  ]);
+  const rfqName = input.rfqName || supplierQuotationRfqName(quotation) || stringValue(rfqRows[0]?.name);
   const materialRequests = new Set(rawItems.map((item) => stringValue(item.material_request)).filter(Boolean));
-  const mrName = materialRequests.size === 1 ? [...materialRequests][0] : "";
+  const mrName = input.materialRequestName || (materialRequests.size === 1
+    ? [...materialRequests][0]
+    : stringValue(materialRequestRows[0]?.name));
   if (!mrName || !rfqName) throw new ApiRequestError("approval_source_missing", "Purchase source documents are missing.", 409);
 
   const [materialRequest, rfq] = await Promise.all([
     frappeGet<MaterialRequest>("Material Request", mrName),
     frappeGet<RequestForQuotation>("Request for Quotation", rfqName),
   ]);
-  for (const document of [materialRequest, rfq, quotation, purchaseOrder]) {
+  for (const [label, document] of [
+    ["material_request", materialRequest],
+    ["request_for_quotation", rfq],
+    ["supplier_quotation", quotation],
+    ["purchase_order", purchaseOrder],
+  ] as const) {
     if (stringValue(document.custom_letron_orchestration_id) !== input.orchestrationId) {
-      throw new ApiRequestError("approval_source_mismatch", "Approval sources do not belong to the same orchestration.", 409);
+      throw new ApiRequestError(
+        "approval_source_mismatch",
+        `Approval source ${label} (${document.name}) does not belong to this orchestration.`,
+        409,
+      );
     }
   }
   if (Number(quotation.docstatus) !== 1 || Number(purchaseOrder.docstatus) !== 0) {
@@ -348,7 +377,22 @@ async function approvalSource(input: {
   }
   if (!rawItems.length) throw new ApiRequestError("approval_items_missing", "Supplier quotation has no items.", 409);
 
-  const items = rawItems.map((item) => quotationItem(item, quotation.name));
+  const rfqItems = rfq.items ?? [];
+  const mrItems = materialRequest.items ?? [];
+  const items = rawItems.map((item) => {
+    const rfqItem = rfqItems.find((candidate) => stringValue(candidate.item_code) === stringValue(item.item_code));
+    const mrItem = mrItems.find((candidate) => stringValue(candidate.item_code) === stringValue(item.item_code));
+    return quotationItem({
+      ...item,
+      item_name: stringValue(item.item_name) || stringValue(rfqItem?.item_name) || stringValue(mrItem?.item_name),
+      uom: stringValue(item.uom) || stringValue(rfqItem?.uom) || stringValue(mrItem?.uom),
+      warehouse: stringValue(item.warehouse) || stringValue(rfqItem?.warehouse) || stringValue(mrItem?.warehouse),
+      material_request: stringValue(item.material_request) || mrName,
+      material_request_item: stringValue(item.material_request_item) || stringValue(mrItem?.name),
+      request_for_quotation: stringValue(item.request_for_quotation) || rfq.name,
+      request_for_quotation_item: stringValue(item.request_for_quotation_item) || stringValue(rfqItem?.name),
+    }, quotation.name);
+  });
   if (
     items.some(
       (item) =>
@@ -510,6 +554,8 @@ export async function openPurchaseApproval(input: {
   orchestrationId: string;
   supplierQuotationName: string;
   erpPurchaseOrderName: string;
+  materialRequestName?: string;
+  rfqName?: string;
   justification?: string;
 }): Promise<{ instanceCode: string; erpPurchaseOrderName: string; idempotent: boolean }> {
   return lock(`open:${input.orchestrationId}`, async () => {
@@ -550,6 +596,8 @@ export async function openPurchaseApproval(input: {
     await database().set(instanceKey(instanceCode), {
       purchase_order: source.purchaseOrderName,
       supplier_quotation: source.quotationName,
+      material_request: source.materialRequestName,
+      request_for_quotation: source.rfqName,
       source_fingerprint: source.sourceFingerprint,
     }, { ex: 90 * 86400 });
     return { instanceCode, erpPurchaseOrderName: source.purchaseOrderName, idempotent: false };
@@ -568,9 +616,9 @@ export async function submitApprovedPurchaseOrder(instanceCode: string, poName: 
     if (Number(po.docstatus ?? 0) !== 0 || !stringValue(po.custom_letron_orchestration_id)) throw new Error("ERP_PO_NOT_SUBMITTABLE");
     const instance = await readPurchaseApproval(instanceCode);
     if (stringValue(instance.status).toUpperCase() !== "APPROVED") throw new Error("LARK_APPROVAL_NOT_APPROVED");
-    const mapping = await database().get<Pick<ApprovalInstanceMapping, "supplier_quotation" | "source_fingerprint">>(instanceKey(instanceCode));
-    if (!mapping?.supplier_quotation || !mapping.source_fingerprint) throw new Error("ERP_PO_APPROVAL_MAPPING_MISSING");
-    const source = await approvalSource({ orchestrationId: stringValue(po.custom_letron_orchestration_id), supplierQuotationName: mapping.supplier_quotation, erpPurchaseOrderName: poName, justification: "approval-reconcile" });
+    const mapping = await database().get<Pick<ApprovalInstanceMapping, "supplier_quotation" | "material_request" | "request_for_quotation" | "source_fingerprint">>(instanceKey(instanceCode));
+    if (!mapping?.supplier_quotation || !mapping.material_request || !mapping.request_for_quotation || !mapping.source_fingerprint) throw new Error("ERP_PO_APPROVAL_MAPPING_MISSING");
+    const source = await approvalSource({ orchestrationId: stringValue(po.custom_letron_orchestration_id), supplierQuotationName: mapping.supplier_quotation, erpPurchaseOrderName: poName, materialRequestName: mapping.material_request, rfqName: mapping.request_for_quotation, justification: "approval-reconcile" });
     if (source.sourceFingerprint !== mapping.source_fingerprint) throw new Error("ERP_PO_APPROVAL_SOURCE_CHANGED");
     const submitted = await frappeDocumentAction<ErpSubmittedDocument>("Purchase Order", poName, "submit");
     if (Number(submitted.docstatus ?? 0) !== 1) throw new Error("ERP_PO_SUBMIT_NOT_CONFIRMED");

@@ -2420,12 +2420,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {
+                    "message": {
                       "$ref": "#/components/schemas/BankTransactionResponse"
                     }
                   },
                   "required": [
-                    "data"
+                    "message"
                   ]
                 }
               }
@@ -2553,8 +2553,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": false,
-                "description": "Payload for unreconcile Bank Transaction."
+                "additionalProperties": false
               }
             }
           }
@@ -2567,12 +2566,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {
+                    "message": {
                       "$ref": "#/components/schemas/BankTransactionResponse"
                     }
                   },
                   "required": [
-                    "data"
+                    "message"
                   ]
                 }
               }
@@ -3395,8 +3394,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": false,
-                "description": "Payload for run-evaluation Bank Transaction Rule."
+                "additionalProperties": false
               }
             }
           }
@@ -3409,12 +3407,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/BankTransactionRuleResponse"
+                    "message": {
+                      "$ref": "#/components/schemas/FrappeResponse"
                     }
                   },
                   "required": [
-                    "data"
+                    "message"
                   ]
                 }
               }
@@ -36476,7 +36474,13 @@
           "action": "make-purchase-order",
           "operation_id": "makePurchaseOrderFromSupplierQuotation",
           "path_suffix": "make-purchase-order",
-          "handler": "letron_api.control.api.make_purchase_order"
+          "handler": "letron_api.control.api.make_purchase_order",
+          "request_schema": {
+            "type": "object",
+            "additionalProperties": false
+          },
+          "response_schema": "PurchaseOrderResponse",
+          "response_envelope": "message"
         },
         {
           "doctype": "Bank Transaction",
@@ -36484,7 +36488,10 @@
           "action": "reconcile",
           "operation_id": "reconcileBankTransaction",
           "path_suffix": "reconcile",
-          "handler": "letron_api.finance.accounts_reconciliation.reconcile_bank_transaction"
+          "handler": "letron_api.finance.accounts_reconciliation.reconcile_bank_transaction",
+          "request_schema": "BankTransactionReconcileRequest",
+          "response_schema": "BankTransactionResponse",
+          "response_envelope": "message"
         },
         {
           "doctype": "Bank Transaction",
@@ -36492,7 +36499,13 @@
           "action": "unreconcile",
           "operation_id": "unreconcileBankTransaction",
           "path_suffix": "unreconcile",
-          "handler": "letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction"
+          "handler": "letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction",
+          "request_schema": {
+            "type": "object",
+            "additionalProperties": false
+          },
+          "response_schema": "BankTransactionResponse",
+          "response_envelope": "message"
         },
         {
           "doctype": "Bank Transaction Rule",
@@ -36500,7 +36513,13 @@
           "action": "run-evaluation",
           "operation_id": "runBankTransactionRules",
           "path_suffix": "run-evaluation",
-          "handler": "letron_api.finance.banking.run_rule_evaluation"
+          "handler": "letron_api.finance.banking.run_rule_evaluation",
+          "request_schema": {
+            "type": "object",
+            "additionalProperties": false
+          },
+          "response_schema": "FrappeResponse",
+          "response_envelope": "message"
         }
       ],
       "custom_routes": [
@@ -36757,6 +36776,20 @@
               "type": "string"
             },
             "material_request_item": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "doctype": "Purchase Receipt Item",
+          "allowed_write_fields": {
+            "stock_uom": {
+              "type": "string"
+            },
+            "purchase_order": {
+              "type": "string"
+            },
+            "purchase_order_item": {
               "type": "string"
             }
           }
