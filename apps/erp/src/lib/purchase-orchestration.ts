@@ -31,7 +31,6 @@ type Item = {
 export type PurchaseOrchestrationInput = {
   material_request: Row;
   suppliers: string[];
-  supplier_email?: string;
   justification?: string;
 };
 export type PurchaseOrchestrationState = {
@@ -39,11 +38,11 @@ export type PurchaseOrchestrationState = {
   status: "started" | "mr_created" | "partial_failure" | "rfq_created" | "waiting_supplier_quotes" | "failed";
   material_request: Row;
   suppliers: string[];
-  supplier_email?: string;
   rfq_payload: Row;
   material_request_name?: string;
   request_for_quotation_name?: string;
   supplier_quote_deadline_at?: string;
+  mail_deliveries?: Array<{ supplier: string; to: string; subject: string; message_id: string; idempotent?: boolean }>;
   justification?: string;
   retry_count: number;
   error?: string;
@@ -264,13 +263,15 @@ async function issueSupplierPortalAccesses(
       request_for_quotation: state.request_for_quotation_name ?? "",
       orchestration_id: state.id,
       supplier,
-      email: await resolveSupplierEmail(supplier, state.supplier_email),
+      email: await resolveSupplierEmail(supplier),
       deadline_at: quotationDeadline,
       access_expires_at: accessExpiry,
     });
     if (!result.access.access_id || !result.access.email) throw new ApiRequestError("supplier_portal_access_missing", "Supplier portal access is missing.", 502);
-    const delivery = await sendSupplierPortalMail(buildAccessMail(result.access, result.magic_token));
-    void delivery;
+    const mail = buildAccessMail(result.access, result.magic_token);
+    const delivery = await sendSupplierPortalMail(mail);
+    const deliveries = (state.mail_deliveries ?? []).filter((item) => item.supplier !== supplier);
+    state.mail_deliveries = [...deliveries, { supplier, to: mail.to, subject: mail.subject, message_id: delivery.messageId, idempotent: delivery.idempotent }];
   }
   state.supplier_quote_deadline_at = quotationDeadline;
 }
@@ -306,7 +307,6 @@ export async function createPurchaseOrchestration(
     status: "started",
     material_request: normalized.materialRequest,
     suppliers: normalized.suppliers,
-    supplier_email: String(input.supplier_email ?? "").trim() || undefined,
     justification: String(input.justification ?? "").trim() || undefined,
     rfq_payload: buildRfqPayload(
       normalized.materialRequest,

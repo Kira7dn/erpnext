@@ -77,10 +77,10 @@ Global Portal Auth Server (`apps/auth-server`) được triển khai lên Vercel
 
 | Biến | Local Dev (`.env`) | Production / VPS (`.env.production`) | Vercel Auth Server |
 | :--- | :--- | :--- | :--- |
-| **`AUTH_BASE_URL`** | `http://localhost:3000` | `https://erp-one-henna.vercel.app` | `https://erp-one-henna.vercel.app` |
+| **`LETRON_AUTH_BASE_URL`** | `http://localhost:3000` | `https://erp-one-henna.vercel.app` | `https://erp-one-henna.vercel.app` |
 | **`LETRON_SSO_ISSUER`** | `http://localhost:3000/api/oidc` | `https://erp-one-henna.vercel.app/api/oidc` | *(N/A)* |
 | **`LETRON_SSO_INTERNAL_ISSUER`**| `http://host.docker.internal:3000/api/oidc` | `https://erp-one-henna.vercel.app/api/oidc` | *(N/A)* |
-| **`LETRON_SSO_SYNC_URL`** | `http://host.docker.internal:3000/api/internal/lark-role-snapshots` | `https://erp-one-henna.vercel.app/api/internal/lark-role-snapshots` | *(N/A)* |
+| **SSO sync URL** | `${LETRON_AUTH_BASE_URL}/api/internal/lark-role-snapshots` | `${LETRON_AUTH_BASE_URL}/api/internal/lark-role-snapshots` | *(N/A)* |
 | **`DATABASE_URL`** | *(Neon Postgres string)* | *(Neon Postgres string)* | *(Neon Postgres string)* |
 | **`AWS_ACCESS_KEY_ID`** | `AKIA...` (user/LeTRON-ERP) | `AKIA...` (user/LeTRON-ERP) | `AKIA...` (user/LeTRON-ERP) |
 | **`AWS_SECRET_ACCESS_KEY`** | *(Secret)* | *(Secret)* | *(Secret)* |

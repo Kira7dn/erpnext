@@ -43,7 +43,7 @@ function store(): Redis {
 
 function hash(value: string): string { return createHash("sha256").update(value).digest("hex"); }
 function tokenKeyMaterial(): Buffer {
-  const secret = process.env.LETRON_SSO_SYNC_SECRET?.trim();
+  const secret = process.env.LETRON_INTERNAL_API_SECRET?.trim();
   if (!secret) throw new ApiRequestError("configuration_error", "Supplier portal token protection is not configured.", 503);
   return createHash("sha256").update(secret).digest();
 }
@@ -151,40 +151,54 @@ export function buildOtpMail(access: SupplierPortalAccess, otp: string): { to: s
 export async function requestNextOtp(magicToken: string): Promise<{ access: SupplierPortalAccess; otp: string }> {
   const access = await getAccessByMagicToken(magicToken);
   const db = store();
-  const lock = await db.set(lockKey(access.access_id), "1", { nx: true, ex: 10 });
+  const owner = randomBytes(16).toString("hex");
+  const key = lockKey(access.access_id);
+  const lock = await db.set(key, owner, { nx: true, ex: 10 });
   if (!lock) throw new ApiRequestError("supplier_portal_rate_limited", "Supplier Portal request is temporarily limited.", 429, true, 10);
-  const current = await getAccessById(access.access_id) ?? access;
-  const currentTime = now();
-  if (current.otp_sent_at && currentTime - current.otp_sent_at < OTP_RESEND_COOLDOWN_SECONDS) {
-    const retry = OTP_RESEND_COOLDOWN_SECONDS - (currentTime - current.otp_sent_at);
-    throw new ApiRequestError("supplier_otp_rate_limited", "OTP request is temporarily limited.", 429, true, retry);
+  try {
+    const current = await getAccessById(access.access_id) ?? access;
+    const currentTime = now();
+    if (current.otp_sent_at && currentTime - current.otp_sent_at < OTP_RESEND_COOLDOWN_SECONDS) {
+      const retry = OTP_RESEND_COOLDOWN_SECONDS - (currentTime - current.otp_sent_at);
+      throw new ApiRequestError("supplier_otp_rate_limited", "OTP request is temporarily limited.", 429, true, retry);
+    }
+    const otp = String(Math.floor(Math.random() * 1_000_000)).padStart(6, "0");
+    const updated = { ...current, otp_hash: hash(otp), otp_expires_at: Date.now() + OTP_TTL_SECONDS * 1000, otp_attempts: 0, otp_sent_at: currentTime };
+    await db.set(accessKey(current.access_id), updated, { ex: ACCESS_TTL_SECONDS });
+    return { access: updated, otp };
+  } finally {
+    await db.eval("if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end", [key], [owner]).catch(() => undefined);
   }
-  const otp = String(Math.floor(Math.random() * 1_000_000)).padStart(6, "0");
-  const updated = { ...current, otp_hash: hash(otp), otp_expires_at: Date.now() + OTP_TTL_SECONDS * 1000, otp_attempts: 0, otp_sent_at: currentTime };
-  await db.set(accessKey(current.access_id), updated, { ex: ACCESS_TTL_SECONDS });
-  return { access: updated, otp };
 }
 
 export async function verifyNextOtp(magicToken: string, otp: string): Promise<{ sessionToken: string; expiresInSeconds: number }> {
   const access = await getAccessByMagicToken(magicToken);
   const db = store();
-  const lock = await db.set(lockKey(access.access_id), "1", { nx: true, ex: 10 });
+  const owner = randomBytes(16).toString("hex");
+  const key = lockKey(access.access_id);
+  const lock = await db.set(key, owner, { nx: true, ex: 10 });
   if (!lock) throw new ApiRequestError("supplier_portal_rate_limited", "Supplier Portal request is temporarily limited.", 429, true, 10);
-  const current = await getAccessById(access.access_id) ?? access;
-  const attempts = Number(current.otp_attempts ?? 0) + 1;
-  if (!current.otp_hash || !current.otp_expires_at || current.otp_expires_at <= Date.now() || attempts > 5 || hash(otp) !== current.otp_hash) {
-    await db.set(accessKey(current.access_id), { ...current, otp_attempts: attempts }, { ex: ACCESS_TTL_SECONDS });
-    throw new ApiRequestError("otp_invalid_or_expired", "OTP is invalid or expired.", 401);
+  try {
+    const current = await getAccessById(access.access_id) ?? access;
+    const attempts = Number(current.otp_attempts ?? 0) + 1;
+    if (!current.otp_hash || !current.otp_expires_at || current.otp_expires_at <= Date.now() || attempts > 5 || hash(otp) !== current.otp_hash) {
+      await db.set(accessKey(current.access_id), { ...current, otp_attempts: attempts }, { ex: ACCESS_TTL_SECONDS });
+      throw new ApiRequestError("otp_invalid_or_expired", "OTP is invalid or expired.", 401);
+    }
+    const sessionToken = newToken();
+    const session: SupplierPortalSession = { access_id: current.access_id, session_hash: hash(sessionToken) };
+    await db.set(sessionKey(sessionToken), session, { ex: SESSION_TTL_SECONDS });
+    await db.set(accessKey(current.access_id), { ...current, otp_hash: undefined, otp_expires_at: undefined, otp_attempts: 0 }, { ex: ACCESS_TTL_SECONDS });
+    return { sessionToken, expiresInSeconds: SESSION_TTL_SECONDS };
+  } finally {
+    await db.eval("if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end", [key], [owner]).catch(() => undefined);
   }
-  const sessionToken = newToken();
-  const session: SupplierPortalSession = { access_id: current.access_id, session_hash: hash(sessionToken) };
-  await db.set(sessionKey(sessionToken), session, { ex: SESSION_TTL_SECONDS });
-  await db.set(accessKey(current.access_id), { ...current, otp_hash: undefined, otp_expires_at: undefined, otp_attempts: 0 }, { ex: ACCESS_TTL_SECONDS });
-  return { sessionToken, expiresInSeconds: SESSION_TTL_SECONDS };
 }
 
-export async function getSupplierPortalSession(): Promise<{ sessionToken: string; access: SupplierPortalAccess } | null> {
-  const sessionToken = (await cookies()).get(SESSION_COOKIE)?.value;
+export async function getSupplierPortalSession(rawCookieHeader?: string | null): Promise<{ sessionToken: string; access: SupplierPortalAccess } | null> {
+  const cookieHeader = rawCookieHeader ?? (await cookies()).toString();
+  const headerCookie = cookieHeader.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${SESSION_COOKIE}=`))?.slice(SESSION_COOKIE.length + 1);
+  const sessionToken = headerCookie || (await cookies()).get(SESSION_COOKIE)?.value;
   if (!sessionToken) return null;
   const session = await store().get<SupplierPortalSession>(sessionKey(sessionToken));
   if (!session) return null;

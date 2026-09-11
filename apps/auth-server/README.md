@@ -30,7 +30,7 @@ Next.js SSO server chạy trên Vercel Functions. Lark là upstream identity pro
 1. Tạo PostgreSQL serverless trên Neon hoặc Vercel Marketplace và lấy pooled `DATABASE_URL`.
 2. Copy `.env.example` thành `.env.local`. Có thể giữ `LARK_APP_ID` và `LARK_APP_SECRET` trong file `.env` ở root repo khi chạy local; production phải khai báo trong Vercel Environment Variables.
 3. Chạy `npm run keys:generate` rồi đưa ba giá trị sinh ra vào `.env.local`/Vercel.
-4. Trong Lark Developer Console, đăng ký callback chính xác `http://localhost:3000/api/auth/lark/callback` cho local và `${AUTH_BASE_URL}/api/auth/lark/callback` cho production.
+4. Trong Lark Developer Console, đăng ký callback chính xác `http://localhost:3000/api/auth/lark/callback` cho local và `${LETRON_AUTH_BASE_URL}/api/auth/lark/callback` cho production.
 5. Bật các quyền ứng dụng cần thiết để API `authen/v1/user_info` trả về email hoặc enterprise email; auth server cố ý từ chối tài khoản không có email.
 6. Để bật đồng bộ role, cấp application permission `contact:group:readonly`, đặt Contacts data scope bao phủ người dùng ERP, tạo các User Group và cấu hình mapping bằng `group_id`.
 7. Chạy migration rồi khởi động:
@@ -81,8 +81,8 @@ từ Lark group và projection ERP dùng role kỹ thuật `Letron Policy - grou
 
 ## Global Access Policy và OpenAPI gateway
 
-Trang `/admin/access-policy` dành riêng cho Lark group
-`GLOBAL_ACCESS_ADMIN_GROUP_ID`. Policy được lưu trong PostgreSQL theo version và
+Trang `/admin/access-policy` dành riêng cho Global Access Admin Lark group được
+quản lý cố định trong runtime config. Policy được lưu trong PostgreSQL theo version và
 autosave thành bản published mới; không có draft/approve/rollback workflow.
 Policy v1 chỉ tham chiếu các public OpenAPI routes đã đăng ký.
 
@@ -92,8 +92,8 @@ operation không được cấp sẽ fail closed. Gateway truyền authorization
 bằng header HMAC nội bộ; ERP origin phải private và chỉ nhận traffic từ gateway.
 Không đưa authorization decision vào query string hoặc tin header do client gửi.
 
-Gateway và policy publication dùng lại `LETRON_SSO_ERP_BASE_URL` và
-`LETRON_SSO_SYNC_SECRET` hiện có. Đây là app nội bộ nên không tạo thêm ERP
+Gateway và policy publication dùng lại `FRAPPE_ERP_NEXT_URL` và
+`LETRON_INTERNAL_API_SECRET` hiện có. Đây là app nội bộ nên không tạo thêm ERP
 credential riêng trong Auth Server; ERP origin vẫn phải nằm trong mạng nội bộ.
 nếu chưa có ERP-side verifier, policy projection readback và direct-origin deny
 acceptance.
@@ -137,9 +137,9 @@ mỗi request và chỉ đồng bộ snapshot khi cần.
 ERP chỉ được projection các role kỹ thuật có prefix `Letron Policy - group-`;
 `Administrator`, `All`, `Guest` và `System Manager` không bao giờ được quản lý bởi Portal.
 
-Issuer: `${AUTH_BASE_URL}/api/oidc`
+Issuer: `${LETRON_AUTH_BASE_URL}/api/oidc`
 
-Discovery: `${AUTH_BASE_URL}/api/oidc/.well-known/openid-configuration`
+Discovery: `${LETRON_AUTH_BASE_URL}/api/oidc/.well-known/openid-configuration`
 
 ## Kiểm chứng
 

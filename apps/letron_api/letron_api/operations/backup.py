@@ -67,7 +67,7 @@ def scheduled_s3_backup() -> Dict[str, object]:
     """
     Main entry point for Frappe Scheduler (01:00 AM daily cron) or bench execute / API.
     """
-    sync_secret = os.environ.get("LETRON_SSO_SYNC_SECRET")
+    sync_secret = os.environ.get("LETRON_INTERNAL_API_SECRET")
     req_secret = frappe.get_request_header("X-Letron-Sync-Secret")
     if sync_secret and req_secret != sync_secret and getattr(frappe.session, "user", "Guest") == "Guest":
         frappe.throw("Unauthorized access to backup API", frappe.PermissionError)

@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { publicErrorMessage, retryAfterSeconds } from "@/lib/error-contract";
 
 type Item = { name: string; item_code: string; description: string; qty: number; uom: string; rate?: number };
-type Summary = { supplier: string; rfq: { name: string; status: string; items: Item[] }; quotation: { name: string; status: string } | null; purchase_order: { name: string; status: string; currency: string; items: Item[] } | null; purchase_receipt: { name: string; status: string } | null; payment_status: string; approval_status: string; deadline_at: string };
+type Summary = { supplier: string; rfq: { name: string; status: string; items: Item[] }; quotation: { name: string; status: string } | null; purchase_order: { name: string; status: string; currency: string; items: Item[] } | null; purchase_receipt: { name: string; status: string }[]; purchase_invoice: { name: string; status: string }[]; payment_status: string; approval_status: string; deadline_at: string };
 type ApiPayload = { error?: unknown; retry_after_seconds?: unknown; resend_after_seconds?: unknown };
 
 async function payloadOf(response: Response): Promise<ApiPayload> {
@@ -119,7 +119,8 @@ export default function SupplierPortalPage({ params }: { params: Promise<{ magic
         setMessage(errorMessage(response, await payloadOf(response)));
         return;
       }
-      setMessage("Đã gửi delivery confirmation, đang chờ nội bộ kiểm tra.");
+      setMessage("Đã tạo Purchase Receipt thành công.");
+      await refresh();
     } catch {
       setMessage("Không thể kết nối Supplier Portal. Vui lòng thử lại sau.");
     }
@@ -137,7 +138,9 @@ export default function SupplierPortalPage({ params }: { params: Promise<{ magic
         setMessage(errorMessage(response, await payloadOf(response)));
         return;
       }
-      setMessage("Đã nhận XML invoice, đang chờ nội bộ kiểm tra.");
+      setMessage("Đã tạo Purchase Invoice thành công.");
+      setXmlFile(null);
+      await refresh();
     } catch {
       setMessage("Không thể kết nối Supplier Portal. Vui lòng thử lại sau.");
     }
@@ -165,7 +168,7 @@ export default function SupplierPortalPage({ params }: { params: Promise<{ magic
       <header className="flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-700">LeTRON Supplier Portal</p><h1 className="mt-3 text-3xl font-bold">Supplier workspace</h1><p className="mt-2 text-muted-foreground">Supplier: {summary.supplier}</p></div><button className="rounded-md border px-3 py-2 text-sm" onClick={() => void logout()}>Đăng xuất</button></header>
       <section className="rounded-xl border bg-card p-5"><h2 className="font-semibold">Request for Quotation</h2><p className="mt-3 text-sm">RFQ: {summary.rfq.name} · Trạng thái: {summary.rfq.status} · Approval: {summary.approval_status} · Hạn: {summary.deadline_at}</p></section>
       {summary.quotation ? <p className="rounded-md bg-emerald-50 p-4 text-sm text-emerald-800">Quotation đã submit: {summary.quotation.name}. Đã khóa.</p> : <form className="space-y-4 rounded-xl border bg-card p-5" onSubmit={(event) => void submitQuotation(event)}><h2 className="font-semibold">Nhập báo giá</h2>{summary.rfq.items.map((item) => <div className="grid gap-2 sm:grid-cols-[1fr_10rem]" key={item.name}><label className="text-sm">{item.item_code} — {item.description || "Item"}<span className="block text-muted-foreground">Số lượng: {item.qty} {item.uom}</span></label><input className="h-10 rounded-md border bg-background px-3" min="0" step="0.01" required type="number" value={rates[item.name] ?? ""} onChange={(event) => setRates((current) => ({ ...current, [item.name]: event.target.value }))} /></div>)}<button className="h-10 rounded-md bg-primary px-4 text-sm text-primary-foreground" type="submit">Submit quotation</button></form>}
-      {summary.purchase_order ? <><section className="space-y-4 rounded-xl border bg-card p-5"><h2 className="font-semibold">Purchase Order: {summary.purchase_order.name}</h2><p className="text-sm">{summary.purchase_order.status} · {summary.purchase_order.currency}</p><form className="space-y-3" onSubmit={(event) => void submitDelivery(event)}><h3 className="font-medium">Delivery confirmation</h3><input className="h-10 rounded-md border bg-background px-3" required type="date" value={deliveryDate} onChange={(event) => setDeliveryDate(event.target.value)} />{summary.purchase_order.items.map((item) => <div className="grid gap-2 sm:grid-cols-[1fr_10rem]" key={item.name}><label className="text-sm">{item.item_code} · đặt {item.qty} {item.uom}</label><input className="h-10 rounded-md border bg-background px-3" min="0" max={item.qty} step="0.01" type="number" value={deliveryQty[item.name] ?? ""} onChange={(event) => setDeliveryQty((current) => ({ ...current, [item.name]: event.target.value }))} /></div>)}<button className="h-10 rounded-md bg-primary px-4 text-sm text-primary-foreground" type="submit">Gửi xác nhận giao hàng</button></form></section><section className="space-y-4 rounded-xl border bg-card p-5"><h2 className="font-semibold">XML Invoice</h2><p className="text-sm text-muted-foreground">Receipt: {summary.purchase_receipt?.status ?? "Chờ kiểm tra"} · Payment: {summary.payment_status}</p><form className="flex flex-wrap gap-3" onSubmit={(event) => void submitXml(event)}><input accept=".xml,text/xml,application/xml" required type="file" onChange={(event) => setXmlFile(event.target.files?.[0] ?? null)} /><button className="h-10 rounded-md bg-primary px-4 text-sm text-primary-foreground" type="submit">Upload XML</button></form></section></> : null}
+      {summary.purchase_order ? <><section className="space-y-4 rounded-xl border bg-card p-5"><h2 className="font-semibold">Purchase Order: {summary.purchase_order.name}</h2><p className="text-sm">{summary.purchase_order.status} · {summary.purchase_order.currency}</p><form className="space-y-3" onSubmit={(event) => void submitDelivery(event)}><h3 className="font-medium">Delivery confirmation</h3><input className="h-10 rounded-md border bg-background px-3" required type="date" value={deliveryDate} onChange={(event) => setDeliveryDate(event.target.value)} />{summary.purchase_order.items.map((item) => <div className="grid gap-2 sm:grid-cols-[1fr_10rem]" key={item.name}><label className="text-sm">{item.item_code} · đặt {item.qty} {item.uom}</label><input className="h-10 rounded-md border bg-background px-3" min="0" max={item.qty} step="0.01" type="number" value={deliveryQty[item.name] ?? ""} onChange={(event) => setDeliveryQty((current) => ({ ...current, [item.name]: event.target.value }))} /></div>)}<button className="h-10 rounded-md bg-primary px-4 text-sm text-primary-foreground" type="submit">Gửi xác nhận và tạo Receipt</button></form></section><section className="space-y-4 rounded-xl border bg-card p-5"><h2 className="font-semibold">XML Invoice</h2><p className="text-sm text-muted-foreground">Receipt: {summary.purchase_receipt?.[0]?.status ?? "Chưa tạo"} · Payment: {summary.payment_status}</p><form className="flex flex-wrap gap-3" onSubmit={(event) => void submitXml(event)}><input accept=".xml,text/xml,application/xml" required type="file" onChange={(event) => setXmlFile(event.target.files?.[0] ?? null)} /><button className="h-10 rounded-md bg-primary px-4 text-sm text-primary-foreground" type="submit">Upload và tạo Invoice</button></form></section></> : null}
       <p role="status">{message}</p>
     </main>
   );

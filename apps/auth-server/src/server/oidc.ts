@@ -1,7 +1,7 @@
 import Provider, { type Configuration, type JWKS } from "oidc-provider";
 
 import { getDb } from "./db";
-import { getEnv, parseJsonEnv } from "./env";
+import { AUTH_FEATURE_CONFIG, getEnv, parseJsonEnv } from "./env";
 import { PrismaOidcAdapter } from "./oidc-adapter";
 import { audit } from "./audit";
 
@@ -58,15 +58,15 @@ export function getOidcProvider(): Provider {
         interaction: "letron_oidc_interaction",
         resume: "letron_oidc_resume",
       },
-      long: { httpOnly: true, sameSite: "lax", secure: env.AUTH_BASE_URL.startsWith("https://"), path: "/" },
-      short: { httpOnly: true, sameSite: "lax", secure: env.AUTH_BASE_URL.startsWith("https://"), path: "/" },
+      long: { httpOnly: true, sameSite: "lax", secure: env.LETRON_AUTH_BASE_URL.startsWith("https://"), path: "/" },
+      short: { httpOnly: true, sameSite: "lax", secure: env.LETRON_AUTH_BASE_URL.startsWith("https://"), path: "/" },
     },
     ttl: {
       AccessToken: 10 * 60,
       AuthorizationCode: 60,
       IdToken: 10 * 60,
       Interaction: 10 * 60,
-      Session: env.AUTH_SESSION_TTL_SECONDS,
+      Session: AUTH_FEATURE_CONFIG.sessionTtlSeconds,
     },
     interactions: {
       url: (_ctx, interaction) => `/login?uid=${encodeURIComponent(interaction.uid)}`,
@@ -127,7 +127,7 @@ export function getOidcProvider(): Provider {
     },
   };
 
-  const provider = new Provider(`${env.AUTH_BASE_URL}/api/oidc`, configuration);
+  const provider = new Provider(`${env.LETRON_AUTH_BASE_URL}/api/oidc`, configuration);
   provider.proxy = true;
   provider.on("authorization.success", (ctx) => {
     void audit({

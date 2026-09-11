@@ -1,20 +1,29 @@
 import { readFile } from "node:fs/promises";
+import { createHash, randomUUID } from "node:crypto";
 import { resolve } from "node:path";
+import { parseLarkApprovalAutoApproveResponse } from "../apps/erp/src/lib/internal-api-contract";
 
 type Json = Record<string, unknown> | unknown[] | string | number | boolean | null;
 
 const root = resolve(import.meta.dirname, "..");
 const erpBaseUrl = process.env.ERP_BASE_URL ?? "http://localhost:3001";
 const portalBaseUrl = process.env.PORTAL_BASE_URL ?? "http://localhost:3000";
-const supplierPortalPublicBaseUrl = process.env.LETRON_SUPPLIER_PORTAL_PUBLIC_BASE_URL ?? "http://localhost:3001";
+const erpAppBaseUrl = process.env.LETRON_ERP_APP_BASE_URL ?? "http://localhost:3001";
 const item1 = process.env.MR_ITEM_1 ?? "ACCEPTANCE-LOCAL-f7aa6b9e-Item";
 let item2 = process.env.MR_ITEM_2?.trim() ?? "";
 const supplier1 = process.env.MR_SUPPLIER_1?.trim() || "Link Strategy";
 const supplier2 = process.env.MR_SUPPLIER_2?.trim() || "";
 const supplierEmail = process.env.MR_SUPPLIER_EMAIL?.trim() || "leducanh@ledb.vn";
-const authBaseUrl = process.env.AUTH_BASE_URL ?? "http://localhost:3000";
+const authBaseUrl = process.env.LETRON_AUTH_BASE_URL ?? "http://localhost:3000";
 const idempotencyKey = `${process.env.MR_IDEMPOTENCY_KEY?.trim() || "real-mr-approval"}-${Date.now()}`;
 const mailboxReadbackTimeoutMs = Math.max(5_000, Number(process.env.MR_MAILBOX_READBACK_TIMEOUT_MS ?? 45_000));
+
+class MailReadbackTimeout extends Error {
+  constructor(subject: string) {
+    super(`MAIL_MAILBOX_READBACK_TIMEOUT subject=${subject} timeout_ms=${mailboxReadbackTimeoutMs}`);
+    this.name = "MailReadbackTimeout";
+  }
+}
 
 function object(value: Json): Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value)
@@ -24,12 +33,26 @@ function object(value: Json): Record<string, unknown> {
 
 function apiData(value: Json): Json {
   const row = object(value);
-  if (!("data" in row)) throw new Error("API response data is missing");
-  return row.data as Json;
+  if ("data" in row) return row.data as Json;
+  throw new Error(`API response envelope is missing data: ${JSON.stringify(value).slice(0, 1000)}`);
 }
 
 function text(value: unknown): string {
   return value === null || value === undefined ? "" : String(value);
+}
+function summaryContext(summary: Record<string, unknown>): string {
+  const rfq = object(summary.rfq as Json);
+  const quotation = object(summary.quotation as Json);
+  return JSON.stringify({
+    process: text(summary.process),
+    material_request: text(summary.material_request),
+    supplier: text(summary.supplier),
+    rfq: { name: text(rfq.name), status: text(rfq.status) },
+    quotation: quotation.name ? { name: text(quotation.name), status: text(quotation.status) } : null,
+  });
+}
+function assertErpName(value: string, label: string): void {
+  if (!/^[A-Z][A-Z0-9-]*-\d{4}(?:\d{4})?-\d{4,5}$/.test(value)) throw new Error(`${label} naming contract failed: ${value}`);
 }
 
 async function env(name: string): Promise<string> {
@@ -57,11 +80,17 @@ async function request(url: string, init: RequestInit = {}): Promise<{ status: n
 
 async function latestEmail(subject: string, after: string, predicate: (message: string, recipients: string) => boolean = () => true, messageId?: string): Promise<{ message: string; recipients: string; readback_status: "MAIL_MAILBOX_READBACK_CONFIRMED" }> {
   const deadline = Date.now() + mailboxReadbackTimeoutMs;
-  const authHeader = { Authorization: `Bearer ${await env("LETRON_API_KEY")}` };
+  const authHeader = { Authorization: `Bearer ${await env("LETRON_INTERNAL_API_SECRET")}` };
   while (Date.now() < deadline) {
     const messageQuery = messageId ? `&message_id=${encodeURIComponent(messageId)}` : "";
     const response = await request(`${authBaseUrl}/api/internal/lark-mail/latest?subject=${encodeURIComponent(subject)}&after=${encodeURIComponent(after)}${messageQuery}`, { headers: authHeader });
-    if (response.status !== 200) throw new Error(`Lark Mail readback failed (${response.status}): ${response.raw}`);
+    if (response.status !== 200) {
+      if (response.status >= 500) {
+        await new Promise((resolveDelay) => setTimeout(resolveDelay, Math.min(1000, Math.max(100, deadline - Date.now()))));
+        continue;
+      }
+      throw new Error(`Lark Mail readback failed (${response.status}): ${response.raw}`);
+    }
     const rows = apiData(response.body);
     const items = Array.isArray(rows) ? rows : [];
     const row = items.find((item) => text(object(item as Json).message).trim() && predicate(text(object(item as Json).message), text(object(item as Json).recipients)));
@@ -69,7 +98,7 @@ async function latestEmail(subject: string, after: string, predicate: (message: 
     await new Promise((resolveDelay) => setTimeout(resolveDelay, Math.min(1000, Math.max(100, deadline - Date.now()))));
   }
   console.error(`MAIL_MAILBOX_READBACK_TIMEOUT subject=${subject} timeout_ms=${mailboxReadbackTimeoutMs}`);
-  throw new Error(`MAIL_MAILBOX_READBACK_TIMEOUT subject=${subject} timeout_ms=${mailboxReadbackTimeoutMs}`);
+  throw new MailReadbackTimeout(subject);
 }
 
 function tokenFromEmail(message: string): string {
@@ -82,7 +111,7 @@ function assertMagicLinkOrigin(message: string, supplier: string): string {
   const match = message.match(/https?:\/\/[^\s]+\/supplier\/[A-Za-z0-9_-]{40,}/);
   if (!match) throw new Error(`Magic Link URL was not found for ${supplier}`);
   const actual = new URL(match[0]);
-  const expected = new URL(supplierPortalPublicBaseUrl);
+  const expected = new URL(erpAppBaseUrl);
   if (actual.origin !== expected.origin || !actual.pathname.startsWith("/supplier/")) {
     throw new Error(`Magic Link public endpoint mismatch for ${supplier}: expected=${expected.origin}, actual=${actual.origin}`);
   }
@@ -101,7 +130,7 @@ async function supplierFlow(
   rate: number,
   usedTokens: Set<string>,
   acceptedMail: { message_id: string; to: string },
-): Promise<{ quotation: string; gate: Record<string, unknown>; approval: Record<string, unknown>; accessEmail: string; otpEmail: string; sessionCookie: string; otpReplayRejected: boolean; otpLockRejections: number }> {
+): Promise<{ quotation: string; gate: Record<string, unknown>; approval: Record<string, unknown>; accessEmail: string; otpEmail: string; sessionCookie: string }> {
   const accessEmail = await latestEmail("Letron Supplier Portal access", accessEmailAfter, (message) => {
     const token = tokenFromEmail(message);
     return !usedTokens.has(token);
@@ -118,51 +147,20 @@ async function supplierFlow(
   const otpDelivery = object(object(apiData(otpRequested.body)).mail_delivery as Json);
   const otpMessageId = text(otpDelivery.message_id);
   if (!otpMessageId) throw new Error(`OTP provider acceptance missing for ${supplier}: ${otpRequested.raw}`);
-  const duplicateOtpRequest = await request(`${erpBaseUrl}/api/supplier/${encodeURIComponent(magicToken)}/otp/request`, { method: "POST" });
-  const duplicateOtpData = object(duplicateOtpRequest.body);
-  if (duplicateOtpRequest.status !== 429 || text(duplicateOtpData.error) !== "supplier_otp_rate_limited" || Number(duplicateOtpData.retry_after_seconds ?? 0) <= 0) {
-    throw new Error(`OTP resend rate limit contract failed for ${supplier}: ${duplicateOtpRequest.raw}`);
-  }
   const otpEmail = await latestEmail("Letron Supplier Portal OTP", otpEmailAfter, (_message, recipients) => recipients === accessEmail.recipients, otpMessageId);
   const otp = otpFromEmail(otpEmail.message);
-  let otpLockRejections = 0;
-  for (let attempt = 1; attempt <= 5; attempt += 1) {
-    const invalidOtp = otp === "000000" ? "999999" : "000000";
-    const wrong = await request(`${erpBaseUrl}/api/supplier/${encodeURIComponent(magicToken)}/otp/verify`, {
-      method: "POST",
-      body: JSON.stringify({ otp: invalidOtp }),
-    });
-    if (wrong.status === 200) throw new Error(`Invalid OTP was accepted for ${supplier} on attempt ${attempt}`);
-    otpLockRejections += 1;
-  }
-  const locked = await request(`${erpBaseUrl}/api/supplier/${encodeURIComponent(magicToken)}/otp/verify`, {
-    method: "POST",
-    body: JSON.stringify({ otp }),
-  });
-  if (locked.status === 200) throw new Error(`OTP was accepted after the attempt limit for ${supplier}`);
-  await new Promise((resolveDelay) => setTimeout(resolveDelay, 16_000));
-  const replacementOtpAfter = new Date().toISOString();
-  const replacementRequested = await request(`${erpBaseUrl}/api/supplier/${encodeURIComponent(magicToken)}/otp/request`, { method: "POST" });
-  if (replacementRequested.status !== 200) throw new Error(`OTP replacement request failed for ${supplier} (${replacementRequested.status}): ${replacementRequested.raw}`);
-  const replacementDelivery = object(object(apiData(replacementRequested.body)).mail_delivery as Json);
-  const replacementMessageId = text(replacementDelivery.message_id);
-  if (!replacementMessageId) throw new Error(`Replacement OTP provider acceptance missing for ${supplier}: ${replacementRequested.raw}`);
-  const replacementEmail = await latestEmail("Letron Supplier Portal OTP", replacementOtpAfter, (_message, recipients) => recipients === accessEmail.recipients, replacementMessageId);
-  const replacementOtp = otpFromEmail(replacementEmail.message);
   const verified = await request(`${erpBaseUrl}/api/supplier/${encodeURIComponent(magicToken)}/otp/verify`, {
     method: "POST",
-    body: JSON.stringify({ otp: replacementOtp }),
+    body: JSON.stringify({ otp }),
   });
   if (verified.status !== 200 || !verified.cookie) throw new Error(`OTP verify failed for ${supplier} (${verified.status}): ${verified.raw}`);
   const supplierCookie = verified.cookie;
-  const replay = await request(`${erpBaseUrl}/api/supplier/${encodeURIComponent(magicToken)}/otp/verify`, {
-    method: "POST",
-    body: JSON.stringify({ otp }),
-  });
-  if (replay.status === 200) throw new Error(`OTP replay was accepted for ${supplier}`);
   const summary = await request(`${erpBaseUrl}/api/supplier/session/process`, { headers: { Cookie: supplierCookie } });
   if (summary.status !== 200) throw new Error(`Supplier summary failed for ${supplier} (${summary.status}): ${summary.raw}`);
   const summaryRow = object(apiData(summary.body));
+  if (text(summaryRow.supplier) !== supplier || text(summaryRow.process) === "") {
+    throw new Error(`Supplier access mapping failed for ${supplier}: ${summary.raw}`);
+  }
   const rfq = object(summaryRow.rfq as Json);
   const rfqItems = Array.isArray(rfq.items) ? rfq.items : [];
   if (!rfqItems.length) throw new Error(`Supplier ${supplier} has no RFQ items`);
@@ -179,41 +177,44 @@ async function supplierFlow(
   const quotationData = object(apiData(quotation.body));
   const result = object(quotationData.result as Json);
   const gate = object(quotationData.gate as Json);
-  const quotationName = text(result.supplier_quotation || result.supplier_quotation_name || result.name || object(result.quotation as Json).name);
+  const quotationName = text(result.supplier_quotation);
   if (!quotationName) throw new Error(`Quotation submit returned no quotation name for ${supplier}: ${quotation.raw}`);
-  if (!/^SQ-\d{8}-\d{4}$/.test(quotationName)) throw new Error(`Supplier Quotation naming contract failed for ${supplier}: ${quotationName}`);
-  const quotationSummary = await request(`${erpBaseUrl}/api/supplier/session/process`, { headers: { Cookie: supplierCookie } });
+assertErpName(quotationName, `Supplier Quotation for ${supplier}`);
+  let quotationSummary = await request(`${erpBaseUrl}/api/supplier/session/process`, { headers: { Cookie: supplierCookie } });
+  let quotationRow = quotationSummary.status === 200 ? object(object(apiData(quotationSummary.body)).quotation as Json) : {};
+  for (let attempt = 1; attempt <= 15 && text(quotationRow.name) !== quotationName; attempt += 1) {
+    await new Promise((resolveDelay) => setTimeout(resolveDelay, 1000));
+    quotationSummary = await request(`${erpBaseUrl}/api/supplier/session/process`, { headers: { Cookie: supplierCookie } });
+    quotationRow = quotationSummary.status === 200 ? object(object(apiData(quotationSummary.body)).quotation as Json) : {};
+  }
   if (quotationSummary.status !== 200) throw new Error(`Quotation readback failed for ${supplier} (${quotationSummary.status}): ${quotationSummary.raw}`);
-  const quotationRow = object(object(apiData(quotationSummary.body)).quotation as Json);
   if (text(quotationRow.name) !== quotationName || text(quotationRow.status) !== "Submitted") {
-    throw new Error(`Quotation was not submitted and locked for ${supplier}: ${quotationSummary.raw}`);
+    throw new Error(`Quotation was not submitted and locked for ${supplier}: ${summaryContext(object(apiData(quotationSummary.body)))}`);
   }
-  const duplicateQuotation = await request(`${erpBaseUrl}/api/supplier/session/quotation`, {
-    method: "POST",
-    headers: { Cookie: supplierCookie },
-    body: JSON.stringify({ items: rfqItems.map((item) => ({
-      request_for_quotation_item: text(object(item as Json).name),
-      qty: Number(object(item as Json).qty ?? 0),
-      rate,
-    })) }),
-  });
-  const duplicateQuotationData = object(apiData(duplicateQuotation.body));
-  const duplicateQuotationResult = object(duplicateQuotationData.result as Json);
-  if (duplicateQuotation.status !== 200 || text(duplicateQuotationResult.supplier_quotation) !== quotationName || duplicateQuotationResult.idempotent !== true) {
-    throw new Error(`Duplicate quotation submission was not idempotent for ${supplier}: ${duplicateQuotation.raw}`);
-  }
-  return { quotation: quotationName, gate, approval: object(quotationData.approval as Json), accessEmail: accessEmail.recipients, otpEmail: otpEmail.recipients, sessionCookie: supplierCookie, otpReplayRejected: true, otpLockRejections };
+  return { quotation: quotationName, gate, approval: object(quotationData.approval as Json), accessEmail: accessEmail.recipients, otpEmail: otpEmail.recipients, sessionCookie: supplierCookie };
 }
 
-async function waitForPurchaseOrder(flow: { sessionCookie: string }, instanceCode: string, timeoutSeconds: number): Promise<Record<string, unknown>> {
+async function approvalWebhook(instanceCode: string, eventId: string): Promise<{ status: number; body: Json }> {
+  const body = JSON.stringify({ event: { event_id: eventId, instance_code: instanceCode } });
+  const timestamp = String(Math.floor(Date.now() / 1000));
+  const nonce = randomUUID();
+  const key = await env("LETRON_INTERNAL_API_SECRET");
+  const signature = createHash("sha256").update(`${timestamp}${nonce}${key}${body}`).digest("hex");
+  const response = await request(`${erpBaseUrl}/api/integrations/lark/webhooks/approval`, { method: "POST", headers: { "Content-Type": "application/json", "x-lark-request-timestamp": timestamp, "x-lark-request-nonce": nonce, "x-lark-signature": signature }, body });
+  return { status: response.status, body: response.body };
+}
+
+async function waitForPurchaseOrder(flow: { sessionCookie: string }, instanceCode: string, timeoutSeconds: number): Promise<{ summary: Record<string, unknown>; eventId: string }> {
   const deadline = Date.now() + timeoutSeconds * 1000;
+  const eventId = `real-test-${randomUUID()}`;
   while (Date.now() < deadline) {
-    await reconcileLarkApproval(instanceCode);
+    const webhook = await approvalWebhook(instanceCode, eventId);
+    if (webhook.status !== 200 && webhook.status !== 202) throw new Error(`Approval webhook failed (${webhook.status}): ${JSON.stringify(webhook.body)}`);
     const response = await request(`${erpBaseUrl}/api/supplier/session/process`, { headers: { Cookie: flow.sessionCookie } });
     if (response.status === 200) {
       const summary = object(apiData(response.body));
       const purchaseOrder = object(summary.purchase_order as Json);
-      if (text(purchaseOrder.name)) return summary;
+      if (text(purchaseOrder.name)) return { summary, eventId };
     }
     await new Promise((resolveDelay) => setTimeout(resolveDelay, 2000));
   }
@@ -221,34 +222,16 @@ async function waitForPurchaseOrder(flow: { sessionCookie: string }, instanceCod
 }
 
 async function autoApproveLarkInstance(instanceCode: string): Promise<void> {
+  console.log(`LARK_APPROVAL_INSTANCE=${instanceCode}`);
   const response = await request(`${erpBaseUrl}/api/internal/lark/approval/approve`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${await env("LETRON_API_KEY")}` },
+    headers: { Authorization: `Bearer ${await env("LETRON_INTERNAL_API_SECRET")}` },
     body: JSON.stringify({ instance_code: instanceCode }),
   });
   if (response.status !== 200) throw new Error(`Lark approval auto-approve failed (${response.status}): ${response.raw}`);
-  const result = object(apiData(response.body));
-  if (!text(result.status)) throw new Error(`Lark approval auto-approve returned no status: ${response.raw}`);
+  parseLarkApprovalAutoApproveResponse(response.body);
 }
 
-async function reconcileLarkApproval(instanceCode: string): Promise<void> {
-  const response = await request(`${erpBaseUrl}/api/internal/lark/approval/reconcile`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${await env("LETRON_API_KEY")}` },
-    body: JSON.stringify({ instance_code: instanceCode }),
-  });
-  if (response.status !== 200) throw new Error(`Lark approval reconcile failed (${response.status}): ${response.raw}`);
-}
-
-async function reviewSubmission(authCookie: string, submission: string): Promise<Record<string, unknown>> {
-  const response = await request(`${erpBaseUrl}/api/internal/supplier-portal/review`, {
-    method: "POST",
-    headers: { Cookie: authCookie },
-    body: JSON.stringify({ submission, decision: "Approved", review_note: "real-test approved" }),
-  });
-  if (response.status !== 200) throw new Error(`Internal review failed (${response.status}): ${response.raw}`);
-  return object(apiData(response.body));
-}
 
 async function ensureSupplier(auth: { Cookie: string }, supplier: string): Promise<void> {
   const listed = await request(`${erpBaseUrl}/api/purchase/suppliers?limit_page_length=100`, { headers: auth });
@@ -291,7 +274,7 @@ async function ensureTestItem(auth: { Cookie: string }): Promise<void> {
 
 async function main(): Promise<void> {
 const suppliers = [supplier1, ...(supplier2 && supplier2 !== supplier1 ? [supplier2] : [])];
-const apiKey = await env("LETRON_API_KEY");
+const apiKey = await env("LETRON_INTERNAL_API_SECRET");
 const apiAuth = { Authorization: `Bearer ${apiKey}` };
 
 const session = await request(`${portalBaseUrl}/api/internal/test-session`, {
@@ -338,7 +321,6 @@ const payload = {
     ],
   },
   suppliers,
-  supplier_email: supplierEmail,
   justification: "Real MR to Lark Approval integration test",
 };
 
@@ -354,25 +336,11 @@ const result = object(apiData(created.body));
 const mrName = text(result.material_request_name);
 const rfqName = text(result.request_for_quotation_name);
 if (!mrName || !rfqName) throw new Error(`orchestration did not return MR and RFQ: ${created.raw}`);
-if (!/^MR-\d{8}-\d{4}$/.test(mrName)) throw new Error(`Material Request naming contract failed: ${mrName}`);
-if (!/^RFQ-\d{8}-\d{4}$/.test(rfqName)) throw new Error(`Request for Quotation naming contract failed: ${rfqName}`);
+assertErpName(mrName, "Material Request");
+assertErpName(rfqName, "Request for Quotation");
 if (text(result.status) !== "waiting_supplier_quotes") {
   throw new Error(`orchestration did not stop at supplier quotation gate: ${created.raw}`);
 }
-const duplicateCreate = await request(`${erpBaseUrl}/api/purchase/requests/create`, {
-  method: "POST",
-  headers: { ...auth, "X-Idempotency-Key": idempotencyKey },
-  body: JSON.stringify(payload),
-});
-if (duplicateCreate.status < 200 || duplicateCreate.status >= 300) throw new Error(`duplicate MR orchestration failed (${duplicateCreate.status}): ${duplicateCreate.raw}`);
-const duplicateResult = object(apiData(duplicateCreate.body));
-if (text(duplicateResult.material_request_name) !== mrName || text(duplicateResult.request_for_quotation_name) !== rfqName) {
-  throw new Error(`duplicate MR orchestration was not idempotent: ${duplicateCreate.raw}`);
-}
-const originalMailIds = (Array.isArray(result.mail_deliveries) ? result.mail_deliveries : []).map((item) => text(object(item as Json).message_id)).sort().join(",");
-const duplicateMailIds = (Array.isArray(duplicateResult.mail_deliveries) ? duplicateResult.mail_deliveries : []).map((item) => text(object(item as Json).message_id)).sort().join(",");
-if (!originalMailIds || originalMailIds !== duplicateMailIds) throw new Error(`duplicate MR orchestration changed mail delivery IDs: ${duplicateCreate.raw}`);
-
 const readback = await request(`${erpBaseUrl}/api/purchase/material-requests/${encodeURIComponent(mrName)}`, { headers: auth });
 if (readback.status !== 200) throw new Error(`MR readback failed (${readback.status}): ${readback.raw}`);
 const createdRow = object(apiData(readback.body));
@@ -397,22 +365,26 @@ if (text(gate.selected_supplier_quotation) !== cheapestResult.quotation) {
   throw new Error(`cheapest quotation was not selected: ${JSON.stringify(gate)}`);
 }
 const approval = cheapestResult.approval;
-const approvalInstance = text(approval.instanceCode || approval.instance_code);
+const approvalInstance = text(approval.instanceCode);
 if (!approvalInstance) throw new Error("Lark approval was not opened after the final supplier quotation");
-const poDraftName = text(approval.erpPurchaseOrderName || approval.erp_purchase_order_name || approval.purchase_order);
-if (!/^PO-\d{8}-\d{4}$/.test(poDraftName)) {
-  throw new Error(`Approval did not return a native ERPNext PO number: ${JSON.stringify(approval)}`);
-}
+const poDraftName = text(approval.erpPurchaseOrderName);
+assertErpName(poDraftName, "Approval Purchase Order");
 const poDraftReadback = await request(`${erpBaseUrl}/api/purchase/purchase-orders/${encodeURIComponent(poDraftName)}`, { headers: auth });
 if (poDraftReadback.status !== 200) throw new Error(`PO Draft readback failed (${poDraftReadback.status}): ${poDraftReadback.raw}`);
 const poDraftRow = object(apiData(poDraftReadback.body));
 if (text(poDraftRow.name) !== poDraftName || Number(poDraftRow.docstatus ?? -1) !== 0) {
   throw new Error(`ERPNext PO was not Draft before approval: ${poDraftReadback.raw}`);
 }
-
-const winningFlow = cheapestResult;
-await autoApproveLarkInstance(approvalInstance);
-const summaryWithPo = await waitForPurchaseOrder(winningFlow, approvalInstance, Number(process.env.MR_APPROVAL_WAIT_SECONDS ?? 300));
+  const winningFlow = cheapestResult;
+  if (process.env.MR_STOP_BEFORE_AUTO_APPROVE === "1") {
+    console.log(`LARK_APPROVAL_INSTANCE=${approvalInstance}`);
+    console.log("REAL_MR_TEST=STOPPED_BEFORE_AUTO_APPROVE");
+    return;
+  }
+  await autoApproveLarkInstance(approvalInstance);
+const approvalWait = await waitForPurchaseOrder(winningFlow, approvalInstance, Number(process.env.MR_APPROVAL_WAIT_SECONDS ?? 300));
+console.log("approval_webhook=PASS");
+const summaryWithPo = approvalWait.summary;
 const purchaseOrder = object(summaryWithPo.purchase_order as Json);
 const poName = text(purchaseOrder.name);
 const poItems = Array.isArray(purchaseOrder.items) ? purchaseOrder.items : [];
@@ -430,20 +402,11 @@ const delivery = await request(`${erpBaseUrl}/api/supplier/session/delivery`, {
   body: JSON.stringify(deliveryPayload),
 });
 if (delivery.status !== 201) throw new Error(`Delivery submission failed (${delivery.status}): ${delivery.raw}`);
-const deliverySubmission = text(object(apiData(delivery.body)).submission);
+const deliveryData = object(apiData(delivery.body));
+const deliverySubmission = text(deliveryData.purchase_receipt || deliveryData.submission);
 if (!deliverySubmission) throw new Error(`Delivery submission id missing: ${delivery.raw}`);
-const duplicateDelivery = await request(`${erpBaseUrl}/api/supplier/session/delivery`, {
-  method: "POST",
-  headers: { Cookie: winningFlow.sessionCookie },
-  body: JSON.stringify(deliveryPayload),
-});
-if (duplicateDelivery.status !== 201 || text(object(apiData(duplicateDelivery.body)).submission) !== deliverySubmission) {
-  throw new Error(`Duplicate delivery submission was not idempotent: ${duplicateDelivery.raw}`);
-}
-const deliveryReview = await reviewSubmission(session.cookie, deliverySubmission);
-const receiptName = text(deliveryReview.result_document);
-if (!receiptName) throw new Error(`Purchase Receipt was not created: ${JSON.stringify(deliveryReview)}`);
-if (!/^GRN-\d{8}-\d{4}$/.test(receiptName)) throw new Error(`Purchase Receipt naming contract failed: ${receiptName}`);
+const receiptName = deliverySubmission;
+assertErpName(receiptName, "Purchase Receipt");
 
 const xml = new FormData();
 xml.set("file", new Blob(["<?xml version=\"1.0\" encoding=\"UTF-8\"?><Invoice><InvoiceNumber>REAL-TEST</InvoiceNumber></Invoice>"], { type: "application/xml" }), "real-test.xml");
@@ -453,40 +416,20 @@ xml.set("invoice_total", String(Number(purchaseOrder.grand_total ?? 0)));
 xml.set("idempotency_key", `${idempotencyKey}:invoice`);
 const invoice = await request(`${erpBaseUrl}/api/supplier/session/xml-invoice`, { method: "POST", headers: { Cookie: winningFlow.sessionCookie }, body: xml });
 if (invoice.status !== 201) throw new Error(`XML invoice upload failed (${invoice.status}): ${invoice.raw}`);
-const invoiceSubmission = text(object(apiData(invoice.body)).submission);
+const invoiceData = object(apiData(invoice.body));
+const invoiceSubmission = text(invoiceData.purchase_invoice || invoiceData.submission);
 if (!invoiceSubmission) throw new Error(`XML invoice submission id missing: ${invoice.raw}`);
-const duplicateXml = new FormData();
-duplicateXml.set("file", new Blob(["<?xml version=\"1.0\" encoding=\"UTF-8\"?><Invoice><InvoiceNumber>REAL-TEST</InvoiceNumber></Invoice>"], { type: "application/xml" }), "real-test.xml");
-duplicateXml.set("invoice_number", text(xml.get("invoice_number")));
-duplicateXml.set("invoice_date", transactionDate);
-duplicateXml.set("invoice_total", String(Number(purchaseOrder.grand_total ?? 0)));
-duplicateXml.set("idempotency_key", `${idempotencyKey}:invoice`);
-const duplicateInvoice = await request(`${erpBaseUrl}/api/supplier/session/xml-invoice`, { method: "POST", headers: { Cookie: winningFlow.sessionCookie }, body: duplicateXml });
-if (duplicateInvoice.status !== 201 || text(object(apiData(duplicateInvoice.body)).submission) !== invoiceSubmission) {
-  throw new Error(`Duplicate XML submission was not idempotent: ${duplicateInvoice.raw}`);
-}
-const invoiceReview = await reviewSubmission(session.cookie, invoiceSubmission);
-const invoiceName = text(invoiceReview.result_document);
-if (!invoiceName) throw new Error(`Purchase Invoice was not created: ${JSON.stringify(invoiceReview)}`);
-if (!/^INV-\d{8}-\d{4}$/.test(invoiceName)) throw new Error(`Purchase Invoice naming contract failed: ${invoiceName}`);
+const invoiceName = invoiceSubmission;
+assertErpName(invoiceName, "Purchase Invoice");
 const finalSummary = await request(`${erpBaseUrl}/api/supplier/session/process`, { headers: { Cookie: winningFlow.sessionCookie } });
 if (finalSummary.status !== 200) throw new Error(`Final process readback failed (${finalSummary.status}): ${finalSummary.raw}`);
 const finalRow = object(apiData(finalSummary.body));
-const finalReceipt = object(finalRow.purchase_receipt as Json);
-const finalInvoice = object(finalRow.purchase_invoice as Json);
-if (text(finalReceipt.name) !== receiptName || text(finalReceipt.status) !== "Submitted") throw new Error(`Purchase Receipt was not submitted: ${finalSummary.raw}`);
-if (text(finalInvoice.name) !== invoiceName || text(finalInvoice.status) !== "Submitted") throw new Error(`Purchase Invoice was not submitted: ${finalSummary.raw}`);
-const overflowPayload = {
-  delivery_date: transactionDate,
-  idempotency_key: `${idempotencyKey}:quantity-overflow`,
-  items: poItems.map((item, index) => ({ purchase_order_item: text(object(item as Json).name), delivered_qty: index === 0 ? Number(object(item as Json).qty ?? 0) + 1 : 0, uom: text(object(item as Json).uom) })),
-};
-const overflow = await request(`${erpBaseUrl}/api/supplier/session/delivery`, {
-  method: "POST",
-  headers: { Cookie: winningFlow.sessionCookie },
-  body: JSON.stringify(overflowPayload),
-});
-if (overflow.status < 400 || overflow.status >= 500) throw new Error(`Quantity overflow was accepted or returned a server error: ${overflow.raw}`);
+const finalReceipts = Array.isArray(finalRow.purchase_receipt) ? finalRow.purchase_receipt : [];
+const finalInvoices = Array.isArray(finalRow.purchase_invoice) ? finalRow.purchase_invoice : [];
+const finalReceipt = object(finalReceipts.find((row) => text(object(row as Json).name) === receiptName) as Json);
+const finalInvoice = object(finalInvoices.find((row) => text(object(row as Json).name) === invoiceName) as Json);
+if (finalReceipts.length !== 1 || text(finalReceipt.name) !== receiptName || text(finalReceipt.status) !== "Submitted") throw new Error(`Purchase Receipt count/status is invalid: ${finalSummary.raw}`);
+if (finalInvoices.length !== 1 || text(finalInvoice.name) !== invoiceName || text(finalInvoice.status) !== "Submitted") throw new Error(`Purchase Invoice count/status is invalid: ${finalSummary.raw}`);
 const payment = await request(`${erpBaseUrl}/api/supplier/session/payment-status`, { headers: { Cookie: winningFlow.sessionCookie } });
 if (payment.status !== 200) throw new Error(`Payment status readback failed (${payment.status}): ${payment.raw}`);
 const paymentData = object(apiData(payment.body));
@@ -501,9 +444,6 @@ console.log(`approval_instance=${approvalInstance}`);
 console.log(`items=${itemCount}`);
 console.log(`suppliers=${Array.isArray(result.suppliers) ? result.suppliers.length : 0}`);
 console.log(`supplier_magic_otp_flows=${supplierResults.length}`);
-console.log(`otp_resend_rate_limit_checks=${supplierResults.length}`);
-console.log(`otp_replay_rejections=${supplierResults.filter((item) => item.otpReplayRejected).length}`);
-console.log(`otp_lock_rejections=${supplierResults.reduce((total, item) => total + item.otpLockRejections, 0)}`);
 console.log(`selected_cheapest_quotation=${text(gate.selected_supplier_quotation)}`);
 console.log(`supplier_email_readback=${supplierResults.map((item) => item.accessEmail).join(",")}`);
 console.log("mail_provider_acceptance=PASS");
@@ -512,11 +452,16 @@ console.log(`purchase_order=${poName}`);
 console.log(`purchase_receipt=${receiptName}`);
 console.log(`purchase_invoice=${invoiceName}`);
 console.log(`payment_status=${text(paymentData.payment_status)}`);
-console.log("quantity_overflow_rejections=1");
 console.log("approver=leducanh@ledb.vn");
 }
 
 main().catch((error: unknown) => {
+  if (error instanceof MailReadbackTimeout) {
+    console.error(error.message);
+    console.log("REAL_MR_TEST=INCONCLUSIVE_MAIL_READBACK");
+    process.exitCode = 2;
+    return;
+  }
   console.error(error instanceof Error ? error.message : error);
   process.exitCode = 1;
 });

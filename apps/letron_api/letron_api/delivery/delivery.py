@@ -112,7 +112,7 @@ def capture_event(doc: Any, event_type: str) -> None:
     finally:
         frappe.flags.in_letron_outbox = False
     frappe.enqueue(
-        "letron_api.delivery.process_outbox_event",
+        "letron_api.delivery.delivery.process_outbox_event",
         queue="short",
         enqueue_after_commit=True,
         job_id=f"letron-outbox-{event_id}",
@@ -221,7 +221,7 @@ def process_outbox_event(event_id: str) -> None:
     frappe.db.commit()
     if "Retry" in states:
         frappe.enqueue(
-            "letron_api.delivery.process_outbox_event",
+            "letron_api.delivery.delivery.process_outbox_event",
             queue="short",
             enqueue_after_commit=True,
             event_id=event_id,

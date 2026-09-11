@@ -14,8 +14,7 @@ import { canonicalAuthOrigin } from "../../../../src/server/auth-origin";
 function safeReturnTo(value: string | undefined): string {
   if (!value) return "/";
   if (value.startsWith("/") && !value.startsWith("//")) return value;
-  const configured = getEnv().LETRON_NEXT_BASE_URL;
-  if (!configured) return "/";
+  const configured = getEnv().LETRON_ERP_APP_BASE_URL;
   try {
     const requested = new URL(value);
     const allowed = new URL(configured);

@@ -1,0 +1,1 @@
+export const GLOBAL_ACCESS_ADMIN_GROUP_ID = "1eee428b5b358f23";

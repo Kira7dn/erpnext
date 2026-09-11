@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { getDb } from "./db";
-import { getEnv } from "./env";
+import { AUTH_FEATURE_CONFIG, getEnv } from "./env";
 import { appendSetCookie, parseCookies, requestIsSecure, serializeCookie } from "./http";
 import { randomToken, sha256 } from "./crypto";
 import { cacheDelete, cacheGet, cacheSet, sessionCacheKey } from "./cache";
@@ -19,15 +19,13 @@ export type AuthenticatedUser = {
   subjectType: string | null;
 };
 
-function cookieOptions(req: NextApiRequest): { secure: boolean; domain?: string } {
-  const host = (Array.isArray(req.headers.host) ? req.headers.host[0] : req.headers.host ?? "").split(",")[0].trim().split(":")[0];
-  const local = host === "localhost" || host === "127.0.0.1";
-  return { secure: requestIsSecure(req), domain: local ? undefined : getEnv().AUTH_COOKIE_DOMAIN };
+function cookieOptions(req: NextApiRequest): { secure: boolean } {
+  return { secure: requestIsSecure(req) };
 }
 
 export async function createSession(userId: string): Promise<{ token: string; expiresAt: Date }> {
   const token = randomToken();
-  const expiresAt = new Date(Date.now() + getEnv().AUTH_SESSION_TTL_SECONDS * 1000);
+  const expiresAt = new Date(Date.now() + AUTH_FEATURE_CONFIG.sessionTtlSeconds * 1000);
   await getDb().ssoSession.create({ data: { tokenHash: sha256(token), userId, expiresAt } });
   return { token, expiresAt };
 }
@@ -88,7 +86,7 @@ export async function getUserBySessionToken(token: string | undefined): Promise<
     subject: identity?.subject ?? null,
     subjectType: identity?.subjectType ?? null,
   };
-  await cacheSet(sessionCacheKey(tokenHash), { user, expiresAt: session.expiresAt.toISOString() }, Math.min(getEnv().AUTH_SESSION_CACHE_TTL_SECONDS, Math.max(1, Math.ceil((session.expiresAt.getTime() - Date.now()) / 1000))));
+  await cacheSet(sessionCacheKey(tokenHash), { user, expiresAt: session.expiresAt.toISOString() }, Math.min(AUTH_FEATURE_CONFIG.sessionCacheTtlSeconds, Math.max(1, Math.ceil((session.expiresAt.getTime() - Date.now()) / 1000))));
   return user;
 }
 
@@ -103,7 +101,7 @@ export async function rotateSession(req: NextApiRequest, res: NextApiResponse, u
       });
     }
     const token = randomToken();
-    const expiresAt = new Date(Date.now() + getEnv().AUTH_SESSION_TTL_SECONDS * 1000);
+    const expiresAt = new Date(Date.now() + AUTH_FEATURE_CONFIG.sessionTtlSeconds * 1000);
     await tx.ssoSession.create({ data: { tokenHash: sha256(token), userId, expiresAt } });
     return { token, expiresAt };
   });

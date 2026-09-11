@@ -49,7 +49,7 @@ union_id` dành cho nhân viên.
 - [x] Hiển thị thông tin PO được allowlist.
 - [x] Supplier gửi xác nhận giao hàng và chứng từ giao hàng.
 - [x] Supplier upload XML invoice.
-- [x] Internal review trước khi tạo hoặc submit chứng từ kế toán/kho.
+- [x] Next.js validate rồi tạo và submit native Receipt/Invoice qua Frappe REST.
 - [x] Audit event và control-plane revoke operator đã triển khai; các runtime acceptance còn lại được đánh dấu trực tiếp trong Phase 3.
 - [x] Expiry và idempotency cho access, OTP, quotation, delivery và XML intake.
 
@@ -161,8 +161,8 @@ vào việc Supplier có ERP login hay không. Context phải được khôi ph�
 | Nghiệp vụ | Request từ Supplier | Actor tạo/submit native document |
 |---|---|---|
 | Supplier Quotation | Item, quantity, rate thuộc RFQ của access | `apps/erp` qua native Frappe REST |
-| Delivery confirmation | PO item và số lượng còn nhận | Internal reviewer/service sau khi review |
-| XML invoice | File XML và metadata thuộc PO/Supplier | Internal reviewer/service sau khi review |
+| Delivery confirmation | PO item và số lượng còn nhận | `apps/erp` qua native Frappe REST |
+| XML invoice | File XML và metadata thuộc PO/Supplier | `apps/erp` qua native Frappe REST |
 | PO trước approval | Không được tự tạo/chỉnh sửa | `apps/erp` tạo PO Draft native ERPNext |
 | PO sau approval | Không được tạo PO mới | Lark callback submit đúng PO Draft đã cấp số |
 
@@ -220,7 +220,7 @@ sequenceDiagram
 
     SUP->>APP: Quote / delivery confirmation / XML upload
     APP->>ERP: Validate session, lifecycle capability and idempotency
-    ERP-->>APP: Persist pending submission
+    ERP-->>APP: Persist native ERPNext document
 ```
 
 Magic Link là bearer credential ban đầu và là định danh cố định của process, không
@@ -356,7 +356,7 @@ cầu `letron_sso` và Lark SSO.
 Supplier Portal không còn là module nghiệp vụ của Frappe. `apps/erp` giữ access,
 Magic Link, OTP, session, submission, deadline gate và approval handoff trong
 Redis; Next gọi trực tiếp native Frappe REST API bằng system-automation
-signature hiện có (`LETRON_SSO_SYNC_SECRET`). Frappe chỉ xử lý các DocType và
+signature hiện có (`LETRON_INTERNAL_API_SECRET`). Frappe chỉ xử lý các DocType và
 lifecycle native: Material Request, RFQ, Supplier Quotation, Purchase Order,
 Purchase Receipt và Purchase Invoice.
 
@@ -394,7 +394,7 @@ Không expose các method này qua generic CRUD public resource.
 │   ├── Invoice number
 │   ├── Invoice date
 │   └── Tax identification
-└── Submission status
+└── Native document status
 ```
 
 Process Summary chỉ trả các field cần cho supplier:
@@ -422,12 +422,12 @@ Capability theo lifecycle đề xuất:
 
 ## 10. Delivery Confirmation
 
-Supplier submit delivery confirmation tạo một bản ghi pending, không submit kho
-ngay:
+Supplier submit delivery confirmation được validate rồi tạo và submit Receipt
+native ngay:
 
 ```text
 Supplier Delivery Confirmation
-→ Internal review
+→ Purchase Receipt submitted
 → Native Purchase Receipt draft
 → Internal submit Purchase Receipt
 ```
@@ -461,14 +461,14 @@ payload hash để retry cùng idempotency key trả lại đúng submission cũ
 
 ## 11. XML Invoice Intake
 
-XML upload tạo intake pending, không tự động ghi nhận công nợ:
+XML upload được validate và tạo Purchase Invoice native ngay sau khi đối chiếu PO:
 
 ```text
 Upload private XML
 → Validate size/type/checksum
 → Parse supplier/tax/total
 → Match PO/Supplier
-→ Internal review
+→ Purchase Invoice submitted
 → Purchase Invoice draft
 → Submit Purchase Invoice
 → E-invoice provider handoff
@@ -538,12 +538,12 @@ Cấu hình không-secret của Supplier Portal nằm trong
 submitter approval, user review nội bộ và chu kỳ deadline. Endpoint theo môi
 trường được override bằng các biến URL đã có trong
 `.env.local`/`.env.production`: `LETRON_AUTH_BASE_URL`,
-`LETRON_SSO_ERP_BASE_URL`, `LETRON_NEXT_BASE_URL` và
-`LETRON_SUPPLIER_PORTAL_PUBLIC_BASE_URL`. Local dùng `http://localhost:3001`,
+`FRAPPE_ERP_NEXT_URL` và `LETRON_ERP_APP_BASE_URL`. Local dùng
+`http://localhost:3001`,
 production dùng HTTPS public domain. Backend nhận endpoint tương ứng qua
 Compose. Chỉ các secret mới bắt buộc nằm trong env:
-`LETRON_SUPPLIER_PORTAL_CRON_SECRET` và các secret control-plane có sẵn của
-hệ thống. Supplier Portal dùng chung `LETRON_SSO_SYNC_SECRET` cho các request
+`LETRON_INTERNAL_API_SECRET` và các secret control-plane có sẵn của
+hệ thống. Supplier Portal dùng chung `LETRON_INTERNAL_API_SECRET` cho các request
 được ký nội bộ; không còn secret alias riêng.
 
 Khi `NODE_ENV=production`, public URL phải là HTTPS và không được là
@@ -808,12 +808,12 @@ không hiển thị lỗi link cho trường hợp này.
 
 ## 17. Mặc định KISS đã chốt
 
-- [x] Supplier chỉ gửi delivery confirmation; ERPNext tạo Purchase Receipt draft
-  để nội bộ kiểm tra và submit.
+- [x] Supplier gửi delivery confirmation; Next.js validate và ERPNext tạo
+  Purchase Receipt submitted.
 - [x] Mỗi Supplier process có một Contact/email snapshot nhận Magic Link. Đổi
   Contact cần operator nội bộ revoke/reissue theo cùng process policy.
 - [x] Magic Link giữ nguyên đến khi process đóng, revoke hoặc hết 90 ngày không
   hoạt động; không tạo URL mới khi đổi trạng thái chứng từ.
-- [x] XML chỉ tạo intake pending và Purchase Invoice draft sau internal review.
+- [x] XML được validate, đối chiếu PO và ERPNext tạo Purchase Invoice submitted.
 - [x] OTP qua email là cơ chế xác minh duy nhất trong phase này; không thêm factor
   thứ hai ngoài email.

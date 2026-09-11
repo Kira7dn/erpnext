@@ -33,7 +33,7 @@ if ($Action -eq 'config-validate') {
 }
 if ($Action -eq 'policy-validate') {
     if (!(Test-Path -LiteralPath $policyPath)) { throw "Missing policy YAML: $policyPath" }
-    Write-Host (Invoke-UvPython @('-m','letron_api.policy','validate','--path',$policyPath))
+    Write-Host (Invoke-UvPython @('-m','letron_api.control.policy','validate','--path',$policyPath))
     return
 }
 
@@ -79,7 +79,7 @@ function Invoke-Compose([string[]]$extra) {
 }
 
 function Invoke-Readiness {
-    $uri = "http://localhost:$env:HTTP_PORT/api/method/letron_api.api.health"
+    $uri = "http://localhost:$env:HTTP_PORT/api/method/letron_api.control.api.health"
     $deadline = [DateTime]::UtcNow.AddSeconds(180)
     do {
         try {
@@ -103,7 +103,7 @@ function Invoke-Readiness {
 function Invoke-ReloadReadiness {
     # frappe.ping is protected by the gateway ingress policy. Use the public
     # integration health endpoint for a real unauthenticated readiness check.
-    $uri = "http://localhost:$env:HTTP_PORT/api/method/letron_api.api.health"
+    $uri = "http://localhost:$env:HTTP_PORT/api/method/letron_api.control.api.health"
     $deadline = [DateTime]::UtcNow.AddSeconds(20)
     do {
         try {
@@ -148,12 +148,12 @@ switch ($Action) {
     'restart' { Invoke-Compose @('down'); Invoke-Compose @('up','-d'); Invoke-Compose @('ps'); Invoke-Readiness }
     'ps' { Invoke-Compose @('ps','-a') }
     'logs' { Invoke-Compose ($(if($FollowLogs){@('logs','-f')}else{@('logs','--tail=100')})) }
-    'bootstrap' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.tenant_bootstrap.run') }
-    'inspect' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.api.runtime_snapshot') }
+    'bootstrap' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.tenant_bootstrap.run') }
+    'inspect' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.api.runtime_snapshot') }
     'config-plan' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.system_config.plan') }
     'config-apply' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.system_config.sync') }
     'policy-export' {
-        $encoded = (& docker @composeArgs exec -T backend bench --site $env:SITE_NAME execute letron_api.policy.export_current_base64)
+        $encoded = (& docker @composeArgs exec -T backend bench --site $env:SITE_NAME execute letron_api.control.policy.export_current_base64)
         if ($LASTEXITCODE -ne 0) { throw "Policy export failed with exit code $LASTEXITCODE" }
         try {
             $content = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String(($encoded -join '').Trim()))
@@ -163,15 +163,15 @@ switch ($Action) {
         $temporaryPolicy = "$policyPath.tmp.$PID"
         try {
             [IO.File]::WriteAllText($temporaryPolicy, $content, [Text.UTF8Encoding]::new($false))
-            Write-Host (Invoke-UvPython @('-m','letron_api.policy','validate','--path',$temporaryPolicy))
+            Write-Host (Invoke-UvPython @('-m','letron_api.control.policy','validate','--path',$temporaryPolicy))
             Move-Item -LiteralPath $temporaryPolicy -Destination $policyPath -Force
         } finally {
             if (Test-Path -LiteralPath $temporaryPolicy) { Remove-Item -LiteralPath $temporaryPolicy -Force }
         }
         Write-Host "Exported native ERPNext business policy to $policyPath"
     }
-    'policy-plan' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.policy.plan') }
-    'policy-apply' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.policy.sync') }
+    'policy-plan' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.policy.plan') }
+    'policy-apply' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.policy.sync') }
     # Run the one-shot backup independently of the long-lived scheduled
     # service.  The scheduled service intentionally sleeps forever when
     # backup.enabled is false; waiting on that dependency here made the

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { getEnv } from "./env";
+import { LARK_DOMAIN } from "./lark-runtime-config";
 
 const tokenSchema = z.object({
   access_token: z.string().min(1),
@@ -32,7 +33,7 @@ const optionalEmail = z.preprocess((value) => value === "" ? undefined : value, 
 const optionalUrl = z.preprocess((value) => value === "" ? undefined : value, z.string().url().optional());
 export const LARK_LOGIN_SCOPES = "contact:user.email:readonly";
 
-export function larkCallbackUri(origin = getEnv().AUTH_BASE_URL): string {
+export function larkCallbackUri(origin = getEnv().LETRON_AUTH_BASE_URL): string {
   return `${origin.replace(/\/$/, "")}/api/auth/lark/callback`;
 }
 
@@ -89,7 +90,7 @@ export function buildLarkAuthorizationUrl(input: {
   redirectUri?: string;
 }): URL {
   const env = getEnv();
-  const url = new URL("/open-apis/authen/v1/authorize", env.LARK_DOMAIN);
+  const url = new URL("/open-apis/authen/v1/authorize", LARK_DOMAIN);
   url.searchParams.set("client_id", env.LARK_APP_ID);
   url.searchParams.set("response_type", "code");
   url.searchParams.set("redirect_uri", input.redirectUri ?? larkCallbackUri());
@@ -102,7 +103,7 @@ export function buildLarkAuthorizationUrl(input: {
 
 export async function exchangeLarkCode(code: string, codeVerifier: string, redirectUri = larkCallbackUri()): Promise<string> {
   const env = getEnv();
-  const response = await fetch(new URL("/open-apis/authen/v2/oauth/token", env.LARK_DOMAIN), {
+  const response = await fetch(new URL("/open-apis/authen/v2/oauth/token", LARK_DOMAIN), {
     method: "POST",
     headers: { "content-type": "application/json; charset=utf-8" },
     body: JSON.stringify({
@@ -115,12 +116,14 @@ export async function exchangeLarkCode(code: string, codeVerifier: string, redir
     }),
     signal: AbortSignal.timeout(10_000),
   });
-  return tokenSchema.parse(unwrap(await readJson(response))).access_token;
+  // OAuth token exchange returns access_token at the response root. The
+  // user-info endpoint below uses the separate { data: ... } envelope.
+  return tokenSchema.parse(await readJson(response)).access_token;
 }
 
 export async function fetchLarkIdentity(accessToken: string) {
   const env = getEnv();
-  const response = await fetch(new URL("/open-apis/authen/v1/user_info", env.LARK_DOMAIN), {
+  const response = await fetch(new URL("/open-apis/authen/v1/user_info", LARK_DOMAIN), {
     headers: { authorization: `Bearer ${accessToken}` },
     signal: AbortSignal.timeout(10_000),
   });
@@ -148,7 +151,7 @@ async function getTenantAccessToken(): Promise<string> {
   }
 
   const env = getEnv();
-  const response = await fetch(new URL("/open-apis/auth/v3/tenant_access_token/internal", env.LARK_DOMAIN), {
+  const response = await fetch(new URL("/open-apis/auth/v3/tenant_access_token/internal", LARK_DOMAIN), {
     method: "POST",
     headers: { "content-type": "application/json; charset=utf-8" },
     body: JSON.stringify({ app_id: env.LARK_APP_ID, app_secret: env.LARK_APP_SECRET }),
@@ -169,7 +172,7 @@ export async function fetchLarkGroupIds(subject: string, subjectType: LarkSubjec
   let pageToken: string | undefined;
 
   for (let page = 0; page < 100; page += 1) {
-    const url = new URL("/open-apis/contact/v3/group/member_belong", env.LARK_DOMAIN);
+    const url = new URL("/open-apis/contact/v3/group/member_belong", LARK_DOMAIN);
     url.searchParams.set("member_id", subject);
     url.searchParams.set("member_id_type", subjectType);
     url.searchParams.set("page_size", "500");
@@ -194,7 +197,7 @@ export async function fetchLarkGroupCatalog(): Promise<Array<{ id: string; name:
   const groups = new Map<string, { id: string; name: string; description?: string }>();
   let pageToken: string | undefined;
   for (let page = 0; page < 100; page += 1) {
-    const url = new URL("/open-apis/contact/v3/group/simplelist", env.LARK_DOMAIN);
+    const url = new URL("/open-apis/contact/v3/group/simplelist", LARK_DOMAIN);
     url.searchParams.set("page_size", "100");
     if (pageToken) url.searchParams.set("page_token", pageToken);
     const response = await fetch(url, { headers: { authorization: `Bearer ${tenantAccessToken}` }, signal: AbortSignal.timeout(10_000) });
@@ -217,7 +220,7 @@ export async function fetchLarkUserIdByEmail(
 ): Promise<string> {
   const env = getEnv();
   const tenantAccessToken = await getTenantAccessToken();
-  const response = await fetch(new URL(`/open-apis/contact/v3/users/batch_get_id?user_id_type=${userIdType}`, env.LARK_DOMAIN), {
+  const response = await fetch(new URL(`/open-apis/contact/v3/users/batch_get_id?user_id_type=${userIdType}`, LARK_DOMAIN), {
     method: "POST",
     headers: { authorization: `Bearer ${tenantAccessToken}`, "content-type": "application/json" },
     body: JSON.stringify({ emails: [email] }),
@@ -236,7 +239,7 @@ export async function larkTenantJson<T>(path: string, init: RequestInit = {}): P
   const headers = new Headers(init.headers);
   headers.set("authorization", `Bearer ${token}`);
   headers.set("content-type", headers.get("content-type") ?? "application/json");
-  return (await readJson(await fetch(new URL(path, env.LARK_DOMAIN), {
+  return (await readJson(await fetch(new URL(path, LARK_DOMAIN), {
     ...init,
     headers,
     signal: init.signal ?? AbortSignal.timeout(15_000),

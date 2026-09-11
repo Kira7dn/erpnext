@@ -456,12 +456,7 @@ def protect_lark_managed_user(document: Any, _method: str | None = None) -> None
 
 
 def status() -> dict[str, Any]:
-    enabled = os.environ.get("LETRON_SSO_ROLE_SYNC_ENABLED", "false").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
+    enabled = True
     if not enabled:
         return {"enabled": False}
     if not frappe.db.table_exists(IDENTITY_DOCTYPE):

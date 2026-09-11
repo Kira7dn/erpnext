@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getEnv } from "../src/server/env";
+import { GLOBAL_ACCESS_ADMIN_GROUP_ID } from "../src/server/runtime-config";
 import { getUserBySessionToken, SESSION_COOKIE } from "../src/server/session";
 
 export const dynamic = "force-dynamic";
@@ -41,8 +42,8 @@ export default async function HomePage() {
   const user = await getUserBySessionToken((await cookies()).get(SESSION_COOKIE)?.value);
   if (!user) redirect("/api/auth/lark/start?return_to=/");
 
-  const env = getEnv();
-  const isAccessAdmin = Boolean(env.GLOBAL_ACCESS_ADMIN_GROUP_ID && user.groupIds.includes(env.GLOBAL_ACCESS_ADMIN_GROUP_ID));
+  getEnv();
+  const isAccessAdmin = user.groupIds.includes(GLOBAL_ACCESS_ADMIN_GROUP_ID);
   const initials = user.displayName.split(/\s+/).filter(Boolean).slice(-2).map((part) => part[0]?.toUpperCase()).join("") || "L";
 
   return (

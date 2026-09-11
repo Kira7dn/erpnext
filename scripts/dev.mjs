@@ -3,7 +3,6 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = process.cwd();
-const secretKeys = ["LETRON_API_KEY", "LETRON_SSO_SYNC_SECRET", "LARK_APP_ID", "LARK_APP_SECRET", "LARK_DOMAIN", "LARK_PO_APPROVAL_CODE", "LARK_PO_APPROVER_EMAIL", "LARK_EVENT_ENCRYPT_KEY", "KV_REST_API_URL", "KV_REST_API_TOKEN"];
 
 function parseEnv(content) {
   const values = new Map();
@@ -17,9 +16,7 @@ function parseEnv(content) {
 
 try {
   const values = parseEnv(await readFile(resolve(root, ".env"), "utf8"));
-  for (const key of secretKeys) {
-    if (!process.env[key] && values.get(key)) process.env[key] = values.get(key);
-  }
+  for (const [key, value] of values) if (!process.env[key] && value) process.env[key] = value;
 } catch (error) {
   console.error(`Root dev launcher could not load .env: ${error.message}`);
   process.exit(1);

@@ -255,8 +255,7 @@ Secret thật và group ID thật chỉ nằm trong `.env` bị Git ignore. Tài
 dùng placeholder:
 
 ```env
-GLOBAL_ACCESS_ADMIN_GROUP_ID=replace-with-lark-group-id
-LETRON_SSO_REQUIRED_LARK_GROUP_ID=replace-with-erp-access-group-id
+Global Access Admin và ERP Access group ID được quản lý cố định trong runtime config.
 ```
 
 Stable identity bắt buộc là `lark + tenant_key + union_id`; không fallback sang

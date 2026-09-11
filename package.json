@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "dev:auth": "npm --prefix apps/auth-server run dev",
-    "dev:erp": "npm --prefix apps/erp run dev"
+    "dev:erp": "npm --prefix apps/erp run dev",
+    "realtest": "npm --prefix apps/auth-server exec -- tsx scripts/real-test-mr.ts"
   }
 }

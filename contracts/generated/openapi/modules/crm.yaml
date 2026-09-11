@@ -1369,6 +1369,11 @@ x-contract:
       actions:
       - submit
       - cancel
+    - doctype: Supplier Quotation
+      module: CRM
+      actions:
+      - submit
+      - cancel
     - doctype: Sales Order
       module: Selling
       actions:
@@ -1420,6 +1425,12 @@ x-contract:
       - submit
       - cancel
     custom_actions:
+    - doctype: Supplier Quotation
+      module: CRM
+      action: make-purchase-order
+      operation_id: makePurchaseOrderFromSupplierQuotation
+      path_suffix: make-purchase-order
+      handler: letron_api.control.api.make_purchase_order
     - doctype: Bank Transaction
       module: Accounts
       action: reconcile

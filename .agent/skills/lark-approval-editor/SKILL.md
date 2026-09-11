@@ -11,13 +11,22 @@ reading, translating, reorganizing, or updating a form or approval process.
 ## Letron PO implementation
 
 - The editable source of truth for the PO Approval form/detail is
-  `apps/auth-server/src/server/lark-po-approval-design.ts`.
+  `apps/erp/src/lib/lark-po-approval-design.ts`. Auth Server does not own
+  the ERP Approval form.
 - The official API synchronizer is
   `scripts/apply-lark-po-approval-design.ts`.
-- The MR runtime mapper imports the same design file, so labels and the total
-  row do not drift between the definition and newly created Approval records.
+- The ERP runtime mapper imports the same design file, so labels and the table
+  columns do not drift between the live definition and newly created Approval
+  records.
 - After changing the design, run from `apps/auth-server`:
   `npx --yes tsx ../../scripts/apply-lark-po-approval-design.ts`.
+- Lark regenerates widget `id` and `custom_id` values when an Approval
+  definition is rewritten. They are runtime handles, not business identity.
+  The synchronizer must read the live definition before any write and validate
+  the semantic contract exactly: unique label + type, field-list child labels
+  and types, and radio option values/text. It must use the IDs from that live
+  readback only for the current request; never persist widget IDs as source of
+  truth and never match by array index.
 - The compact item table uses five display columns: item/specification,
   supplier/RFQ, quantity, unit price, and line total. Keep the total row inside
   that table; do not reintroduce numeric `number`/`amount` children that cause
@@ -42,6 +51,9 @@ reading, translating, reorganizing, or updating a form or approval process.
   replacement definition unless explicitly requested.
 - Preserve the existing Approval code, viewers, approvers, and process unless
   the user asks to change them.
+- Do not import Approval form source across application roots. ERP code must
+  import the ERP-local design module; Auth Server may call the synchronizer
+  but must not define or own the ERP form.
 - Prefer CLI/API over browser automation for Approval definition changes.
 - Do not use Playwright for Approval definition edits or for creating test MR
   records when the authenticated API path is available.

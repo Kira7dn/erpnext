@@ -4,7 +4,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 
 import { getDb } from "../../../src/server/db";
-import { getEnv } from "../../../src/server/env";
+import { AUTH_FEATURE_CONFIG, getEnv } from "../../../src/server/env";
 import { disableCaching } from "../../../src/server/http";
 import { fetchLarkGroupIds, type LarkSubjectType } from "../../../src/server/lark";
 import { audit } from "../../../src/server/audit";
@@ -89,11 +89,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(405).end();
     return;
   }
-  if (!env.LARK_GROUP_SYNC_ENABLED || !env.LETRON_SSO_SYNC_SECRET) {
+  if (!AUTH_FEATURE_CONFIG.larkGroupSyncEnabled || !env.LETRON_INTERNAL_API_SECRET) {
     res.status(503).json({ error: "lark_group_sync_disabled" });
     return;
   }
-  if (!authorized(req, env.LETRON_SSO_SYNC_SECRET)) {
+  if (!authorized(req, env.LETRON_INTERNAL_API_SECRET)) {
     res.status(401).json({ error: "unauthorized" });
     return;
   }

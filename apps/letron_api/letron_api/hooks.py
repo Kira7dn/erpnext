@@ -82,6 +82,7 @@ PUBLIC_RESOURCE_ROUTES = {
     ("stock", "stock-reservation-entries"): "Stock Reservation Entry",
 }
 DOCUMENT_ACTIONS = {
+    ("crm", "supplier-quotations"): {"submit", "cancel"},
     ("assets", "assets"): {"submit", "cancel"},
     ("assets", "asset-capitalizations"): {"submit", "cancel"},
     ("assets", "asset-movements"): {"submit", "cancel"},
@@ -101,6 +102,7 @@ DOCUMENT_ACTIONS = {
     ("accounts", "bank-transactions"): {"submit", "cancel"},
 }
 CUSTOM_ACTIONS = {
+    ("crm", "supplier-quotations", "make-purchase-order"): "letron_api.control.api.make_purchase_order",
     ("accounts", "bank-transactions", "reconcile"): "letron_api.finance.accounts_reconciliation.reconcile_bank_transaction",
     ("accounts", "bank-transactions", "unreconcile"): "letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction",
     ("accounts", "bank-transaction-rules", "run-evaluation"): "letron_api.finance.banking.run_rule_evaluation",
@@ -298,10 +300,10 @@ after_migrate = ["letron_api.procurement.purchase_schema.ensure_schema"]
 
 doc_events = {
     doctype: {
-        "after_insert": "letron_api.delivery.capture_create",
-        "on_update": "letron_api.delivery.capture_update",
-        "on_submit": "letron_api.delivery.capture_submit",
-        "on_cancel": "letron_api.delivery.capture_cancel",
+        "after_insert": "letron_api.delivery.delivery.capture_create",
+        "on_update": "letron_api.delivery.delivery.capture_update",
+        "on_submit": "letron_api.delivery.delivery.capture_submit",
+        "on_cancel": "letron_api.delivery.delivery.capture_cancel",
     }
     for doctype in PUBLIC_RESOURCE_ROUTES.values()
 }
@@ -319,7 +321,7 @@ user_handlers = doc_events.setdefault("User", {})
 user_handlers["validate"] = "letron_api.auth.sso_identity.protect_lark_managed_user"
 
 scheduler_events = {
-    "all": ["letron_api.delivery.process_pending_outbox"],
+    "all": ["letron_api.delivery.delivery.process_pending_outbox"],
     "hourly": ["letron_api.control.policy.audit", "letron_api.control.system_config.audit"],
     "cron": {
         "*/5 * * * *": [

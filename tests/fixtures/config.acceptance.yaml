@@ -8,7 +8,7 @@ database:
   host: db
   port: 3306
   root_user: root
-  root_password: ${DB_ROOT_PASSWORD}
+  root_password: ${LETRON_BOOTSTRAP_PASSWORD}
   charset: utf8mb4
   collation: utf8mb4_unicode_ci
   volume: db-data
@@ -18,7 +18,7 @@ redis:
   socketio: redis-queue:6379
   cache_image: redis:6.2-alpine
   queue_image: redis:6.2-alpine
-site: {name: frontend, header: frontend, database_type: mariadb, admin_password: "${ADMIN_PASSWORD}"}
+site: {name: frontend, header: frontend, database_type: mariadb, admin_password: "${LETRON_BOOTSTRAP_PASSWORD}"}
 developer: {mode: true, allow_tests: true, request_timeout: 120}
 frontend: {backend: "backend:8000", websocket: "websocket:9000", upload_size: 50m, proxy_timeout: 120}
 workers:

@@ -1,6 +1,0 @@
-import { timingSafeEqual } from "node:crypto";
-import { NextResponse } from "next/server";
-import { reconcilePurchaseApproval } from "@/lib/lark-approval";
-
-function authorized(request: Request): boolean { const expected = process.env.LETRON_API_KEY?.trim(); const supplied = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, ""); if (!expected || !supplied) return false; const left = Buffer.from(supplied); const right = Buffer.from(expected); return left.length === right.length && timingSafeEqual(left, right); }
-export async function POST(request: Request): Promise<Response> { if (process.env.NODE_ENV === "production") return NextResponse.json({ error: "real_test_reconcile_disabled_in_production" }, { status: 403 }); if (!authorized(request)) return NextResponse.json({ error: "internal_unauthorized" }, { status: 401 }); const body = await request.json().catch(() => ({})) as { instance_code?: unknown }; const instanceCode = String(body.instance_code ?? "").trim(); if (!instanceCode) return NextResponse.json({ error: "instance_code_required" }, { status: 400 }); try { return NextResponse.json(await reconcilePurchaseApproval(instanceCode)); } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "lark_approval_reconcile_failed" }, { status: 400 }); } }

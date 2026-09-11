@@ -4,7 +4,7 @@ import { getEnv } from "../../../../src/server/env";
 import { sendLarkMail } from "../../../../src/server/lark-mail";
 
 function authorized(req: NextApiRequest): boolean {
-  const expected = getEnv().LETRON_API_KEY;
+  const expected = getEnv().LETRON_INTERNAL_API_SECRET;
   const supplied = req.headers.authorization?.replace(/^Bearer\s+/i, "") ?? "";
   return Boolean(expected && supplied && supplied === expected);
 }

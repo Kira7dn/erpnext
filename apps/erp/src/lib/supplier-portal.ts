@@ -4,7 +4,7 @@ import { ApiRequestError, type RemoteErrorPayload } from "./api-error";
 import { publicErrorMessage, retryAfterSeconds, validErrorCode } from "./error-contract";
 import { supplierPortalConfig } from "./supplier-portal-config";
 import { openPurchaseApproval } from "./lark-approval";
-import { approvalState, createDelivery, evaluateApprovalGate, evaluateDueOrchestrations, getSubmissions, processSummary, reviewSubmission, revokeAccess, submitQuotation, uploadInvoice } from "./supplier-portal-core";
+import { approvalState, createDelivery, evaluateApprovalGate, evaluateDueOrchestrations, getSubmissions, processSummary, revokeAccess, submitQuotation, uploadInvoice } from "./supplier-portal-core";
 
 export type SupplierPortalMail = { to: string; subject: string; body_html: string; body_plain_text: string; idempotency_key: string };
 function local(body: Record<string, unknown>): string { return String(body.portal_access_id ?? body.access_id ?? ""); }
@@ -26,8 +26,7 @@ export async function supplierPortalRequest<T>(method: string, body: Record<stri
 }
 export async function supplierPortalControlRequest<T>(method: string, body: Record<string, unknown>): Promise<T> {
   if (method === "revoke_access") return await revokeAccess(String(body.access_id ?? body.portal_access_id)) as T;
-  if (method !== "review_submission") throw new ApiRequestError("not_found", `Unsupported Supplier Portal control operation: ${method}.`, 404);
-  return await reviewSubmission(String(body.submission), String(body.decision) as "Approved" | "Rejected", String(body.review_note ?? "")) as T;
+  throw new ApiRequestError("not_found", `Unsupported Supplier Portal control operation: ${method}.`, 404);
 }
 export async function supplierPortalUpload<T>(method: string, form: FormData): Promise<T> {
   if (method !== "upload_xml_invoice") throw new ApiRequestError("not_found", `Unsupported Supplier Portal upload operation: ${method}.`, 404);
@@ -36,7 +35,7 @@ export async function supplierPortalUpload<T>(method: string, form: FormData): P
 export async function supplierPortalCronRequest<T>(): Promise<T> { return await evaluateDueOrchestrations() as T; }
 
 export async function sendSupplierPortalMail(input: SupplierPortalMail): Promise<{ messageId: string; idempotent?: boolean }> {
-  const authBase = supplierPortalConfig().auth_base_url.replace(/\/$/, ""); const apiKey = process.env.LETRON_API_KEY?.trim();
+  const authBase = supplierPortalConfig().auth_base_url.replace(/\/$/, ""); const apiKey = process.env.LETRON_INTERNAL_API_SECRET?.trim();
   if (!authBase || !apiKey) throw new ApiRequestError("configuration_error", "Supplier mail service is not configured.", 503);
   let response: Response;
   try { response = await fetch(`${authBase}/api/internal/lark-mail/send`, { method: "POST", headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${apiKey}`, "X-Idempotency-Key": input.idempotency_key }, body: JSON.stringify(input), cache: "no-store", signal: AbortSignal.timeout(30_000) }); }

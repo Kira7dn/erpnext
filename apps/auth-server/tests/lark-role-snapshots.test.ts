@@ -64,8 +64,7 @@ describe("targeted Lark role snapshot", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getEnv.mockReturnValue({
-      LARK_GROUP_SYNC_ENABLED: true,
-      LETRON_SSO_SYNC_SECRET: secret,
+      LETRON_INTERNAL_API_SECRET: secret,
       LARK_ALLOWED_TENANT_KEY: "tenant-test",
     });
     mocks.getDb.mockReturnValue(database);

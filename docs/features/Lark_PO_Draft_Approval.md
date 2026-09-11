@@ -36,4 +36,4 @@ Approval status được ghi trên chính Purchase Order native qua các custom 
 
 - Supplier quotation flow gọi trực tiếp `openPurchaseApproval()` server-side.
 - `POST /api/integrations/lark/webhooks/approval`
-- `POST /api/internal/lark/approval/reconcile`
+- `POST /api/integrations/lark/webhooks/approval`

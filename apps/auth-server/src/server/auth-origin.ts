@@ -7,7 +7,7 @@ function headerValue(value: string | string[] | undefined): string {
 }
 
 export function canonicalAuthOrigin(req: NextApiRequest): string {
-  const envOrigin = new URL(getEnv().AUTH_BASE_URL);
+  const envOrigin = new URL(getEnv().LETRON_AUTH_BASE_URL);
   const host = headerValue(req.headers["x-forwarded-host"] || req.headers.host);
   const local = host === "localhost:3000" || host === "127.0.0.1:3000";
   if (!local && host !== envOrigin.host) return envOrigin.origin;

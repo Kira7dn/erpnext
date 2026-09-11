@@ -1,7 +1,7 @@
 import { getDb } from "./db";
 import { parseAccessPolicy, type AccessPolicy } from "./access-policy";
 import { cacheGet, cacheSet, policyCacheKey } from "./cache";
-import { getEnv } from "./env";
+import { AUTH_FEATURE_CONFIG } from "./env";
 
 export async function getPublishedPolicy(): Promise<{ policy: AccessPolicy; version: number; sha256: string } | null> {
   const cached = await cacheGet<{ policy: AccessPolicy; version: number; sha256: string }>(policyCacheKey);
@@ -9,6 +9,6 @@ export async function getPublishedPolicy(): Promise<{ policy: AccessPolicy; vers
   const row = await getDb().accessPolicy.findFirst({ where: { status: "PUBLISHED" }, orderBy: { version: "desc" } });
   if (!row) return null;
   const policy = { policy: parseAccessPolicy(row.policy), version: row.version, sha256: row.sha256 };
-  await cacheSet(policyCacheKey, policy, getEnv().AUTH_POLICY_CACHE_TTL_SECONDS);
+  await cacheSet(policyCacheKey, policy, AUTH_FEATURE_CONFIG.policyCacheTtlSeconds);
   return policy;
 }

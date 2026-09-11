@@ -14,10 +14,8 @@ ghi trong approval form; retry là idempotent theo tên PO và instance code.
 
 - `apps/erp` gọi trực tiếp `openPurchaseApproval()` để tạo approval từ một PO
   native đã tồn tại.
-- `POST /api/integrations/lark/webhooks/approval`: nhận và reconcile trạng thái
-  approval.
-- `POST /api/internal/lark/approval/reconcile`: reconcile nội bộ khi cần vận
-  hành.
+- `POST /api/integrations/lark/webhooks/approval`: nhận approval event đã ký từ
+  Lark và submit đúng PO Draft được map với approval instance.
 
 ## Invariants
 

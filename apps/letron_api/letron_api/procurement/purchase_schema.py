@@ -35,6 +35,14 @@ def _custom_field(doctype: str, fieldname: str, fieldtype: str, insert_after: st
     field.insert(ignore_permissions=True)
 
 
+def _allow_on_submit(doctype: str, fieldname: str) -> None:
+    field_name = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": fieldname}, "name")
+    if not field_name:
+        raise RuntimeError(f"Missing Custom Field: {doctype}.{fieldname}")
+    if not frappe.db.get_value("Custom Field", field_name, "allow_on_submit"):
+        frappe.db.set_value("Custom Field", field_name, "allow_on_submit", 1, update_modified=False)
+
+
 def ensure_schema() -> None:
     """Install the non-user-facing correlation fields idempotently."""
 
@@ -85,6 +93,8 @@ def ensure_schema() -> None:
         options="Draft\nPending Approval\nApproved\nRejected\nERP Failed\nERP Submitted",
     )
     _custom_field("Purchase Order", "custom_lark_error", "Small Text", "supplier")
+    _allow_on_submit("Purchase Order", "custom_lark_approval_status")
+    _allow_on_submit("Purchase Order", "custom_lark_error")
     frappe.db.commit()
 
 

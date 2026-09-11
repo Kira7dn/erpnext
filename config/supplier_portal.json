@@ -5,6 +5,5 @@
   "auth_base_url": "http://host.docker.internal:3000",
   "approval_submitter_email": "leducanh@ledb.vn",
   "support_email": "procurement@letrongroup.com",
-  "review_user": "Administrator",
   "deadline_interval_minutes": 5
 }

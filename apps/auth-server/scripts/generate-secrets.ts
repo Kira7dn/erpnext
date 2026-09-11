@@ -35,7 +35,7 @@ function setEnvValue(content: string, name: string, value: string): string {
 if (process.argv.includes("--write-env")) {
   const tenantKey = argument("--tenant-key");
   if (!tenantKey) throw new Error("--tenant-key is required with --write-env");
-  const envPath = resolve(process.cwd(), ".env");
+  const envPath = resolve(process.cwd(), "../../.env");
   let content = await readFile(envPath, "utf8");
   content = setEnvValue(content, "LARK_ALLOWED_TENANT_KEY", tenantKey);
   content = setEnvValue(content, "AUTH_DATA_ENCRYPTION_KEY", values.AUTH_DATA_ENCRYPTION_KEY);

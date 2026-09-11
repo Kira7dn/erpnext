@@ -40,16 +40,14 @@ def test_config_resolves_only_exact_environment_references(
     candidate.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
     dotenv = tmp_path / ".env"
     dotenv.write_text(
-        "DB_ROOT_PASSWORD=db-secret\n"
-        "ADMIN_PASSWORD=admin-secret\n"
+        "LETRON_BOOTSTRAP_PASSWORD=bootstrap-secret\n"
         "SMTP_PASSWORD=smtp-secret\n"
         "LETRON_WEBHOOK_SECRET=webhook-secret\n"
         "LETRON_REALTIME_TOKEN=realtime-secret\n",
         encoding="utf-8",
     )
     for name in (
-        "DB_ROOT_PASSWORD",
-        "ADMIN_PASSWORD",
+        "LETRON_BOOTSTRAP_PASSWORD",
         "SMTP_PASSWORD",
         "LETRON_WEBHOOK_SECRET",
         "LETRON_REALTIME_TOKEN",
@@ -58,8 +56,9 @@ def test_config_resolves_only_exact_environment_references(
 
     resolved = system_config.load_config(candidate, resolve_secrets=True)
 
-    assert resolved["database"]["root_password"] == "db-secret"
-    assert resolved["delivery"]["realtime_token"] == "realtime-secret"
+    assert resolved["database"]["root_password"] == "bootstrap-secret"
+    assert resolved["email"]["password"] == ""
+    assert resolved["delivery"]["realtime_token"] == ""
 
 
 def test_config_prefers_local_dotenv_when_present(
@@ -69,8 +68,7 @@ def test_config_prefers_local_dotenv_when_present(
     source.parent.mkdir(parents=True, exist_ok=True)
     source.write_text(system_config.config_path().read_text(encoding="utf-8"), encoding="utf-8")
     (tmp_path / ".env").write_text(
-        "DB_ROOT_PASSWORD=db-secret\n"
-        "ADMIN_PASSWORD=admin-secret\n"
+        "LETRON_BOOTSTRAP_PASSWORD=bootstrap-secret\n"
         "SMTP_PASSWORD=smtp-secret\n"
         "LETRON_WEBHOOK_SECRET=webhook-secret\n"
         "LETRON_REALTIME_TOKEN=realtime-secret\n"
@@ -80,16 +78,14 @@ def test_config_prefers_local_dotenv_when_present(
         encoding="utf-8",
     )
     (tmp_path / ".env.local").write_text(
-        "DB_ROOT_PASSWORD=db-secret-local\n"
-        "ADMIN_PASSWORD=admin-secret-local\n"
+        "LETRON_BOOTSTRAP_PASSWORD=bootstrap-secret-local\n"
         "SMTP_PASSWORD=smtp-secret-local\n"
         "LETRON_WEBHOOK_SECRET=webhook-secret-local\n"
         "LETRON_REALTIME_TOKEN=realtime-secret-local\n",
         encoding="utf-8",
     )
     for name in (
-        "DB_ROOT_PASSWORD",
-        "ADMIN_PASSWORD",
+        "LETRON_BOOTSTRAP_PASSWORD",
         "SMTP_PASSWORD",
         "LETRON_WEBHOOK_SECRET",
         "LETRON_REALTIME_TOKEN",
@@ -101,11 +97,11 @@ def test_config_prefers_local_dotenv_when_present(
 
     resolved = system_config.load_config(source, resolve_secrets=True)
 
-    assert resolved["database"]["root_password"] == "db-secret-local"
-    assert resolved["site"]["admin_password"] == "admin-secret-local"
-    assert resolved["email"]["password"] == "smtp-secret-local"
-    assert resolved["delivery"]["webhook_secret"] == "webhook-secret-local"
-    assert resolved["delivery"]["realtime_token"] == "realtime-secret-local"
+    assert resolved["database"]["root_password"] == "bootstrap-secret-local"
+    assert resolved["site"]["admin_password"] == "bootstrap-secret-local"
+    assert resolved["email"]["password"] == ""
+    assert resolved["delivery"]["webhook_secret"] == ""
+    assert resolved["delivery"]["realtime_token"] == ""
 
 
 @pytest.mark.parametrize(
@@ -123,7 +119,7 @@ def test_invalid_system_config_fails_closed(
     if replacement == "version: 3":
         content = "version: 3\n" + content
     elif replacement.startswith("root_password"):
-        content = content.replace("root_password: ${DB_ROOT_PASSWORD}", replacement)
+        content = content.replace("root_password: ${LETRON_BOOTSTRAP_PASSWORD}", replacement)
     else:
         content = content.replace("environment: production-like", replacement)
     candidate = tmp_path / "config.yaml"
@@ -139,11 +135,7 @@ def test_missing_secret_fails_only_when_materializing(
     candidate = tmp_path / "config.yaml"
     candidate.write_text(system_config.config_path().read_text(encoding="utf-8"), encoding="utf-8")
     for name in (
-        "DB_ROOT_PASSWORD",
-        "ADMIN_PASSWORD",
-        "SMTP_PASSWORD",
-        "LETRON_WEBHOOK_SECRET",
-        "LETRON_REALTIME_TOKEN",
+        "LETRON_BOOTSTRAP_PASSWORD",
     ):
         monkeypatch.delenv(name, raising=False)
 

@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const previousOriginalUrl = mountedRequest.originalUrl;
   const previousForwardedHost = req.headers["x-forwarded-host"];
   const previousForwardedProto = req.headers["x-forwarded-proto"];
-  const canonical = new URL(getEnv().AUTH_BASE_URL);
+  const canonical = new URL(getEnv().LETRON_AUTH_BASE_URL);
   mountedRequest.originalUrl = originalUrl;
   req.headers["x-forwarded-host"] = canonical.host;
   req.headers["x-forwarded-proto"] = canonical.protocol.slice(0, -1);

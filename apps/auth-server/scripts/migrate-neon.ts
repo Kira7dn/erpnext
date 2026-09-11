@@ -4,8 +4,6 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { config as loadDotEnv } from "dotenv";
 
-loadDotEnv({ path: resolve(process.cwd(), ".env.local"), override: false, quiet: true });
-loadDotEnv({ path: resolve(process.cwd(), ".env"), override: false, quiet: true });
 loadDotEnv({ path: resolve(process.cwd(), "../../.env"), override: false, quiet: true });
 
 const databaseUrl = process.env.DATABASE_URL;

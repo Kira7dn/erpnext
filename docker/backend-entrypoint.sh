@@ -29,9 +29,9 @@ bench set-config -g default_site "$SITE_NAME"
 if [ ! -f "sites/$SITE_NAME/site_config.json" ]; then
   echo "Site $SITE_NAME does not exist. Initializing new site..."
   bench new-site --mariadb-user-host-login-scope='%' \
-    --admin-password="$ADMIN_PASSWORD" \
+    --admin-password="$LETRON_BOOTSTRAP_PASSWORD" \
     --db-root-username="$DB_ROOT_USER" \
-    --db-root-password="$MARIADB_ROOT_PASSWORD" \
+    --db-root-password="$LETRON_BOOTSTRAP_PASSWORD" \
     --install-app erpnext \
     --install-app "$INTEGRATION_APP" \
     --set-default "$SITE_NAME"
@@ -45,9 +45,9 @@ fi
 
 # 4. Bootstrap tenant, system config và policy sync
 echo "Bootstrapping tenant and syncing policies..."
-bench --site "$SITE_NAME" execute letron_api.tenant_bootstrap.run
-bench --site "$SITE_NAME" execute letron_api.system_config.sync
-bench --site "$SITE_NAME" execute letron_api.policy.sync
+bench --site "$SITE_NAME" execute letron_api.control.tenant_bootstrap.run
+bench --site "$SITE_NAME" execute letron_api.control.system_config.sync
+bench --site "$SITE_NAME" execute letron_api.control.policy.sync
 
 # 5. Cấu hình site mapping cho direct API access
 echo "Configuring site routing..."

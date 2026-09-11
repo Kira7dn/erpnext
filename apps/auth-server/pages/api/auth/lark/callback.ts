@@ -8,6 +8,7 @@ import { finishInteraction } from "../../../../src/server/interaction";
 import { exchangeLarkCode, fetchLarkGroupIds, fetchLarkIdentity, larkCallbackUri } from "../../../../src/server/lark";
 import { consumeOAuthTransaction, LARK_TRANSACTION_COOKIE } from "../../../../src/server/oauth-transaction";
 import { getOidcProvider } from "../../../../src/server/oidc";
+import { AUTH_FEATURE_CONFIG } from "../../../../src/server/env";
 import { rotateSession } from "../../../../src/server/session";
 import { upsertLarkUser } from "../../../../src/server/users";
 import { getEnv } from "../../../../src/server/env";
@@ -59,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }));
     const accessToken = await exchangeLarkCode(code, transaction.codeVerifier, larkCallbackUri(canonicalAuthOrigin(req)));
     const identity = await fetchLarkIdentity(accessToken);
-    const groupIds = getEnv().LARK_GROUP_SYNC_ENABLED
+    const groupIds = AUTH_FEATURE_CONFIG.larkGroupSyncEnabled
       ? await fetchLarkGroupIds(identity.subject, identity.subjectType)
       : undefined;
     const user = await upsertLarkUser({ ...identity, groupIds });

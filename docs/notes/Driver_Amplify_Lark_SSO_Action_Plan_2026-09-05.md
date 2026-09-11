@@ -146,9 +146,9 @@ callback URL theo từng environment.
 ### Công việc
 
 - [ ] Deploy Auth Server tại một HTTPS origin ổn định.
-- [ ] Đặt `AUTH_BASE_URL` đúng public origin và đăng ký callback Lark chính xác.
+- [ ] Đặt `LETRON_AUTH_BASE_URL` đúng public origin và đăng ký callback Lark chính xác.
 - [ ] Kiểm tra OIDC discovery tại
-      `${AUTH_BASE_URL}/api/oidc/.well-known/openid-configuration`.
+      `${LETRON_AUTH_BASE_URL}/api/oidc/.well-known/openid-configuration`.
 - [ ] Kiểm tra `authorization_endpoint`, `token_endpoint`, `userinfo_endpoint`
       và `jwks_uri` đều là HTTPS public URL.
 - [ ] Hoàn thành hai lỗi P0 trong audit SSO: refresh group trước phát hành claim

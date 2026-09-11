@@ -25,7 +25,12 @@ export async function POST(request: Request): Promise<Response> {
   let poName = ""; let status = "";
   try {
     const instance = await readPurchaseApproval(instanceCode); status = String(instance.status ?? "").toUpperCase(); poName = findString(instance, ["erp_purchase_order_name", "purchase_order_name", "po_number"]) ?? instanceCode;
-    const result = await reconcilePurchaseApproval(instanceCode); await completeApprovalWebhook(eventId);
+    const result = await reconcilePurchaseApproval(instanceCode);
+    if (result.status !== "ERP_SUBMITTED" && status === "PENDING") {
+      await releaseApprovalWebhook(eventId);
+      return NextResponse.json({ accepted: true, retryable: true, status: result.status, erp_purchase_order_name: result.erpPurchaseOrderName }, { status: 202 });
+    }
+    await completeApprovalWebhook(eventId);
     return NextResponse.json({ accepted: true, status: result.status, erp_purchase_order_name: result.erpPurchaseOrderName });
   } catch (error) {
     const message = error instanceof Error ? error.message : "approval_reconciliation_failed";

@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getUserBySessionToken, SESSION_COOKIE } from "../../../src/server/session";
 import { disableCaching } from "../../../src/server/http";
 import { getEnv } from "../../../src/server/env";
+import { GLOBAL_ACCESS_ADMIN_GROUP_ID } from "../../../src/server/runtime-config";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   disableCaching(res);
@@ -14,15 +15,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const sessionToken = req.cookies[SESSION_COOKIE];
   const user = await getUserBySessionToken(sessionToken);
-  const adminGroupId = getEnv().GLOBAL_ACCESS_ADMIN_GROUP_ID;
+  const adminGroupId = GLOBAL_ACCESS_ADMIN_GROUP_ID;
   if (!user || !adminGroupId || !user.groupIds.includes(adminGroupId)) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
 
   const env = getEnv();
-  const erpBaseUrl = env.LETRON_SSO_ERP_BASE_URL || "http://localhost:8080";
-  const syncSecret = env.LETRON_SSO_SYNC_SECRET || "";
+  const erpBaseUrl = env.FRAPPE_ERP_NEXT_URL;
+  const syncSecret = env.LETRON_INTERNAL_API_SECRET || "";
 
   try {
     const response = await fetch(`${erpBaseUrl}/api/method/letron_api.operations.backup.scheduled_s3_backup`, {

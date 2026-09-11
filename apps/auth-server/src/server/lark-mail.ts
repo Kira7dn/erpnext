@@ -4,6 +4,7 @@ import { decrypt, encrypt, sha256 } from "./crypto";
 import { getDb } from "./db";
 import { getEnv } from "./env";
 import { fetchLarkIdentity } from "./lark";
+import { LARK_DOMAIN, LARK_PO_APPROVER_EMAIL } from "./lark-runtime-config";
 
 const exchangeTokenSchema = z.object({
   access_token: z.string().min(1),
@@ -62,7 +63,7 @@ async function json(response: Response): Promise<unknown> {
 export const LARK_MAIL_OAUTH_COOKIE = "letron_lark_mail_oauth";
 export const LARK_MAIL_OAUTH_TTL_SECONDS = 600;
 
-export function larkMailCallbackUri(origin = getEnv().AUTH_BASE_URL): string {
+export function larkMailCallbackUri(origin = getEnv().LETRON_AUTH_BASE_URL): string {
   // Reuse the already-whitelisted Lark SSO callback. The callback dispatches
   // to the mail transaction when the mail OAuth cookie/state is present.
   return `${origin.replace(/\/$/, "")}/api/auth/lark/callback`;
@@ -70,7 +71,7 @@ export function larkMailCallbackUri(origin = getEnv().AUTH_BASE_URL): string {
 
 export function buildLarkMailAuthorizationUrl(state: string, redirectUri = larkMailCallbackUri()): URL {
   const env = getEnv();
-  const url = new URL("/open-apis/authen/v1/authorize", env.LARK_DOMAIN);
+  const url = new URL("/open-apis/authen/v1/authorize", LARK_DOMAIN);
   url.searchParams.set("client_id", env.LARK_APP_ID);
   url.searchParams.set("response_type", "code");
   url.searchParams.set("redirect_uri", redirectUri);
@@ -95,7 +96,7 @@ export async function completeLarkMailOAuth(input: { state: string; binding: str
   if (!consumed) throw new Error("MAIL_OAUTH_TRANSACTION_INVALID");
   const token = await exchangeLarkMailCode(input.code);
   const identity = await fetchLarkIdentity(token.access_token);
-  const expectedMailbox = getEnv().LARK_PO_APPROVER_EMAIL?.toLowerCase();
+  const expectedMailbox = LARK_PO_APPROVER_EMAIL?.toLowerCase();
   if (!expectedMailbox || identity.email.toLowerCase() !== expectedMailbox) throw new Error("LARK_MAIL_MAILBOX_MISMATCH");
   await saveLarkMailCredential({
     mailboxEmail: LARK_PUBLIC_MAILBOX,
@@ -110,7 +111,7 @@ export async function completeLarkMailOAuth(input: { state: string; binding: str
 
 async function appAccessToken(): Promise<string> {
   const env = getEnv();
-  const response = await fetch(new URL("/open-apis/auth/v3/app_access_token/internal", env.LARK_DOMAIN), {
+  const response = await fetch(new URL("/open-apis/auth/v3/app_access_token/internal", LARK_DOMAIN), {
     method: "POST",
     headers: { "content-type": "application/json; charset=utf-8" },
     body: JSON.stringify({ app_id: env.LARK_APP_ID, app_secret: env.LARK_APP_SECRET }),
@@ -121,7 +122,7 @@ async function appAccessToken(): Promise<string> {
 
 export async function exchangeLarkMailCode(code: string): Promise<z.infer<typeof exchangeTokenSchema>> {
   const env = getEnv();
-  const response = await fetch(new URL("/open-apis/authen/v1/access_token", env.LARK_DOMAIN), {
+  const response = await fetch(new URL("/open-apis/authen/v1/access_token", LARK_DOMAIN), {
     method: "POST",
     headers: { authorization: `Bearer ${await appAccessToken()}`, "content-type": "application/json; charset=utf-8" },
     body: JSON.stringify({ grant_type: "authorization_code", code }),
@@ -132,7 +133,7 @@ export async function exchangeLarkMailCode(code: string): Promise<z.infer<typeof
 
 async function refreshLarkMailToken(refreshToken: string): Promise<z.infer<typeof refreshTokenSchema>> {
   const env = getEnv();
-  const response = await fetch(new URL("/open-apis/authen/v1/refresh_access_token", env.LARK_DOMAIN), {
+  const response = await fetch(new URL("/open-apis/authen/v1/refresh_access_token", LARK_DOMAIN), {
     method: "POST",
     headers: { authorization: `Bearer ${await appAccessToken()}`, "content-type": "application/json; charset=utf-8" },
     body: JSON.stringify({ grant_type: "refresh_token", refresh_token: refreshToken }),
@@ -264,7 +265,7 @@ export async function sendLarkMail(input: { to: string; subject: string; bodyHtm
         const accessToken = await refreshStoredLarkMailCredential(mailboxEmail);
         try {
           payload = await withTimeout((async () => {
-            const response = await fetch(new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailboxEmail)}/messages/send`, env.LARK_DOMAIN), {
+            const response = await fetch(new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailboxEmail)}/messages/send`, LARK_DOMAIN), {
               method: "POST",
               headers: { authorization: `Bearer ${accessToken}`, "content-type": "application/json; charset=utf-8" },
               body: JSON.stringify({ subject: input.subject, to: [{ mail_address: input.to }], body_html: input.bodyHtml, body_plain_text: input.bodyPlainText ?? input.bodyHtml.replace(/<[^>]+>/g, ""), dedupe_key: input.idempotencyKey }),
@@ -296,10 +297,10 @@ export async function sendLarkMail(input: { to: string; subject: string; bodyHtm
 export async function latestLarkMail(input: { subject: string; after?: string; messageId?: string }): Promise<Array<{ messageId: string; subject: string; message: string; recipients: string; internalDate: string }>> {
   const read = async (accessToken: string): Promise<Array<{ messageId: string; subject: string; message: string; recipients: string; internalDate: string }>> => {
     const env = getEnv();
-    const mailbox = env.LARK_PO_APPROVER_EMAIL;
+    const mailbox = LARK_PO_APPROVER_EMAIL;
     if (!mailbox) throw new Error("LARK_MAIL_READER_NOT_CONFIGURED");
-    const listUrl = new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailbox)}/messages`, env.LARK_DOMAIN);
-    listUrl.searchParams.set("page_size", "50");
+    const listUrl = new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailbox)}/messages`, LARK_DOMAIN);
+    listUrl.searchParams.set("page_size", "20");
     listUrl.searchParams.set("folder_id", "INBOX");
     const listResponse = await fetch(listUrl, { headers: { authorization: `Bearer ${accessToken}` }, signal: AbortSignal.timeout(15_000) });
     const listed = await json(listResponse) as { data?: { items?: string[] } };
@@ -313,7 +314,7 @@ export async function latestLarkMail(input: { subject: string; after?: string; m
     for (let offset = 0; offset < messageIds.length; offset += concurrency) {
       const batch = messageIds.slice(offset, offset + concurrency);
       const details = await Promise.allSettled(batch.map(async (messageId) => {
-      const detailUrl = new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailbox)}/messages/${encodeURIComponent(messageId)}`, env.LARK_DOMAIN);
+      const detailUrl = new URL(`/open-apis/mail/v1/user_mailboxes/${encodeURIComponent(mailbox)}/messages/${encodeURIComponent(messageId)}`, LARK_DOMAIN);
       detailUrl.searchParams.set("format", "full");
       const detailResponse = await fetch(detailUrl, { headers: { authorization: `Bearer ${accessToken}` }, signal: AbortSignal.timeout(15_000) });
       const detail = await json(detailResponse) as { data?: { message?: { subject?: string; body_plain_text?: string; internal_date?: string; to?: Array<{ mail_address?: string }> } } };

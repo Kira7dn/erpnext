@@ -5,7 +5,7 @@ import { createPurchaseOrderDraft } from "@/lib/supplier-portal-core";
 
 export async function POST(request: NextRequest) {
   const supplied = request.headers.get("x-letron-cron-secret") ?? "";
-  if (!supplied || supplied !== process.env.LETRON_SUPPLIER_PORTAL_CRON_SECRET) {
+  if (!supplied || supplied !== process.env.LETRON_INTERNAL_API_SECRET) {
     return apiErrorResponse("forbidden", 403, "Internal access is required.");
   }
   try {

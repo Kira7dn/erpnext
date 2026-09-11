@@ -17,19 +17,19 @@ export PYTHONPATH="$ROOT/apps/letron_api"
 
 case "$ACTION" in
   config-validate)
-    uv run python -m letron_api.system_config validate --path "$CONFIG"
+    uv run python -m letron_api.control.system_config validate --path "$CONFIG"
     exit 0
     ;;
   policy-validate)
-    uv run python -m letron_api.policy validate --path "$POLICY"
+    uv run python -m letron_api.control.policy validate --path "$POLICY"
     exit 0
     ;;
 esac
 
-uv run python -m letron_api.system_config validate --path "$CONFIG"
-uv run python -m letron_api.policy validate --path "$POLICY"
-uv run python -m letron_api.system_config bundle-validate --config "$CONFIG" --policy "$POLICY"
-eval "$(uv run python -m letron_api.system_config env --path "$CONFIG" --format posix)"
+uv run python -m letron_api.control.system_config validate --path "$CONFIG"
+uv run python -m letron_api.control.policy validate --path "$POLICY"
+uv run python -m letron_api.control.system_config bundle-validate --config "$CONFIG" --policy "$POLICY"
+eval "$(uv run python -m letron_api.control.system_config env --path "$CONFIG" --format posix)"
 if [[ -f "$ROOT/.env" ]]; then
   set -a
   # shellcheck disable=SC1091
@@ -42,13 +42,13 @@ compose=(docker compose --project-name "$PROJECT_NAME" -f "$COMPOSE")
 readiness() {
   local deadline=$((SECONDS + 180))
   while (( SECONDS < deadline )); do
-    if response="$(curl --fail --silent --show-error "http://127.0.0.1:$HTTP_PORT/api/method/letron_api.api.health" 2>/dev/null)" \
+    if response="$(curl --fail --silent --show-error "http://127.0.0.1:$HTTP_PORT/api/method/letron_api.control.api.health" 2>/dev/null)" \
       && [[ "$response" =~ \"ok\"[[:space:]]*:[[:space:]]*true ]]; then
-      "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.system_config.audit
-      "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.api.runtime_snapshot
-      response="$(curl --fail --silent --show-error "http://127.0.0.1:$HTTP_PORT/api/method/letron_api.api.health")"
+      "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.system_config.audit
+      "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.api.runtime_snapshot
+      response="$(curl --fail --silent --show-error "http://127.0.0.1:$HTTP_PORT/api/method/letron_api.control.api.health")"
       [[ "$response" =~ \"restart_required\"[[:space:]]*:[[:space:]]*false ]]
-      echo "HTTP health verified: http://127.0.0.1:$HTTP_PORT/api/method/letron_api.api.health"
+      echo "HTTP health verified: http://127.0.0.1:$HTTP_PORT/api/method/letron_api.control.api.health"
       return
     fi
     sleep 2
@@ -79,22 +79,22 @@ case "$ACTION" in
     ;;
   ps) "${compose[@]}" ps -a ;;
   logs) "${compose[@]}" logs --tail=100 ;;
-  bootstrap) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.tenant_bootstrap.run ;;
-  inspect) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.api.runtime_snapshot ;;
-  config-plan) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.system_config.plan ;;
-  config-apply) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.system_config.sync ;;
+  bootstrap) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.tenant_bootstrap.run ;;
+  inspect) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.api.runtime_snapshot ;;
+  config-plan) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.system_config.plan ;;
+  config-apply) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.system_config.sync ;;
   policy-export)
     temporary_policy="$(mktemp "$ROOT/config/.policy.yaml.XXXXXX")"
     trap 'rm -f "$temporary_policy"' EXIT
-    "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.policy.export_current_base64 \
+    "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.policy.export_current_base64 \
       | tr -d '\r\n' | base64 --decode >"$temporary_policy"
-    uv run python -m letron_api.policy validate --path "$temporary_policy"
+    uv run python -m letron_api.control.policy validate --path "$temporary_policy"
     mv -f "$temporary_policy" "$POLICY"
     trap - EXIT
     echo "Exported native ERPNext business policy to $POLICY"
     ;;
-  policy-plan) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.policy.plan ;;
-  policy-apply) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.policy.sync ;;
+  policy-plan) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.policy.plan ;;
+  policy-apply) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.policy.sync ;;
   backup)
     "${compose[@]}" run --rm -e BACKUP_ENABLED=True -e BACKUP_ONCE=True backup
     python3 scripts/backup_to_s3.py

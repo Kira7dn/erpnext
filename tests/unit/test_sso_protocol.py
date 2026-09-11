@@ -9,28 +9,28 @@ from letron_api.auth.sso_protocol import (
 
 def _environment() -> dict[str, str]:
     return {
-        "LETRON_SSO_ROLE_SYNC_ENABLED": "false",
+        "LETRON_AUTH_BASE_URL": "http://host.docker.internal:3000",
+        "LETRON_INTERNAL_API_SECRET": "s" * 32,
     }
 
 
 def test_configuration_has_no_native_oidc_contract() -> None:
     config = load_configuration(_environment())
 
-    assert config.role_sync.enabled is False
+    assert config.role_sync.enabled is True
     assert not hasattr(config, "redirect_uri")
 
 
 @pytest.mark.parametrize(
     ("name", "value"),
     [
-        ("LETRON_SSO_SYNC_URL", "https://auth.example.com/path?unexpected=1"),
+        ("LETRON_AUTH_BASE_URL", "https://auth.example.com/path?unexpected=1"),
     ],
 )
 def test_configuration_rejects_unsafe_or_invalid_values(name: str, value: str) -> None:
     environment = _environment()
     environment["LETRON_SSO_ROLE_SYNC_ENABLED"] = "true"
-    environment["LETRON_SSO_REQUIRED_LARK_GROUP_ID"] = "g-access"
-    environment["LETRON_SSO_SYNC_SECRET"] = "s" * 32
+    environment["LETRON_INTERNAL_API_SECRET"] = "s" * 32
     environment[name] = value
 
     with pytest.raises(ValueError):
@@ -40,9 +40,7 @@ def test_configuration_rejects_unsafe_or_invalid_values(name: str, value: str) -
 def test_lark_groups_project_only_deterministic_policy_roles() -> None:
     environment = _environment() | {
         "LETRON_SSO_ROLE_SYNC_ENABLED": "true",
-        "LETRON_SSO_REQUIRED_LARK_GROUP_ID": "g-access",
-        "LETRON_SSO_SYNC_URL": "http://host.docker.internal:3000/api/internal/lark-role-snapshots",
-        "LETRON_SSO_SYNC_SECRET": "s" * 32,
+        "LETRON_INTERNAL_API_SECRET": "s" * 32,
     }
     role_sync = load_configuration(environment).role_sync
 
@@ -61,38 +59,21 @@ def test_lark_groups_project_only_deterministic_policy_roles() -> None:
 def test_role_sync_requires_access_group_and_internal_sync_credentials() -> None:
     environment = _environment() | {
         "LETRON_SSO_ROLE_SYNC_ENABLED": "true",
-        "LETRON_SSO_REQUIRED_LARK_GROUP_ID": "g-access",
-        "LETRON_SSO_SYNC_URL": "http://host.docker.internal:3000/api/internal/lark-role-snapshots",
-        "LETRON_SSO_SYNC_SECRET": "s" * 32,
+        "LETRON_INTERNAL_API_SECRET": "s" * 32,
     }
-    environment.pop("LETRON_SSO_SYNC_SECRET")
-    with pytest.raises(ValueError, match="LETRON_SSO_SYNC_SECRET"):
+    environment.pop("LETRON_INTERNAL_API_SECRET")
+    with pytest.raises(ValueError, match="LETRON_INTERNAL_API_SECRET"):
         load_configuration(environment)
 
 
 def test_role_sync_requires_stale_lock_to_exceed_login_snapshot_age() -> None:
-    environment = _environment() | {
-        "LETRON_SSO_ROLE_SYNC_ENABLED": "true",
-        "LETRON_SSO_REQUIRED_LARK_GROUP_ID": "g-access",
-        "LETRON_SSO_SYNC_URL": "http://host.docker.internal:3000/api/internal/lark-role-snapshots",
-        "LETRON_SSO_SYNC_SECRET": "s" * 32,
-        "LETRON_SSO_SNAPSHOT_MAX_AGE_SECONDS": "300",
-        "LETRON_SSO_STALE_LOCK_SECONDS": "300",
-    }
-
-    with pytest.raises(ValueError, match="must exceed snapshot max age"):
-        load_configuration(environment)
+    environment = _environment() | {"LETRON_SSO_SNAPSHOT_MAX_AGE_SECONDS": "300", "LETRON_SSO_STALE_LOCK_SECONDS": "300"}
+    role_sync = load_configuration(environment).role_sync
+    assert role_sync.snapshot_max_age_seconds == 120
+    assert role_sync.stale_lock_seconds == 600
 
 
 def test_role_sync_requires_request_check_interval_within_snapshot_age() -> None:
-    environment = _environment() | {
-        "LETRON_SSO_ROLE_SYNC_ENABLED": "true",
-        "LETRON_SSO_REQUIRED_LARK_GROUP_ID": "g-access",
-        "LETRON_SSO_SYNC_URL": "http://host.docker.internal:3000/api/internal/lark-role-snapshots",
-        "LETRON_SSO_SYNC_SECRET": "s" * 32,
-        "LETRON_SSO_REQUEST_CHECK_INTERVAL_SECONDS": "121",
-        "LETRON_SSO_SNAPSHOT_MAX_AGE_SECONDS": "120",
-    }
-
-    with pytest.raises(ValueError, match="must not exceed snapshot max age"):
-        load_configuration(environment)
+    environment = _environment() | {"LETRON_SSO_REQUEST_CHECK_INTERVAL_SECONDS": "121"}
+    role_sync = load_configuration(environment).role_sync
+    assert role_sync.request_check_interval_seconds == 60

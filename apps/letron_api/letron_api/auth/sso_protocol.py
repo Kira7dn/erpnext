@@ -8,6 +8,12 @@ from urllib.parse import urlparse
 
 POLICY_ROLE_PREFIX = "Letron Policy - "
 FORBIDDEN_LARK_MANAGED_ROLES = {"Administrator", "All", "Guest", "System Manager"}
+ROLE_SYNC_ENABLED = True
+REQUEST_CHECK_INTERVAL_SECONDS = 60
+SNAPSHOT_MAX_AGE_SECONDS = 120
+STALE_LOCK_SECONDS = 600
+BREAK_GLASS_MAX_SECONDS = 3600
+REQUIRED_LARK_GROUP_ID = "8be4c17b6a1f837c"
 
 
 class SsoConfigurationError(ValueError):
@@ -70,29 +76,21 @@ def _integer(env: Mapping[str, str], name: str, default: int, minimum: int, maxi
 
 
 def _load_role_sync_configuration(env: Mapping[str, str]) -> RoleSyncConfiguration:
-    if not _enabled(env, "LETRON_SSO_ROLE_SYNC_ENABLED"):
-        return RoleSyncConfiguration(False, None, None, None, 60, 120, 600, 3600)
-
-    required_group_id = _required(env, "LETRON_SSO_REQUIRED_LARK_GROUP_ID")
-    sync_url = _required(env, "LETRON_SSO_SYNC_URL")
-    sync_secret = _required(env, "LETRON_SSO_SYNC_SECRET")
-    _validate_url("LETRON_SSO_SYNC_URL", sync_url, allow_internal_http=True)
+    required_group_id = REQUIRED_LARK_GROUP_ID
+    auth_base_url = _required(env, "LETRON_AUTH_BASE_URL")
+    sync_url = f"{auth_base_url}/api/internal/lark-role-snapshots"
+    sync_secret = _required(env, "LETRON_INTERNAL_API_SECRET")
+    _validate_url("LETRON_AUTH_BASE_URL", auth_base_url, allow_internal_http=True)
     if len(sync_secret) < 32:
-        raise SsoConfigurationError("LETRON_SSO_SYNC_SECRET must contain at least 32 characters")
-    snapshot_max_age_seconds = _integer(env, "LETRON_SSO_SNAPSHOT_MAX_AGE_SECONDS", 120, 30, 600)
-    request_check_interval_seconds = _integer(
-        env,
-        "LETRON_SSO_REQUEST_CHECK_INTERVAL_SECONDS",
-        60,
-        15,
-        600,
-    )
-    stale_lock_seconds = _integer(env, "LETRON_SSO_STALE_LOCK_SECONDS", 600, 60, 86400)
-    break_glass_max_seconds = _integer(env, "LETRON_SSO_BREAK_GLASS_MAX_SECONDS", 3600, 60, 14400)
+        raise SsoConfigurationError("LETRON_INTERNAL_API_SECRET must contain at least 32 characters")
+    snapshot_max_age_seconds = SNAPSHOT_MAX_AGE_SECONDS
+    request_check_interval_seconds = REQUEST_CHECK_INTERVAL_SECONDS
+    stale_lock_seconds = STALE_LOCK_SECONDS
+    break_glass_max_seconds = BREAK_GLASS_MAX_SECONDS
     if stale_lock_seconds <= snapshot_max_age_seconds:
-        raise SsoConfigurationError("LETRON_SSO_STALE_LOCK_SECONDS must exceed snapshot max age")
+        raise SsoConfigurationError("stale lock duration must exceed snapshot max age")
     if request_check_interval_seconds > snapshot_max_age_seconds:
-        raise SsoConfigurationError("LETRON_SSO_REQUEST_CHECK_INTERVAL_SECONDS must not exceed snapshot max age")
+        raise SsoConfigurationError("request check interval must not exceed snapshot max age")
     return RoleSyncConfiguration(
         True,
         required_group_id,

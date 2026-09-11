@@ -37,28 +37,14 @@ x-frappe-defaults: &frappe_defaults
     DELIVERY_ENABLED: ${DELIVERY_ENABLED}
     PYTHONPATH: /home/frappe/frappe-bench/apps/${INTEGRATION_APP}
     LETRON_CONFIG_DIR: /etc/letron/config
-    LETRON_SSO_ISSUER: ${LETRON_SSO_ISSUER:-}
-    LETRON_SSO_INTERNAL_ISSUER: ${LETRON_SSO_INTERNAL_ISSUER:-}
-    LETRON_SSO_CLIENT_ID: ${LETRON_SSO_CLIENT_ID:-}
-    LETRON_SSO_CLIENT_SECRET: ${LETRON_SSO_CLIENT_SECRET:-}
-    LETRON_SSO_ERP_BASE_URL: ${LETRON_SSO_ERP_BASE_URL:-}
-    LETRON_SSO_ROLE_SYNC_ENABLED: ${LETRON_SSO_ROLE_SYNC_ENABLED:-false}
-    LETRON_SSO_LARK_ROLE_MAPPING: ${LETRON_SSO_LARK_ROLE_MAPPING:-}
-    LETRON_SSO_LARK_MANAGED_ROLES: ${LETRON_SSO_LARK_MANAGED_ROLES:-}
-    LETRON_SSO_REQUIRED_LARK_GROUP_ID: ${LETRON_SSO_REQUIRED_LARK_GROUP_ID:-}
-    LETRON_SSO_SYNC_URL: ${LETRON_SSO_SYNC_URL:-}
-    LETRON_SSO_SYNC_SECRET: ${LETRON_SSO_SYNC_SECRET:-}
-    LETRON_SUPPLIER_PORTAL_PUBLIC_BASE_URL: ${LETRON_SUPPLIER_PORTAL_PUBLIC_BASE_URL:-}
-    LETRON_API_KEY: ${LETRON_API_KEY:-}
-    LETRON_SUPPLIER_PORTAL_CRON_SECRET: ${LETRON_SUPPLIER_PORTAL_CRON_SECRET:-}
-    LETRON_SSO_REQUEST_CHECK_INTERVAL_SECONDS: ${LETRON_SSO_REQUEST_CHECK_INTERVAL_SECONDS:-60}
-    LETRON_SSO_SNAPSHOT_MAX_AGE_SECONDS: ${LETRON_SSO_SNAPSHOT_MAX_AGE_SECONDS:-120}
-    LETRON_SSO_STALE_LOCK_SECONDS: ${LETRON_SSO_STALE_LOCK_SECONDS:-600}
-    LETRON_SSO_BREAK_GLASS_MAX_SECONDS: ${LETRON_SSO_BREAK_GLASS_MAX_SECONDS:-3600}
+    FRAPPE_ERP_NEXT_URL: ${FRAPPE_ERP_NEXT_URL:-}
+    LETRON_AUTH_BASE_URL: ${LETRON_AUTH_BASE_URL:-}
+    LETRON_ERP_APP_BASE_URL: ${LETRON_ERP_APP_BASE_URL:-}
+    LETRON_INTERNAL_API_SECRET: ${LETRON_INTERNAL_API_SECRET:-}
     SITE_NAME: ${SITE_NAME}
     DB_ROOT_USER: ${DB_ROOT_USER}
-    MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-    ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    LETRON_BOOTSTRAP_PASSWORD: ${LETRON_BOOTSTRAP_PASSWORD}
+    MARIADB_ROOT_PASSWORD: ${LETRON_BOOTSTRAP_PASSWORD}
     REDIS_SOCKETIO: ${REDIS_SOCKETIO}
     ALLOW_TESTS: ${ALLOW_TESTS}
     REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
@@ -82,8 +68,8 @@ services:
       - --skip-character-set-client-handshake
     environment:
       MARIADB_ROOT_USER: ${DB_ROOT_USER}
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${LETRON_BOOTSTRAP_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${LETRON_BOOTSTRAP_PASSWORD}
       MARIADB_AUTO_UPGRADE: "1"
     healthcheck:
       test: [CMD-SHELL, "mariadb-admin ping -h localhost -u$${MARIADB_ROOT_USER} -p$${MARIADB_ROOT_PASSWORD} --silent"]
@@ -186,19 +172,18 @@ services:
         drill_site="restore-drill-$$$$.local";
         drill_db="letron_restore_drill_$$$$";
         cleanup() {
-          bench drop-site "$${drill_site}" --no-backup --force --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${DB_ROOT_PASSWORD}" >/dev/null 2>&1 || true;
+          bench drop-site "$${drill_site}" --no-backup --force --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${LETRON_BOOTSTRAP_PASSWORD}" >/dev/null 2>&1 || true;
           rm -f /home/frappe/backups/*;
         };
         trap cleanup EXIT;
-        bench new-site "$${drill_site}" --mariadb-user-host-login-scope='%' --db-name "$${drill_db}" --admin-password "$${ADMIN_PASSWORD}" --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${DB_ROOT_PASSWORD}";
-        bench --site "$${drill_site}" restore "$${sql}" --force --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${DB_ROOT_PASSWORD}" --with-public-files "$${public}" --with-private-files "$${private}";
+        bench new-site "$${drill_site}" --mariadb-user-host-login-scope='%' --db-name "$${drill_db}" --admin-password "$${LETRON_BOOTSTRAP_PASSWORD}" --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${LETRON_BOOTSTRAP_PASSWORD}";
+        bench --site "$${drill_site}" restore "$${sql}" --force --db-root-username "$${DB_ROOT_USER}" --db-root-password "$${LETRON_BOOTSTRAP_PASSWORD}" --with-public-files "$${public}" --with-private-files "$${private}";
         bench --site "$${drill_site}" execute letron_api.api.runtime_info;
         echo "Backup restore drill verified: $${drill_site}";
     environment:
       <<: *frappe_environment
       DB_ROOT_USER: ${DB_ROOT_USER}
-      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      LETRON_BOOTSTRAP_PASSWORD: ${LETRON_BOOTSTRAP_PASSWORD}
     depends_on:
       db: {condition: service_healthy}
       backup-init: {condition: service_completed_successfully}

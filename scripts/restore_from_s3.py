@@ -79,8 +79,9 @@ def main():
     secret_key = env_vars.get("AWS_SECRET_ACCESS_KEY")
     target_site = args.target_site or env_vars.get("SITE_NAME", "frontend")
     db_root_user = env_vars.get("DB_ROOT_USER", "root")
-    db_root_pass = env_vars.get("DB_ROOT_PASSWORD", "")
-    admin_pass = env_vars.get("ADMIN_PASSWORD", "")
+    bootstrap_pass = env_vars.get("LETRON_BOOTSTRAP_PASSWORD", "")
+    db_root_pass = bootstrap_pass
+    admin_pass = bootstrap_pass
 
     if not access_key or not secret_key:
         print("[ERROR] AWS credentials not found in .env", file=sys.stderr)

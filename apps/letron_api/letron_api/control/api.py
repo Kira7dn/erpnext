@@ -113,6 +113,18 @@ def document_action(doctype: str, name: str, action: str) -> dict[str, object]:
 
 
 @frappe.whitelist(methods=["POST"])
+def make_purchase_order(name: str, action: str = "make-purchase-order") -> dict[str, object]:
+    """Create a Purchase Order Draft through ERPNext's native document map."""
+    if action != "make-purchase-order":
+        frappe.throw("Unsupported Supplier Quotation action")
+    from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order as native_make_purchase_order
+
+    purchase_order = native_make_purchase_order(name)
+    purchase_order.insert()
+    return purchase_order.as_dict()
+
+
+@frappe.whitelist(methods=["POST"])
 def acceptance_cleanup(prefix: str) -> dict[str, object]:
     """Remove only local integration fixtures after runtime acceptance.
 

@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { getEnv } from "./env";
+import { AUTH_FEATURE_CONFIG, getEnv } from "./env";
 import { fetchLarkGroupIds, type LarkSubjectType } from "./lark";
 
 export type LarkIdentity = {
@@ -72,11 +72,11 @@ export async function syncLarkGroupsIfStale(userId: string): Promise<string[]> {
   if (!identity || identity.subjectType !== "union_id") {
     throw new Error("LARK_IDENTITY_REAUTH_REQUIRED");
   }
-  const staleAt = Date.now() - getEnv().AUTH_GROUP_SYNC_STALE_SECONDS * 1000;
+  const staleAt = Date.now() - AUTH_FEATURE_CONFIG.groupSyncStaleSeconds * 1000;
   if (identity.groupsSyncedAt && identity.groupsSyncedAt.getTime() > staleAt) return identity.groupIds;
 
   const now = new Date();
-  const leaseUntil = new Date(Date.now() + Math.min(getEnv().AUTH_GROUP_SYNC_STALE_SECONDS, 30) * 1000);
+  const leaseUntil = new Date(Date.now() + Math.min(AUTH_FEATURE_CONFIG.groupSyncStaleSeconds, 30) * 1000);
   const claimed = await getDb().externalIdentity.updateMany({
     where: { id: identity.id, OR: [{ syncLeaseUntil: null }, { syncLeaseUntil: { lt: now } }] },
     data: { syncLeaseUntil: leaseUntil },

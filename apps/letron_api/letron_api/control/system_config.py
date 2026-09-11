@@ -26,9 +26,6 @@ CONFIG_STATUS_CACHE_KEY = "letron:system-config:status"
 SECRET_REFERENCE_FIELDS = {
     "database.root_password",
     "site.admin_password",
-    "email.password",
-    "delivery.webhook_secret",
-    "delivery.realtime_token",
 }
 REQUIRED_PATHS = {
     "runtime.environment",
@@ -72,7 +69,6 @@ REQUIRED_PATHS = {
     "email.host",
     "email.port",
     "email.username",
-    "email.password",
     "email.use_tls",
     "storage.sites_volume",
     "storage.logs_volume",
@@ -85,10 +81,8 @@ REQUIRED_PATHS = {
     "credentials.production_like",
     "delivery.enabled",
     "delivery.webhook_url",
-    "delivery.webhook_secret",
     "delivery.webhook_timeout_ms",
     "delivery.realtime_url",
-    "delivery.realtime_token",
 }
 ALLOWED_TOP_LEVEL = {
     "version",
@@ -366,7 +360,7 @@ def launcher_environment(path: str | Path | None = None) -> dict[str, str]:
         "DB_HOST": config["database"]["host"],
         "DB_PORT": config["database"]["port"],
         "DB_ROOT_USER": config["database"]["root_user"],
-        "DB_ROOT_PASSWORD": config["database"]["root_password"],
+        "LETRON_BOOTSTRAP_PASSWORD": config["database"]["root_password"],
         "DB_CHARSET": config["database"]["charset"],
         "DB_COLLATION": config["database"]["collation"],
         "DB_VOLUME": config["database"]["volume"],
@@ -377,7 +371,6 @@ def launcher_environment(path: str | Path | None = None) -> dict[str, str]:
         "REDIS_QUEUE_IMAGE": config["redis"]["queue_image"],
         "SITE_NAME": config["site"]["name"],
         "SITE_HEADER": config["site"]["header"],
-        "ADMIN_PASSWORD": config["site"]["admin_password"],
         "DEVELOPER_MODE": config["developer"]["mode"],
         "ALLOW_TESTS": config["developer"]["allow_tests"],
         "REQUEST_TIMEOUT": config["developer"]["request_timeout"],

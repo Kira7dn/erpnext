@@ -21,7 +21,7 @@ database:
   host: db
   port: 3306
   root_user: root
-  root_password: ${DB_ROOT_PASSWORD}
+  root_password: ${LETRON_BOOTSTRAP_PASSWORD}
   charset: utf8mb4
   collation: utf8mb4_unicode_ci
   volume: db-data
@@ -37,7 +37,7 @@ site:
   name: frontend
   header: frontend
   database_type: mariadb
-  admin_password: ${ADMIN_PASSWORD}
+  admin_password: ${LETRON_BOOTSTRAP_PASSWORD}
 
 developer:
   mode: false
@@ -61,7 +61,7 @@ email:
   host: smtp.example.local
   port: 587
   username: change-me
-  password: ${SMTP_PASSWORD}
+  password: ""
   use_tls: true
 
 storage:
@@ -82,10 +82,10 @@ credentials:
 delivery:
   enabled: false
   webhook_url: https://integration.example.invalid/webhook
-  webhook_secret: ${LETRON_WEBHOOK_SECRET}
+  webhook_secret: ""
   webhook_timeout_ms: 5000
   realtime_url: https://integration.example.invalid/realtime
-  realtime_token: ${LETRON_REALTIME_TOKEN}
+  realtime_token: ""
 
 # These are native Frappe System Settings harvested from the current tenant.
 # letron_api only validates and reconciles their native field values.

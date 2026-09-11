@@ -5,7 +5,7 @@ import { resetEnvForTests } from "../src/server/env";
 
 beforeEach(() => {
   Object.assign(process.env, {
-    AUTH_BASE_URL: "http://localhost:3000",
+    LETRON_AUTH_BASE_URL: "http://localhost:3000",
     DATABASE_URL: "postgresql://test:test@localhost/test",
     LARK_APP_ID: "cli_test",
     LARK_APP_SECRET: "secret",

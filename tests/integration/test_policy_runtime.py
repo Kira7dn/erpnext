@@ -221,7 +221,7 @@ def test_compute_yaml_control_api_access_and_idempotency() -> None:
         current = _configuration_source(client, kind)
         assert "content" in current and current["source_sha256"]
         if kind == "config":
-            assert "${DB_ROOT_PASSWORD}" in current["content"]
+            assert "${LETRON_BOOTSTRAP_PASSWORD}" in current["content"]
             assert (
                 load_config(resolve_secrets=True)["database"]["root_password"]
                 not in current["content"]

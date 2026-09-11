@@ -143,8 +143,8 @@ export default async function handler(
     return;
   }
   const env = getEnv();
-  const baseUrl = env.LETRON_SSO_ERP_BASE_URL;
-  const secret = env.LETRON_SSO_SYNC_SECRET;
+  const baseUrl = env.FRAPPE_ERP_NEXT_URL;
+  const secret = env.LETRON_INTERNAL_API_SECRET;
   if (!baseUrl || !secret) {
     finish();
     errorResponse(res, 503, "gateway_not_configured", "Gateway is not configured.");

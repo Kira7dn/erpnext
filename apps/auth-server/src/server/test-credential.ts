@@ -4,6 +4,7 @@ import type { NextApiRequest } from "next";
 
 import { getDb } from "./db";
 import { getEnv } from "./env";
+import { LARK_PO_APPROVER_EMAIL } from "./lark-runtime-config";
 import type { AuthenticatedUser } from "./session";
 
 function suppliedApiKey(req: NextApiRequest): string {
@@ -20,9 +21,8 @@ function matchesApiKey(supplied: string, expected: string): boolean {
 /** Resolve the configured test credential to one existing Lark identity. */
 export async function authenticateTestCredential(req: NextApiRequest): Promise<AuthenticatedUser | null> {
   const env = getEnv();
-  const testUserEmail = env.LARK_PO_APPROVER_EMAIL?.trim().toLowerCase();
-  if (!env.LETRON_API_KEY || !testUserEmail) return null;
-  if (!matchesApiKey(suppliedApiKey(req), env.LETRON_API_KEY)) return null;
+  const testUserEmail = LARK_PO_APPROVER_EMAIL.toLowerCase();
+  if (!env.LETRON_INTERNAL_API_SECRET || !matchesApiKey(suppliedApiKey(req), env.LETRON_INTERNAL_API_SECRET)) return null;
 
   const user = await getDb().user.findUnique({
     where: { email: testUserEmail },

@@ -34,7 +34,7 @@ def _signature_payload(headers: Any) -> str:
 
 def verify_gateway_request() -> str:
     headers = frappe.local.request.headers
-    secret = os.environ.get("LETRON_SSO_SYNC_SECRET", "")
+    secret = os.environ.get("LETRON_INTERNAL_API_SECRET", "")
     timestamp = headers.get("X-Letron-Gateway-Issued-At", "") or headers.get("X-Letron-Gateway-Timestamp", "")
     expires_at = headers.get("X-Letron-Gateway-Expires-At", "")
     signature = headers.get("X-Letron-Gateway-Signature", "")
@@ -84,7 +84,7 @@ def verify_gateway_request() -> str:
 
 def verify_control_plane_request(expected_path: str | None = "/api/method/letron_api.control.access_policy.publish") -> None:
     headers = frappe.local.request.headers
-    secret = os.environ.get("LETRON_SSO_SYNC_SECRET", "")
+    secret = os.environ.get("LETRON_INTERNAL_API_SECRET", "")
     timestamp = headers.get("X-Letron-Control-Timestamp", "")
     expires_at = headers.get("X-Letron-Control-Expires-At", "")
     request_id = headers.get("X-Letron-Control-Request-Id", "")
@@ -104,6 +104,11 @@ def verify_control_plane_request(expected_path: str | None = "/api/method/letron
     expected = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
     if not hmac.compare_digest(expected, signature):
         frappe.throw("Invalid control-plane authorization", exc=frappe.AuthenticationError)
+    # A valid control-plane signature is the system-automation identity for
+    # native ERPNext resource calls. Do not leave the request as Guest after
+    # authenticating the caller, otherwise the signed automation cannot use
+    # the native document API.
+    frappe.set_user("Administrator")
 
 
 def sync_gateway_roles_if_changed(user: str, identity_name: str, encoded_roles: str, policy_version: str) -> None:
@@ -152,6 +157,13 @@ def _sync_gateway_roles_if_changed_locked(user: str, identity_name: str, desired
 def enforce_gateway_ingress() -> None:
     path = frappe.local.request.path
     if path.startswith("/api/v1/"):
+        # System automation uses the same canonical public route contract as
+        # the portal, but authenticates with the control-plane HMAC. This
+        # keeps one resource/action route instead of a second method API.
+        if frappe.local.request.headers.get("X-Letron-Control-Signature"):
+            verify_control_plane_request(path)
+            frappe.local.letron_control_plane_authorized = True
+            return
         verify_gateway_request()
         frappe.local.letron_gateway_authorized = True
         return

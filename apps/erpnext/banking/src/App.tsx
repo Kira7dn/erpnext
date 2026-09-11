@@ -43,7 +43,7 @@ function App() {
 						defaultTheme={window.frappe?.boot?.desk_theme ?? "Automatic"}
 					>
 						{window.frappe?.boot?.user?.name && window.frappe?.boot?.user?.name !== 'Guest' &&
-							<BrowserRouter basename={import.meta.env.VITE_BASE_NAME ? `/${import.meta.env.VITE_BASE_NAME}` : ''}>
+									<BrowserRouter basename="/banking">
 								<Routes>
 									<Route index element={<BankReconciliation />} />
 									<Route path="/statement-importer" element={<BankStatementImporterContainer />}>

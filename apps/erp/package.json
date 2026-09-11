@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3001",
-    "build": "next build",
+    "dev": "node ../../scripts/next-with-root-env.mjs dev --port 3001",
+    "build": "node ../../scripts/next-with-root-env.mjs build",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },

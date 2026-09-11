@@ -9,6 +9,7 @@ export type ApiErrorBody = {
   error: string;
   message: string;
   retryable: boolean;
+  stage?: string;
   retry_after_seconds?: number;
 };
 
@@ -36,8 +37,10 @@ export function apiErrorResponse(
   message: string,
   retryable = status >= 500,
   retryAfterSecondsValue?: number,
+  stage?: string,
 ): NextResponse<ApiErrorBody> {
   const body: ApiErrorBody = { error: validErrorCode(code) ?? "request_failed", message, retryable };
+  if (stage) body.stage = stage;
   if (retryAfterSecondsValue !== undefined) body.retry_after_seconds = retryAfterSecondsValue;
   const headers = retryAfterSecondsValue !== undefined ? { "Retry-After": String(retryAfterSecondsValue) } : undefined;
   return NextResponse.json(body, { status, headers });
@@ -69,8 +72,9 @@ export function apiErrorFromCause(
   errorCode: ApiErrorCode,
   errorMessage: string,
   errorStatus = 400,
+  stage?: string,
 ): NextResponse<ApiErrorBody> {
   if (cause instanceof ApiRequestError)
-    return apiErrorResponse(cause.code, cause.status, cause.message, cause.retryable, cause.retryAfterSeconds);
-  return apiErrorResponse(errorCode, errorStatus, errorMessage, errorStatus >= 500);
+    return apiErrorResponse(cause.code, cause.status, cause.message, cause.retryable, cause.retryAfterSeconds, stage);
+  return apiErrorResponse(errorCode, errorStatus, errorMessage, errorStatus >= 500, undefined, stage);
 }

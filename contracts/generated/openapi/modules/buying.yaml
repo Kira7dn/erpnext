@@ -1657,6 +1657,100 @@ paths:
       x-test-evidence:
         suite: crm-preorder
         test: tests/integration/test_crm_preorder.py::test_crm_preorder_contract_and_lifecycle
+  /api/v1/crm/supplier-quotations/{name}/submit:
+    post:
+      tags:
+      - 'Module: Buying'
+      - Document actions
+      operationId: submitSupplierQuotation
+      parameters: *id029
+      responses:
+        '200':
+          description: Submit document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: *id027
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-action: submit
+      x-test-status: not-tested
+  /api/v1/crm/supplier-quotations/{name}/cancel:
+    post:
+      tags:
+      - 'Module: Buying'
+      - Document actions
+      operationId: cancelSupplierQuotation
+      parameters: *id029
+      responses:
+        '200':
+          description: Cancel document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: *id027
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-action: cancel
+      x-test-status: not-tested
+  /api/v1/crm/supplier-quotations/{name}/make-purchase-order:
+    post:
+      tags:
+      - 'Module: Buying'
+      - Business actions
+      summary: Make-Purchase-Order Supplier Quotation
+      operationId: makePurchaseOrderFromSupplierQuotation
+      parameters: *id029
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              description: Payload for make-purchase-order Supplier Quotation.
+      responses:
+        '200':
+          description: Make-Purchase-Order Supplier Quotation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: *id027
+                required:
+                - data
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.control.api.make_purchase_order
+      x-native-action: make-purchase-order
+      x-test-status: not-tested
 components:
   securitySchemes:
     frappeToken:
@@ -3716,6 +3810,11 @@ x-contract:
       actions:
       - submit
       - cancel
+    - doctype: Supplier Quotation
+      module: CRM
+      actions:
+      - submit
+      - cancel
     - doctype: Sales Order
       module: Selling
       actions:
@@ -3767,6 +3866,12 @@ x-contract:
       - submit
       - cancel
     custom_actions:
+    - doctype: Supplier Quotation
+      module: CRM
+      action: make-purchase-order
+      operation_id: makePurchaseOrderFromSupplierQuotation
+      path_suffix: make-purchase-order
+      handler: letron_api.control.api.make_purchase_order
     - doctype: Bank Transaction
       module: Accounts
       action: reconcile
@@ -4092,7 +4197,7 @@ x-capabilities:
 x-acceptance-summary:
   passed: 22
   partial: 0
-  not-tested: 0
+  not-tested: 3
   blocked: 0
 x-module: Buying
 x-module-index:
