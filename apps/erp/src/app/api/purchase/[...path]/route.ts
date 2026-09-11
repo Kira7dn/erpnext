@@ -81,7 +81,7 @@ async function proxy(
       cache: "no-store",
     });
   } catch {
-    return apiErrorResponse("gateway_unavailable", 503, "Letron Global Portal Gateway is unavailable.", true);
+    return apiErrorResponse("gateway_unavailable", 503, "Letron Gateway is unavailable.", true);
   }
   if (!response.ok)
     return apiErrorFromResponse(response, "purchase_request_failed");

@@ -4,6 +4,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { larkLoginHref } from "@/lib/auth-navigation";
 
 type Row = Record<string, unknown>;
 type Kind = "supplier" | "item" | "request";
@@ -217,11 +218,11 @@ const config: Record<
 
 function messageFor(status: number) {
   return status === 401
-    ? "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại qua Global Portal."
+    ? "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại bằng Lark."
     : status === 403
       ? "Tài khoản chưa được cấp quyền cho phân hệ này."
       : status >= 502
-        ? "Global Portal Gateway hiện không khả dụng."
+        ? "Letron Gateway hiện không khả dụng."
         : `Yêu cầu thất bại (${status}).`;
 }
 
@@ -510,7 +511,7 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
           </div>
           <h1 className="text-3xl font-bold tracking-tight">{meta.title}</h1>
           <p className="mt-2 text-muted-foreground">
-            ERPNext native fields · dữ liệu live qua Global Portal Gateway.
+            ERPNext native fields · dữ liệu live qua Letron Gateway.
           </p>
         </div>
         <Button onClick={() => setCreating(true)}>Tạo mới</Button>
@@ -617,8 +618,8 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
           <div className="space-y-3 p-8 text-sm text-destructive">
             <p>{error}</p>
             {errorStatus === 401 ? (
-              <a className="block w-fit underline" href="/api/auth/login">
-                Đăng nhập qua Global Portal
+              <a className="block w-fit underline" href="/api/auth/login" onClick={(event) => { event.preventDefault(); window.location.assign(larkLoginHref(`${window.location.pathname}${window.location.search}`)); }}>
+                Đăng nhập lại bằng Lark
               </a>
             ) : null}
             <Button variant="outline" onClick={() => void load(page)}>

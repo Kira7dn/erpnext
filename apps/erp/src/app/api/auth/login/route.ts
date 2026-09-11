@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { portalAuthBaseUrl } from "@/lib/portal-config";
 
+function isAppPath(pathname: string): boolean {
+  return ["/assets", "/purchase", "/accounts"].some((root) => pathname === root || pathname.startsWith(`${root}/`));
+}
+
 export function GET(request: NextRequest): NextResponse {
   const authBaseUrl = portalAuthBaseUrl();
   const requested = request.nextUrl.searchParams.get("return_to");
-  const fallback = new URL("/accounts/bank-accounts", request.url);
+  const fallback = new URL("/accounts", request.url);
   let returnTo = fallback;
   if (requested) {
     try {
       const candidate = new URL(requested, request.url);
-      if (candidate.origin === request.nextUrl.origin && !candidate.pathname.startsWith("/api/")) returnTo = candidate;
+      if (candidate.origin === request.nextUrl.origin && isAppPath(candidate.pathname)) returnTo = candidate;
     } catch { /* use the safe fallback */ }
   }
   const callback = new URL("/api/auth/oidc/callback", request.url);

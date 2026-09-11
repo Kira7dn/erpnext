@@ -224,7 +224,7 @@ export function getAccountingFormFields(
 
 export class GatewayAuthenticationRequiredError extends ApiRequestError {
   constructor() {
-    super("authentication_required", "Bạn cần đăng nhập qua Letron Global Portal.", 401);
+    super("authentication_required", "Bạn cần đăng nhập bằng Lark.", 401);
   }
 }
 
@@ -238,7 +238,7 @@ export class GatewayUnavailableError extends ApiRequestError {
   constructor() {
     super(
       "gateway_unavailable",
-      "Letron Global Portal Gateway hiện không khả dụng. Vui lòng thử lại sau.",
+      "Letron Gateway hiện không khả dụng. Vui lòng thử lại sau.",
       503,
       true,
     );

@@ -31,7 +31,7 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   try {
     response = await fetch(target, { method: request.method, headers, body: request.method === "GET" || request.method === "DELETE" ? undefined : await request.arrayBuffer(), cache: "no-store" });
   } catch {
-    return apiErrorResponse("gateway_unavailable", 503, "Letron Global Portal Gateway is unavailable.", true);
+    return apiErrorResponse("gateway_unavailable", 503, "Letron Gateway is unavailable.", true);
   }
   if (!response.ok)
     return apiErrorFromResponse(response, "asset_request_failed");

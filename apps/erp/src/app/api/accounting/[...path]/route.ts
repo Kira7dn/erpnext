@@ -52,7 +52,7 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
       cache: "no-store",
     });
   } catch {
-    return apiErrorResponse("gateway_unavailable", 503, "Letron Global Portal Gateway is unavailable.", true);
+    return apiErrorResponse("gateway_unavailable", 503, "Letron Gateway is unavailable.", true);
   }
   if (!response.ok)
     return apiErrorFromResponse(response, "accounting_request_failed");

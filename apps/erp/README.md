@@ -20,7 +20,7 @@ PWA routes:
 - `/assets/manifest.webmanifest` — LeTRON-Tài sản
 
 The PWA layer intentionally has no service worker and does not cache API
-responses. SSO and all business data remain online through the Global Portal
+responses. SSO is provided by Lark, while all business data remains online through the Letron Gateway
 Gateway.
 
 Run from this directory:
