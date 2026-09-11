@@ -131,7 +131,7 @@ async function supplierFlow(
   rate: number,
   usedTokens: Set<string>,
   acceptedMail: { message_id: string; to: string },
-): Promise<{ quotation: string; gate: Record<string, unknown>; approval: Record<string, unknown>; accessEmail: string; otpEmail: string; sessionCookie: string }> {
+): Promise<{ supplier: string; quotation: string; gate: Record<string, unknown>; approval: Record<string, unknown>; accessEmail: string; otpEmail: string; sessionCookie: string }> {
   const accessEmail = await latestEmail("Letron Supplier Portal access", accessEmailAfter, (message) => {
     const token = tokenFromEmail(message);
     return !usedTokens.has(token);
@@ -192,7 +192,7 @@ assertErpName(quotationName, `Supplier Quotation for ${supplier}`);
   if (text(quotationRow.name) !== quotationName || text(quotationRow.status) !== "Submitted") {
     throw new Error(`Quotation was not submitted and locked for ${supplier}: ${summaryContext(object(apiData(quotationSummary.body)))}`);
   }
-  return { quotation: quotationName, gate, approval: object(quotationData.approval as Json), accessEmail: accessEmail.recipients, otpEmail: otpEmail.recipients, sessionCookie: supplierCookie };
+  return { supplier, quotation: quotationName, gate, approval: object(quotationData.approval as Json), accessEmail: accessEmail.recipients, otpEmail: otpEmail.recipients, sessionCookie: supplierCookie };
 }
 
 async function approvalWebhook(instanceCode: string, eventId: string): Promise<{ status: number; body: Json }> {
@@ -398,22 +398,28 @@ const poItems = Array.isArray(purchaseOrder.items) ? purchaseOrder.items : [];
 if (!poName || !poItems.length || text(purchaseOrder.status) !== "Submitted") throw new Error(`PO is not submitted: ${JSON.stringify(purchaseOrder)}`);
 if (poName !== poDraftName) throw new Error(`Approval created a different PO: draft=${poDraftName}, submitted=${poName}`);
 
-const deliveryPayload = {
-  delivery_date: transactionDate,
-  idempotency_key: `${idempotencyKey}:delivery`,
-  items: poItems.map((item) => ({ purchase_order_item: text(object(item as Json).name), delivered_qty: Number(object(item as Json).qty ?? 0), uom: text(object(item as Json).uom) })),
-};
-const delivery = await request(`${erpBaseUrl}/api/supplier/session/delivery`, {
+const receipt = await request(`${erpBaseUrl}/api/purchase/purchase-receipts`, {
   method: "POST",
-  headers: { Cookie: winningFlow.sessionCookie },
-  body: JSON.stringify(deliveryPayload),
+  headers: auth,
+  body: JSON.stringify({
+    supplier: winningFlow.supplier,
+    company: text(purchaseOrder.company),
+    posting_date: transactionDate,
+    custom_letron_orchestration_id: text(result.id),
+    items: poItems.map((item) => ({ item_code: text(object(item as Json).item_code), qty: Number(object(item as Json).qty ?? 0), uom: text(object(item as Json).uom), rate: Number(object(item as Json).rate ?? 0), warehouse: text(object(item as Json).warehouse), purchase_order: poName, purchase_order_item: text(object(item as Json).name) })),
+  }),
 });
-if (delivery.status !== 201) throw new Error(`Delivery submission failed (${delivery.status}): ${delivery.raw}`);
-const deliveryData = object(apiData(delivery.body));
-const deliverySubmission = text(deliveryData.purchase_receipt || deliveryData.submission);
-if (!deliverySubmission) throw new Error(`Delivery submission id missing: ${delivery.raw}`);
-const receiptName = deliverySubmission;
+if (receipt.status < 200 || receipt.status >= 300) throw new Error(`Warehouse Purchase Receipt creation failed (${receipt.status}): ${receipt.raw}`);
+const receiptName = text(object(apiData(receipt.body)).name || object(apiData(receipt.body)).purchase_receipt);
+if (!receiptName) throw new Error(`Warehouse Purchase Receipt name missing: ${receipt.raw}`);
+const receiptSubmit = await request(`${erpBaseUrl}/api/purchase/purchase-receipts/${encodeURIComponent(receiptName)}/submit`, { method: "POST", headers: auth });
+if (receiptSubmit.status < 200 || receiptSubmit.status >= 300) throw new Error(`Warehouse Purchase Receipt submission failed (${receiptSubmit.status}): ${receiptSubmit.raw}`);
 assertErpName(receiptName, "Purchase Receipt");
+
+const invoiceRequestAfter = new Date(Date.now() - 2_000).toISOString();
+const invoiceRequest = await latestEmail(`Letron invoice request for ${receiptName}`, invoiceRequestAfter, (_message, recipients) => recipients.toLowerCase().includes(supplierEmail.toLowerCase()));
+if (!invoiceRequest.message.includes(receiptName)) throw new Error(`Invoice request email did not reference ${receiptName}`);
+console.log(`invoice_request_email=CONFIRMED recipient=${invoiceRequest.recipients}`);
 
 const xml = new FormData();
 xml.set("file", new Blob(["<?xml version=\"1.0\" encoding=\"UTF-8\"?><Invoice><InvoiceNumber>REAL-TEST</InvoiceNumber></Invoice>"], { type: "application/xml" }), "real-test.xml");

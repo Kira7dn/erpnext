@@ -129,6 +129,7 @@ export type PurchaseResource =
   | "material-requests"
   | "request-for-quotations"
   | "purchase-orders"
+  | "purchase-receipts"
   | "attachments";
 export const PURCHASE_RESOURCES = [
   "suppliers",
@@ -138,6 +139,7 @@ export const PURCHASE_RESOURCES = [
   "material-requests",
   "request-for-quotations",
   "purchase-orders",
+  "purchase-receipts",
   "attachments",
 ] as const satisfies readonly PurchaseResource[];
 

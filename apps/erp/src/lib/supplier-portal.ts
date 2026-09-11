@@ -4,7 +4,8 @@ import { ApiRequestError, type RemoteErrorPayload } from "./api-error";
 import { publicErrorMessage, retryAfterSeconds, validErrorCode } from "./error-contract";
 import { supplierPortalConfig } from "./supplier-portal-config";
 import { openPurchaseApproval } from "./lark-approval";
-import { approvalState, createDelivery, evaluateApprovalGate, evaluateDueOrchestrations, getSubmissions, processSummary, revokeAccess, submitQuotation, uploadInvoice } from "./supplier-portal-core";
+import { approvalState, evaluateApprovalGate, evaluateDueOrchestrations, getSubmissions, processSummary, registerWarehouseReceipt, revokeAccess, submitQuotation, uploadInvoice } from "./supplier-portal-core";
+import { buildInvoiceRequestMail, decryptSupplierPortalToken } from "./supplier-portal-session";
 
 export type SupplierPortalMail = { to: string; subject: string; body_html: string; body_plain_text: string; idempotency_key: string };
 function local(body: Record<string, unknown>): string { return String(body.portal_access_id ?? body.access_id ?? ""); }
@@ -14,7 +15,6 @@ export async function supplierPortalRequest<T>(method: string, body: Record<stri
     case "submit_quotation": return await submitQuotation(local(body), body) as T;
     case "evaluate_approval_gate": return await evaluateApprovalGate(String(body.orchestration_id ?? body.material_request ?? "")) as T;
     case "get_submissions": return await getSubmissions(local(body)) as T;
-    case "create_delivery_confirmation": return await createDelivery(local(body), body) as T;
     case "get_purchase_order": return (await processSummary(local(body))).purchase_order as T;
     case "get_payment_status": { const summary = await processSummary(local(body)); return { purchase_invoice: summary.purchase_invoice, payment_status: summary.payment_status } as T; }
     case "claim_approval_opening": return await approvalState(String(body.process), "claim") as T;
@@ -44,6 +44,10 @@ export async function sendSupplierPortalMail(input: SupplierPortalMail): Promise
   if (!response.ok) { const retry = retryAfterSeconds(payload.retry_after_seconds) ?? retryAfterSeconds(response.headers.get("Retry-After")); const code = validErrorCode(payload.error) ?? "lark_mail_send_failed"; throw new ApiRequestError(code, publicErrorMessage(code, response.status), response.status, response.status === 409 || response.status >= 500, retry); }
   if (!payload.data?.messageId) throw new ApiRequestError("lark_mail_send_failed", "Supplier mail delivery returned no message ID.", 502, true);
   return payload.data as { messageId: string; idempotent?: boolean };
+}
+export async function notifySupplierInvoiceRequest(receiptName: string): Promise<{ messageId: string; idempotent?: boolean }> {
+  const { access } = await registerWarehouseReceipt(receiptName);
+  return sendSupplierPortalMail(buildInvoiceRequestMail(access, decryptSupplierPortalToken(access), receiptName));
 }
 export async function openSupplierApproval<T>(input: { orchestration_id: string; selected_supplier_quotation_name: string; erp_purchase_order_name: string; justification: string }): Promise<T> {
   return await openPurchaseApproval({ orchestrationId: input.orchestration_id, supplierQuotationName: input.selected_supplier_quotation_name, erpPurchaseOrderName: input.erp_purchase_order_name, justification: input.justification }) as T;

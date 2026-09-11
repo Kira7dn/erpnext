@@ -226,40 +226,18 @@ function mutationInput(accessId: string, type: string, key: string, payload: unk
   if (!normalized || normalized.length > 128) throw new ApiRequestError("validation_failed", "idempotency_key is required.", 400);
   return { key: normalized, payloadHash: hash(payload) };
 }
-export async function createDelivery(accessId: string, payload: Row): Promise<Row> {
-  const access = await requireAccess(accessId);
-  const input = mutationInput(accessId, "Purchase Receipt", text(payload.idempotency_key), payload);
-  return withLock(`delivery:${accessId}:${input.key}`, async () => {
-    const existing = await mutation(accessId, "Purchase Receipt", input.key);
-    if (existing) {
-      if (existing.payload_hash !== input.payloadHash) throw new ApiRequestError("validation_failed", "Idempotency key was used with a different payload.", 400);
-      return { submission: existing.document_name, purchase_receipt: existing.document_name, status: "Submitted", idempotent: true };
-    }
-    if (!Array.isArray(payload.items) || !payload.items.length || !text(payload.delivery_date)) throw new ApiRequestError("validation_failed", "Delivery date and items are required.", 400);
-    const po = await getSubmittedPurchaseOrder(access);
-    const ordered = new Map((po.items as Row[]).map((item) => [text(item.name), number(item.qty, "ordered quantity")]));
-    const received = await receivedByPoItem(text(po.name), access.orchestration_id);
-    const seen = new Set<string>();
-    let positive = false;
-    const items = (payload.items as Row[]).map((item) => {
-      const name = text(item.purchase_order_item); const qty = number(item.delivered_qty, "delivered quantity");
-      if (seen.has(name) || !ordered.has(name) || (received.get(name)?.qty ?? 0) + qty > ordered.get(name)!) throw new ApiRequestError("validation_failed", "Delivered quantity exceeds the remaining Purchase Order quantity.", 400);
-      seen.add(name); if (qty > 0) positive = true;
-      const source = (po.items as Row[]).find((candidate) => text(candidate.name) === name)!;
-      return { item_code: source.item_code, qty, uom: source.uom, rate: source.rate, purchase_order: po.name, purchase_order_item: source.name, warehouse: source.warehouse, serial_no: item.serial_no, batch_no: item.batch_no };
-    });
-    if (!positive) throw new ApiRequestError("validation_failed", "At least one delivered quantity is required.", 400);
-    const frappeKey = hash(`${accessId}:Purchase Receipt:${input.key}`).slice(0, 64);
-    const doc = await frappeInsert<Row>({ doctype: "Purchase Receipt", naming_series: "GRN-.YYYYMMDD.-.####", supplier: po.supplier, company: po.company, custom_letron_orchestration_id: access.orchestration_id, posting_date: text(payload.delivery_date), items }, `${frappeKey}:insert`);
-    const submitted = await frappeDocumentAction<Row>("Purchase Receipt", text(doc.name), "submit");
-    const documentName = text(submitted.name);
-    if (!documentName) throw new ApiRequestError("purchase_receipt_missing", "ERPNext did not return the Purchase Receipt name.", 502);
-    await saveMutation(accessId, "Purchase Receipt", input.key, { document_name: documentName, payload_hash: input.payloadHash, created_at: new Date().toISOString() });
-    const state = await db().get<Row>(stateKey(access.orchestration_id)) ?? {};
-    const receipts = Array.isArray(state.purchase_receipts) ? state.purchase_receipts.map(text).filter(Boolean) : [];
-    await db().set(stateKey(access.orchestration_id), { ...state, purchase_receipts: [...new Set([...receipts, documentName])] }, { ex: TTL });
-    return { submission: documentName, purchase_receipt: documentName, status: "Submitted", idempotent: false };
-  });
+export async function registerWarehouseReceipt(receiptName: string): Promise<{ access: SupplierPortalAccess; purchase_receipt: Row }> {
+  const purchaseReceipt = await frappeGet<Row>("Purchase Receipt", receiptName);
+  if (Number(purchaseReceipt.docstatus ?? 0) !== 1) throw new ApiRequestError("purchase_receipt_not_submitted", "Purchase Receipt must be submitted before requesting an invoice.", 409);
+  const orchestrationId = text(purchaseReceipt.custom_letron_orchestration_id);
+  const supplier = text(purchaseReceipt.supplier);
+  if (!orchestrationId || !supplier) throw new ApiRequestError("purchase_receipt_mapping_missing", "Purchase Receipt is missing procurement mapping.", 409);
+  const access = (await getAccessesForOrchestration(orchestrationId)).find((candidate) => candidate.supplier === supplier);
+  if (!access) throw new ApiRequestError("supplier_portal_access_missing", "Supplier portal access is missing for this Purchase Receipt.", 409);
+  const state = await db().get<Row>(stateKey(orchestrationId)) ?? {};
+  const receipts = Array.isArray(state.purchase_receipts) ? state.purchase_receipts.map(text).filter(Boolean) : [];
+  if (!receipts.includes(receiptName)) await db().set(stateKey(orchestrationId), { ...state, purchase_receipts: [...receipts, receiptName] }, { ex: TTL });
+  return { access, purchase_receipt: purchaseReceipt };
 }
 export async function uploadInvoice(accessId: string, form: FormData): Promise<Row> {
   const access = await requireAccess(accessId); const file = form.get("file");

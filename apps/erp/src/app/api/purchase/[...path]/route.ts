@@ -1,9 +1,10 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { apiErrorFromResponse, apiErrorResponse } from "@/lib/api-error";
+import { apiErrorFromCause, apiErrorFromResponse, apiErrorResponse } from "@/lib/api-error";
 import { isPurchaseResource } from "@/lib/letron-api";
 import { portalAuthBaseUrl } from "@/lib/portal-config";
 import { APP_SESSION_COOKIES } from "@/lib/erp-auth-session";
+import { notifySupplierInvoiceRequest } from "@/lib/supplier-portal";
 
 const METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 const OFFICIAL_MODULES: Record<string, string> = {
@@ -14,6 +15,7 @@ const OFFICIAL_MODULES: Record<string, string> = {
   "material-requests": "stock/material-requests",
   "request-for-quotations": "crm/request-for-quotations",
   "purchase-orders": "buying/purchase-orders",
+  "purchase-receipts": "stock/purchase-receipts",
   attachments: "files/attachments",
 };
 export async function GET(
@@ -85,6 +87,13 @@ async function proxy(
   }
   if (!response.ok)
     return apiErrorFromResponse(response, "purchase_request_failed");
+  if (path[0] === "purchase-receipts" && path.at(-1) === "submit" && path.length === 3) {
+    try {
+      await notifySupplierInvoiceRequest(decodeURIComponent(path[1]));
+    } catch (error) {
+      return apiErrorFromCause(error, "invoice_request_failed", "Purchase Receipt was submitted but the supplier invoice request could not be sent.");
+    }
+  }
   const responseHeaders = new Headers({
     "content-type": response.headers.get("content-type") ?? "application/json",
   });

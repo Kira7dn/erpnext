@@ -24,8 +24,6 @@ export default function SupplierPortalPage({ params }: { params: Promise<{ magic
   const [otpCooldownSeconds, setOtpCooldownSeconds] = useState(0);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [rates, setRates] = useState<Record<string, string>>({});
-  const [deliveryDate, setDeliveryDate] = useState("");
-  const [deliveryQty, setDeliveryQty] = useState<Record<string, string>>({});
   const [xmlFile, setXmlFile] = useState<File | null>(null);
   const [message, setMessage] = useState("");
 
@@ -111,21 +109,6 @@ export default function SupplierPortalPage({ params }: { params: Promise<{ magic
     }
   }
 
-  async function submitDelivery(event: FormEvent) {
-    event.preventDefault();
-    try {
-      const response = await fetch("/api/supplier/session/delivery", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ delivery_date: deliveryDate, idempotency_key: crypto.randomUUID(), items: (summary?.purchase_order?.items ?? []).map((item) => ({ purchase_order_item: item.name, delivered_qty: Number(deliveryQty[item.name] ?? 0), uom: item.uom })) }) });
-      if (!response.ok) {
-        setMessage(errorMessage(response, await payloadOf(response)));
-        return;
-      }
-      setMessage("Đã tạo Purchase Receipt thành công.");
-      await refresh();
-    } catch {
-      setMessage("Không thể kết nối Supplier Portal. Vui lòng thử lại sau.");
-    }
-  }
-
   async function submitXml(event: FormEvent) {
     event.preventDefault();
     if (!xmlFile) return;
@@ -168,7 +151,7 @@ export default function SupplierPortalPage({ params }: { params: Promise<{ magic
       <header className="flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-700">LeTRON Supplier Portal</p><h1 className="mt-3 text-3xl font-bold">Supplier workspace</h1><p className="mt-2 text-muted-foreground">Supplier: {summary.supplier}</p></div><button className="rounded-md border px-3 py-2 text-sm" onClick={() => void logout()}>Đăng xuất</button></header>
       <section className="rounded-xl border bg-card p-5"><h2 className="font-semibold">Request for Quotation</h2><p className="mt-3 text-sm">RFQ: {summary.rfq.name} · Trạng thái: {summary.rfq.status} · Approval: {summary.approval_status} · Hạn: {summary.deadline_at}</p></section>
       {summary.quotation ? <p className="rounded-md bg-emerald-50 p-4 text-sm text-emerald-800">Quotation đã submit: {summary.quotation.name}. Đã khóa.</p> : <form className="space-y-4 rounded-xl border bg-card p-5" onSubmit={(event) => void submitQuotation(event)}><h2 className="font-semibold">Nhập báo giá</h2>{summary.rfq.items.map((item) => <div className="grid gap-2 sm:grid-cols-[1fr_10rem]" key={item.name}><label className="text-sm">{item.item_code} — {item.description || "Item"}<span className="block text-muted-foreground">Số lượng: {item.qty} {item.uom}</span></label><input className="h-10 rounded-md border bg-background px-3" min="0" step="0.01" required type="number" value={rates[item.name] ?? ""} onChange={(event) => setRates((current) => ({ ...current, [item.name]: event.target.value }))} /></div>)}<button className="h-10 rounded-md bg-primary px-4 text-sm text-primary-foreground" type="submit">Submit quotation</button></form>}
-      {summary.purchase_order ? <><section className="space-y-4 rounded-xl border bg-card p-5"><h2 className="font-semibold">Purchase Order: {summary.purchase_order.name}</h2><p className="text-sm">{summary.purchase_order.status} · {summary.purchase_order.currency}</p><form className="space-y-3" onSubmit={(event) => void submitDelivery(event)}><h3 className="font-medium">Delivery confirmation</h3><input className="h-10 rounded-md border bg-background px-3" required type="date" value={deliveryDate} onChange={(event) => setDeliveryDate(event.target.value)} />{summary.purchase_order.items.map((item) => <div className="grid gap-2 sm:grid-cols-[1fr_10rem]" key={item.name}><label className="text-sm">{item.item_code} · đặt {item.qty} {item.uom}</label><input className="h-10 rounded-md border bg-background px-3" min="0" max={item.qty} step="0.01" type="number" value={deliveryQty[item.name] ?? ""} onChange={(event) => setDeliveryQty((current) => ({ ...current, [item.name]: event.target.value }))} /></div>)}<button className="h-10 rounded-md bg-primary px-4 text-sm text-primary-foreground" type="submit">Gửi xác nhận và tạo Receipt</button></form></section><section className="space-y-4 rounded-xl border bg-card p-5"><h2 className="font-semibold">XML Invoice</h2><p className="text-sm text-muted-foreground">Receipt: {summary.purchase_receipt?.[0]?.status ?? "Chưa tạo"} · Payment: {summary.payment_status}</p><form className="flex flex-wrap gap-3" onSubmit={(event) => void submitXml(event)}><input accept=".xml,text/xml,application/xml" required type="file" onChange={(event) => setXmlFile(event.target.files?.[0] ?? null)} /><button className="h-10 rounded-md bg-primary px-4 text-sm text-primary-foreground" type="submit">Upload và tạo Invoice</button></form></section></> : null}
+      {summary.purchase_order ? <><section className="space-y-4 rounded-xl border bg-card p-5"><h2 className="font-semibold">Purchase Order: {summary.purchase_order.name}</h2><p className="text-sm">{summary.purchase_order.status} · {summary.purchase_order.currency}</p><p className="text-sm text-muted-foreground">Warehouse sẽ cập nhật Purchase Receipt. Sau khi hàng được ghi nhận, Supplier sẽ nhận email yêu cầu gửi invoice.</p></section><section className="space-y-4 rounded-xl border bg-card p-5"><h2 className="font-semibold">XML Invoice</h2><p className="text-sm text-muted-foreground">Receipt: {summary.purchase_receipt?.[0]?.status ?? "Chưa tạo"} · Payment: {summary.payment_status}</p><form className="flex flex-wrap gap-3" onSubmit={(event) => void submitXml(event)}><input accept=".xml,text/xml,application/xml" required type="file" onChange={(event) => setXmlFile(event.target.files?.[0] ?? null)} /><button className="h-10 rounded-md bg-primary px-4 text-sm text-primary-foreground" type="submit">Upload và tạo Invoice</button></form></section></> : null}
       <p role="status">{message}</p>
     </main>
   );

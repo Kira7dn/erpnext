@@ -47,11 +47,12 @@ union_id` dành cho nhân viên.
 - [x] Supplier session có phạm vi theo Supplier và procurement process; PO, Receipt,
   Invoice và Payment chỉ là các chứng từ liên kết trong process đó.
 - [x] Hiển thị thông tin PO được allowlist.
-- [x] Supplier gửi xác nhận giao hàng và chứng từ giao hàng.
+- [x] Warehouse/nhân sự nội bộ tạo và submit Purchase Receipt.
+- [x] Sau khi Receipt submitted, gửi email yêu cầu Supplier gửi invoice.
 - [x] Supplier upload XML invoice.
-- [x] Next.js validate rồi tạo và submit native Receipt/Invoice qua Frappe REST.
+- [x] Next.js validate XML rồi tạo và submit native Purchase Invoice qua Frappe REST.
 - [x] Audit event và control-plane revoke operator đã triển khai; các runtime acceptance còn lại được đánh dấu trực tiếp trong Phase 3.
-- [x] Expiry và idempotency cho access, OTP, quotation, delivery và XML intake.
+- [x] Expiry và idempotency cho access, OTP, quotation, receipt notification và XML intake.
 
 ### Không có trong phạm vi (N/A)
 
@@ -77,7 +78,8 @@ flowchart LR
     LINK[One persistent Magic Link]
     OTP[Email OTP]
     PORTAL[Supplier Portal]
-    GOODS[Delivery Confirmation]
+    GOODS[Warehouse Purchase Receipt]
+    INVREQ[Invoice Request Email]
     XML[XML Invoice Intake]
     PR[Purchase Receipt]
     PI[Purchase Invoice]
@@ -87,7 +89,8 @@ flowchart LR
     LINK --> SQ --> GATE
     GATE -->|Đủ điều kiện| PODRAFT --> APPROVAL --> PO
     PO --> OTP --> PORTAL
-    PORTAL --> GOODS --> PR
+    GOODS --> PR --> INVREQ
+    INVREQ --> PORTAL
     PORTAL --> XML --> PI
     PI --> PAY
 ```
@@ -107,21 +110,22 @@ Material Request
 → Lark Approval tổng hợp mở kèm số PO thật và kết quả chọn
 → Approver phê duyệt
 → ERPNext submit đúng PO Draft đã cấp số, không tạo PO thứ hai
-→ Purchase Receipt
+→ Warehouse tạo và submit Purchase Receipt
+→ Gửi email yêu cầu Supplier gửi Invoice
 → Purchase Invoice
 → Payment Entry
 ```
 
 `Delivery Note` thuộc nhánh bán hàng/giao cho Customer. Với nhà cung cấp,
-Supplier Portal chỉ gửi delivery confirmation; ERPNext tạo `Purchase Receipt`
-sau bước kiểm tra nội bộ.
+warehouse/nhân sự nội bộ tạo và submit `Purchase Receipt`; sau đó hệ thống gửi
+email yêu cầu Supplier nộp invoice qua portal.
 
 ## 4. Boundary và ownership
 
 | Thành phần | Ownership |
 |---|---|
 | ERPNext | Supplier, Case, MR, RFQ, Supplier Quotation, PO Draft/PO, Purchase Receipt, Purchase Invoice, stock, accounting và mã chứng từ |
-| `apps/erp` | Supplier Portal UI, public BFF và orchestration chính |
+| `apps/erp` | Supplier Portal UI, public BFF, orchestration và invoice-request notification |
 | `apps/letron_api` | Native ERPNext schema/lifecycle helpers và system automation boundary |
 | `apps/erp` | Lark PO approval adapter và procurement orchestration; không quản lý Supplier identity |
 | Lark/Auth Server | Gửi Magic Link/OTP qua một Lark Mail adapter server-side; credential refresh token mã hóa trong Neon và refresh được khóa bằng PostgreSQL advisory lock |
@@ -161,7 +165,7 @@ vào việc Supplier có ERP login hay không. Context phải được khôi ph�
 | Nghiệp vụ | Request từ Supplier | Actor tạo/submit native document |
 |---|---|---|
 | Supplier Quotation | Item, quantity, rate thuộc RFQ của access | `apps/erp` qua native Frappe REST |
-| Delivery confirmation | PO item và số lượng còn nhận | `apps/erp` qua native Frappe REST |
+| Warehouse Purchase Receipt | PO item và số lượng thực nhận | Nhân sự nội bộ qua ERP Purchase Receipt |
 | XML invoice | File XML và metadata thuộc PO/Supplier | `apps/erp` qua native Frappe REST |
 | PO trước approval | Không được tự tạo/chỉnh sửa | `apps/erp` tạo PO Draft native ERPNext |
 | PO sau approval | Không được tạo PO mới | Lark callback submit đúng PO Draft đã cấp số |
@@ -218,7 +222,7 @@ sequenceDiagram
     ERP->>ERP: Evaluate all-submitted / MR+3-day gate
     ERP->>ERP: Open aggregate Lark PO approval when gate passes
 
-    SUP->>APP: Quote / delivery confirmation / XML upload
+    SUP->>APP: Quote / XML invoice upload
     APP->>ERP: Validate session, lifecycle capability and idempotency
     ERP-->>APP: Persist native ERPNext document
 ```
@@ -289,7 +293,6 @@ src/app/api/supplier/[magicId]/otp/request/route.ts
 src/app/api/supplier/[magicId]/otp/verify/route.ts
 src/app/api/supplier/session/process/route.ts
 src/app/api/supplier/session/po/route.ts
-src/app/api/supplier/session/delivery/route.ts
 src/app/api/supplier/session/xml-invoice/route.ts
 src/app/api/supplier/session/payment-status/route.ts
 src/app/api/supplier/session/logout/route.ts
@@ -384,11 +387,9 @@ Không expose các method này qua generic CRUD public resource.
 /supplier/{magicId}
 ├── Verify Email OTP
 ├── Purchase Order Summary
-├── Supplier Goods
-│   ├── Ordered quantity
-│   ├── Delivered quantity
-│   ├── Delivery date
-│   └── Delivery document upload
+├── Receipt status (warehouse input)
+│   ├── Purchase Receipt number
+│   └── Received quantities
 ├── XML Invoice
 │   ├── XML file upload
 │   ├── Invoice number
@@ -414,50 +415,36 @@ Capability theo lifecycle đề xuất:
 |---|---|
 | RFQ mở | Xem RFQ, nhập/cập nhật Supplier Quotation |
 | Chờ duyệt / PO đang tạo | Xem trạng thái, không sửa quote nếu đã khóa |
-| PO đã submit | Xem PO, xác nhận giao hàng |
-| Đã nhận hàng | Xem receipt, gửi/bổ sung XML invoice |
+| PO đã submit | Chờ warehouse tạo Purchase Receipt |
+| Đã nhận hàng | Nhận email yêu cầu, gửi/bổ sung XML invoice |
 | Invoice đã submit | Xem invoice và trạng thái thanh toán tối thiểu |
 | Đã thanh toán | Read-only |
 | Hủy/revoke | Không truy cập được |
 
-## 10. Delivery Confirmation
+## 10. Warehouse Receipt và Invoice Request
 
-Supplier submit delivery confirmation được validate rồi tạo và submit Receipt
-native ngay:
+Supplier không còn nhập delivery confirmation. Warehouse/nhân sự nội bộ tạo và
+submit Purchase Receipt trong ERP. Chỉ sau khi Receipt đạt `docstatus=1`, hệ
+thống mới gửi email yêu cầu Supplier upload invoice:
 
 ```text
-Supplier Delivery Confirmation
-→ Purchase Receipt submitted
-→ Native Purchase Receipt draft
-→ Internal submit Purchase Receipt
+Warehouse tạo Purchase Receipt
+→ Validate PO/Supplier/remaining quantity
+→ Submit Purchase Receipt
+→ Ghi receipt vào procurement process
+→ Gửi Invoice Request Email idempotent
 ```
 
-Payload tối thiểu:
+Receipt Draft, Receipt lỗi hoặc Receipt bị hủy không được gửi email. Key chống
+trùng là:
 
-```json
-{
-  "purchase_order": "PO-...",
-  "delivery_date": "YYYY-MM-DD",
-  "items": [
-    {
-      "purchase_order_item": "...",
-      "delivered_qty": 0,
-      "rejected_qty": 0,
-      "uom": "...",
-      "serial_no": "...",
-      "batch_no": "..."
-    }
-  ],
-  "attachments": ["..."],
-  "idempotency_key": "..."
-}
+```text
+supplier-invoice-request:{purchase_receipt}:{supplier}
 ```
 
-ERP phải tự đọc lại PO và tính số lượng còn nhận; không tin `delivered_qty` do
-client gửi nếu vượt số lượng còn lại. Nếu PO item là hàng quản lý serial/batch,
-supplier bắt buộc gửi `serial_no`/`batch_no`; ERP không tự sinh traceability và
-không cho phép submit receipt thiếu dữ liệu đó. Các field này được giữ trong
-payload hash để retry cùng idempotency key trả lại đúng submission cũ.
+Nếu gửi email thất bại sau khi Receipt đã submit, phải retry notification mà
+không tạo Receipt hoặc email trùng. ERP phải tự đọc lại PO và kiểm tra tổng số
+lượng đã nhận trước khi warehouse submit Receipt.
 
 ## 11. XML Invoice Intake
 
@@ -673,9 +660,9 @@ Trạng thái hiện tại:
   status `Invoiced`; mỗi Supplier có access/Magic Link riêng.
 - [x] Resend OTP trả `429` kèm `Retry-After`; OTP đã verify không thể replay.
 - [x] Quotation có tổng giá thấp nhất được chọn trước khi mở Lark approval;
-  approval test được auto-approve ở non-production, PO Draft có số native trước
+  approval test được auto-approve bằng marker explicit, PO Draft có số native trước
   approval và cùng số đó được readback là `Submitted` sau approval.
-- [x] Idempotency của quotation, delivery confirmation và XML invoice; revoke
+- [x] Idempotency của quotation, warehouse receipt notification và XML invoice; revoke
   access xóa OTP/session và request sau revoke bị từ chối.
 - [x] Auth Server, `apps/erp` và Python backend đã qua typecheck/build/lint hoặc
   compile tương ứng; Docker reload/verify đạt health, zero drift và setup
@@ -757,7 +744,8 @@ mở lại approval request đã gửi.
 - [x] Thêm OTP request/verify.
 - [x] Thêm scoped process/quotation summary.
 - [x] Bypass đúng public route trong `proxy.ts`.
-- [x] Bổ sung delivery confirmation, XML invoice intake, payment-status và logout UI/BFF.
+- [x] Bổ sung warehouse Receipt readback, invoice-request email, XML invoice intake,
+  payment-status và logout UI/BFF.
 
 ### Phase 3 — Acceptance
 
@@ -771,7 +759,7 @@ mở lại approval request đã gửi.
   `Retry-After` dương.
 - [ ] Supplier A không đọc được PO của Supplier B.
 - [x] Không vượt quantity còn lại; realtest xác nhận quantity overflow bị từ chối.
-- [x] Duplicate delivery/XML upload không tạo record trùng.
+- [x] Duplicate receipt notification/XML upload không tạo record trùng.
 - [ ] File private, checksum và residue cleanup.
 - [ ] Process chưa có RFQ hợp lệ thì không phát invite.
 - [ ] Supplier chưa submit quotation thì không mở Lark PO approval.
@@ -810,8 +798,8 @@ không hiển thị lỗi link cho trường hợp này.
 
 ## 17. Mặc định KISS đã chốt
 
-- [x] Supplier gửi delivery confirmation; Next.js validate và ERPNext tạo
-  Purchase Receipt submitted.
+- [x] Warehouse tạo và submit Purchase Receipt; hệ thống gửi invoice-request email
+  idempotent tới Supplier.
 - [x] Mỗi Supplier process có một Contact/email snapshot nhận Magic Link. Đổi
   Contact cần operator nội bộ revoke/reissue theo cùng process policy.
 - [x] Magic Link giữ nguyên đến khi process đóng, revoke hoặc hết 90 ngày không

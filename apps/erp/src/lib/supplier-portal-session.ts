@@ -148,6 +148,19 @@ export function buildOtpMail(access: SupplierPortalAccess, otp: string): { to: s
   return { to: access.email, subject: "Letron Supplier Portal OTP", body_html: `<p>${plain.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>")}</p>`, body_plain_text: plain, idempotency_key: `supplier-otp:${access.access_id}:${Math.floor(Date.now() / 1000)}` };
 }
 
+export function buildInvoiceRequestMail(access: SupplierPortalAccess, magicToken: string, purchaseReceipt: string): { to: string; subject: string; body_html: string; body_plain_text: string; idempotency_key: string } {
+  const portalUrl = `${supplierPortalConfig().portal_public_base_url.replace(/\/$/, "")}/supplier/${magicToken}`;
+  const plain = [
+    `Supplier: ${access.supplier}`,
+    `Purchase Receipt: ${purchaseReceipt}`,
+    `RFQ: ${access.request_for_quotation}`,
+    "Please submit your invoice through the Supplier Portal.",
+    "Do not share this link or OTP with anyone.",
+    `Open this link and request an OTP: ${portalUrl}`,
+  ].join("\n");
+  return { to: access.email, subject: `Letron invoice request for ${purchaseReceipt}`, body_html: `<p>${plain.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>")}</p>`, body_plain_text: plain, idempotency_key: `supplier-invoice-request:${purchaseReceipt}:${access.supplier}` };
+}
+
 export async function requestNextOtp(magicToken: string): Promise<{ access: SupplierPortalAccess; otp: string }> {
   const access = await getAccessByMagicToken(magicToken);
   const db = store();
