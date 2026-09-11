@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ContactEmailWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "email_id": {
+      "type": "string",
+      "x-frappe-options": "Email"
+    },
+    "is_primary": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "email_id"
+  ],
+  "additionalProperties": false,
+  "x-module": "Contacts"
+}

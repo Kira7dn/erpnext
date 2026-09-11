@@ -1,42 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://letron.local/schemas/operations/updateAssetShiftAllocation.request.json",
-  "type": "object",
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "section_break_esaa": {
-      "type": "string"
-    },
-    "asset": {
-      "type": "string",
-      "x-frappe-target-doctype": "Asset"
-    },
-    "column_break_tdae": {
-      "type": "string"
-    },
-    "finance_book": {
-      "type": "string",
-      "x-frappe-target-doctype": "Finance Book"
-    },
-    "depreciation_schedule_section": {
-      "type": "string"
-    },
-    "naming_series": {
-      "type": "string",
-      "enum": [
-        "ACC-ASA-.YYYY.-"
-      ]
-    },
-    "column_break_jomc": {
-      "type": "string"
-    }
-  },
-  "required": [
-    "asset",
-    "naming_series"
-  ],
-  "additionalProperties": false,
-  "x-module": "Assets"
+  "$ref": "AssetShiftAllocationWrite.json"
 }

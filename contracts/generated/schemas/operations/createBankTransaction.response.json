@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "BankTransaction.json"
+      "$ref": "BankTransactionResponse.json"
     }
   },
   "required": [

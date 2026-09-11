@@ -17,10 +17,20 @@
       "type": "string"
     },
     "is_container": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "is_group": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "sb_location_details": {
       "type": "string"

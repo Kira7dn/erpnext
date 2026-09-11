@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SalesInvoicePaymentWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "mode_of_payment": {
+      "type": "string",
+      "x-frappe-target-doctype": "Mode of Payment"
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "reference_no": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "amount",
+    "mode_of_payment"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

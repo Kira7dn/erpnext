@@ -137,7 +137,12 @@
       "writeOnly": true
     },
     "is_free_item": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "section_break_21": {
@@ -170,7 +175,12 @@
       "type": "string"
     },
     "delivered_by_supplier": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "accounting": {
@@ -207,7 +217,12 @@
       "format": "date"
     },
     "enable_deferred_revenue": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break_50": {
       "type": "string"
@@ -263,7 +278,12 @@
       "type": "string"
     },
     "allow_zero_valuation_rate": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "serial_no": {
       "type": "string"
@@ -322,7 +342,12 @@
       "readOnly": true
     },
     "is_fixed_asset": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
@@ -334,7 +359,12 @@
       "type": "string"
     },
     "page_break": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "description_section": {
       "type": "string"
@@ -374,7 +404,12 @@
       "x-frappe-target-doctype": "Account"
     },
     "grant_commission": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "internal_transfer_section": {
@@ -393,7 +428,12 @@
       "readOnly": true
     },
     "has_item_scanned": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "serial_and_batch_bundle": {
@@ -404,7 +444,12 @@
       "type": "string"
     },
     "use_serial_batch_fields": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_break_eoec": {
       "type": "string"
@@ -448,7 +493,12 @@
       "x-frappe-target-doctype": "Tax Withholding Category"
     },
     "apply_tds": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "against_pick_list": {

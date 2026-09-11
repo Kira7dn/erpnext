@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SerialNoResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break0": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "serial_no": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "item_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item"
+    },
+    "column_break1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "item_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "item_group": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item Group",
+      "readOnly": true
+    },
+    "brand": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Brand",
+      "readOnly": true
+    },
+    "asset_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "asset": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset",
+      "readOnly": true
+    },
+    "asset_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Issue",
+        "Receipt",
+        "Transfer",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "column_break_24": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "location": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Location",
+      "readOnly": true
+    },
+    "employee": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Employee",
+      "readOnly": true
+    },
+    "warranty_amc_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break6": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "maintenance_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Under Warranty",
+        "Out of Warranty",
+        "Under AMC",
+        "Out of AMC",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "warranty_period": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break7": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "warranty_expiry_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "amc_expiry_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "more_info": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "work_order": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Work Order"
+    },
+    "warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse",
+      "readOnly": true
+    },
+    "batch_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Batch",
+      "readOnly": true
+    },
+    "purchase_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Active",
+        "Inactive",
+        "Consumed",
+        "Delivered",
+        "Expired",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "column_break_2cmm": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "customer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Customer",
+      "readOnly": true
+    },
+    "source_document_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reference_doctype": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType",
+      "readOnly": true
+    },
+    "column_break_ctcx": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reference_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "reference_doctype",
+      "readOnly": true
+    },
+    "posting_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

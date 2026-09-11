@@ -1,0 +1,293 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetCapitalizationResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "title": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "target_item_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "target_asset": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset"
+    },
+    "target_asset_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "posting_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "posting_time": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "time"
+    },
+    "set_posting_time": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset Capitalization",
+      "readOnly": true
+    },
+    "section_break_16": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stock_items": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AssetCapitalizationStockItemResponse.json"
+      }
+    },
+    "section_break_26": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "asset_items": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AssetCapitalizationAssetItemResponse.json"
+      }
+    },
+    "stock_items_total": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "asset_items_total": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "finance_book": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Finance Book"
+    },
+    "service_expenses_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "service_items": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AssetCapitalizationServiceItemResponse.json"
+      }
+    },
+    "service_items_total": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "totals_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "total_value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "column_break_36": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_incoming_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cost_center": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "project": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Project"
+    },
+    "dimension_col_break": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_fixed_asset_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account",
+      "readOnly": true
+    },
+    "section_break_urtz": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_gqep": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_yvlx": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_arbh": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_boeu": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_qecy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_ptna": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_szvh": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_katv": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

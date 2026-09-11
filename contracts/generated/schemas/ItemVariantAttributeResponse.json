@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ItemVariantAttributeResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "variant_of": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item"
+    },
+    "attribute": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item Attribute"
+    },
+    "column_break_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "attribute_value": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "numeric_values": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "section_break_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "from_range": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "increment": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "column_break_8": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "to_range": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "disabled": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

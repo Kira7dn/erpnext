@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PickListItemWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "picked_qty": {
+      "type": "number"
+    },
+    "serial_no": {
+      "type": "string"
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "column_break_2": {
+      "type": "string"
+    },
+    "section_break_5": {
+      "type": "string"
+    },
+    "column_break_11": {
+      "type": "string"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "quantity_section": {
+      "type": "string"
+    },
+    "column_break_15": {
+      "type": "string"
+    },
+    "serial_no_and_batch_section": {
+      "type": "string"
+    },
+    "column_break_20": {
+      "type": "string"
+    },
+    "serial_and_batch_bundle": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "pick_serial_and_batch": {
+      "type": "string"
+    },
+    "use_serial_batch_fields": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "section_break_ecxc": {
+      "type": "string"
+    },
+    "column_break_belw": {
+      "type": "string"
+    },
+    "available_quantity_section": {
+      "type": "string"
+    },
+    "column_break_kyek": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "item_code",
+    "qty"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

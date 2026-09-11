@@ -35,10 +35,20 @@
       "type": "string"
     },
     "allocate_full_amount_to_stock_items": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "included_in_print_rate": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "col_break1": {
       "type": "string"
@@ -106,7 +116,12 @@
       "x-frappe-target-doctype": "Project"
     },
     "included_in_paid_amount": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "account_currency": {
       "type": "string",
@@ -114,7 +129,12 @@
       "readOnly": true
     },
     "is_tax_withholding_account": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "net_amount": {
@@ -128,12 +148,22 @@
       "readOnly": true
     },
     "set_by_item_tax_template": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
     "dont_recompute_tax": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },

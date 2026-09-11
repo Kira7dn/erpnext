@@ -1,0 +1,626 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/JournalEntryResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "entry_type_and_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-flag"
+    },
+    "title": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "voucher_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Journal Entry",
+        "Inter Company Journal Entry",
+        "Bank Entry",
+        "Cash Entry",
+        "Credit Card Entry",
+        "Debit Note",
+        "Credit Note",
+        "Contra Entry",
+        "Excise Entry",
+        "Write Off Entry",
+        "Opening Entry",
+        "Depreciation Entry",
+        "Asset Disposal",
+        "Periodic Accounting Entry",
+        "Exchange Rate Revaluation",
+        "Exchange Gain Or Loss",
+        "Deferred Revenue",
+        "Deferred Expense",
+        "",
+        null
+      ]
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "posting_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "finance_book": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Finance Book",
+      "readOnly": true
+    },
+    "2_add_edit_gl_entries": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-table"
+    },
+    "accounts": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "JournalEntryAccountResponse.json"
+      }
+    },
+    "section_break99": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cheque_no": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cheque_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "user_remark": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "total_debit": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "total_credit": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "difference": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "get_balance": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "multi_currency": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "total_amount_currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "total_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "total_amount_currency",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "total_amount_in_words": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "reference": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-pushpin"
+    },
+    "clearance_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date",
+      "readOnly": true
+    },
+    "remark": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "inter_company_journal_entry_reference": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Journal Entry",
+      "readOnly": true
+    },
+    "column_break98": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bill_no": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bill_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "due_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "write_off": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "write_off_based_on": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Accounts Receivable",
+        "Accounts Payable",
+        "",
+        null
+      ]
+    },
+    "get_outstanding_invoices": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "get_outstanding_invoices"
+    },
+    "column_break_30": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "write_off_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "printing_settings": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pay_to_recd_from": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_35": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "letter_head": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Letter Head"
+    },
+    "select_print_heading": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Print Heading"
+    },
+    "addtional_info": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-file-text"
+    },
+    "mode_of_payment": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Mode of Payment"
+    },
+    "payment_order": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Payment Order",
+      "readOnly": true
+    },
+    "column_break3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_opening": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "No",
+        "Yes",
+        "",
+        null
+      ]
+    },
+    "stock_entry": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Stock Entry",
+      "readOnly": true
+    },
+    "auto_repeat": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Auto Repeat",
+      "readOnly": true
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Journal Entry",
+      "readOnly": true
+    },
+    "from_template": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Journal Entry Template"
+    },
+    "tax_withholding_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Tax Withholding Category"
+    },
+    "apply_tds": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reversal_of": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Journal Entry",
+      "readOnly": true
+    },
+    "process_deferred_accounting": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Process Deferred Accounting",
+      "readOnly": true
+    },
+    "is_system_generated": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "periodic_entry_difference_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account"
+    },
+    "section_break_tcvw": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "for_all_stock_asset_accounts": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "stock_asset_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account"
+    },
+    "column_break_wpau": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "get_balance_for_periodic_accounting": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "party_not_required": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "section_tax_withholding_entry": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tax_withholding_group": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Tax Withholding Group"
+    },
+    "ignore_tax_withholding_threshold": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "override_tax_withholding_entries": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tax_withholding_entries": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "TaxWithholdingEntryResponse.json"
+      }
+    },
+    "more_info_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_ouaq": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_cixu": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_oizh": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_isfa": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tax_withholding_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "auto_repeat_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "custom_remark": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

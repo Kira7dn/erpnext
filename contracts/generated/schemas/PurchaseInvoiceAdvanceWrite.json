@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PurchaseInvoiceAdvanceWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "allocated_amount": {
+      "type": "number",
+      "x-frappe-options": "party_account_currency"
+    },
+    "difference_posting_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

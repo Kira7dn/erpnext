@@ -89,13 +89,28 @@
       "format": "time"
     },
     "set_posting_time": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "inspection_required": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "from_bom": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "bom_no": {
       "type": "string",
@@ -108,7 +123,12 @@
       "type": "string"
     },
     "use_multi_level_bom": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "get_items": {
       "type": "string"
@@ -278,13 +298,28 @@
       "type": "string"
     },
     "add_to_transit": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "apply_putaway_rule": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "is_return": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
@@ -330,7 +365,12 @@
       "type": "string"
     },
     "is_additional_transfer_entry": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },

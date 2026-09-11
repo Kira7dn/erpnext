@@ -35,16 +35,36 @@
       "type": "string"
     },
     "disabled": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "allow_alternative_item": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "is_stock_item": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "include_item_in_manufacturing": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "opening_stock": {
       "type": "number",
@@ -57,7 +77,12 @@
       "type": "number"
     },
     "is_fixed_asset": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "asset_category": {
       "type": "string",
@@ -155,19 +180,39 @@
       "type": "string"
     },
     "has_batch_no": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "create_new_batch": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "batch_number_series": {
       "type": "string"
     },
     "has_expiry_date": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "retain_sample": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "sample_quantity": {
       "type": "integer"
@@ -176,7 +221,12 @@
       "type": "string"
     },
     "has_serial_no": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "serial_no_series": {
       "type": "string"
@@ -185,7 +235,12 @@
       "type": "string"
     },
     "has_variants": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "variant_based_on": {
       "type": "string",
@@ -208,7 +263,12 @@
       }
     },
     "is_purchase_item": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "purchase_uom": {
       "type": "string",
@@ -231,13 +291,23 @@
       "readOnly": true
     },
     "is_customer_provided_item": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "supplier_details": {
       "type": "string"
     },
     "delivered_by_supplier": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "supplier_items": {
       "type": "array",
@@ -268,7 +338,12 @@
       "x-frappe-target-doctype": "UOM"
     },
     "is_sales_item": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break3": {
       "type": "string"
@@ -277,13 +352,23 @@
       "type": "number"
     },
     "enable_deferred_revenue": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "no_of_months": {
       "type": "integer"
     },
     "enable_deferred_expense": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "no_of_months_exp": {
       "type": "integer"
@@ -308,10 +393,20 @@
       }
     },
     "inspection_required_before_purchase": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "inspection_required_before_delivery": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "quality_inspection_template": {
       "type": "string",
@@ -327,7 +422,12 @@
       "readOnly": true
     },
     "is_sub_contracted_item": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break_74": {
       "type": "string"
@@ -348,7 +448,12 @@
       "type": "number"
     },
     "auto_create_assets": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "default_item_manufacturer": {
       "type": "string",
@@ -360,13 +465,28 @@
       "readOnly": true
     },
     "grant_commission": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "is_grouped_asset": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "allow_negative_stock": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "inventory_settings_section": {
       "type": "string"

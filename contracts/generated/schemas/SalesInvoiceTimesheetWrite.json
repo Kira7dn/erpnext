@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SalesInvoiceTimesheetWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "from_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "to_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "section_break_3": {
+      "type": "string"
+    },
+    "column_break_5": {
+      "type": "string"
+    },
+    "section_break_7": {
+      "type": "string"
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "section_break_11": {
+      "type": "string"
+    },
+    "column_break_13": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

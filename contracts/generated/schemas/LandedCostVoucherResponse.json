@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/LandedCostVoucherResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "purchase_receipts": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "LandedCostPurchaseReceiptResponse.json"
+      }
+    },
+    "purchase_receipt_items": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "get_items_from_purchase_receipts": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "items": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "LandedCostItemResponse.json"
+      }
+    },
+    "sec_break1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "taxes": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "LandedCostTaxesandChargesResponse.json"
+      }
+    },
+    "section_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "total_taxes_and_charges": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "col_break1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "distribute_charges_based_on": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Qty",
+        "Amount",
+        "Distribute Manually",
+        "",
+        null
+      ]
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Landed Cost Voucher",
+      "readOnly": true
+    },
+    "sec_break2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "landed_cost_help": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "posting_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "section_break_5": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "vendor_invoices": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "LandedCostVendorInvoiceResponse.json"
+      }
+    },
+    "total_vendor_invoices_cost": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

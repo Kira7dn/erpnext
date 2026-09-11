@@ -5,4 +5,5 @@ FROM ${ERPNEXT_IMAGE}
 # immutable runtime image; containers never download dependencies at startup.
 RUN /home/frappe/frappe-bench/env/bin/pip install --no-cache-dir \
     PyYAML==6.0.3 \
-    'boto3>=1.34.0'
+    'boto3>=1.34.0' \
+    'jsonschema>=4.23.0'

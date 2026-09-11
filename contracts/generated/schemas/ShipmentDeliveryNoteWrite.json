@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ShipmentDeliveryNoteWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "delivery_note": {
+      "type": "string",
+      "x-frappe-target-doctype": "Delivery Note"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "delivery_note"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

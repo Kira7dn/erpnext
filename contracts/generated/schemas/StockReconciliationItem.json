@@ -93,7 +93,12 @@
       "x-frappe-target-doctype": "Batch"
     },
     "allow_zero_valuation_rate": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "has_item_scanned": {
       "type": "string",
@@ -116,7 +121,12 @@
       "x-frappe-target-doctype": "Item Group"
     },
     "use_serial_batch_fields": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_break_lypk": {
       "type": "string"
@@ -125,7 +135,12 @@
       "type": "string"
     },
     "reconcile_all_serial_batch": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     }
   },
   "required": [

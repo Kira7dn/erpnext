@@ -34,11 +34,21 @@
       "readOnly": true
     },
     "has_corrective_cost": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "has_operating_cost": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "operation_id": {

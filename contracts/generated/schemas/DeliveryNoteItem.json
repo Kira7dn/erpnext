@@ -141,7 +141,12 @@
       "writeOnly": true
     },
     "is_free_item": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "section_break_25": {
@@ -247,7 +252,12 @@
       "x-frappe-target-doctype": "Cost Center"
     },
     "allow_zero_valuation_rate": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "against_sales_order": {
       "type": "string",
@@ -279,7 +289,12 @@
       "readOnly": true
     },
     "page_break": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "accounting_details_section": {
       "type": "string"
@@ -329,7 +344,12 @@
       "readOnly": true
     },
     "grant_commission": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "pick_list_item": {
@@ -353,7 +373,12 @@
       "readOnly": true
     },
     "has_item_scanned": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "material_request": {
@@ -395,7 +420,12 @@
       "x-frappe-target-doctype": "Batch"
     },
     "use_serial_batch_fields": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_break_qyjv": {
       "type": "string"

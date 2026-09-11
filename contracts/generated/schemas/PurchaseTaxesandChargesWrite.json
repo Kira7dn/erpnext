@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PurchaseTaxesandChargesWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Valuation and Total",
+        "Valuation",
+        "Total"
+      ]
+    },
+    "add_deduct_tax": {
+      "type": "string",
+      "enum": [
+        "Add",
+        "Deduct"
+      ]
+    },
+    "charge_type": {
+      "type": "string",
+      "enum": [
+        "Actual",
+        "On Net Total",
+        "On Previous Row Amount",
+        "On Previous Row Total",
+        "On Item Quantity"
+      ]
+    },
+    "row_id": {
+      "type": "string"
+    },
+    "allocate_full_amount_to_stock_items": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "included_in_print_rate": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "account_head": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "description": {
+      "type": "string"
+    },
+    "section_break_10": {
+      "type": "string"
+    },
+    "rate": {
+      "type": "number"
+    },
+    "section_break_9": {
+      "type": "string"
+    },
+    "tax_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "column_break_14": {
+      "type": "string"
+    },
+    "base_total": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "writeOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "included_in_paid_amount": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "section_break_mvae": {
+      "type": "string"
+    },
+    "column_break_odzz": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_head",
+    "add_deduct_tax",
+    "category",
+    "charge_type",
+    "description"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

@@ -150,14 +150,24 @@
       "type": "number"
     },
     "ignore_pricing_rule": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "set_warehouse": {
       "type": "string",
       "x-frappe-target-doctype": "Warehouse"
     },
     "is_subcontracted": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "supplier_warehouse": {
       "type": "string",
@@ -365,7 +375,12 @@
       "readOnly": true
     },
     "disable_rounded_total": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "in_words": {
       "type": "string",
@@ -457,7 +472,12 @@
       "type": "string"
     },
     "group_same_items": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "language": {
       "type": "string"
@@ -510,7 +530,12 @@
       "type": "string"
     },
     "is_internal_supplier": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "represents_company": {
@@ -533,7 +558,12 @@
       "x-frappe-target-doctype": "Project"
     },
     "is_old_subcontracting_flow": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
@@ -595,7 +625,12 @@
       "writeOnly": true
     },
     "has_unit_price_items": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "writeOnly": true
     },
     "dispatch_address": {

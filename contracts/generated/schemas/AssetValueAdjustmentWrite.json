@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetValueAdjustmentWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "asset": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset"
+    },
+    "asset_category": {
+      "type": "string"
+    },
+    "finance_book": {
+      "type": "string",
+      "x-frappe-target-doctype": "Finance Book"
+    },
+    "column_break_4": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "new_asset_value": {
+      "type": "number"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "value_details_section": {
+      "type": "string"
+    },
+    "column_break_11": {
+      "type": "string"
+    },
+    "difference_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset",
+    "date",
+    "difference_account",
+    "new_asset_value"
+  ],
+  "additionalProperties": false,
+  "x-module": "Assets"
+}

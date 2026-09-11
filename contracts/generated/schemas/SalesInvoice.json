@@ -34,14 +34,24 @@
       "x-frappe-target-doctype": "Project"
     },
     "is_pos": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "pos_profile": {
       "type": "string",
       "x-frappe-target-doctype": "POS Profile"
     },
     "is_return": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break1": {
       "type": "string"
@@ -63,7 +73,12 @@
       "format": "time"
     },
     "set_posting_time": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "due_date": {
       "type": "string",
@@ -79,7 +94,12 @@
       "x-frappe-target-doctype": "Sales Invoice"
     },
     "update_billed_amount_in_sales_order": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "customer_po_details": {
       "type": "string"
@@ -174,7 +194,12 @@
       "type": "number"
     },
     "ignore_pricing_rule": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "set_warehouse": {
       "type": "string",
@@ -185,7 +210,12 @@
       "x-frappe-options": "fa fa-shopping-cart"
     },
     "update_stock": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "scan_barcode": {
       "type": "string",
@@ -331,7 +361,12 @@
       "readOnly": true
     },
     "redeem_loyalty_points": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break_77": {
       "type": "string"
@@ -426,7 +461,12 @@
       "x-frappe-options": "fa fa-money"
     },
     "allocate_advances_automatically": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "get_advances": {
       "type": "string",
@@ -511,7 +551,12 @@
       "readOnly": true
     },
     "write_off_outstanding_amount_automatically": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break_74": {
       "type": "string"
@@ -542,7 +587,12 @@
       "x-frappe-target-doctype": "Letter Head"
     },
     "group_same_items": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "language": {
       "type": "string",
@@ -570,7 +620,12 @@
       "writeOnly": true
     },
     "is_discounted": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "status": {
@@ -673,11 +728,21 @@
       "type": "string"
     },
     "is_consolidated": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "is_internal_customer": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "company_tax_id": {
@@ -698,10 +763,20 @@
       "x-frappe-target-doctype": "Warehouse"
     },
     "is_debit_note": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "disable_rounded_total": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "additional_discount_account": {
       "type": "string",
@@ -716,7 +791,12 @@
       "readOnly": true
     },
     "ignore_default_payment_terms_template": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
@@ -734,7 +814,12 @@
       "x-frappe-target-doctype": "Subscription"
     },
     "is_cash_or_non_trade_discount": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "contact_and_address_tab": {
       "type": "string"
@@ -795,23 +880,48 @@
       "type": "string"
     },
     "only_include_allocated_payments": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "use_company_roundoff_cost_center": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "update_billed_amount_in_delivery_note": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "dont_create_loyalty_points": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "coupon_code": {
       "type": "string",
       "x-frappe-target-doctype": "Coupon Code"
     },
     "update_outstanding_for_self": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break_imbx": {
       "type": "string"
@@ -836,7 +946,12 @@
       "x-frappe-target-doctype": "Contact"
     },
     "is_created_using_pos": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "writeOnly": true
     },
     "pos_closing_entry": {
@@ -848,7 +963,12 @@
       "type": "string"
     },
     "has_subcontracted": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
@@ -860,7 +980,12 @@
       "writeOnly": true
     },
     "apply_tds": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_tax_withholding_entry": {
       "type": "string"
@@ -876,10 +1001,20 @@
       }
     },
     "ignore_tax_withholding_threshold": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "override_tax_withholding_entries": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "totals_section": {
       "type": "string",

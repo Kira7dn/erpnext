@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "message": {
-      "$ref": "SalesOrder.json"
+      "$ref": "SalesOrderResponse.json"
     }
   },
   "required": [

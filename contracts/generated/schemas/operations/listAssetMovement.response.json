@@ -6,7 +6,7 @@
     "data": {
       "type": "array",
       "items": {
-        "$ref": "AssetMovement.json"
+        "$ref": "AssetMovementResponse.json"
       }
     },
     "message": {}

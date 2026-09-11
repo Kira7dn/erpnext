@@ -158,7 +158,12 @@
       "writeOnly": true
     },
     "is_free_item": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "item_weight_details": {
@@ -228,7 +233,12 @@
       "x-frappe-target-doctype": "Item Tax Template"
     },
     "page_break": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "item_group": {
       "type": "string",
@@ -263,7 +273,12 @@
       "readOnly": true
     },
     "against_blanket_order": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_break_43": {
       "type": "string"
@@ -287,10 +302,20 @@
       "readOnly": true
     },
     "is_alternative": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "has_alternative_item": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },

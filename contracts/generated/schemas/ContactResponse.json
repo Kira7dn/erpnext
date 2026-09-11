@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ContactResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "contact_section": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-user"
+    },
+    "first_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "last_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "email_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "Email",
+      "readOnly": true
+    },
+    "user": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "User"
+    },
+    "cb00": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Passive",
+        "Open",
+        "Replied",
+        "",
+        null
+      ]
+    },
+    "salutation": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Salutation"
+    },
+    "gender": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Gender"
+    },
+    "phone": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "Phone",
+      "readOnly": true
+    },
+    "image": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "contact_details": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-pushpin"
+    },
+    "is_primary_contact": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "links": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "DynamicLinkResponse.json"
+      }
+    },
+    "more_info": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-file-text"
+    },
+    "department": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "designation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "unsubscribed": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "middle_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sb_00": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "email_ids": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "ContactEmailResponse.json"
+      }
+    },
+    "address": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Address"
+    },
+    "phone_nos": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "ContactPhoneResponse.json"
+      }
+    },
+    "mobile_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "Phone",
+      "readOnly": true
+    },
+    "pulled_from_google_contacts": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sync_with_google_contacts": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "google_contacts": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Google Contacts"
+    },
+    "cb_00": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sb_01": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "google_contacts_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "company_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "full_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Contacts"
+}

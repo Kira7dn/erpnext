@@ -81,7 +81,12 @@
       ]
     },
     "included_in_paid_amount": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "currency": {
       "type": "string",
@@ -99,12 +104,22 @@
       "readOnly": true
     },
     "set_by_item_tax_template": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
     "is_tax_withholding_account": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     }
   },

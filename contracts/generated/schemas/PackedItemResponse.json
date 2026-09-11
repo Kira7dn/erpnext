@@ -1,0 +1,286 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PackedItemResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "parent_item": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item",
+      "readOnly": true
+    },
+    "item_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item",
+      "readOnly": true
+    },
+    "item_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break_5": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_6": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "target_warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "column_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "section_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "serial_no": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_11": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "batch_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Batch"
+    },
+    "section_break_13": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "actual_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "projected_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break_16": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "uom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "page_break": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "prevdoc_doctype": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "parent_detail_docname": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "actual_batch_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "incoming_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "conversion_factor": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "ordered_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "picked_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "packed_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "serial_and_batch_bundle": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "pick_serial_and_batch": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "use_serial_batch_fields": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "section_break_bgys": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_qlha": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "delivered_by_supplier": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "requested_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

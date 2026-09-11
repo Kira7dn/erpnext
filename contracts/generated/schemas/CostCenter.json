@@ -27,7 +27,12 @@
       "type": "string"
     },
     "is_group": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "lft": {
       "type": "integer",
@@ -43,7 +48,12 @@
       "writeOnly": true
     },
     "disabled": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     }
   },
   "required": [

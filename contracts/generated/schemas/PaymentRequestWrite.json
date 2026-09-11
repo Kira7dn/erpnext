@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PaymentRequestWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "payment_request_type": {
+      "type": "string",
+      "enum": [
+        "Outward",
+        "Inward"
+      ]
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "column_break_2": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": "string"
+    },
+    "mode_of_payment": {
+      "type": "string",
+      "x-frappe-target-doctype": "Mode of Payment"
+    },
+    "party_details": {
+      "type": "string"
+    },
+    "party_type": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "party": {
+      "type": "string",
+      "x-frappe-options": "party_type"
+    },
+    "column_break_4": {
+      "type": "string"
+    },
+    "transaction_details": {
+      "type": "string"
+    },
+    "grand_total": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "is_a_subscription": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "column_break_18": {
+      "type": "string"
+    },
+    "subscription_section": {
+      "type": "string"
+    },
+    "subscription_plans": {
+      "type": "array",
+      "items": {
+        "$ref": "SubscriptionPlanDetailWrite.json"
+      }
+    },
+    "bank_account_details": {
+      "type": "string"
+    },
+    "bank_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Bank Account"
+    },
+    "bank_account_no": {
+      "type": "string"
+    },
+    "account": {
+      "type": "string"
+    },
+    "column_break_11": {
+      "type": "string"
+    },
+    "iban": {
+      "type": "string",
+      "x-frappe-options": "IBAN"
+    },
+    "branch_code": {
+      "type": "string"
+    },
+    "swift_number": {
+      "type": "string"
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "recipient_and_message": {
+      "type": "string"
+    },
+    "print_format": {
+      "type": "string"
+    },
+    "email_to": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "payment_gateway_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Payment Gateway Account"
+    },
+    "section_break_10": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "message_examples": {
+      "type": "string",
+      "x-frappe-options": "<pre><h5>Message Example</h5>\n\n&lt;p&gt;Dear {{ doc.contact_person }},&lt;/p&gt;\n\n&lt;p&gt;Requesting payment for {{ doc.doctype }}, {{ doc.name }} for {{ doc.grand_total }}.&lt;/p&gt;\n\n&lt;a href=\"{{ payment_url }}\"&gt; click here to pay &lt;/a&gt;\n\n</pre>\n"
+    },
+    "section_break_7": {
+      "type": "string"
+    },
+    "payment_gateway": {
+      "type": "string"
+    },
+    "column_break_pnyv": {
+      "type": "string"
+    },
+    "column_break_iiuv": {
+      "type": "string"
+    },
+    "phone_number": {
+      "type": "string"
+    },
+    "payment_reference_section": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "grand_total",
+    "naming_series",
+    "payment_request_type"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

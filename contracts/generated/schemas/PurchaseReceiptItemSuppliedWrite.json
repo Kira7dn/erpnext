@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PurchaseReceiptItemSuppliedWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "serial_no": {
+      "type": "string"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "consumed_qty": {
+      "type": "number"
+    },
+    "secbreak_1": {
+      "type": "string"
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "secbreak_2": {
+      "type": "string"
+    },
+    "col_break3": {
+      "type": "string"
+    },
+    "secbreak_3": {
+      "type": "string"
+    },
+    "col_break4": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "consumed_qty"
+  ],
+  "additionalProperties": false,
+  "x-module": "Buying"
+}

@@ -6,7 +6,7 @@
     "data": {
       "type": "array",
       "items": {
-        "$ref": "BankTransactionRule.json"
+        "$ref": "BankTransactionRuleResponse.json"
       }
     },
     "message": {}

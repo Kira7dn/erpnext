@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "AssetShiftFactor.json"
+      "$ref": "AssetShiftFactorResponse.json"
     }
   },
   "required": [

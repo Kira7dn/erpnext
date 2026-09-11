@@ -1,0 +1,320 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PickListResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "column_break_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_6": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "parent_warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "customer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Customer"
+    },
+    "work_order": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Work Order"
+    },
+    "locations": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "PickListItemResponse.json"
+      }
+    },
+    "for_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Pick List",
+      "readOnly": true
+    },
+    "purpose": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Material Transfer for Manufacture",
+        "Material Transfer",
+        "Delivery",
+        "",
+        null
+      ]
+    },
+    "material_request": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Material Request"
+    },
+    "get_item_locations": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "print_settings_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "group_same_items": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "section_break_15": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "scan_barcode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "Barcode"
+    },
+    "column_break_13": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "scan_mode": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "prompt_qty": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Draft",
+        "Open",
+        "Partly Delivered",
+        "Partially Transferred",
+        "Completed",
+        "Cancelled",
+        "",
+        null
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "consider_rejected_warehouses": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "pick_manually": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ignore_pricing_rule": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "delivery_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Not Delivered",
+        "Fully Delivered",
+        "Partly Delivered",
+        "",
+        null
+      ],
+      "writeOnly": true
+    },
+    "per_delivered": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "section_break_cfiw": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_nwpf": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "other_info_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_refl": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reference_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_feoy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "connections_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

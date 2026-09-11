@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "PickList.json"
+      "$ref": "PickListResponse.json"
     }
   },
   "required": [

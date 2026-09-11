@@ -13,14 +13,24 @@
       "type": "string"
     },
     "is_group": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "company": {
       "type": "string",
       "x-frappe-target-doctype": "Company"
     },
     "disabled": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "writeOnly": true
     },
     "column_break_4": {
@@ -116,7 +126,12 @@
       "type": "string"
     },
     "is_rejected_warehouse": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "customer": {
       "type": "string",

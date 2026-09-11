@@ -114,7 +114,12 @@
       "readOnly": true
     },
     "use_serial_batch_fields": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_break_ecxc": {
       "type": "string"

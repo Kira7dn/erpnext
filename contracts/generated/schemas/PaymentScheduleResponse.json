@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PaymentScheduleResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "payment_term": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Payment Term"
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "due_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "invoice_portion": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "payment_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency"
+    },
+    "mode_of_payment": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Mode of Payment"
+    },
+    "paid_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency"
+    },
+    "column_break_3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "discounted_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "outstanding": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "column_break_5": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "discount_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "discount_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Percentage",
+        "Amount",
+        "",
+        null
+      ]
+    },
+    "discount": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "section_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_15": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_6": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "base_payment_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "base_outstanding": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_paid_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "due_date_based_on": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Day(s) after invoice date",
+        "Day(s) after the end of the invoice month",
+        "Month(s) after the end of the invoice month",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "credit_days": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "credit_months": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "discount_validity_based_on": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Day(s) after invoice date",
+        "Day(s) after the end of the invoice month",
+        "Month(s) after the end of the invoice month",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "discount_validity": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

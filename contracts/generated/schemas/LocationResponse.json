@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/LocationResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "location_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "parent_location": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Location"
+    },
+    "cb_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_container": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_group": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sb_location_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "latitude": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "longitude": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "cb_latlong": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "area": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "area_uom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "UOM"
+    },
+    "sb_geolocation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "location": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tree_details": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "lft": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "rgt": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "old_parent": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

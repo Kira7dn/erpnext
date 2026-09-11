@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetValueAdjustmentResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "asset": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset"
+    },
+    "asset_category": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "finance_book": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Finance Book"
+    },
+    "journal_entry": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Journal Entry",
+      "readOnly": true
+    },
+    "column_break_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "current_asset_value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "new_asset_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "difference_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "cost_center": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset Value Adjustment",
+      "readOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dimension_col_break": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "value_details_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_11": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "difference_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

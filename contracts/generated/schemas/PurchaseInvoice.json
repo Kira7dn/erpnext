@@ -30,13 +30,28 @@
       "format": "date"
     },
     "is_paid": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "is_return": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "apply_tds": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break1": {
       "type": "string"
@@ -58,7 +73,12 @@
       "format": "time"
     },
     "set_posting_time": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "amended_from": {
       "type": "string",
@@ -69,7 +89,12 @@
       "type": "string"
     },
     "on_hold": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "release_date": {
       "type": "string",
@@ -100,10 +125,20 @@
       "readOnly": true
     },
     "update_billed_amount_in_purchase_order": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "update_billed_amount_in_purchase_receipt": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_addresses": {
       "type": "string"
@@ -172,7 +207,12 @@
       "type": "number"
     },
     "ignore_pricing_rule": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "sec_warehouse": {
       "type": "string"
@@ -189,7 +229,12 @@
       "type": "string"
     },
     "is_subcontracted": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "items_section": {
@@ -197,7 +242,12 @@
       "x-frappe-options": "fa fa-shopping-cart"
     },
     "update_stock": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "scan_barcode": {
       "type": "string",
@@ -411,7 +461,12 @@
       "readOnly": true
     },
     "disable_rounded_total": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "payments_section": {
       "type": "string"
@@ -469,7 +524,12 @@
       "x-frappe-options": "fa fa-money"
     },
     "allocate_advances_automatically": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "get_advances": {
       "type": "string",
@@ -513,7 +573,12 @@
       "x-frappe-target-doctype": "Letter Head"
     },
     "group_same_items": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break_112": {
       "type": "string"
@@ -527,7 +592,12 @@
       "readOnly": true
     },
     "is_internal_supplier": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "credit_to": {
@@ -640,7 +710,12 @@
       "writeOnly": true
     },
     "ignore_default_payment_terms_template": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
@@ -655,7 +730,12 @@
       "x-frappe-target-doctype": "Subscription"
     },
     "is_old_subcontracting_flow": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
@@ -713,13 +793,28 @@
       "type": "string"
     },
     "only_include_allocated_payments": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "use_company_roundoff_cost_center": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "use_transaction_date_exchange_rate": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "supplier_group": {
@@ -727,7 +822,12 @@
       "x-frappe-target-doctype": "Supplier Group"
     },
     "update_outstanding_for_self": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "sender": {
       "type": "string",
@@ -770,10 +870,20 @@
       }
     },
     "ignore_tax_withholding_threshold": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "override_tax_withholding_entries": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break_hcca": {
       "type": "string"

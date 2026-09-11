@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/QualityInspectionReadingResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "specification": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Quality Inspection Parameter"
+    },
+    "value": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reading_1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reading_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reading_3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reading_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reading_5": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reading_6": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reading_7": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reading_8": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reading_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reading_10": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Accepted",
+        "Rejected",
+        "",
+        null
+      ]
+    },
+    "section_break_3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "acceptance_formula": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_10": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_14": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "formula_based_criteria": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "min_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "max_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "reading_value": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_14": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "manual_inspection": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "numeric": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "parameter_group": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Quality Inspection Parameter Group",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

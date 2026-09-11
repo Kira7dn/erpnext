@@ -64,7 +64,7 @@ paths:
                   data:
                     type: array
                     items: &id003
-                      $ref: '#/components/schemas/Asset'
+                      $ref: '#/components/schemas/AssetResponse'
                   message: {}
                 required:
                 - data
@@ -116,186 +116,7 @@ paths:
         content:
           application/json:
             schema: &id013
-              type: object
-              properties:
-                name: &id057
-                  type: string
-                naming_series: &id058
-                  type: string
-                  enum:
-                  - ACC-ASS-.YYYY.-
-                asset_name: &id059
-                  type: string
-                item_code: &id060
-                  type: string
-                  x-frappe-target-doctype: Item
-                asset_owner: &id061
-                  type: string
-                  enum:
-                  - Company
-                  - Supplier
-                  - Customer
-                asset_owner_company: &id062
-                  type: string
-                  x-frappe-target-doctype: Company
-                supplier: &id063
-                  type: string
-                  x-frappe-target-doctype: Supplier
-                customer: &id064
-                  type: string
-                  x-frappe-target-doctype: Customer
-                image: &id065
-                  type: string
-                  writeOnly: true
-                column_break_3: &id066
-                  type: string
-                company: &id067
-                  type: string
-                  x-frappe-target-doctype: Company
-                location: &id068
-                  type: string
-                  x-frappe-target-doctype: Location
-                custodian: &id069
-                  type: string
-                  x-frappe-target-doctype: Employee
-                cost_center: &id070
-                  type: string
-                  x-frappe-target-doctype: Cost Center
-                department: &id071
-                  type: string
-                  x-frappe-target-doctype: Department
-                purchase_date: &id072
-                  type: string
-                  format: date
-                available_for_use_date: &id073
-                  type: string
-                  format: date
-                calculate_depreciation: &id074
-                  type: boolean
-                opening_accumulated_depreciation: &id075
-                  type: number
-                  x-frappe-options: Company:company:default_currency
-                finance_books: &id076
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AssetFinanceBook'
-                section_break_33: &id077
-                  type: string
-                  writeOnly: true
-                depreciation_method: &id078
-                  type: string
-                  enum:
-                  - Straight Line
-                  - Double Declining Balance
-                  - Written Down Value
-                  - Manual
-                total_number_of_depreciations: &id079
-                  type: integer
-                column_break_24: &id080
-                  type: string
-                frequency_of_depreciation: &id081
-                  type: integer
-                next_depreciation_date: &id082
-                  type: string
-                  format: date
-                  writeOnly: true
-                policy_number: &id083
-                  type: string
-                insurer: &id084
-                  type: string
-                insured_value: &id085
-                  type: string
-                column_break_48: &id086
-                  type: string
-                insurance_start_date: &id087
-                  type: string
-                  format: date
-                insurance_end_date: &id088
-                  type: string
-                  format: date
-                comprehensive_insurance: &id089
-                  type: string
-                maintenance_required: &id090
-                  type: boolean
-                column_break_51: &id091
-                  type: string
-                purchase_receipt: &id092
-                  type: string
-                  x-frappe-target-doctype: Purchase Receipt
-                purchase_invoice: &id093
-                  type: string
-                  x-frappe-target-doctype: Purchase Invoice
-                purchase_details_section: &id094
-                  type: string
-                column_break_23: &id095
-                  type: string
-                column_break_33: &id096
-                  type: string
-                section_break_36: &id097
-                  type: string
-                asset_quantity: &id098
-                  type: integer
-                depreciation_schedule_sb: &id099
-                  type: string
-                depreciation_schedule_view: &id100
-                  type: string
-                  writeOnly: true
-                is_fully_depreciated: &id101
-                  type: boolean
-                opening_number_of_booked_depreciations: &id102
-                  type: integer
-                purchase_receipt_item: &id103
-                  type: string
-                  writeOnly: true
-                purchase_invoice_item: &id104
-                  type: string
-                  writeOnly: true
-                other_info_tab: &id105
-                  type: string
-                connections_tab: &id106
-                  type: string
-                depreciation_tab: &id107
-                  type: string
-                accounting_dimensions_section: &id108
-                  type: string
-                section_break_jtou: &id109
-                  type: string
-                net_purchase_amount: &id110
-                  type: number
-                  x-frappe-options: currency
-                asset_type: &id111
-                  type: string
-                  enum:
-                  - Existing Asset
-                  - Composite Asset
-                  - Composite Component
-                column_break_wqzi: &id112
-                  type: string
-                column_break_rjyw: &id113
-                  type: string
-                insurance_section: &id114
-                  type: string
-                section_break_uiyd: &id115
-                  type: string
-                column_break_bbwr: &id116
-                  type: string
-                column_break_bfkm: &id117
-                  type: string
-                item_name: &id118
-                  type: string
-                  writeOnly: true
-                asset_owner_section: &id119
-                  type: string
-                column_break_yeds: &id120
-                  type: string
-              required:
-              - asset_name
-              - company
-              - item_code
-              - location
-              - purchase_date
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/AssetWrite'
             example:
               asset_name: ''
               item_code: ''
@@ -523,7 +344,7 @@ paths:
                   data:
                     type: array
                     items: &id021
-                      $ref: '#/components/schemas/AssetCapitalization'
+                      $ref: '#/components/schemas/AssetCapitalizationResponse'
                   message: {}
                 required:
                 - data
@@ -553,93 +374,7 @@ paths:
         content:
           application/json:
             schema: &id022
-              type: object
-              properties:
-                name: &id121
-                  type: string
-                title: &id122
-                  type: string
-                  writeOnly: true
-                target_asset: &id123
-                  type: string
-                  x-frappe-target-doctype: Asset
-                column_break_9: &id124
-                  type: string
-                company: &id125
-                  type: string
-                  x-frappe-target-doctype: Company
-                posting_date: &id126
-                  type: string
-                  format: date
-                posting_time: &id127
-                  type: string
-                  format: time
-                set_posting_time: &id128
-                  type: boolean
-                naming_series: &id129
-                  type: string
-                  enum:
-                  - ACC-ASC-.YYYY.-
-                section_break_16: &id130
-                  type: string
-                stock_items: &id131
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AssetCapitalizationStockItem'
-                section_break_26: &id132
-                  type: string
-                asset_items: &id133
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AssetCapitalizationAssetItem'
-                finance_book: &id134
-                  type: string
-                  x-frappe-target-doctype: Finance Book
-                service_expenses_section: &id135
-                  type: string
-                service_items: &id136
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AssetCapitalizationServiceItem'
-                totals_section: &id137
-                  type: string
-                column_break_36: &id138
-                  type: string
-                accounting_dimensions_section: &id139
-                  type: string
-                cost_center: &id140
-                  type: string
-                  x-frappe-target-doctype: Cost Center
-                project: &id141
-                  type: string
-                  x-frappe-target-doctype: Project
-                dimension_col_break: &id142
-                  type: string
-                section_break_urtz: &id143
-                  type: string
-                column_break_gqep: &id144
-                  type: string
-                column_break_yvlx: &id145
-                  type: string
-                section_break_arbh: &id146
-                  type: string
-                column_break_boeu: &id147
-                  type: string
-                column_break_qecy: &id148
-                  type: string
-                section_break_ptna: &id149
-                  type: string
-                column_break_szvh: &id150
-                  type: string
-                column_break_katv: &id151
-                  type: string
-              required:
-              - company
-              - naming_series
-              - posting_date
-              - posting_time
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/AssetCapitalizationWrite'
             example:
               company: ''
               posting_date: ''
@@ -866,7 +601,7 @@ paths:
                   data:
                     type: array
                     items: &id024
-                      $ref: '#/components/schemas/AssetCategory'
+                      $ref: '#/components/schemas/AssetCategoryResponse'
                   message: {}
                 required:
                 - data
@@ -896,37 +631,7 @@ paths:
         content:
           application/json:
             schema: &id025
-              type: object
-              properties:
-                name: &id152
-                  type: string
-                asset_category_name: &id153
-                  type: string
-                column_break_3: &id154
-                  type: string
-                finance_book_detail: &id155
-                  type: string
-                finance_books: &id156
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AssetFinanceBook'
-                section_break_2: &id157
-                  type: string
-                accounts: &id158
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AssetCategoryAccount'
-                depreciation_options: &id159
-                  type: string
-                enable_cwip_accounting: &id160
-                  type: boolean
-                non_depreciable_category: &id161
-                  type: boolean
-              required:
-              - accounts
-              - asset_category_name
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/AssetCategoryWrite'
             example:
               asset_category_name: ''
               accounts: []
@@ -1085,7 +790,7 @@ paths:
                   data:
                     type: array
                     items: &id027
-                      $ref: '#/components/schemas/AssetDepreciationSchedule'
+                      $ref: '#/components/schemas/AssetDepreciationScheduleResponse'
                   message: {}
                 required:
                 - data
@@ -1116,38 +821,7 @@ paths:
         content:
           application/json:
             schema: &id028
-              type: object
-              properties:
-                name: &id162
-                  type: string
-                asset: &id163
-                  type: string
-                  x-frappe-target-doctype: Asset
-                naming_series: &id164
-                  type: string
-                  enum:
-                  - ACC-ADS-.YYYY.-
-                column_break_2: &id165
-                  type: string
-                depreciation_details_section: &id166
-                  type: string
-                finance_book: &id167
-                  type: string
-                  x-frappe-target-doctype: Finance Book
-                column_break_8: &id168
-                  type: string
-                depreciation_schedule_section: &id169
-                  type: string
-                depreciation_schedule: &id170
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/DepreciationSchedule'
-                details_section: &id171
-                  type: string
-              required:
-              - asset
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/AssetDepreciationScheduleWrite'
             example:
               asset: ''
       responses:
@@ -1305,7 +979,7 @@ paths:
                   data:
                     type: array
                     items: &id030
-                      $ref: '#/components/schemas/AssetMaintenance'
+                      $ref: '#/components/schemas/AssetMaintenanceResponse'
                   message: {}
                 required:
                 - data
@@ -1335,46 +1009,7 @@ paths:
         content:
           application/json:
             schema: &id031
-              type: object
-              properties:
-                name: &id172
-                  type: string
-                asset_name: &id173
-                  type: string
-                  x-frappe-target-doctype: Asset
-                asset_category: &id174
-                  type: string
-                item_code: &id175
-                  type: string
-                item_name: &id176
-                  type: string
-                column_break_3: &id177
-                  type: string
-                company: &id178
-                  type: string
-                  x-frappe-target-doctype: Company
-                section_break_6: &id179
-                  type: string
-                maintenance_team: &id180
-                  type: string
-                  x-frappe-target-doctype: Asset Maintenance Team
-                column_break_9: &id181
-                  type: string
-                maintenance_manager_name: &id182
-                  type: string
-                section_break_8: &id183
-                  type: string
-                asset_maintenance_tasks: &id184
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AssetMaintenanceTask'
-              required:
-              - asset_maintenance_tasks
-              - asset_name
-              - company
-              - maintenance_team
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/AssetMaintenanceWrite'
             example:
               asset_name: ''
               company: ''
@@ -1535,7 +1170,7 @@ paths:
                   data:
                     type: array
                     items: &id033
-                      $ref: '#/components/schemas/AssetMaintenanceLog'
+                      $ref: '#/components/schemas/AssetMaintenanceLogResponse'
                   message: {}
                 required:
                 - data
@@ -1565,59 +1200,7 @@ paths:
         content:
           application/json:
             schema: &id034
-              type: object
-              properties:
-                name: &id185
-                  type: string
-                asset_maintenance: &id186
-                  type: string
-                  x-frappe-target-doctype: Asset Maintenance
-                naming_series: &id187
-                  type: string
-                  enum:
-                  - ACC-AML-.YYYY.-
-                asset_name: &id188
-                  type: string
-                column_break_2: &id189
-                  type: string
-                item_code: &id190
-                  type: string
-                item_name: &id191
-                  type: string
-                section_break_5: &id192
-                  type: string
-                task: &id193
-                  type: string
-                  x-frappe-target-doctype: Asset Maintenance Task
-                maintenance_type: &id194
-                  type: string
-                assign_to_name: &id195
-                  type: string
-                column_break_6: &id196
-                  type: string
-                completion_date: &id197
-                  type: string
-                  format: date
-                maintenance_status: &id198
-                  type: string
-                  enum:
-                  - Planned
-                  - Completed
-                  - Cancelled
-                  - Overdue
-                has_certificate: &id199
-                  type: boolean
-                certificate_attachement: &id200
-                  type: string
-                column_break_9: &id201
-                  type: string
-                actions_performed: &id202
-                  type: string
-              required:
-              - maintenance_status
-              - naming_series
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/AssetMaintenanceLogWrite'
             example:
               naming_series: ''
               maintenance_status: ''
@@ -1776,7 +1359,7 @@ paths:
                   data:
                     type: array
                     items: &id036
-                      $ref: '#/components/schemas/AssetMaintenanceTeam'
+                      $ref: '#/components/schemas/AssetMaintenanceTeamResponse'
                   message: {}
                 required:
                 - data
@@ -1806,34 +1389,7 @@ paths:
         content:
           application/json:
             schema: &id037
-              type: object
-              properties:
-                name: &id203
-                  type: string
-                maintenance_team_name: &id204
-                  type: string
-                maintenance_manager: &id205
-                  type: string
-                  x-frappe-target-doctype: User
-                maintenance_manager_name: &id206
-                  type: string
-                column_break_2: &id207
-                  type: string
-                company: &id208
-                  type: string
-                  x-frappe-target-doctype: Company
-                section_break_2: &id209
-                  type: string
-                maintenance_team_members: &id210
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/MaintenanceTeamMember'
-              required:
-              - company
-              - maintenance_team_members
-              - maintenance_team_name
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/AssetMaintenanceTeamWrite'
             example:
               maintenance_team_name: ''
               company: ''
@@ -1993,7 +1549,7 @@ paths:
                   data:
                     type: array
                     items: &id039
-                      $ref: '#/components/schemas/AssetMovement'
+                      $ref: '#/components/schemas/AssetMovementResponse'
                   message: {}
                 required:
                 - data
@@ -2023,48 +1579,7 @@ paths:
         content:
           application/json:
             schema: &id040
-              type: object
-              properties:
-                name: &id211
-                  type: string
-                company: &id212
-                  type: string
-                  x-frappe-target-doctype: Company
-                purpose: &id213
-                  type: string
-                  enum:
-                  - Issue
-                  - Receipt
-                  - Transfer
-                  - Transfer and Issue
-                transaction_date: &id214
-                  type: string
-                  format: date-time
-                column_break_4: &id215
-                  type: string
-                reference: &id216
-                  type: string
-                reference_doctype: &id217
-                  type: string
-                  x-frappe-target-doctype: DocType
-                reference_name: &id218
-                  type: string
-                  x-frappe-options: reference_doctype
-                section_break_10: &id219
-                  type: string
-                assets: &id220
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AssetMovementItem'
-                column_break_9: &id221
-                  type: string
-              required:
-              - assets
-              - company
-              - purpose
-              - transaction_date
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/AssetMovementWrite'
             example:
               company: ''
               purpose: ''
@@ -2291,7 +1806,7 @@ paths:
                   data:
                     type: array
                     items: &id042
-                      $ref: '#/components/schemas/AssetRepair'
+                      $ref: '#/components/schemas/AssetRepairResponse'
                   message: {}
                 required:
                 - data
@@ -2321,98 +1836,7 @@ paths:
         content:
           application/json:
             schema: &id043
-              type: object
-              properties:
-                name: &id222
-                  type: string
-                naming_series: &id223
-                  type: string
-                  enum:
-                  - ACC-ASR-.YYYY.-
-                column_break_2: &id224
-                  type: string
-                failure_date: &id225
-                  type: string
-                  format: date-time
-                completion_date: &id226
-                  type: string
-                  format: date-time
-                repair_status: &id227
-                  type: string
-                  enum:
-                  - Pending
-                  - Completed
-                  - Cancelled
-                section_break_9: &id228
-                  type: string
-                description: &id229
-                  type: string
-                column_break_9: &id230
-                  type: string
-                actions_performed: &id231
-                  type: string
-                asset: &id232
-                  type: string
-                  x-frappe-target-doctype: Asset
-                asset_name: &id233
-                  type: string
-                capitalize_repair_cost: &id234
-                  type: boolean
-                accounting_details: &id235
-                  type: string
-                stock_items: &id236
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AssetRepairConsumedItem'
-                cost_center: &id237
-                  type: string
-                  x-frappe-target-doctype: Cost Center
-                project: &id238
-                  type: string
-                  x-frappe-target-doctype: Project
-                column_break_14: &id239
-                  type: string
-                stock_consumption_details_section: &id240
-                  type: string
-                increase_in_asset_life: &id241
-                  type: integer
-                company: &id242
-                  type: string
-                  x-frappe-target-doctype: Company
-                invoices: &id243
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AssetRepairPurchaseInvoice'
-                section_break_muyc: &id244
-                  type: string
-                column_break_hkem: &id245
-                  type: string
-                capitalizations_section: &id246
-                  type: string
-                column_break_spre: &id247
-                  type: string
-                column_break_ajbh: &id248
-                  type: string
-                section_break_ltbb: &id249
-                  type: string
-                column_break_ewor: &id250
-                  type: string
-                column_break_ceuc: &id251
-                  type: string
-                consumed_items_cost: &id252
-                  type: number
-                column_break_xebe: &id253
-                  type: string
-                accounting_dimensions_section: &id254
-                  type: string
-                connection_tab: &id255
-                  type: string
-              required:
-              - asset
-              - failure_date
-              - naming_series
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/AssetRepairWrite'
             example:
               naming_series: ''
               failure_date: ''
@@ -2638,7 +2062,7 @@ paths:
                   data:
                     type: array
                     items: &id045
-                      $ref: '#/components/schemas/AssetShiftAllocation'
+                      $ref: '#/components/schemas/AssetShiftAllocationResponse'
                   message: {}
                 required:
                 - data
@@ -2668,33 +2092,7 @@ paths:
         content:
           application/json:
             schema: &id046
-              type: object
-              properties:
-                name: &id256
-                  type: string
-                section_break_esaa: &id257
-                  type: string
-                asset: &id258
-                  type: string
-                  x-frappe-target-doctype: Asset
-                column_break_tdae: &id259
-                  type: string
-                finance_book: &id260
-                  type: string
-                  x-frappe-target-doctype: Finance Book
-                depreciation_schedule_section: &id261
-                  type: string
-                naming_series: &id262
-                  type: string
-                  enum:
-                  - ACC-ASA-.YYYY.-
-                column_break_jomc: &id263
-                  type: string
-              required:
-              - asset
-              - naming_series
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/AssetShiftAllocationWrite'
             example:
               asset: ''
               naming_series: ''
@@ -2853,7 +2251,7 @@ paths:
                   data:
                     type: array
                     items: &id048
-                      $ref: '#/components/schemas/AssetShiftFactor'
+                      $ref: '#/components/schemas/AssetShiftFactorResponse'
                   message: {}
                 required:
                 - data
@@ -2883,21 +2281,7 @@ paths:
         content:
           application/json:
             schema: &id049
-              type: object
-              properties:
-                name: &id264
-                  type: string
-                shift_name: &id265
-                  type: string
-                shift_factor: &id266
-                  type: number
-                default: &id267
-                  type: boolean
-              required:
-              - shift_factor
-              - shift_name
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/AssetShiftFactorWrite'
             example:
               shift_name: ''
               shift_factor: 0
@@ -3056,7 +2440,7 @@ paths:
                   data:
                     type: array
                     items: &id051
-                      $ref: '#/components/schemas/AssetValueAdjustment'
+                      $ref: '#/components/schemas/AssetValueAdjustmentResponse'
                   message: {}
                 required:
                 - data
@@ -3086,49 +2470,7 @@ paths:
         content:
           application/json:
             schema: &id052
-              type: object
-              properties:
-                name: &id268
-                  type: string
-                company: &id269
-                  type: string
-                  x-frappe-target-doctype: Company
-                asset: &id270
-                  type: string
-                  x-frappe-target-doctype: Asset
-                asset_category: &id271
-                  type: string
-                finance_book: &id272
-                  type: string
-                  x-frappe-target-doctype: Finance Book
-                column_break_4: &id273
-                  type: string
-                date: &id274
-                  type: string
-                  format: date
-                new_asset_value: &id275
-                  type: number
-                cost_center: &id276
-                  type: string
-                  x-frappe-target-doctype: Cost Center
-                accounting_dimensions_section: &id277
-                  type: string
-                dimension_col_break: &id278
-                  type: string
-                value_details_section: &id279
-                  type: string
-                column_break_11: &id280
-                  type: string
-                difference_account: &id281
-                  type: string
-                  x-frappe-target-doctype: Account
-              required:
-              - asset
-              - date
-              - difference_account
-              - new_asset_value
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/AssetValueAdjustmentWrite'
             example:
               asset: ''
               date: ''
@@ -3355,7 +2697,7 @@ paths:
                   data:
                     type: array
                     items: &id054
-                      $ref: '#/components/schemas/Location'
+                      $ref: '#/components/schemas/LocationResponse'
                   message: {}
                 required:
                 - data
@@ -3385,43 +2727,7 @@ paths:
         content:
           application/json:
             schema: &id055
-              type: object
-              properties:
-                name: &id282
-                  type: string
-                location_name: &id283
-                  type: string
-                parent_location: &id284
-                  type: string
-                  x-frappe-target-doctype: Location
-                cb_details: &id285
-                  type: string
-                is_container: &id286
-                  type: boolean
-                is_group: &id287
-                  type: boolean
-                sb_location_details: &id288
-                  type: string
-                latitude: &id289
-                  type: number
-                longitude: &id290
-                  type: number
-                cb_latlong: &id291
-                  type: string
-                area_uom: &id292
-                  type: string
-                  x-frappe-target-doctype: UOM
-                sb_geolocation: &id293
-                  type: string
-                location: &id294
-                  type: string
-                tree_details: &id295
-                  type: string
-                  writeOnly: true
-              required:
-              - location_name
-              additionalProperties: false
-              x-module: Assets
+              $ref: '#/components/schemas/LocationWrite'
             example:
               location_name: ''
       responses:
@@ -3685,26 +2991,59 @@ components:
     Asset:
       type: object
       properties:
-        name: *id057
-        naming_series: *id058
-        asset_name: *id059
-        item_code: *id060
+        name:
+          type: string
+        naming_series:
+          type: string
+          enum:
+          - ACC-ASS-.YYYY.-
+        asset_name:
+          type: string
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
         asset_category:
           type: string
           x-frappe-target-doctype: Asset Category
           readOnly: true
-        asset_owner: *id061
-        asset_owner_company: *id062
-        supplier: *id063
-        customer: *id064
-        image: *id065
-        column_break_3: *id066
-        company: *id067
-        location: *id068
-        custodian: *id069
-        cost_center: *id070
-        department: *id071
-        purchase_date: *id072
+        asset_owner:
+          type: string
+          enum:
+          - Company
+          - Supplier
+          - Customer
+        asset_owner_company:
+          type: string
+          x-frappe-target-doctype: Company
+        supplier:
+          type: string
+          x-frappe-target-doctype: Supplier
+        customer:
+          type: string
+          x-frappe-target-doctype: Customer
+        image:
+          type: string
+          writeOnly: true
+        column_break_3:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        location:
+          type: string
+          x-frappe-target-doctype: Location
+        custodian:
+          type: string
+          x-frappe-target-doctype: Employee
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        department:
+          type: string
+          x-frappe-target-doctype: Department
+        purchase_date:
+          type: string
+          format: date
         disposal_date:
           type: string
           format: date
@@ -3713,29 +3052,69 @@ components:
           type: string
           x-frappe-target-doctype: Journal Entry
           readOnly: true
-        available_for_use_date: *id073
-        calculate_depreciation: *id074
-        opening_accumulated_depreciation: *id075
-        finance_books: *id076
-        section_break_33: *id077
-        depreciation_method: *id078
+        available_for_use_date:
+          type: string
+          format: date
+        calculate_depreciation:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        opening_accumulated_depreciation:
+          type: number
+          x-frappe-options: Company:company:default_currency
+        finance_books:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetFinanceBook'
+        section_break_33:
+          type: string
+          writeOnly: true
+        depreciation_method:
+          type: string
+          enum:
+          - Straight Line
+          - Double Declining Balance
+          - Written Down Value
+          - Manual
         value_after_depreciation:
           type: number
           x-frappe-options: Company:company:default_currency
           readOnly: true
           writeOnly: true
-        total_number_of_depreciations: *id079
-        column_break_24: *id080
-        frequency_of_depreciation: *id081
-        next_depreciation_date: *id082
-        policy_number: *id083
-        insurer: *id084
-        insured_value: *id085
-        column_break_48: *id086
-        insurance_start_date: *id087
-        insurance_end_date: *id088
-        comprehensive_insurance: *id089
-        maintenance_required: *id090
+        total_number_of_depreciations:
+          type: integer
+        column_break_24:
+          type: string
+        frequency_of_depreciation:
+          type: integer
+        next_depreciation_date:
+          type: string
+          format: date
+          writeOnly: true
+        policy_number:
+          type: string
+        insurer:
+          type: string
+        insured_value:
+          type: string
+        column_break_48:
+          type: string
+        insurance_start_date:
+          type: string
+          format: date
+        insurance_end_date:
+          type: string
+          format: date
+        comprehensive_insurance:
+          type: string
+        maintenance_required:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
         status:
           type: string
           enum:
@@ -3754,12 +3133,21 @@ components:
           - Work In Progress
           readOnly: true
         booked_fixed_asset:
-          type: boolean
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
           readOnly: true
           writeOnly: true
-        column_break_51: *id091
-        purchase_receipt: *id092
-        purchase_invoice: *id093
+        column_break_51:
+          type: string
+        purchase_receipt:
+          type: string
+          x-frappe-target-doctype: Purchase Receipt
+        purchase_invoice:
+          type: string
+          x-frappe-target-doctype: Purchase Invoice
         default_finance_book:
           type: string
           x-frappe-target-doctype: Finance Book
@@ -3769,15 +3157,20 @@ components:
           type: string
           x-frappe-target-doctype: Asset
           readOnly: true
-        purchase_details_section: *id094
-        column_break_23: *id095
-        column_break_33: *id096
-        section_break_36: *id097
+        purchase_details_section:
+          type: string
+        column_break_23:
+          type: string
+        column_break_33:
+          type: string
+        section_break_36:
+          type: string
         split_from:
           type: string
           x-frappe-target-doctype: Asset
           readOnly: true
-        asset_quantity: *id098
+        asset_quantity:
+          type: integer
         depr_entry_posting_status:
           type: string
           enum:
@@ -3785,9 +3178,17 @@ components:
           - Failed
           readOnly: true
           writeOnly: true
-        depreciation_schedule_sb: *id099
-        depreciation_schedule_view: *id100
-        is_fully_depreciated: *id101
+        depreciation_schedule_sb:
+          type: string
+        depreciation_schedule_view:
+          type: string
+          writeOnly: true
+        is_fully_depreciated:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
         total_asset_cost:
           type: number
           x-frappe-options: Company:company:default_currency
@@ -3800,25 +3201,52 @@ components:
           type: number
           readOnly: true
           writeOnly: true
-        opening_number_of_booked_depreciations: *id102
-        purchase_receipt_item: *id103
-        purchase_invoice_item: *id104
-        other_info_tab: *id105
-        connections_tab: *id106
-        depreciation_tab: *id107
-        accounting_dimensions_section: *id108
-        section_break_jtou: *id109
-        net_purchase_amount: *id110
-        asset_type: *id111
-        column_break_wqzi: *id112
-        column_break_rjyw: *id113
-        insurance_section: *id114
-        section_break_uiyd: *id115
-        column_break_bbwr: *id116
-        column_break_bfkm: *id117
-        item_name: *id118
-        asset_owner_section: *id119
-        column_break_yeds: *id120
+        opening_number_of_booked_depreciations:
+          type: integer
+        purchase_receipt_item:
+          type: string
+          writeOnly: true
+        purchase_invoice_item:
+          type: string
+          writeOnly: true
+        other_info_tab:
+          type: string
+        connections_tab:
+          type: string
+        depreciation_tab:
+          type: string
+        accounting_dimensions_section:
+          type: string
+        section_break_jtou:
+          type: string
+        net_purchase_amount:
+          type: number
+          x-frappe-options: currency
+        asset_type:
+          type: string
+          enum:
+          - Existing Asset
+          - Composite Asset
+          - Composite Component
+        column_break_wqzi:
+          type: string
+        column_break_rjyw:
+          type: string
+        insurance_section:
+          type: string
+        section_break_uiyd:
+          type: string
+        column_break_bbwr:
+          type: string
+        column_break_bfkm:
+          type: string
+        item_name:
+          type: string
+          writeOnly: true
+        asset_owner_section:
+          type: string
+        column_break_yeds:
+          type: string
       required:
       - asset_name
       - company
@@ -3831,31 +3259,59 @@ components:
     AssetCapitalization:
       type: object
       properties:
-        name: *id121
-        title: *id122
+        name:
+          type: string
+        title:
+          type: string
+          writeOnly: true
         target_item_code:
           type: string
           x-frappe-target-doctype: Item
           readOnly: true
           writeOnly: true
-        target_asset: *id123
+        target_asset:
+          type: string
+          x-frappe-target-doctype: Asset
         target_asset_name:
           type: string
           readOnly: true
-        column_break_9: *id124
-        company: *id125
-        posting_date: *id126
-        posting_time: *id127
-        set_posting_time: *id128
-        naming_series: *id129
+        column_break_9:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        posting_date:
+          type: string
+          format: date
+        posting_time:
+          type: string
+          format: time
+        set_posting_time:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        naming_series:
+          type: string
+          enum:
+          - ACC-ASC-.YYYY.-
         amended_from:
           type: string
           x-frappe-target-doctype: Asset Capitalization
           readOnly: true
-        section_break_16: *id130
-        stock_items: *id131
-        section_break_26: *id132
-        asset_items: *id133
+        section_break_16:
+          type: string
+        stock_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetCapitalizationStockItem'
+        section_break_26:
+          type: string
+        asset_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetCapitalizationAssetItem'
         stock_items_total:
           type: number
           x-frappe-options: Company:company:default_currency
@@ -3864,40 +3320,63 @@ components:
           type: number
           x-frappe-options: Company:company:default_currency
           readOnly: true
-        finance_book: *id134
-        service_expenses_section: *id135
-        service_items: *id136
+        finance_book:
+          type: string
+          x-frappe-target-doctype: Finance Book
+        service_expenses_section:
+          type: string
+        service_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetCapitalizationServiceItem'
         service_items_total:
           type: number
           x-frappe-options: Company:company:default_currency
           readOnly: true
-        totals_section: *id137
+        totals_section:
+          type: string
         total_value:
           type: number
           x-frappe-options: Company:company:default_currency
           readOnly: true
-        column_break_36: *id138
+        column_break_36:
+          type: string
         target_incoming_rate:
           type: number
           x-frappe-options: Company:company:default_currency
           readOnly: true
-        accounting_dimensions_section: *id139
-        cost_center: *id140
-        project: *id141
-        dimension_col_break: *id142
+        accounting_dimensions_section:
+          type: string
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        project:
+          type: string
+          x-frappe-target-doctype: Project
+        dimension_col_break:
+          type: string
         target_fixed_asset_account:
           type: string
           x-frappe-target-doctype: Account
           readOnly: true
-        section_break_urtz: *id143
-        column_break_gqep: *id144
-        column_break_yvlx: *id145
-        section_break_arbh: *id146
-        column_break_boeu: *id147
-        column_break_qecy: *id148
-        section_break_ptna: *id149
-        column_break_szvh: *id150
-        column_break_katv: *id151
+        section_break_urtz:
+          type: string
+        column_break_gqep:
+          type: string
+        column_break_yvlx:
+          type: string
+        section_break_arbh:
+          type: string
+        column_break_boeu:
+          type: string
+        column_break_qecy:
+          type: string
+        section_break_ptna:
+          type: string
+        column_break_szvh:
+          type: string
+        column_break_katv:
+          type: string
       required:
       - company
       - name
@@ -4062,7 +3541,11 @@ components:
           type: string
           x-frappe-target-doctype: Serial and Batch Bundle
         use_serial_batch_fields:
-          type: boolean
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
         section_break_bfqc:
           type: string
         column_break_mbuv:
@@ -4080,16 +3563,38 @@ components:
     AssetCategory:
       type: object
       properties:
-        name: *id152
-        asset_category_name: *id153
-        column_break_3: *id154
-        finance_book_detail: *id155
-        finance_books: *id156
-        section_break_2: *id157
-        accounts: *id158
-        depreciation_options: *id159
-        enable_cwip_accounting: *id160
-        non_depreciable_category: *id161
+        name:
+          type: string
+        asset_category_name:
+          type: string
+        column_break_3:
+          type: string
+        finance_book_detail:
+          type: string
+        finance_books:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetFinanceBook'
+        section_break_2:
+          type: string
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetCategoryAccount'
+        depreciation_options:
+          type: string
+        enable_cwip_accounting:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        non_depreciable_category:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
       required:
       - accounts
       - asset_category_name
@@ -4125,16 +3630,26 @@ components:
     AssetDepreciationSchedule:
       type: object
       properties:
-        name: *id162
-        asset: *id163
-        naming_series: *id164
+        name:
+          type: string
+        asset:
+          type: string
+          x-frappe-target-doctype: Asset
+        naming_series:
+          type: string
+          enum:
+          - ACC-ADS-.YYYY.-
         amended_from:
           type: string
           x-frappe-target-doctype: Asset Depreciation Schedule
           readOnly: true
-        column_break_2: *id165
-        depreciation_details_section: *id166
-        finance_book: *id167
+        column_break_2:
+          type: string
+        depreciation_details_section:
+          type: string
+        finance_book:
+          type: string
+          x-frappe-target-doctype: Finance Book
         depreciation_method:
           type: string
           enum:
@@ -4146,13 +3661,19 @@ components:
         rate_of_depreciation:
           type: number
           readOnly: true
-        column_break_8: *id168
+        column_break_8:
+          type: string
         total_number_of_depreciations:
           type: integer
           readOnly: true
-        depreciation_schedule_section: *id169
-        depreciation_schedule: *id170
-        details_section: *id171
+        depreciation_schedule_section:
+          type: string
+        depreciation_schedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/DepreciationSchedule'
+        details_section:
+          type: string
         notes:
           type: string
           readOnly: true
@@ -4185,10 +3706,18 @@ components:
           readOnly: true
           writeOnly: true
         daily_prorata_based:
-          type: boolean
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
           readOnly: true
         shift_based:
-          type: boolean
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
           readOnly: true
         company:
           type: string
@@ -4243,9 +3772,17 @@ components:
         salvage_value_percentage:
           type: number
         daily_prorata_based:
-          type: boolean
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
         shift_based:
-          type: boolean
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
         total_number_of_booked_depreciations:
           type: integer
           readOnly: true
@@ -4266,23 +3803,41 @@ components:
     AssetMaintenance:
       type: object
       properties:
-        name: *id172
-        asset_name: *id173
-        asset_category: *id174
-        item_code: *id175
-        item_name: *id176
-        column_break_3: *id177
-        company: *id178
-        section_break_6: *id179
-        maintenance_team: *id180
-        column_break_9: *id181
+        name:
+          type: string
+        asset_name:
+          type: string
+          x-frappe-target-doctype: Asset
+        asset_category:
+          type: string
+        item_code:
+          type: string
+        item_name:
+          type: string
+        column_break_3:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        section_break_6:
+          type: string
+        maintenance_team:
+          type: string
+          x-frappe-target-doctype: Asset Maintenance Team
+        column_break_9:
+          type: string
         maintenance_manager:
           type: string
           readOnly: true
           writeOnly: true
-        maintenance_manager_name: *id182
-        section_break_8: *id183
-        asset_maintenance_tasks: *id184
+        maintenance_manager_name:
+          type: string
+        section_break_8:
+          type: string
+        asset_maintenance_tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetMaintenanceTask'
       required:
       - asset_maintenance_tasks
       - asset_name
@@ -4294,34 +3849,66 @@ components:
     AssetMaintenanceLog:
       type: object
       properties:
-        name: *id185
-        asset_maintenance: *id186
-        naming_series: *id187
-        asset_name: *id188
-        column_break_2: *id189
-        item_code: *id190
-        item_name: *id191
-        section_break_5: *id192
-        task: *id193
-        maintenance_type: *id194
+        name:
+          type: string
+        asset_maintenance:
+          type: string
+          x-frappe-target-doctype: Asset Maintenance
+        naming_series:
+          type: string
+          enum:
+          - ACC-AML-.YYYY.-
+        asset_name:
+          type: string
+        column_break_2:
+          type: string
+        item_code:
+          type: string
+        item_name:
+          type: string
+        section_break_5:
+          type: string
+        task:
+          type: string
+          x-frappe-target-doctype: Asset Maintenance Task
+        maintenance_type:
+          type: string
         periodicity:
           type: string
           readOnly: true
-        assign_to_name: *id195
-        column_break_6: *id196
+        assign_to_name:
+          type: string
+        column_break_6:
+          type: string
         due_date:
           type: string
           format: date
           readOnly: true
-        completion_date: *id197
-        maintenance_status: *id198
-        has_certificate: *id199
-        certificate_attachement: *id200
+        completion_date:
+          type: string
+          format: date
+        maintenance_status:
+          type: string
+          enum:
+          - Planned
+          - Completed
+          - Cancelled
+          - Overdue
+        has_certificate:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        certificate_attachement:
+          type: string
         description:
           type: string
           readOnly: true
-        column_break_9: *id201
-        actions_performed: *id202
+        column_break_9:
+          type: string
+        actions_performed:
+          type: string
         amended_from:
           type: string
           x-frappe-target-doctype: Asset Maintenance Log
@@ -4380,7 +3967,11 @@ components:
           type: string
           format: date
         certificate_required:
-          type: boolean
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
         section_break_9:
           type: string
         assign_to:
@@ -4415,14 +4006,26 @@ components:
     AssetMaintenanceTeam:
       type: object
       properties:
-        name: *id203
-        maintenance_team_name: *id204
-        maintenance_manager: *id205
-        maintenance_manager_name: *id206
-        column_break_2: *id207
-        company: *id208
-        section_break_2: *id209
-        maintenance_team_members: *id210
+        name:
+          type: string
+        maintenance_team_name:
+          type: string
+        maintenance_manager:
+          type: string
+          x-frappe-target-doctype: User
+        maintenance_manager_name:
+          type: string
+        column_break_2:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        section_break_2:
+          type: string
+        maintenance_team_members:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaintenanceTeamMember'
       required:
       - company
       - maintenance_team_members
@@ -4433,21 +4036,43 @@ components:
     AssetMovement:
       type: object
       properties:
-        name: *id211
-        company: *id212
-        purpose: *id213
-        transaction_date: *id214
-        column_break_4: *id215
-        reference: *id216
-        reference_doctype: *id217
-        reference_name: *id218
+        name:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        purpose:
+          type: string
+          enum:
+          - Issue
+          - Receipt
+          - Transfer
+          - Transfer and Issue
+        transaction_date:
+          type: string
+          format: date-time
+        column_break_4:
+          type: string
+        reference:
+          type: string
+        reference_doctype:
+          type: string
+          x-frappe-target-doctype: DocType
+        reference_name:
+          type: string
+          x-frappe-options: reference_doctype
         amended_from:
           type: string
           x-frappe-target-doctype: Asset Movement
           readOnly: true
-        section_break_10: *id219
-        assets: *id220
-        column_break_9: *id221
+        section_break_10:
+          type: string
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetMovementItem'
+        column_break_9:
+          type: string
       required:
       - assets
       - company
@@ -4494,16 +4119,34 @@ components:
     AssetRepair:
       type: object
       properties:
-        name: *id222
-        naming_series: *id223
-        column_break_2: *id224
-        failure_date: *id225
-        completion_date: *id226
-        repair_status: *id227
-        section_break_9: *id228
-        description: *id229
-        column_break_9: *id230
-        actions_performed: *id231
+        name:
+          type: string
+        naming_series:
+          type: string
+          enum:
+          - ACC-ASR-.YYYY.-
+        column_break_2:
+          type: string
+        failure_date:
+          type: string
+          format: date-time
+        completion_date:
+          type: string
+          format: date-time
+        repair_status:
+          type: string
+          enum:
+          - Pending
+          - Completed
+          - Cancelled
+        section_break_9:
+          type: string
+        description:
+          type: string
+        column_break_9:
+          type: string
+        actions_performed:
+          type: string
         downtime:
           type: string
           readOnly: true
@@ -4514,33 +4157,69 @@ components:
           type: string
           x-frappe-target-doctype: Asset Repair
           readOnly: true
-        asset: *id232
-        asset_name: *id233
-        capitalize_repair_cost: *id234
-        accounting_details: *id235
-        stock_items: *id236
-        cost_center: *id237
-        project: *id238
-        column_break_14: *id239
-        stock_consumption_details_section: *id240
+        asset:
+          type: string
+          x-frappe-target-doctype: Asset
+        asset_name:
+          type: string
+        capitalize_repair_cost:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        accounting_details:
+          type: string
+        stock_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetRepairConsumedItem'
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        project:
+          type: string
+          x-frappe-target-doctype: Project
+        column_break_14:
+          type: string
+        stock_consumption_details_section:
+          type: string
         total_repair_cost:
           type: number
           readOnly: true
-        increase_in_asset_life: *id241
-        company: *id242
-        invoices: *id243
-        section_break_muyc: *id244
-        column_break_hkem: *id245
-        capitalizations_section: *id246
-        column_break_spre: *id247
-        column_break_ajbh: *id248
-        section_break_ltbb: *id249
-        column_break_ewor: *id250
-        column_break_ceuc: *id251
-        consumed_items_cost: *id252
-        column_break_xebe: *id253
-        accounting_dimensions_section: *id254
-        connection_tab: *id255
+        increase_in_asset_life:
+          type: integer
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        invoices:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetRepairPurchaseInvoice'
+        section_break_muyc:
+          type: string
+        column_break_hkem:
+          type: string
+        capitalizations_section:
+          type: string
+        column_break_spre:
+          type: string
+        column_break_ajbh:
+          type: string
+        section_break_ltbb:
+          type: string
+        column_break_ewor:
+          type: string
+        column_break_ceuc:
+          type: string
+        consumed_items_cost:
+          type: number
+        column_break_xebe:
+          type: string
+        accounting_dimensions_section:
+          type: string
+        connection_tab:
+          type: string
       required:
       - asset
       - failure_date
@@ -4605,23 +4284,35 @@ components:
     AssetShiftAllocation:
       type: object
       properties:
-        name: *id256
-        section_break_esaa: *id257
+        name:
+          type: string
+        section_break_esaa:
+          type: string
         amended_from:
           type: string
           x-frappe-target-doctype: Asset Shift Allocation
           readOnly: true
-        asset: *id258
-        column_break_tdae: *id259
-        finance_book: *id260
-        depreciation_schedule_section: *id261
+        asset:
+          type: string
+          x-frappe-target-doctype: Asset
+        column_break_tdae:
+          type: string
+        finance_book:
+          type: string
+          x-frappe-target-doctype: Finance Book
+        depreciation_schedule_section:
+          type: string
         depreciation_schedule:
           type: array
           items:
             $ref: '#/components/schemas/DepreciationSchedule'
           readOnly: true
-        naming_series: *id262
-        column_break_jomc: *id263
+        naming_series:
+          type: string
+          enum:
+          - ACC-ASA-.YYYY.-
+        column_break_jomc:
+          type: string
       required:
       - asset
       - name
@@ -4631,10 +4322,18 @@ components:
     AssetShiftFactor:
       type: object
       properties:
-        name: *id264
-        shift_name: *id265
-        shift_factor: *id266
-        default: *id267
+        name:
+          type: string
+        shift_name:
+          type: string
+        shift_factor:
+          type: number
+        default:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
       required:
       - name
       - shift_factor
@@ -4644,34 +4343,54 @@ components:
     AssetValueAdjustment:
       type: object
       properties:
-        name: *id268
-        company: *id269
-        asset: *id270
-        asset_category: *id271
-        finance_book: *id272
+        name:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        asset:
+          type: string
+          x-frappe-target-doctype: Asset
+        asset_category:
+          type: string
+        finance_book:
+          type: string
+          x-frappe-target-doctype: Finance Book
         journal_entry:
           type: string
           x-frappe-target-doctype: Journal Entry
           readOnly: true
-        column_break_4: *id273
-        date: *id274
+        column_break_4:
+          type: string
+        date:
+          type: string
+          format: date
         current_asset_value:
           type: number
           readOnly: true
-        new_asset_value: *id275
+        new_asset_value:
+          type: number
         difference_amount:
           type: number
           readOnly: true
-        cost_center: *id276
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
         amended_from:
           type: string
           x-frappe-target-doctype: Asset Value Adjustment
           readOnly: true
-        accounting_dimensions_section: *id277
-        dimension_col_break: *id278
-        value_details_section: *id279
-        column_break_11: *id280
-        difference_account: *id281
+        accounting_dimensions_section:
+          type: string
+        dimension_col_break:
+          type: string
+        value_details_section:
+          type: string
+        column_break_11:
+          type: string
+        difference_account:
+          type: string
+          x-frappe-target-doctype: Account
       required:
       - asset
       - current_asset_value
@@ -4716,23 +4435,48 @@ components:
     Location:
       type: object
       properties:
-        name: *id282
-        location_name: *id283
-        parent_location: *id284
-        cb_details: *id285
-        is_container: *id286
-        is_group: *id287
-        sb_location_details: *id288
-        latitude: *id289
-        longitude: *id290
-        cb_latlong: *id291
+        name:
+          type: string
+        location_name:
+          type: string
+        parent_location:
+          type: string
+          x-frappe-target-doctype: Location
+        cb_details:
+          type: string
+        is_container:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        is_group:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        sb_location_details:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        cb_latlong:
+          type: string
         area:
           type: number
           readOnly: true
-        area_uom: *id292
-        sb_geolocation: *id293
-        location: *id294
-        tree_details: *id295
+        area_uom:
+          type: string
+          x-frappe-target-doctype: UOM
+        sb_geolocation:
+          type: string
+        location:
+          type: string
+        tree_details:
+          type: string
+          writeOnly: true
         lft:
           type: integer
           readOnly: true
@@ -4892,6 +4636,3621 @@ components:
       required:
       - allocations
       additionalProperties: false
+    PurchaseOrchestrationRequest: &id057
+      type: object
+      additionalProperties: false
+      required:
+      - material_request
+      - suppliers
+      properties:
+        material_request:
+          type: object
+          additionalProperties: false
+          required:
+          - material_request_type
+          - company
+          - transaction_date
+          - items
+          properties:
+            material_request_type:
+              type: string
+              enum:
+              - Purchase
+              - Material Transfer
+              - Material Issue
+              - Manufacture
+            company:
+              type: string
+            transaction_date:
+              type: string
+              format: date
+            schedule_date:
+              type: string
+              format: date
+            title:
+              type: string
+            items:
+              type: array
+              minItems: 1
+              items:
+                type: object
+                additionalProperties: false
+                required:
+                - item_code
+                - qty
+                - schedule_date
+                - warehouse
+                properties:
+                  item_code:
+                    type: string
+                  qty:
+                    type: number
+                    exclusiveMinimum: 0
+                  schedule_date:
+                    type: string
+                    format: date
+                  warehouse:
+                    type: string
+                  uom:
+                    type: string
+                  rate:
+                    type: number
+                    minimum: 0
+        suppliers:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
+        justification:
+          type: string
+    PurchaseOrchestrationResponse: &id058
+      type: object
+      additionalProperties: true
+      required:
+      - id
+      - status
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+    AssetWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        naming_series:
+          type: string
+        asset_name:
+          type: string
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
+        asset_owner:
+          type: string
+          enum:
+          - Company
+          - Supplier
+          - Customer
+        asset_owner_company:
+          type: string
+          x-frappe-target-doctype: Company
+        supplier:
+          type: string
+          x-frappe-target-doctype: Supplier
+        customer:
+          type: string
+          x-frappe-target-doctype: Customer
+        image:
+          type: string
+          writeOnly: true
+        column_break_3:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        location:
+          type: string
+          x-frappe-target-doctype: Location
+        custodian:
+          type: string
+          x-frappe-target-doctype: Employee
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        department:
+          type: string
+          x-frappe-target-doctype: Department
+        purchase_date:
+          type: string
+          format: date
+        available_for_use_date:
+          type: string
+          format: date
+        calculate_depreciation:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        opening_accumulated_depreciation:
+          type: number
+          x-frappe-options: Company:company:default_currency
+        finance_books:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetFinanceBookWrite'
+        section_break_33:
+          type: string
+          writeOnly: true
+        depreciation_method:
+          type: string
+          enum:
+          - Straight Line
+          - Double Declining Balance
+          - Written Down Value
+          - Manual
+        total_number_of_depreciations:
+          type: integer
+        column_break_24:
+          type: string
+        frequency_of_depreciation:
+          type: integer
+        next_depreciation_date:
+          type: string
+          format: date
+          writeOnly: true
+        policy_number:
+          type: string
+        insurer:
+          type: string
+        insured_value:
+          type: string
+        column_break_48:
+          type: string
+        insurance_start_date:
+          type: string
+          format: date
+        insurance_end_date:
+          type: string
+          format: date
+        comprehensive_insurance:
+          type: string
+        maintenance_required:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        column_break_51:
+          type: string
+        purchase_receipt:
+          type: string
+          x-frappe-target-doctype: Purchase Receipt
+        purchase_invoice:
+          type: string
+          x-frappe-target-doctype: Purchase Invoice
+        purchase_details_section:
+          type: string
+        column_break_23:
+          type: string
+        column_break_33:
+          type: string
+        section_break_36:
+          type: string
+        asset_quantity:
+          type: integer
+        depreciation_schedule_sb:
+          type: string
+        depreciation_schedule_view:
+          type: string
+          writeOnly: true
+        is_fully_depreciated:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        opening_number_of_booked_depreciations:
+          type: integer
+        purchase_receipt_item:
+          type: string
+          writeOnly: true
+        purchase_invoice_item:
+          type: string
+          writeOnly: true
+        other_info_tab:
+          type: string
+        connections_tab:
+          type: string
+        depreciation_tab:
+          type: string
+        accounting_dimensions_section:
+          type: string
+        section_break_jtou:
+          type: string
+        net_purchase_amount:
+          type: number
+          x-frappe-options: currency
+        asset_type:
+          type: string
+          enum:
+          - Existing Asset
+          - Composite Asset
+          - Composite Component
+        column_break_wqzi:
+          type: string
+        column_break_rjyw:
+          type: string
+        insurance_section:
+          type: string
+        section_break_uiyd:
+          type: string
+        column_break_bbwr:
+          type: string
+        column_break_bfkm:
+          type: string
+        item_name:
+          type: string
+          writeOnly: true
+        asset_owner_section:
+          type: string
+        column_break_yeds:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - asset_name
+      - company
+      - item_code
+      - location
+      - purchase_date
+      additionalProperties: false
+      x-module: Assets
+    AssetResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        naming_series:
+          type:
+          - string
+          - 'null'
+        asset_name:
+          type:
+          - string
+          - 'null'
+        item_code:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Item
+        asset_category:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset Category
+          readOnly: true
+        asset_owner:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Company
+          - Supplier
+          - Customer
+          - ''
+          - null
+        asset_owner_company:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+        supplier:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Supplier
+        customer:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Customer
+        image:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        column_break_3:
+          type:
+          - string
+          - 'null'
+        company:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+        location:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Location
+        custodian:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Employee
+        cost_center:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Cost Center
+        department:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Department
+        purchase_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        disposal_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          readOnly: true
+        journal_entry_for_scrap:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Journal Entry
+          readOnly: true
+        available_for_use_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        calculate_depreciation:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        opening_accumulated_depreciation:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+        finance_books:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/AssetFinanceBookResponse'
+        section_break_33:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        depreciation_method:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Straight Line
+          - Double Declining Balance
+          - Written Down Value
+          - Manual
+          - ''
+          - null
+        value_after_depreciation:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+          writeOnly: true
+        total_number_of_depreciations:
+          type:
+          - integer
+          - 'null'
+        column_break_24:
+          type:
+          - string
+          - 'null'
+        frequency_of_depreciation:
+          type:
+          - integer
+          - 'null'
+        next_depreciation_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          writeOnly: true
+        policy_number:
+          type:
+          - string
+          - 'null'
+        insurer:
+          type:
+          - string
+          - 'null'
+        insured_value:
+          type:
+          - string
+          - 'null'
+        column_break_48:
+          type:
+          - string
+          - 'null'
+        insurance_start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        insurance_end_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        comprehensive_insurance:
+          type:
+          - string
+          - 'null'
+        maintenance_required:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Draft
+          - Submitted
+          - Cancelled
+          - Partially Depreciated
+          - Fully Depreciated
+          - Sold
+          - Scrapped
+          - In Maintenance
+          - Out of Order
+          - Issue
+          - Receipt
+          - Capitalized
+          - Work In Progress
+          - ''
+          - null
+          readOnly: true
+        booked_fixed_asset:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+            readOnly: true
+            writeOnly: true
+          - type: 'null'
+        column_break_51:
+          type:
+          - string
+          - 'null'
+        purchase_receipt:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Purchase Receipt
+        purchase_invoice:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Purchase Invoice
+        default_finance_book:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Finance Book
+          readOnly: true
+          writeOnly: true
+        amended_from:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset
+          readOnly: true
+        purchase_details_section:
+          type:
+          - string
+          - 'null'
+        column_break_23:
+          type:
+          - string
+          - 'null'
+        column_break_33:
+          type:
+          - string
+          - 'null'
+        section_break_36:
+          type:
+          - string
+          - 'null'
+        split_from:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset
+          readOnly: true
+        asset_quantity:
+          type:
+          - integer
+          - 'null'
+        depr_entry_posting_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Successful
+          - Failed
+          - ''
+          - null
+          readOnly: true
+          writeOnly: true
+        depreciation_schedule_sb:
+          type:
+          - string
+          - 'null'
+        depreciation_schedule_view:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        is_fully_depreciated:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        total_asset_cost:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        additional_asset_cost:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        purchase_amount:
+          type:
+          - number
+          - 'null'
+          readOnly: true
+          writeOnly: true
+        opening_number_of_booked_depreciations:
+          type:
+          - integer
+          - 'null'
+        purchase_receipt_item:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        purchase_invoice_item:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        other_info_tab:
+          type:
+          - string
+          - 'null'
+        connections_tab:
+          type:
+          - string
+          - 'null'
+        depreciation_tab:
+          type:
+          - string
+          - 'null'
+        accounting_dimensions_section:
+          type:
+          - string
+          - 'null'
+        section_break_jtou:
+          type:
+          - string
+          - 'null'
+        net_purchase_amount:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: currency
+        asset_type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Existing Asset
+          - Composite Asset
+          - Composite Component
+          - ''
+          - null
+        column_break_wqzi:
+          type:
+          - string
+          - 'null'
+        column_break_rjyw:
+          type:
+          - string
+          - 'null'
+        insurance_section:
+          type:
+          - string
+          - 'null'
+        section_break_uiyd:
+          type:
+          - string
+          - 'null'
+        column_break_bbwr:
+          type:
+          - string
+          - 'null'
+        column_break_bfkm:
+          type:
+          - string
+          - 'null'
+        item_name:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        asset_owner_section:
+          type:
+          - string
+          - 'null'
+        column_break_yeds:
+          type:
+          - string
+          - 'null'
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetCapitalizationWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        title:
+          type: string
+          writeOnly: true
+        target_asset:
+          type: string
+          x-frappe-target-doctype: Asset
+        column_break_9:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        posting_date:
+          type: string
+          format: date
+        posting_time:
+          type: string
+          format: time
+        set_posting_time:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        naming_series:
+          type: string
+        section_break_16:
+          type: string
+        stock_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetCapitalizationStockItemWrite'
+        section_break_26:
+          type: string
+        asset_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetCapitalizationAssetItemWrite'
+        finance_book:
+          type: string
+          x-frappe-target-doctype: Finance Book
+        service_expenses_section:
+          type: string
+        service_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetCapitalizationServiceItemWrite'
+        totals_section:
+          type: string
+        column_break_36:
+          type: string
+        accounting_dimensions_section:
+          type: string
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        project:
+          type: string
+          x-frappe-target-doctype: Project
+        dimension_col_break:
+          type: string
+        section_break_urtz:
+          type: string
+        column_break_gqep:
+          type: string
+        column_break_yvlx:
+          type: string
+        section_break_arbh:
+          type: string
+        column_break_boeu:
+          type: string
+        column_break_qecy:
+          type: string
+        section_break_ptna:
+          type: string
+        column_break_szvh:
+          type: string
+        column_break_katv:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - company
+      - naming_series
+      - posting_date
+      - posting_time
+      additionalProperties: false
+      x-module: Assets
+    AssetCapitalizationResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        title:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        target_item_code:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Item
+          readOnly: true
+          writeOnly: true
+        target_asset:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset
+        target_asset_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        column_break_9:
+          type:
+          - string
+          - 'null'
+        company:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+        posting_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        posting_time:
+          type:
+          - string
+          - 'null'
+          format: time
+        set_posting_time:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        naming_series:
+          type:
+          - string
+          - 'null'
+        amended_from:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset Capitalization
+          readOnly: true
+        section_break_16:
+          type:
+          - string
+          - 'null'
+        stock_items:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/AssetCapitalizationStockItemResponse'
+        section_break_26:
+          type:
+          - string
+          - 'null'
+        asset_items:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/AssetCapitalizationAssetItemResponse'
+        stock_items_total:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        asset_items_total:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        finance_book:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Finance Book
+        service_expenses_section:
+          type:
+          - string
+          - 'null'
+        service_items:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/AssetCapitalizationServiceItemResponse'
+        service_items_total:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        totals_section:
+          type:
+          - string
+          - 'null'
+        total_value:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_36:
+          type:
+          - string
+          - 'null'
+        target_incoming_rate:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        accounting_dimensions_section:
+          type:
+          - string
+          - 'null'
+        cost_center:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Cost Center
+        project:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Project
+        dimension_col_break:
+          type:
+          - string
+          - 'null'
+        target_fixed_asset_account:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Account
+          readOnly: true
+        section_break_urtz:
+          type:
+          - string
+          - 'null'
+        column_break_gqep:
+          type:
+          - string
+          - 'null'
+        column_break_yvlx:
+          type:
+          - string
+          - 'null'
+        section_break_arbh:
+          type:
+          - string
+          - 'null'
+        column_break_boeu:
+          type:
+          - string
+          - 'null'
+        column_break_qecy:
+          type:
+          - string
+          - 'null'
+        section_break_ptna:
+          type:
+          - string
+          - 'null'
+        column_break_szvh:
+          type:
+          - string
+          - 'null'
+        column_break_katv:
+          type:
+          - string
+          - 'null'
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetCapitalizationAssetItemWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        asset:
+          type: string
+          x-frappe-target-doctype: Asset
+        column_break_3:
+          type: string
+        section_break_6:
+          type: string
+        column_break_9:
+          type: string
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        accounting_dimensions_section:
+          type: string
+        dimension_col_break:
+          type: string
+        project:
+          type: string
+          x-frappe-target-doctype: Project
+        finance_book:
+          type: string
+          x-frappe-target-doctype: Finance Book
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - asset
+      additionalProperties: false
+      x-module: Assets
+    AssetCapitalizationAssetItemResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        asset:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset
+        asset_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        column_break_3:
+          type:
+          - string
+          - 'null'
+        item_code:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Item
+          readOnly: true
+        item_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        section_break_6:
+          type:
+          - string
+          - 'null'
+        asset_value:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_9:
+          type:
+          - string
+          - 'null'
+        fixed_asset_account:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Account
+          readOnly: true
+        cost_center:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Cost Center
+        accounting_dimensions_section:
+          type:
+          - string
+          - 'null'
+        dimension_col_break:
+          type:
+          - string
+          - 'null'
+        project:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Project
+        finance_book:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Finance Book
+        current_asset_value:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetCapitalizationServiceItemWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
+        column_break_3:
+          type: string
+        expense_account:
+          type: string
+          x-frappe-target-doctype: Account
+        section_break_6:
+          type: string
+        qty:
+          type: number
+        uom:
+          type: string
+          x-frappe-target-doctype: UOM
+        column_break_9:
+          type: string
+        rate:
+          type: number
+          x-frappe-options: Company:company:default_currency
+        accounting_dimensions_section:
+          type: string
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        dimension_col_break:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - expense_account
+      additionalProperties: false
+      x-module: Assets
+    AssetCapitalizationServiceItemResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        item_code:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Item
+        item_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        column_break_3:
+          type:
+          - string
+          - 'null'
+        expense_account:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Account
+        section_break_6:
+          type:
+          - string
+          - 'null'
+        qty:
+          type:
+          - number
+          - 'null'
+        uom:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: UOM
+        column_break_9:
+          type:
+          - string
+          - 'null'
+        rate:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+        amount:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        accounting_dimensions_section:
+          type:
+          - string
+          - 'null'
+        cost_center:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Cost Center
+        dimension_col_break:
+          type:
+          - string
+          - 'null'
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetCapitalizationStockItemWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        column_break_3:
+          type: string
+        warehouse:
+          type: string
+          x-frappe-target-doctype: Warehouse
+        batch_no:
+          type: string
+          x-frappe-target-doctype: Batch
+        section_break_6:
+          type: string
+        stock_qty:
+          type: number
+        column_break_9:
+          type: string
+        batch_and_serial_no_section:
+          type: string
+        column_break_13:
+          type: string
+        serial_no:
+          type: string
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
+        accounting_dimensions_section:
+          type: string
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        dimension_col_break:
+          type: string
+        serial_and_batch_bundle:
+          type: string
+          x-frappe-target-doctype: Serial and Batch Bundle
+        use_serial_batch_fields:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        section_break_bfqc:
+          type: string
+        column_break_mbuv:
+          type: string
+        purchase_receipt_item:
+          type: string
+          writeOnly: true
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - item_code
+      - warehouse
+      additionalProperties: false
+      x-module: Assets
+    AssetCapitalizationStockItemResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        column_break_3:
+          type:
+          - string
+          - 'null'
+        warehouse:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Warehouse
+        batch_no:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Batch
+        section_break_6:
+          type:
+          - string
+          - 'null'
+        stock_qty:
+          type:
+          - number
+          - 'null'
+        stock_uom:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: UOM
+          readOnly: true
+        column_break_9:
+          type:
+          - string
+          - 'null'
+        valuation_rate:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        amount:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        batch_and_serial_no_section:
+          type:
+          - string
+          - 'null'
+        column_break_13:
+          type:
+          - string
+          - 'null'
+        serial_no:
+          type:
+          - string
+          - 'null'
+        item_code:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Item
+        item_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        actual_qty:
+          type:
+          - number
+          - 'null'
+          readOnly: true
+        accounting_dimensions_section:
+          type:
+          - string
+          - 'null'
+        cost_center:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Cost Center
+        dimension_col_break:
+          type:
+          - string
+          - 'null'
+        serial_and_batch_bundle:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Serial and Batch Bundle
+        use_serial_batch_fields:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        section_break_bfqc:
+          type:
+          - string
+          - 'null'
+        column_break_mbuv:
+          type:
+          - string
+          - 'null'
+        purchase_receipt_item:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetCategoryWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        asset_category_name:
+          type: string
+        column_break_3:
+          type: string
+        finance_book_detail:
+          type: string
+        finance_books:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetFinanceBookWrite'
+        section_break_2:
+          type: string
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetCategoryAccountWrite'
+        depreciation_options:
+          type: string
+        enable_cwip_accounting:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        non_depreciable_category:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - accounts
+      - asset_category_name
+      additionalProperties: false
+      x-module: Assets
+    AssetCategoryResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        asset_category_name:
+          type:
+          - string
+          - 'null'
+        column_break_3:
+          type:
+          - string
+          - 'null'
+        finance_book_detail:
+          type:
+          - string
+          - 'null'
+        finance_books:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/AssetFinanceBookResponse'
+        section_break_2:
+          type:
+          - string
+          - 'null'
+        accounts:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/AssetCategoryAccountResponse'
+        depreciation_options:
+          type:
+          - string
+          - 'null'
+        enable_cwip_accounting:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        non_depreciable_category:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetCategoryAccountWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        company_name:
+          type: string
+          x-frappe-target-doctype: Company
+        fixed_asset_account:
+          type: string
+          x-frappe-target-doctype: Account
+        accumulated_depreciation_account:
+          type: string
+          x-frappe-target-doctype: Account
+        depreciation_expense_account:
+          type: string
+          x-frappe-target-doctype: Account
+        capital_work_in_progress_account:
+          type: string
+          x-frappe-target-doctype: Account
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - company_name
+      - fixed_asset_account
+      additionalProperties: false
+      x-module: Assets
+    AssetCategoryAccountResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        company_name:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+        fixed_asset_account:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Account
+        accumulated_depreciation_account:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Account
+        depreciation_expense_account:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Account
+        capital_work_in_progress_account:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Account
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetDepreciationScheduleWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        asset:
+          type: string
+          x-frappe-target-doctype: Asset
+        naming_series:
+          type: string
+        column_break_2:
+          type: string
+        depreciation_details_section:
+          type: string
+        finance_book:
+          type: string
+          x-frappe-target-doctype: Finance Book
+        column_break_8:
+          type: string
+        depreciation_schedule_section:
+          type: string
+        depreciation_schedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/DepreciationScheduleWrite'
+        details_section:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - asset
+      additionalProperties: false
+      x-module: Assets
+    AssetDepreciationScheduleResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        asset:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset
+        naming_series:
+          type:
+          - string
+          - 'null'
+        amended_from:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset Depreciation Schedule
+          readOnly: true
+        column_break_2:
+          type:
+          - string
+          - 'null'
+        depreciation_details_section:
+          type:
+          - string
+          - 'null'
+        finance_book:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Finance Book
+        depreciation_method:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Straight Line
+          - Double Declining Balance
+          - Written Down Value
+          - Manual
+          - ''
+          - null
+          readOnly: true
+        rate_of_depreciation:
+          type:
+          - number
+          - 'null'
+          readOnly: true
+        column_break_8:
+          type:
+          - string
+          - 'null'
+        total_number_of_depreciations:
+          type:
+          - integer
+          - 'null'
+          readOnly: true
+        depreciation_schedule_section:
+          type:
+          - string
+          - 'null'
+        depreciation_schedule:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/DepreciationScheduleResponse'
+        details_section:
+          type:
+          - string
+          - 'null'
+        notes:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Draft
+          - Active
+          - Cancelled
+          - ''
+          - null
+          readOnly: true
+          writeOnly: true
+        frequency_of_depreciation:
+          type:
+          - integer
+          - 'null'
+          readOnly: true
+        expected_value_after_useful_life:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        finance_book_id:
+          type:
+          - integer
+          - 'null'
+          readOnly: true
+          writeOnly: true
+        opening_accumulated_depreciation:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+          writeOnly: true
+        opening_number_of_booked_depreciations:
+          type:
+          - integer
+          - 'null'
+          readOnly: true
+          writeOnly: true
+        daily_prorata_based:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+            readOnly: true
+          - type: 'null'
+        shift_based:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+            readOnly: true
+          - type: 'null'
+        company:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+          readOnly: true
+        value_after_depreciation:
+          type:
+          - number
+          - 'null'
+          readOnly: true
+        net_purchase_amount:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+          writeOnly: true
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetFinanceBookWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        finance_book:
+          type: string
+          x-frappe-target-doctype: Finance Book
+        depreciation_method:
+          type: string
+          enum:
+          - Straight Line
+          - Double Declining Balance
+          - Written Down Value
+          - Manual
+        total_number_of_depreciations:
+          type: integer
+        column_break_5:
+          type: string
+        frequency_of_depreciation:
+          type: integer
+        depreciation_start_date:
+          type: string
+          format: date
+        expected_value_after_useful_life:
+          type: number
+          x-frappe-options: Company:company:default_currency
+        rate_of_depreciation:
+          type: number
+        salvage_value_percentage:
+          type: number
+        daily_prorata_based:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        shift_based:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        section_break_jkdf:
+          type: string
+        column_break_sigk:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - depreciation_method
+      - frequency_of_depreciation
+      - total_number_of_depreciations
+      additionalProperties: false
+      x-module: Assets
+    AssetFinanceBookResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        finance_book:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Finance Book
+        depreciation_method:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Straight Line
+          - Double Declining Balance
+          - Written Down Value
+          - Manual
+          - ''
+          - null
+        total_number_of_depreciations:
+          type:
+          - integer
+          - 'null'
+        column_break_5:
+          type:
+          - string
+          - 'null'
+        frequency_of_depreciation:
+          type:
+          - integer
+          - 'null'
+        depreciation_start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        expected_value_after_useful_life:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+        value_after_depreciation:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        rate_of_depreciation:
+          type:
+          - number
+          - 'null'
+        salvage_value_percentage:
+          type:
+          - number
+          - 'null'
+        daily_prorata_based:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        shift_based:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        total_number_of_booked_depreciations:
+          type:
+          - integer
+          - 'null'
+          readOnly: true
+        section_break_jkdf:
+          type:
+          - string
+          - 'null'
+        column_break_sigk:
+          type:
+          - string
+          - 'null'
+        increase_in_asset_life:
+          type:
+          - integer
+          - 'null'
+          readOnly: true
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetMaintenanceWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        asset_name:
+          type: string
+          x-frappe-target-doctype: Asset
+        asset_category:
+          type: string
+        item_code:
+          type: string
+        item_name:
+          type: string
+        column_break_3:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        section_break_6:
+          type: string
+        maintenance_team:
+          type: string
+          x-frappe-target-doctype: Asset Maintenance Team
+        column_break_9:
+          type: string
+        maintenance_manager_name:
+          type: string
+        section_break_8:
+          type: string
+        asset_maintenance_tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetMaintenanceTaskWrite'
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - asset_maintenance_tasks
+      - asset_name
+      - company
+      - maintenance_team
+      additionalProperties: false
+      x-module: Assets
+    AssetMaintenanceResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        asset_name:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset
+        asset_category:
+          type:
+          - string
+          - 'null'
+        item_code:
+          type:
+          - string
+          - 'null'
+        item_name:
+          type:
+          - string
+          - 'null'
+        column_break_3:
+          type:
+          - string
+          - 'null'
+        company:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+        section_break_6:
+          type:
+          - string
+          - 'null'
+        maintenance_team:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset Maintenance Team
+        column_break_9:
+          type:
+          - string
+          - 'null'
+        maintenance_manager:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          writeOnly: true
+        maintenance_manager_name:
+          type:
+          - string
+          - 'null'
+        section_break_8:
+          type:
+          - string
+          - 'null'
+        asset_maintenance_tasks:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/AssetMaintenanceTaskResponse'
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetMaintenanceLogWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        asset_maintenance:
+          type: string
+          x-frappe-target-doctype: Asset Maintenance
+        naming_series:
+          type: string
+        asset_name:
+          type: string
+        column_break_2:
+          type: string
+        item_code:
+          type: string
+        item_name:
+          type: string
+        section_break_5:
+          type: string
+        task:
+          type: string
+          x-frappe-target-doctype: Asset Maintenance Task
+        maintenance_type:
+          type: string
+        assign_to_name:
+          type: string
+        column_break_6:
+          type: string
+        completion_date:
+          type: string
+          format: date
+        maintenance_status:
+          type: string
+          enum:
+          - Planned
+          - Completed
+          - Cancelled
+          - Overdue
+        has_certificate:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        certificate_attachement:
+          type: string
+        column_break_9:
+          type: string
+        actions_performed:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - maintenance_status
+      - naming_series
+      additionalProperties: false
+      x-module: Assets
+    AssetMaintenanceLogResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        asset_maintenance:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset Maintenance
+        naming_series:
+          type:
+          - string
+          - 'null'
+        asset_name:
+          type:
+          - string
+          - 'null'
+        column_break_2:
+          type:
+          - string
+          - 'null'
+        item_code:
+          type:
+          - string
+          - 'null'
+        item_name:
+          type:
+          - string
+          - 'null'
+        section_break_5:
+          type:
+          - string
+          - 'null'
+        task:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset Maintenance Task
+        maintenance_type:
+          type:
+          - string
+          - 'null'
+        periodicity:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        assign_to_name:
+          type:
+          - string
+          - 'null'
+        column_break_6:
+          type:
+          - string
+          - 'null'
+        due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          readOnly: true
+        completion_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        maintenance_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Planned
+          - Completed
+          - Cancelled
+          - Overdue
+          - ''
+          - null
+        has_certificate:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        certificate_attachement:
+          type:
+          - string
+          - 'null'
+        description:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        column_break_9:
+          type:
+          - string
+          - 'null'
+        actions_performed:
+          type:
+          - string
+          - 'null'
+        amended_from:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset Maintenance Log
+          readOnly: true
+        task_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        task_assignee_email:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetMaintenanceTaskWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        maintenance_task:
+          type: string
+        maintenance_type:
+          type: string
+          enum:
+          - Preventive Maintenance
+          - Calibration
+        column_break_2:
+          type: string
+        maintenance_status:
+          type: string
+          enum:
+          - Planned
+          - Overdue
+          - Cancelled
+        section_break_2:
+          type: string
+        start_date:
+          type: string
+          format: date
+        periodicity:
+          type: string
+          enum:
+          - Daily
+          - Weekly
+          - Monthly
+          - Quarterly
+          - Half-yearly
+          - Yearly
+          - 2 Yearly
+          - 3 Yearly
+        column_break_4:
+          type: string
+        end_date:
+          type: string
+          format: date
+        certificate_required:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        section_break_9:
+          type: string
+        assign_to:
+          type: string
+          x-frappe-target-doctype: User
+        column_break_10:
+          type: string
+        assign_to_name:
+          type: string
+        section_break_10:
+          type: string
+        next_due_date:
+          type: string
+          format: date
+        column_break_14:
+          type: string
+        last_completion_date:
+          type: string
+          format: date
+        section_break_7:
+          type: string
+        description:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - maintenance_status
+      - maintenance_task
+      - periodicity
+      - start_date
+      additionalProperties: false
+      x-module: Assets
+    AssetMaintenanceTaskResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        maintenance_task:
+          type:
+          - string
+          - 'null'
+        maintenance_type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Preventive Maintenance
+          - Calibration
+          - ''
+          - null
+        column_break_2:
+          type:
+          - string
+          - 'null'
+        maintenance_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Planned
+          - Overdue
+          - Cancelled
+          - ''
+          - null
+        section_break_2:
+          type:
+          - string
+          - 'null'
+        start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        periodicity:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Daily
+          - Weekly
+          - Monthly
+          - Quarterly
+          - Half-yearly
+          - Yearly
+          - 2 Yearly
+          - 3 Yearly
+          - ''
+          - null
+        column_break_4:
+          type:
+          - string
+          - 'null'
+        end_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        certificate_required:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        section_break_9:
+          type:
+          - string
+          - 'null'
+        assign_to:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: User
+        column_break_10:
+          type:
+          - string
+          - 'null'
+        assign_to_name:
+          type:
+          - string
+          - 'null'
+        section_break_10:
+          type:
+          - string
+          - 'null'
+        next_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        column_break_14:
+          type:
+          - string
+          - 'null'
+        last_completion_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        section_break_7:
+          type:
+          - string
+          - 'null'
+        description:
+          type:
+          - string
+          - 'null'
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetMaintenanceTeamWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        maintenance_team_name:
+          type: string
+        maintenance_manager:
+          type: string
+          x-frappe-target-doctype: User
+        maintenance_manager_name:
+          type: string
+        column_break_2:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        section_break_2:
+          type: string
+        maintenance_team_members:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaintenanceTeamMemberWrite'
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - company
+      - maintenance_team_members
+      - maintenance_team_name
+      additionalProperties: false
+      x-module: Assets
+    AssetMaintenanceTeamResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        maintenance_team_name:
+          type:
+          - string
+          - 'null'
+        maintenance_manager:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: User
+        maintenance_manager_name:
+          type:
+          - string
+          - 'null'
+        column_break_2:
+          type:
+          - string
+          - 'null'
+        company:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+        section_break_2:
+          type:
+          - string
+          - 'null'
+        maintenance_team_members:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/MaintenanceTeamMemberResponse'
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetMovementWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        purpose:
+          type: string
+          enum:
+          - Issue
+          - Receipt
+          - Transfer
+          - Transfer and Issue
+        transaction_date:
+          type: string
+          format: date-time
+        column_break_4:
+          type: string
+        reference:
+          type: string
+        reference_doctype:
+          type: string
+          x-frappe-target-doctype: DocType
+        reference_name:
+          type: string
+          x-frappe-options: reference_doctype
+        section_break_10:
+          type: string
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetMovementItemWrite'
+        column_break_9:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - assets
+      - company
+      - purpose
+      - transaction_date
+      additionalProperties: false
+      x-module: Assets
+    AssetMovementResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        company:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+        purpose:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Issue
+          - Receipt
+          - Transfer
+          - Transfer and Issue
+          - ''
+          - null
+        transaction_date:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        column_break_4:
+          type:
+          - string
+          - 'null'
+        reference:
+          type:
+          - string
+          - 'null'
+        reference_doctype:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: DocType
+        reference_name:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: reference_doctype
+        amended_from:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset Movement
+          readOnly: true
+        section_break_10:
+          type:
+          - string
+          - 'null'
+        assets:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/AssetMovementItemResponse'
+        column_break_9:
+          type:
+          - string
+          - 'null'
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetMovementItemWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        asset:
+          type: string
+          x-frappe-target-doctype: Asset
+        source_location:
+          type: string
+          x-frappe-target-doctype: Location
+        target_location:
+          type: string
+          x-frappe-target-doctype: Location
+        from_employee:
+          type: string
+          x-frappe-target-doctype: Employee
+        to_employee:
+          type: string
+          x-frappe-target-doctype: Employee
+        column_break_2:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - asset
+      additionalProperties: false
+      x-module: Assets
+    AssetMovementItemResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        asset:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset
+        asset_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        source_location:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Location
+        target_location:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Location
+        from_employee:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Employee
+        to_employee:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Employee
+        column_break_2:
+          type:
+          - string
+          - 'null'
+        company:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+          readOnly: true
+          writeOnly: true
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetRepairWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        naming_series:
+          type: string
+        column_break_2:
+          type: string
+        failure_date:
+          type: string
+          format: date-time
+        completion_date:
+          type: string
+          format: date-time
+        repair_status:
+          type: string
+          enum:
+          - Pending
+          - Completed
+          - Cancelled
+        section_break_9:
+          type: string
+        description:
+          type: string
+        column_break_9:
+          type: string
+        actions_performed:
+          type: string
+        asset:
+          type: string
+          x-frappe-target-doctype: Asset
+        asset_name:
+          type: string
+        capitalize_repair_cost:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        accounting_details:
+          type: string
+        stock_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetRepairConsumedItemWrite'
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        project:
+          type: string
+          x-frappe-target-doctype: Project
+        column_break_14:
+          type: string
+        stock_consumption_details_section:
+          type: string
+        increase_in_asset_life:
+          type: integer
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        invoices:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetRepairPurchaseInvoiceWrite'
+        section_break_muyc:
+          type: string
+        column_break_hkem:
+          type: string
+        capitalizations_section:
+          type: string
+        column_break_spre:
+          type: string
+        column_break_ajbh:
+          type: string
+        section_break_ltbb:
+          type: string
+        column_break_ewor:
+          type: string
+        column_break_ceuc:
+          type: string
+        consumed_items_cost:
+          type: number
+        column_break_xebe:
+          type: string
+        accounting_dimensions_section:
+          type: string
+        connection_tab:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - asset
+      - failure_date
+      - naming_series
+      additionalProperties: false
+      x-module: Assets
+    AssetRepairResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        naming_series:
+          type:
+          - string
+          - 'null'
+        column_break_2:
+          type:
+          - string
+          - 'null'
+        failure_date:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        completion_date:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        repair_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Pending
+          - Completed
+          - Cancelled
+          - ''
+          - null
+        section_break_9:
+          type:
+          - string
+          - 'null'
+        description:
+          type:
+          - string
+          - 'null'
+        column_break_9:
+          type:
+          - string
+          - 'null'
+        actions_performed:
+          type:
+          - string
+          - 'null'
+        downtime:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        repair_cost:
+          type:
+          - number
+          - 'null'
+          readOnly: true
+        amended_from:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset Repair
+          readOnly: true
+        asset:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset
+        asset_name:
+          type:
+          - string
+          - 'null'
+        capitalize_repair_cost:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        accounting_details:
+          type:
+          - string
+          - 'null'
+        stock_items:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/AssetRepairConsumedItemResponse'
+        cost_center:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Cost Center
+        project:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Project
+        column_break_14:
+          type:
+          - string
+          - 'null'
+        stock_consumption_details_section:
+          type:
+          - string
+          - 'null'
+        total_repair_cost:
+          type:
+          - number
+          - 'null'
+          readOnly: true
+        increase_in_asset_life:
+          type:
+          - integer
+          - 'null'
+        company:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+        invoices:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/AssetRepairPurchaseInvoiceResponse'
+        section_break_muyc:
+          type:
+          - string
+          - 'null'
+        column_break_hkem:
+          type:
+          - string
+          - 'null'
+        capitalizations_section:
+          type:
+          - string
+          - 'null'
+        column_break_spre:
+          type:
+          - string
+          - 'null'
+        column_break_ajbh:
+          type:
+          - string
+          - 'null'
+        section_break_ltbb:
+          type:
+          - string
+          - 'null'
+        column_break_ewor:
+          type:
+          - string
+          - 'null'
+        column_break_ceuc:
+          type:
+          - string
+          - 'null'
+        consumed_items_cost:
+          type:
+          - number
+          - 'null'
+        column_break_xebe:
+          type:
+          - string
+          - 'null'
+        accounting_dimensions_section:
+          type:
+          - string
+          - 'null'
+        connection_tab:
+          type:
+          - string
+          - 'null'
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetRepairConsumedItemWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        valuation_rate:
+          type: number
+        consumed_quantity:
+          type: string
+        serial_no:
+          type: string
+          writeOnly: true
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
+        serial_and_batch_bundle:
+          type: string
+          x-frappe-target-doctype: Serial and Batch Bundle
+        warehouse:
+          type: string
+          x-frappe-target-doctype: Warehouse
+        pick_serial_and_batch:
+          type: string
+        column_break_xzfr:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - item_code
+      - warehouse
+      additionalProperties: false
+      x-module: Assets
+    AssetRepairConsumedItemResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        valuation_rate:
+          type:
+          - number
+          - 'null'
+        consumed_quantity:
+          type:
+          - string
+          - 'null'
+        total_value:
+          type:
+          - number
+          - 'null'
+          readOnly: true
+        serial_no:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        item_code:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Item
+        serial_and_batch_bundle:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Serial and Batch Bundle
+        warehouse:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Warehouse
+        pick_serial_and_batch:
+          type:
+          - string
+          - 'null'
+        column_break_xzfr:
+          type:
+          - string
+          - 'null'
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetRepairPurchaseInvoiceWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        purchase_invoice:
+          type: string
+          x-frappe-target-doctype: Purchase Invoice
+        expense_account:
+          type: string
+          x-frappe-target-doctype: Account
+        repair_cost:
+          type: number
+          x-frappe-options: Company:company:default_currency
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - expense_account
+      - repair_cost
+      additionalProperties: false
+      x-module: Assets
+    AssetRepairPurchaseInvoiceResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        purchase_invoice:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Purchase Invoice
+        expense_account:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Account
+        repair_cost:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetShiftAllocationWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        section_break_esaa:
+          type: string
+        asset:
+          type: string
+          x-frappe-target-doctype: Asset
+        column_break_tdae:
+          type: string
+        finance_book:
+          type: string
+          x-frappe-target-doctype: Finance Book
+        depreciation_schedule_section:
+          type: string
+        naming_series:
+          type: string
+        column_break_jomc:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - asset
+      - naming_series
+      additionalProperties: false
+      x-module: Assets
+    AssetShiftAllocationResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        section_break_esaa:
+          type:
+          - string
+          - 'null'
+        amended_from:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset Shift Allocation
+          readOnly: true
+        asset:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset
+        column_break_tdae:
+          type:
+          - string
+          - 'null'
+        finance_book:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Finance Book
+        depreciation_schedule_section:
+          type:
+          - string
+          - 'null'
+        depreciation_schedule:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/DepreciationScheduleResponse'
+          readOnly: true
+        naming_series:
+          type:
+          - string
+          - 'null'
+        column_break_jomc:
+          type:
+          - string
+          - 'null'
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetShiftFactorWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        shift_name:
+          type: string
+        shift_factor:
+          type: number
+        default:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - shift_factor
+      - shift_name
+      additionalProperties: false
+      x-module: Assets
+    AssetShiftFactorResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        shift_name:
+          type:
+          - string
+          - 'null'
+        shift_factor:
+          type:
+          - number
+          - 'null'
+        default:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    AssetValueAdjustmentWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        asset:
+          type: string
+          x-frappe-target-doctype: Asset
+        asset_category:
+          type: string
+        finance_book:
+          type: string
+          x-frappe-target-doctype: Finance Book
+        column_break_4:
+          type: string
+        date:
+          type: string
+          format: date
+        new_asset_value:
+          type: number
+        cost_center:
+          type: string
+          x-frappe-target-doctype: Cost Center
+        accounting_dimensions_section:
+          type: string
+        dimension_col_break:
+          type: string
+        value_details_section:
+          type: string
+        column_break_11:
+          type: string
+        difference_account:
+          type: string
+          x-frappe-target-doctype: Account
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - asset
+      - date
+      - difference_account
+      - new_asset_value
+      additionalProperties: false
+      x-module: Assets
+    AssetValueAdjustmentResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        company:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+        asset:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset
+        asset_category:
+          type:
+          - string
+          - 'null'
+        finance_book:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Finance Book
+        journal_entry:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Journal Entry
+          readOnly: true
+        column_break_4:
+          type:
+          - string
+          - 'null'
+        date:
+          type:
+          - string
+          - 'null'
+          format: date
+        current_asset_value:
+          type:
+          - number
+          - 'null'
+          readOnly: true
+        new_asset_value:
+          type:
+          - number
+          - 'null'
+        difference_amount:
+          type:
+          - number
+          - 'null'
+          readOnly: true
+        cost_center:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Cost Center
+        amended_from:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset Value Adjustment
+          readOnly: true
+        accounting_dimensions_section:
+          type:
+          - string
+          - 'null'
+        dimension_col_break:
+          type:
+          - string
+          - 'null'
+        value_details_section:
+          type:
+          - string
+          - 'null'
+        column_break_11:
+          type:
+          - string
+          - 'null'
+        difference_account:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Account
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    DepreciationScheduleWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        schedule_date:
+          type: string
+          format: date
+        depreciation_amount:
+          type: number
+          x-frappe-options: Company:company:default_currency
+        column_break_3:
+          type: string
+        make_depreciation_entry:
+          type: string
+        shift:
+          type: string
+          x-frappe-target-doctype: Asset Shift Factor
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - depreciation_amount
+      - schedule_date
+      additionalProperties: false
+      x-module: Assets
+    DepreciationScheduleResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        schedule_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        depreciation_amount:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+        column_break_3:
+          type:
+          - string
+          - 'null'
+        accumulated_depreciation_amount:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        journal_entry:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Journal Entry
+          readOnly: true
+        make_depreciation_entry:
+          type:
+          - string
+          - 'null'
+        shift:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Asset Shift Factor
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    LocationWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        location_name:
+          type: string
+        parent_location:
+          type: string
+          x-frappe-target-doctype: Location
+        cb_details:
+          type: string
+        is_container:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        is_group:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        sb_location_details:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        cb_latlong:
+          type: string
+        area_uom:
+          type: string
+          x-frappe-target-doctype: UOM
+        sb_geolocation:
+          type: string
+        location:
+          type: string
+        tree_details:
+          type: string
+          writeOnly: true
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - location_name
+      additionalProperties: false
+      x-module: Assets
+    LocationResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        location_name:
+          type:
+          - string
+          - 'null'
+        parent_location:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Location
+        cb_details:
+          type:
+          - string
+          - 'null'
+        is_container:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        is_group:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        sb_location_details:
+          type:
+          - string
+          - 'null'
+        latitude:
+          type:
+          - number
+          - 'null'
+        longitude:
+          type:
+          - number
+          - 'null'
+        cb_latlong:
+          type:
+          - string
+          - 'null'
+        area:
+          type:
+          - number
+          - 'null'
+          readOnly: true
+        area_uom:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: UOM
+        sb_geolocation:
+          type:
+          - string
+          - 'null'
+        location:
+          type:
+          - string
+          - 'null'
+        tree_details:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        lft:
+          type:
+          - integer
+          - 'null'
+          readOnly: true
+          writeOnly: true
+        rgt:
+          type:
+          - integer
+          - 'null'
+          readOnly: true
+          writeOnly: true
+        old_parent:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          writeOnly: true
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
+    MaintenanceTeamMemberWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        team_member:
+          type: string
+          x-frappe-target-doctype: User
+        maintenance_role:
+          type: string
+          x-frappe-target-doctype: Role
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - maintenance_role
+      - team_member
+      additionalProperties: false
+      x-module: Assets
+    MaintenanceTeamMemberResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        team_member:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: User
+        full_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        maintenance_role:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Role
+      required:
+      - name
+      additionalProperties: true
+      x-module: Assets
 x-contract:
   runtime:
     source_of_truth: erpnext
@@ -5264,6 +8623,26 @@ x-contract:
       operation: read
       operation_id: getAssetDashboard
       handler: letron_api.assets.assets.asset_dashboard
+    controller_contracts:
+    - doctype: Request for Quotation Item
+      required_write_fields:
+        conversion_factor:
+          type: number
+        stock_uom:
+          type: string
+    - doctype: Supplier Quotation Item
+      allowed_write_fields:
+        request_for_quotation:
+          type: string
+        request_for_quotation_item:
+          type: string
+        material_request:
+          type: string
+        material_request_item:
+          type: string
+    generated_schemas:
+      PurchaseOrchestrationRequest: *id057
+      PurchaseOrchestrationResponse: *id058
     include_methods:
     - letron_api.control.api.health
     - letron_api.control.api.runtime_info

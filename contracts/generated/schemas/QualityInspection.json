@@ -120,7 +120,12 @@
       ]
     },
     "manual_inspection": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "child_row_reference": {
       "type": "string",

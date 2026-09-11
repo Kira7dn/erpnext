@@ -55,7 +55,12 @@
       "format": "date"
     },
     "certificate_required": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_break_9": {
       "type": "string"

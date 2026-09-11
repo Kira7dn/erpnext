@@ -12,6 +12,16 @@ from lib.api_generator.openapi import build_openapi
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def test_controller_contracts_are_applied_to_generated_write_schema():
+    doctypes, methods = collect(ROOT)
+    contract = expand_typed_modules(load_contract(ROOT / "contracts/erpnext-integration.yml"), doctypes)
+    spec = build_openapi(contract, doctypes, methods)
+    schema = spec["components"]["schemas"]["RequestforQuotationItemWrite"]
+    assert schema["properties"]["conversion_factor"] == {"type": "number"}
+    assert schema["properties"]["stock_uom"] == {"type": "string"}
+    assert {"conversion_factor", "stock_uom"}.issubset(schema["required"])
+
+
 def test_catalog_discovers_erpnext_and_custom_method():
     doctypes, methods = collect(ROOT)
     assert len(doctypes) > 100

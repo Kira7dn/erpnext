@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "message": {
-      "$ref": "AssetValueAdjustment.json"
+      "$ref": "AssetValueAdjustmentResponse.json"
     }
   },
   "required": [

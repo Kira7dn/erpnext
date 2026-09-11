@@ -6,7 +6,7 @@
     "data": {
       "type": "array",
       "items": {
-        "$ref": "AssetShiftAllocation.json"
+        "$ref": "AssetShiftAllocationResponse.json"
       }
     },
     "message": {}

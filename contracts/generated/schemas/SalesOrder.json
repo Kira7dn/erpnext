@@ -153,7 +153,12 @@
       "type": "number"
     },
     "ignore_pricing_rule": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "sec_warehouse": {
       "type": "string"
@@ -431,7 +436,12 @@
       "x-frappe-target-doctype": "Print Heading"
     },
     "group_same_items": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_break_78": {
       "type": "string"
@@ -534,10 +544,20 @@
       "readOnly": true
     },
     "skip_delivery_note": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "is_internal_customer": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "represents_company": {
@@ -546,7 +566,12 @@
       "readOnly": true
     },
     "disable_rounded_total": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "dispatch_address_name": {
       "type": "string",
@@ -619,7 +644,12 @@
       "type": "string"
     },
     "reserve_stock": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "advance_payment_status": {
       "type": "string",
@@ -654,14 +684,24 @@
       "x-frappe-target-doctype": "Contact"
     },
     "has_unit_price_items": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "writeOnly": true
     },
     "last_scanned_warehouse": {
       "type": "string"
     },
     "is_subcontracted": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "item_wise_tax_details": {
       "type": "array",
@@ -700,7 +740,12 @@
       "format": "time"
     },
     "ignore_default_payment_terms_template": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },

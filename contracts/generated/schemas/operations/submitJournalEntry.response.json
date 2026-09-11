@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "message": {
-      "$ref": "JournalEntry.json"
+      "$ref": "JournalEntryResponse.json"
     }
   },
   "required": [

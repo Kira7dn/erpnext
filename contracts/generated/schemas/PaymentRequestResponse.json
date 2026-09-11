@@ -1,0 +1,476 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PaymentRequestResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "payment_request_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Outward",
+        "Inward",
+        "",
+        null
+      ]
+    },
+    "transaction_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "column_break_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "mode_of_payment": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Mode of Payment"
+    },
+    "party_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "party_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType"
+    },
+    "party": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "party_type"
+    },
+    "column_break_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reference_doctype": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType",
+      "readOnly": true
+    },
+    "reference_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "reference_doctype",
+      "readOnly": true
+    },
+    "transaction_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "grand_total": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency"
+    },
+    "is_a_subscription": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "column_break_18": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true
+    },
+    "subscription_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "subscription_plans": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "SubscriptionPlanDetailResponse.json"
+      }
+    },
+    "bank_account_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bank_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank Account"
+    },
+    "bank": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank",
+      "readOnly": true
+    },
+    "bank_account_no": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "account": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_11": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "iban": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "IBAN"
+    },
+    "branch_code": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "swift_number": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "accounting_dimensions_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cost_center": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "dimension_col_break": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Project"
+    },
+    "recipient_and_message": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "print_format": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "email_to": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "subject": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payment_gateway_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Payment Gateway Account"
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Draft",
+        "Requested",
+        "Initiated",
+        "Partially Paid",
+        "Payment Ordered",
+        "Paid",
+        "Failed",
+        "Cancelled",
+        "",
+        null
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "make_sales_invoice": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true,
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "section_break_10": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "message": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "message_examples": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "<pre><h5>Message Example</h5>\n\n&lt;p&gt;Dear {{ doc.contact_person }},&lt;/p&gt;\n\n&lt;p&gt;Requesting payment for {{ doc.doctype }}, {{ doc.name }} for {{ doc.grand_total }}.&lt;/p&gt;\n\n&lt;a href=\"{{ payment_url }}\"&gt; click here to pay &lt;/a&gt;\n\n</pre>\n"
+    },
+    "mute_email": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true,
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "payment_url": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "URL",
+      "readOnly": true
+    },
+    "section_break_7": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payment_gateway": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payment_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "payment_channel": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Email",
+        "Phone",
+        "Other",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "payment_order": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Payment Order",
+      "readOnly": true
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Payment Request",
+      "readOnly": true
+    },
+    "failed_reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "outstanding_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "party_account_currency",
+      "readOnly": true
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company",
+      "readOnly": true
+    },
+    "column_break_pnyv": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "party_account_currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true
+    },
+    "party_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break_iiuv": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "phone_number": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payment_reference_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payment_reference": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "PaymentReferenceResponse.json"
+      },
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

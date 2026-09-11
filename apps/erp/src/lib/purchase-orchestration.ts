@@ -8,11 +8,24 @@ import {
   GatewayRequestError,
   GatewayUnavailableError,
   gatewayRequest,
+  validatedGatewayRequest,
 } from "@/lib/letron-api";
 import { ApiRequestError } from "@/lib/api-error";
 import { sendSupplierPortalMail } from "@/lib/supplier-portal";
 import { buildAccessMail } from "@/lib/supplier-portal-session";
 import { ensureSupplierPortalAccess, resolveSupplierEmail } from "@/lib/supplier-portal-core";
+import {
+  MaterialRequestResponseSchema,
+  MaterialRequestWriteSchema,
+  ItemResponseSchema,
+  RequestforQuotationResponseSchema,
+  RequestforQuotationWriteSchema,
+} from "@/generated/zod";
+import {
+  buildRfqPayload,
+  hydrateRfqItems,
+  itemsFromCreatedMaterialRequest,
+} from "@/lib/purchase-orchestration-contract";
 
 type Row = Record<string, unknown>;
 type Item = {
@@ -150,30 +163,6 @@ function normalizeInput(input: PurchaseOrchestrationInput): {
   return { materialRequest: { ...materialRequest, items }, suppliers, items };
 }
 
-function buildRfqPayload(
-  materialRequest: Row,
-  suppliers: string[],
-  items: Item[],
-  orchestrationId?: string,
-): Row {
-  return {
-    naming_series: "RFQ-.YYYYMMDD.-.####",
-    company: materialRequest.company,
-    transaction_date: materialRequest.transaction_date,
-    subject: materialRequest.title || "RFQ from Material Request",
-    status: "Draft",
-    suppliers: suppliers.map((supplier) => ({ supplier })),
-    items: items.map(({ name, rate, ...item }) => {
-      void name;
-      void rate;
-      return item;
-    }),
-    ...(orchestrationId
-      ? { custom_letron_orchestration_id: orchestrationId }
-      : {}),
-  };
-}
-
 async function findByCorrelation(
   path: string,
   cookieHeader: string,
@@ -200,33 +189,6 @@ async function findByCorrelation(
       return detail;
   }
   return null;
-}
-
-function itemsFromCreatedMaterialRequest(
-  materialRequest: Row,
-): Item[] {
-  if (!Array.isArray(materialRequest.items) || !materialRequest.items.length)
-    throw new Error("ERP_MATERIAL_REQUEST_ITEMS_MISSING");
-  return materialRequest.items.map((item, index) => {
-    const source = item as Row;
-    const itemCode = String(source.item_code ?? "").trim();
-    const qty = Number(source.qty);
-    if (!itemCode || !Number.isFinite(qty) || qty <= 0)
-      throw new Error(`ERP_MATERIAL_REQUEST_ITEM_INVALID_${index + 1}`);
-    return {
-      item_code: itemCode,
-      qty,
-      schedule_date: String(source.schedule_date ?? "").trim() || undefined,
-      warehouse: String(source.warehouse ?? "").trim() || undefined,
-      uom: String(source.uom ?? "").trim() || undefined,
-      stock_uom: String(source.stock_uom ?? "").trim() || undefined,
-      conversion_factor: Number(source.conversion_factor) || 1,
-      rate: Number(source.rate ?? source.price_list_rate) || 0,
-      name: String(source.name ?? "").trim() || undefined,
-      material_request: String(source.material_request ?? materialRequest.name ?? "").trim() || undefined,
-      material_request_item: String(source.material_request_item ?? source.name ?? "").trim() || undefined,
-    };
-  });
 }
 
 async function saveState(
@@ -308,12 +270,9 @@ export async function createPurchaseOrchestration(
     material_request: normalized.materialRequest,
     suppliers: normalized.suppliers,
     justification: String(input.justification ?? "").trim() || undefined,
-    rfq_payload: buildRfqPayload(
-      normalized.materialRequest,
-      normalized.suppliers,
-      normalized.items,
-      correlationId(idempotencyKey),
-    ),
+    // The RFQ contract requires ERP-derived stock_uom values. Build and
+    // validate it only after the Material Request has been created/read back.
+    rfq_payload: {},
     retry_count: 0,
     created_at: now,
     updated_at: now,
@@ -332,14 +291,18 @@ export async function createPurchaseOrchestration(
     ex: STATE_TTL_SECONDS,
   });
   try {
-    state.rfq_payload = buildRfqPayload(
-      normalized.materialRequest,
-      normalized.suppliers,
-      normalized.items,
-      state.id,
-    );
-    const materialRequest = await gatewayRequest<Row>(
+    const materialRequestPayload = MaterialRequestWriteSchema.parse({
+      ...normalized.materialRequest,
+      items: normalized.items.map(({ stock_uom, ...item }) => {
+        void stock_uom;
+        return item;
+      }),
+      naming_series: "MR-.YYYYMMDD.-.####",
+      custom_letron_orchestration_id: state.id,
+    });
+    const materialRequest = await validatedGatewayRequest<Row>(
       "/api/v1/stock/material-requests",
+      MaterialRequestResponseSchema,
       cookieHeader,
       {
         method: "POST",
@@ -347,24 +310,28 @@ export async function createPurchaseOrchestration(
           "Content-Type": "application/json",
           "X-Idempotency-Key": `${idempotencyKey}:mr`,
         },
-        body: JSON.stringify({
-          ...normalized.materialRequest,
-          naming_series: "MR-.YYYYMMDD.-.####",
-          custom_letron_orchestration_id: state.id,
-        }),
+        body: JSON.stringify(materialRequestPayload),
       },
     );
     state.material_request_name = String(materialRequest.name ?? "");
     state.rfq_payload = buildRfqPayload(
       normalized.materialRequest,
       normalized.suppliers,
-      itemsFromCreatedMaterialRequest(materialRequest),
+      await hydrateRfqItems(
+        itemsFromCreatedMaterialRequest(materialRequest),
+        (itemCode) => validatedGatewayRequest<Row>(
+          `/api/v1/stock/items/${encodeURIComponent(itemCode)}`,
+          ItemResponseSchema,
+          cookieHeader,
+        ),
+      ),
       state.id,
     );
     state.status = "mr_created";
     await saveState(key, state);
-    const rfq = await gatewayRequest<Row>(
+    const rfq = await validatedGatewayRequest<Row>(
       "/api/v1/crm/request-for-quotations",
+      RequestforQuotationResponseSchema,
       cookieHeader,
       {
         method: "POST",
@@ -440,7 +407,14 @@ async function continueStartedOrchestration(
       cookieHeader,
       state.id,
     );
-    const existingItems = itemsFromCreatedMaterialRequest(existingMr);
+    const existingItems = await hydrateRfqItems(
+      itemsFromCreatedMaterialRequest(existingMr),
+      (itemCode) => validatedGatewayRequest<Row>(
+        `/api/v1/stock/items/${encodeURIComponent(itemCode)}`,
+        ItemResponseSchema,
+        cookieHeader,
+      ),
+    );
     state.rfq_payload = buildRfqPayload(
       state.material_request,
       state.suppliers,
@@ -452,8 +426,9 @@ async function continueStartedOrchestration(
       state.request_for_quotation_name = String(existingRfq.name ?? "");
       await issueSupplierPortalAccesses(state, existingMr);
     } else {
-      const rfq = await gatewayRequest<Row>(
+      const rfq = await validatedGatewayRequest<Row>(
         "/api/v1/crm/request-for-quotations",
+        RequestforQuotationResponseSchema,
         cookieHeader,
         {
           method: "POST",
@@ -471,9 +446,22 @@ async function continueStartedOrchestration(
     await saveState(key, state);
     return stateResult(state);
   }
+  const stateItems = Array.isArray(state.material_request.items)
+    ? state.material_request.items as Item[]
+    : [];
   try {
-    const materialRequest = await gatewayRequest<Row>(
+    const materialRequestPayload = MaterialRequestWriteSchema.parse({
+      ...state.material_request,
+      items: stateItems.map(({ stock_uom, ...item }: Item) => {
+        void stock_uom;
+        return item;
+      }),
+      naming_series: "MR-.YYYYMMDD.-.####",
+      custom_letron_orchestration_id: state.id,
+    });
+    const materialRequest = await validatedGatewayRequest<Row>(
       "/api/v1/stock/material-requests",
+      MaterialRequestResponseSchema,
       cookieHeader,
       {
         method: "POST",
@@ -481,26 +469,28 @@ async function continueStartedOrchestration(
           "Content-Type": "application/json",
           "X-Idempotency-Key": `${idempotencyKey}:mr`,
         },
-        body: JSON.stringify({
-          ...state.material_request,
-          naming_series: "MR-.YYYYMMDD.-.####",
-          custom_letron_orchestration_id: state.id,
-        }),
+        body: JSON.stringify(materialRequestPayload),
       },
     );
     state.material_request_name = String(materialRequest.name ?? "");
     state.rfq_payload = buildRfqPayload(
       state.material_request,
       state.suppliers,
-      itemsFromCreatedMaterialRequest(
-        materialRequest,
+      await hydrateRfqItems(
+        itemsFromCreatedMaterialRequest(materialRequest),
+        (itemCode) => validatedGatewayRequest<Row>(
+          `/api/v1/stock/items/${encodeURIComponent(itemCode)}`,
+          ItemResponseSchema,
+          cookieHeader,
+        ),
       ),
       state.id,
     );
     state.status = "mr_created";
     await saveState(key, state);
-    const rfq = await gatewayRequest<Row>(
+    const rfq = await validatedGatewayRequest<Row>(
       "/api/v1/crm/request-for-quotations",
+      RequestforQuotationResponseSchema,
       cookieHeader,
       {
         method: "POST",
@@ -569,6 +559,9 @@ export async function retryPurchaseRfq(
     throw new PurchaseOrchestrationValidationError(
       "Material Request was not created; RFQ cannot be retried.",
     );
+  const stateItems = Array.isArray(state.material_request.items)
+    ? state.material_request.items as Item[]
+    : [];
   const materialRequest = await gatewayRequest<Row>(
     `/api/v1/stock/material-requests/${encodeURIComponent(state.material_request_name)}`,
     cookieHeader,
@@ -589,8 +582,9 @@ export async function retryPurchaseRfq(
       await saveState(key, state);
       return stateResult(state);
     }
-    const rfq = await gatewayRequest<Row>(
+    const rfq = await validatedGatewayRequest<Row>(
       "/api/v1/crm/request-for-quotations",
+      RequestforQuotationResponseSchema,
       cookieHeader,
       {
         method: "POST",

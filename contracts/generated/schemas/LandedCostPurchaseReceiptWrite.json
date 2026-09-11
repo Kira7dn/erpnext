@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/LandedCostPurchaseReceiptWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "receipt_document_type": {
+      "type": "string",
+      "enum": [
+        "Purchase Invoice",
+        "Purchase Receipt",
+        "Stock Entry",
+        "Subcontracting Receipt"
+      ]
+    },
+    "receipt_document": {
+      "type": "string",
+      "x-frappe-options": "receipt_document_type"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "receipt_document",
+    "receipt_document_type"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

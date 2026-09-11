@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/DeliveryNoteItemWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "barcode": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "section_break_6": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "image_view": {
+      "type": "string",
+      "x-frappe-options": "image"
+    },
+    "quantity_and_rate": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "section_break_17": {
+      "type": "string"
+    },
+    "discount_and_margin": {
+      "type": "string"
+    },
+    "margin_type": {
+      "type": "string",
+      "enum": [
+        "Percentage",
+        "Amount"
+      ]
+    },
+    "margin_rate_or_amount": {
+      "type": "number"
+    },
+    "column_break_19": {
+      "type": "string"
+    },
+    "discount_percentage": {
+      "type": "number"
+    },
+    "discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "section_break_1": {
+      "type": "string"
+    },
+    "rate": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "col_break3": {
+      "type": "string"
+    },
+    "section_break_25": {
+      "type": "string"
+    },
+    "column_break_28": {
+      "type": "string"
+    },
+    "item_weight_details": {
+      "type": "string"
+    },
+    "weight_per_unit": {
+      "type": "number"
+    },
+    "column_break_21": {
+      "type": "string"
+    },
+    "weight_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "warehouse_and_reference": {
+      "type": "string"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "target_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse",
+      "writeOnly": true
+    },
+    "quality_inspection": {
+      "type": "string",
+      "x-frappe-target-doctype": "Quality Inspection"
+    },
+    "section_break_40": {
+      "type": "string"
+    },
+    "col_break4": {
+      "type": "string"
+    },
+    "expense_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "item_tax_template": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Tax Template"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "allow_zero_valuation_rate": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "page_break": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "accounting_details_section": {
+      "type": "string"
+    },
+    "section_break_72": {
+      "type": "string"
+    },
+    "image_section": {
+      "type": "string"
+    },
+    "column_break_71": {
+      "type": "string"
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "stock_qty_sec_break": {
+      "type": "string"
+    },
+    "stock_qty_col_break": {
+      "type": "string"
+    },
+    "internal_transfer_section": {
+      "type": "string"
+    },
+    "column_break_82": {
+      "type": "string"
+    },
+    "material_request": {
+      "type": "string",
+      "x-frappe-target-doctype": "Material Request"
+    },
+    "material_request_item": {
+      "type": "string"
+    },
+    "column_break_atna": {
+      "type": "string"
+    },
+    "serial_and_batch_bundle": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "pick_serial_and_batch": {
+      "type": "string"
+    },
+    "available_qty_section": {
+      "type": "string"
+    },
+    "column_break_eaoe": {
+      "type": "string"
+    },
+    "serial_no": {
+      "type": "string"
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "use_serial_batch_fields": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "section_break_qyjv": {
+      "type": "string"
+    },
+    "column_break_rxvc": {
+      "type": "string"
+    },
+    "distributed_discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "section_break_kejd": {
+      "type": "string"
+    },
+    "column_break_fguf": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "item_code",
+    "item_name",
+    "qty"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "bank_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bank_details_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "swift_number": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "address_and_contact": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-map-marker"
+    },
+    "address_html": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "website": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_13": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "contact_html": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "data_import_configuration_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bank_transaction_mapping": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "BankTransactionMappingResponse.json"
+      }
+    },
+    "section_break_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "plaid_access_token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

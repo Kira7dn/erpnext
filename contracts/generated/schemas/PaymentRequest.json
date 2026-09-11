@@ -62,7 +62,12 @@
       "x-frappe-options": "currency"
     },
     "is_a_subscription": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break_18": {
       "type": "string"
@@ -161,7 +166,12 @@
       "writeOnly": true
     },
     "make_sales_invoice": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
@@ -176,7 +186,12 @@
       "x-frappe-options": "<pre><h5>Message Example</h5>\n\n&lt;p&gt;Dear {{ doc.contact_person }},&lt;/p&gt;\n\n&lt;p&gt;Requesting payment for {{ doc.doctype }}, {{ doc.name }} for {{ doc.grand_total }}.&lt;/p&gt;\n\n&lt;a href=\"{{ payment_url }}\"&gt; click here to pay &lt;/a&gt;\n\n</pre>\n"
     },
     "mute_email": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },

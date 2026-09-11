@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ItemVariantAttributeWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "variant_of": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "attribute": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Attribute"
+    },
+    "column_break_2": {
+      "type": "string"
+    },
+    "attribute_value": {
+      "type": "string"
+    },
+    "numeric_values": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "section_break_4": {
+      "type": "string"
+    },
+    "from_range": {
+      "type": "number"
+    },
+    "increment": {
+      "type": "number"
+    },
+    "column_break_8": {
+      "type": "string"
+    },
+    "to_range": {
+      "type": "number"
+    },
+    "disabled": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "attribute"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

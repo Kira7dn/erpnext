@@ -145,7 +145,12 @@
       "readOnly": true
     },
     "is_tax_withholding_account": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     }
   },

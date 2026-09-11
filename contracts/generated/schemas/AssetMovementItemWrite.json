@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetMovementItemWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "asset": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset"
+    },
+    "source_location": {
+      "type": "string",
+      "x-frappe-target-doctype": "Location"
+    },
+    "target_location": {
+      "type": "string",
+      "x-frappe-target-doctype": "Location"
+    },
+    "from_employee": {
+      "type": "string",
+      "x-frappe-target-doctype": "Employee"
+    },
+    "to_employee": {
+      "type": "string",
+      "x-frappe-target-doctype": "Employee"
+    },
+    "column_break_2": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset"
+  ],
+  "additionalProperties": false,
+  "x-module": "Assets"
+}

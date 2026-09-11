@@ -1,36 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://letron.local/schemas/operations/updateModeofPayment.request.json",
-  "type": "object",
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "mode_of_payment": {
-      "type": "string"
-    },
-    "type": {
-      "type": "string",
-      "enum": [
-        "Cash",
-        "Bank",
-        "General",
-        "Phone"
-      ]
-    },
-    "accounts": {
-      "type": "array",
-      "items": {
-        "$ref": "ModeofPaymentAccount.json"
-      }
-    },
-    "enabled": {
-      "type": "boolean"
-    }
-  },
-  "required": [
-    "mode_of_payment"
-  ],
-  "additionalProperties": false,
-  "x-module": "Accounts"
+  "$ref": "ModeofPaymentWrite.json"
 }

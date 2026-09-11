@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetMaintenanceLogWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "asset_maintenance": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset Maintenance"
+    },
+    "naming_series": {
+      "type": "string"
+    },
+    "asset_name": {
+      "type": "string"
+    },
+    "column_break_2": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "section_break_5": {
+      "type": "string"
+    },
+    "task": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset Maintenance Task"
+    },
+    "maintenance_type": {
+      "type": "string"
+    },
+    "assign_to_name": {
+      "type": "string"
+    },
+    "column_break_6": {
+      "type": "string"
+    },
+    "completion_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "maintenance_status": {
+      "type": "string",
+      "enum": [
+        "Planned",
+        "Completed",
+        "Cancelled",
+        "Overdue"
+      ]
+    },
+    "has_certificate": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "certificate_attachement": {
+      "type": "string"
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "actions_performed": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "maintenance_status",
+    "naming_series"
+  ],
+  "additionalProperties": false,
+  "x-module": "Assets"
+}

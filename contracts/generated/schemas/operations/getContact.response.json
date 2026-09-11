@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "Contact.json"
+      "$ref": "ContactResponse.json"
     }
   },
   "required": [

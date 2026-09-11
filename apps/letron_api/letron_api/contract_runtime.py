@@ -9,16 +9,19 @@ from typing import Any
 from jsonschema import Draft202012Validator, RefResolver
 
 _CONTRACT: dict[str, Any] | None = None
+_CONTRACT_MTIME_NS: int | None = None
 
 
 def _load_contract() -> dict[str, Any]:
-    global _CONTRACT
-    if _CONTRACT is not None:
-        return _CONTRACT
+    global _CONTRACT, _CONTRACT_MTIME_NS
     path = Path(__file__).with_name("generated") / "runtime-contract.json"
     if not path.exists():
         path = Path(__file__).resolve().parents[3] / "contracts/generated/runtime-contract.json"
+    mtime_ns = path.stat().st_mtime_ns
+    if _CONTRACT is not None and _CONTRACT_MTIME_NS == mtime_ns:
+        return _CONTRACT
     _CONTRACT = json.loads(path.read_text(encoding="utf-8"))
+    _CONTRACT_MTIME_NS = mtime_ns
     return _CONTRACT
 
 

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ItemCustomerDetailWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string",
+      "x-frappe-target-doctype": "Customer"
+    },
+    "customer_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Customer Group"
+    },
+    "ref_code": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "ref_code"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

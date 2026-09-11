@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ItemWiseTaxDetailWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "item_row": {
+      "type": "string"
+    },
+    "tax_row": {
+      "type": "string"
+    },
+    "rate": {
+      "type": "number"
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "taxable_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "item_row",
+    "tax_row"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

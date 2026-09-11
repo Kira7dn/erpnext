@@ -35,7 +35,12 @@
       "format": "time"
     },
     "set_posting_time": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "sb9": {
       "type": "string"
@@ -84,7 +89,12 @@
       "x-frappe-options": "Barcode"
     },
     "scan_mode": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "set_warehouse": {
       "type": "string",

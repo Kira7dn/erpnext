@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetFinanceBookResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "finance_book": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Finance Book"
+    },
+    "depreciation_method": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Straight Line",
+        "Double Declining Balance",
+        "Written Down Value",
+        "Manual",
+        "",
+        null
+      ]
+    },
+    "total_number_of_depreciations": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "column_break_5": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "frequency_of_depreciation": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "depreciation_start_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "expected_value_after_useful_life": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "value_after_depreciation": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "rate_of_depreciation": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "salvage_value_percentage": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "daily_prorata_based": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "shift_based": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "total_number_of_booked_depreciations": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "section_break_jkdf": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_sigk": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "increase_in_asset_life": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

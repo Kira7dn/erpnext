@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankTransactionResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "column_break_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Pending",
+        "Settled",
+        "Unreconciled",
+        "Reconciled",
+        "Cancelled",
+        "",
+        null
+      ]
+    },
+    "bank_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank Account"
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company",
+      "readOnly": true
+    },
+    "section_break_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_7": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Currency"
+    },
+    "section_break_10": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_14": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reference_number": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "transaction_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "payment_entries": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "BankTransactionPaymentsResponse.json"
+      }
+    },
+    "section_break_18": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "allocated_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank Transaction",
+      "readOnly": true
+    },
+    "column_break_17": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "unallocated_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "party_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "party_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType"
+    },
+    "party": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "party_type"
+    },
+    "deposit": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency"
+    },
+    "withdrawal": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency"
+    },
+    "column_break_10": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "transaction_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_3czf": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bank_party_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bank_party_iban": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "IBAN"
+    },
+    "bank_party_account_number": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_oufv": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "extended_bank_statement_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "included_fee": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency"
+    },
+    "excluded_fee": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency"
+    },
+    "is_rule_evaluated": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "matched_transaction_rule": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank Transaction Rule",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

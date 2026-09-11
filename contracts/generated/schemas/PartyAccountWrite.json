@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PartyAccountWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "advance_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

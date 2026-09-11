@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/JournalEntryAccountWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "account_type": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "party_type": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "party": {
+      "type": "string",
+      "x-frappe-options": "party_type"
+    },
+    "currency_section": {
+      "type": "string"
+    },
+    "column_break_10": {
+      "type": "string"
+    },
+    "exchange_rate": {
+      "type": "number"
+    },
+    "sec_break1": {
+      "type": "string"
+    },
+    "debit_in_account_currency": {
+      "type": "number",
+      "x-frappe-options": "account_currency"
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "credit_in_account_currency": {
+      "type": "number",
+      "x-frappe-options": "account_currency"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "reference_type": {
+      "type": "string",
+      "enum": [
+        "Sales Invoice",
+        "Purchase Invoice",
+        "Journal Entry",
+        "Sales Order",
+        "Purchase Order",
+        "Expense Claim",
+        "Asset",
+        "Loan",
+        "Payroll Entry",
+        "Employee Advance",
+        "Exchange Rate Revaluation",
+        "Invoice Discounting",
+        "Fees",
+        "Full and Final Statement",
+        "Payment Entry",
+        "Bank Transaction"
+      ]
+    },
+    "reference_name": {
+      "type": "string",
+      "x-frappe-options": "reference_type"
+    },
+    "reference_due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "col_break3": {
+      "type": "string"
+    },
+    "is_advance": {
+      "type": "string",
+      "enum": [
+        "No",
+        "Yes"
+      ]
+    },
+    "user_remark": {
+      "type": "string"
+    },
+    "against_account": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "bank_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Bank Account"
+    },
+    "reference_detail_no": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "account"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

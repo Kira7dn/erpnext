@@ -1,0 +1,315 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PurchaseInvoiceItemWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "description_section": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "image_view": {
+      "type": "string",
+      "x-frappe-options": "image"
+    },
+    "quantity_and_rate": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "rejected_qty": {
+      "type": "number"
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "sec_break1": {
+      "type": "string"
+    },
+    "price_list_rate": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "discount_percentage": {
+      "type": "number"
+    },
+    "discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "col_break3": {
+      "type": "string"
+    },
+    "sec_break2": {
+      "type": "string"
+    },
+    "rate": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "col_break4": {
+      "type": "string"
+    },
+    "section_break_22": {
+      "type": "string"
+    },
+    "column_break_25": {
+      "type": "string"
+    },
+    "item_weight_details": {
+      "type": "string"
+    },
+    "weight_per_unit": {
+      "type": "number"
+    },
+    "column_break_38": {
+      "type": "string"
+    },
+    "weight_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "warehouse_section": {
+      "type": "string"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "rejected_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "quality_inspection": {
+      "type": "string",
+      "x-frappe-target-doctype": "Quality Inspection"
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "col_br_wh": {
+      "type": "string"
+    },
+    "serial_no": {
+      "type": "string"
+    },
+    "rejected_serial_no": {
+      "type": "string"
+    },
+    "accounting": {
+      "type": "string"
+    },
+    "expense_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "item_tax_template": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Tax Template"
+    },
+    "col_break5": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "deferred_expense_section": {
+      "type": "string"
+    },
+    "deferred_expense_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "service_stop_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "enable_deferred_expense": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "column_break_58": {
+      "type": "string"
+    },
+    "service_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "service_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "allow_zero_valuation_rate": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "brand": {
+      "type": "string",
+      "x-frappe-target-doctype": "Brand",
+      "writeOnly": true
+    },
+    "col_break6": {
+      "type": "string"
+    },
+    "asset_location": {
+      "type": "string",
+      "x-frappe-target-doctype": "Location"
+    },
+    "page_break": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "section_break_82": {
+      "type": "string"
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "manufacture_details": {
+      "type": "string"
+    },
+    "manufacturer": {
+      "type": "string",
+      "x-frappe-target-doctype": "Manufacturer"
+    },
+    "column_break_13": {
+      "type": "string"
+    },
+    "manufacturer_part_no": {
+      "type": "string"
+    },
+    "from_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "col_break7": {
+      "type": "string"
+    },
+    "section_break_26": {
+      "type": "string"
+    },
+    "margin_type": {
+      "type": "string",
+      "enum": [
+        "Percentage",
+        "Amount"
+      ]
+    },
+    "margin_rate_or_amount": {
+      "type": "number"
+    },
+    "column_break_30": {
+      "type": "string"
+    },
+    "apply_tds": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "serial_and_batch_bundle": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "rejected_serial_and_batch_bundle": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "wip_composite_asset": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset"
+    },
+    "add_serial_batch_bundle": {
+      "type": "string"
+    },
+    "use_serial_batch_fields": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "section_break_rqbe": {
+      "type": "string"
+    },
+    "column_break_vbbb": {
+      "type": "string"
+    },
+    "sales_incoming_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "writeOnly": true
+    },
+    "distributed_discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "tax_withholding_category": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Withholding Category"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "item_name",
+    "qty",
+    "rate"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/StockReconciliationItemResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "barcode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "item_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item"
+    },
+    "item_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "column_break_6": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "qty": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "stock_uom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "valuation_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "serial_no_and_batch_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "serial_no": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_11": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "current_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "current_serial_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "current_valuation_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "current_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "section_break_14": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "quantity_difference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_16": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "amount_difference": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "batch_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Batch"
+    },
+    "allow_zero_valuation_rate": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "has_item_scanned": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "serial_and_batch_bundle": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "current_serial_and_batch_bundle": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Serial and Batch Bundle",
+      "readOnly": true
+    },
+    "add_serial_batch_bundle": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "item_group": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item Group"
+    },
+    "use_serial_batch_fields": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "section_break_lypk": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_eefq": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reconcile_all_serial_batch": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

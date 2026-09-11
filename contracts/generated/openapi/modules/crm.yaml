@@ -64,7 +64,7 @@ paths:
                   data:
                     type: array
                     items: &id003
-                      $ref: '#/components/schemas/Lead'
+                      $ref: '#/components/schemas/LeadResponse'
                   message: {}
                 required:
                 - data
@@ -116,203 +116,7 @@ paths:
         content:
           application/json:
             schema: &id013
-              type: object
-              properties:
-                name: &id024
-                  type: string
-                naming_series: &id025
-                  type: string
-                  enum:
-                  - CRM-LEAD-.YYYY.-
-                company_name: &id026
-                  type: string
-                email_id: &id027
-                  type: string
-                  x-frappe-options: Email
-                col_break123: &id028
-                  type: string
-                lead_owner: &id029
-                  type: string
-                  x-frappe-target-doctype: User
-                status: &id030
-                  type: string
-                  enum:
-                  - Lead
-                  - Open
-                  - Replied
-                  - Opportunity
-                  - Quotation
-                  - Lost Quotation
-                  - Interested
-                  - Converted
-                  - Do Not Contact
-                salutation: &id031
-                  type: string
-                  x-frappe-target-doctype: Salutation
-                gender: &id032
-                  type: string
-                  x-frappe-target-doctype: Gender
-                customer: &id033
-                  type: string
-                  x-frappe-target-doctype: Customer
-                image: &id034
-                  type: string
-                  writeOnly: true
-                contact_info_tab: &id035
-                  type: string
-                column_break2: &id036
-                  type: string
-                phone: &id037
-                  type: string
-                  x-frappe-options: Phone
-                mobile_no: &id038
-                  type: string
-                  x-frappe-options: Phone
-                fax: &id039
-                  type: string
-                type: &id040
-                  type: string
-                  enum:
-                  - Client
-                  - Channel Partner
-                  - Consultant
-                market_segment: &id041
-                  type: string
-                  x-frappe-target-doctype: Market Segment
-                industry: &id042
-                  type: string
-                  x-frappe-target-doctype: Industry Type
-                request_type: &id043
-                  type: string
-                  enum:
-                  - Product Enquiry
-                  - Request for Information
-                  - Suggestions
-                  - Other
-                company: &id044
-                  type: string
-                  x-frappe-target-doctype: Company
-                website: &id045
-                  type: string
-                territory: &id046
-                  type: string
-                  x-frappe-target-doctype: Territory
-                unsubscribed: &id047
-                  type: boolean
-                blog_subscriber: &id048
-                  type: boolean
-                language: &id049
-                  type: string
-                  x-frappe-target-doctype: Language
-                first_name: &id050
-                  type: string
-                middle_name: &id051
-                  type: string
-                last_name: &id052
-                  type: string
-                no_of_employees: &id053
-                  type: string
-                  enum:
-                  - 1-10
-                  - 11-50
-                  - 51-200
-                  - 201-500
-                  - 501-1000
-                  - 1000+
-                column_break_22: &id054
-                  type: string
-                whatsapp_no: &id055
-                  type: string
-                  x-frappe-options: Phone
-                column_break_50: &id056
-                  type: string
-                column_break_16: &id057
-                  type: string
-                phone_ext: &id058
-                  type: string
-                qualification_tab: &id059
-                  type: string
-                notes_tab: &id060
-                  type: string
-                other_info_tab: &id061
-                  type: string
-                column_break_1: &id062
-                  type: string
-                qualified_by: &id063
-                  type: string
-                  x-frappe-target-doctype: User
-                qualified_on: &id064
-                  type: string
-                  format: date
-                qualification_status: &id065
-                  type: string
-                  enum:
-                  - Unqualified
-                  - In Process
-                  - Qualified
-                address_section: &id066
-                  type: string
-                column_break_64: &id067
-                  type: string
-                column_break_20: &id068
-                  type: string
-                job_title: &id069
-                  type: string
-                annual_revenue: &id070
-                  type: number
-                activities_tab: &id071
-                  type: string
-                organization_section: &id072
-                  type: string
-                column_break_28: &id073
-                  type: string
-                column_break_31: &id074
-                  type: string
-                notes_html: &id075
-                  type: string
-                open_activities_html: &id076
-                  type: string
-                all_activities_section: &id077
-                  type: string
-                all_activities_html: &id078
-                  type: string
-                notes: &id079
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/CRMNote'
-                  writeOnly: true
-                disabled: &id080
-                  type: boolean
-                column_break_38: &id081
-                  type: string
-                city: &id082
-                  type: string
-                state: &id083
-                  type: string
-                country: &id084
-                  type: string
-                  x-frappe-target-doctype: Country
-                dashboard_tab: &id085
-                  type: string
-                column_break_gkxo: &id086
-                  type: string
-                utm_content: &id087
-                  type: string
-                utm_source: &id088
-                  type: string
-                  x-frappe-target-doctype: UTM Source
-                utm_medium: &id089
-                  type: string
-                  x-frappe-target-doctype: UTM Medium
-                utm_campaign: &id090
-                  type: string
-                  x-frappe-target-doctype: UTM Campaign
-                utm_analytics_section: &id091
-                  type: string
-              required:
-              - status
-              additionalProperties: false
-              x-module: CRM
+              $ref: '#/components/schemas/LeadWrite'
             example:
               status: ''
       responses:
@@ -470,7 +274,7 @@ paths:
                   data:
                     type: array
                     items: &id021
-                      $ref: '#/components/schemas/Opportunity'
+                      $ref: '#/components/schemas/OpportunityResponse'
                   message: {}
                 required:
                 - data
@@ -500,214 +304,7 @@ paths:
         content:
           application/json:
             schema: &id022
-              type: object
-              properties:
-                name: &id092
-                  type: string
-                naming_series: &id093
-                  type: string
-                  enum:
-                  - CRM-OPP-.YYYY.-
-                opportunity_from: &id094
-                  type: string
-                  x-frappe-target-doctype: DocType
-                party_name: &id095
-                  type: string
-                  x-frappe-options: opportunity_from
-                column_break0: &id096
-                  type: string
-                title: &id097
-                  type: string
-                  writeOnly: true
-                opportunity_type: &id098
-                  type: string
-                  x-frappe-target-doctype: Opportunity Type
-                status: &id099
-                  type: string
-                  enum:
-                  - Open
-                  - Quotation
-                  - Converted
-                  - Lost
-                  - Replied
-                  - Closed
-                expected_closing: &id100
-                  type: string
-                  format: date
-                section_break_14: &id101
-                  type: string
-                currency: &id102
-                  type: string
-                  x-frappe-target-doctype: Currency
-                opportunity_amount: &id103
-                  type: number
-                  x-frappe-options: currency
-                column_break_17: &id104
-                  type: string
-                sales_stage: &id105
-                  type: string
-                  x-frappe-target-doctype: Sales Stage
-                probability: &id106
-                  type: number
-                items_section: &id107
-                  type: string
-                  x-frappe-options: fa fa-shopping-cart
-                items: &id108
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/OpportunityItem'
-                contact_info: &id109
-                  type: string
-                  x-frappe-options: fa fa-bullhorn
-                customer_address: &id110
-                  type: string
-                  x-frappe-target-doctype: Address
-                  writeOnly: true
-                territory: &id111
-                  type: string
-                  x-frappe-target-doctype: Territory
-                customer_group: &id112
-                  type: string
-                  x-frappe-target-doctype: Customer Group
-                column_break3: &id113
-                  type: string
-                contact_person: &id114
-                  type: string
-                  x-frappe-target-doctype: Contact
-                contact_email: &id115
-                  type: string
-                  x-frappe-options: Email
-                contact_mobile: &id116
-                  type: string
-                  x-frappe-options: Phone
-                more_info: &id117
-                  type: string
-                  x-frappe-options: fa fa-file-text
-                column_break1: &id118
-                  type: string
-                company: &id119
-                  type: string
-                  x-frappe-target-doctype: Company
-                transaction_date: &id120
-                  type: string
-                  format: date
-                language: &id121
-                  type: string
-                  x-frappe-target-doctype: Language
-                section_break_32: &id122
-                  type: string
-                conversion_rate: &id123
-                  type: number
-                column_break_33: &id124
-                  type: string
-                lost_detail_section: &id125
-                  type: string
-                column_break_56: &id126
-                  type: string
-                column_break_10: &id127
-                  type: string
-                organization_details_section: &id128
-                  type: string
-                no_of_employees: &id129
-                  type: string
-                  enum:
-                  - 1-10
-                  - 11-50
-                  - 51-200
-                  - 201-500
-                  - 501-1000
-                  - 1000+
-                annual_revenue: &id130
-                  type: number
-                industry: &id131
-                  type: string
-                  x-frappe-target-doctype: Industry Type
-                market_segment: &id132
-                  type: string
-                  x-frappe-target-doctype: Market Segment
-                column_break_23: &id133
-                  type: string
-                address_contact_section: &id134
-                  type: string
-                column_break_36: &id135
-                  type: string
-                opportunity_owner: &id136
-                  type: string
-                  x-frappe-target-doctype: User
-                website: &id137
-                  type: string
-                column_break_22: &id138
-                  type: string
-                whatsapp: &id139
-                  type: string
-                  x-frappe-options: Phone
-                phone: &id140
-                  type: string
-                  x-frappe-options: Phone
-                phone_ext: &id141
-                  type: string
-                column_break_31: &id142
-                  type: string
-                primary_contact_section: &id143
-                  type: string
-                column_break_54: &id144
-                  type: string
-                dashboard_tab: &id145
-                  type: string
-                notes_tab: &id146
-                  type: string
-                notes_html: &id147
-                  type: string
-                activities_tab: &id148
-                  type: string
-                job_title: &id149
-                  type: string
-                address_html: &id150
-                  type: string
-                contact_html: &id151
-                  type: string
-                open_activities_html: &id152
-                  type: string
-                all_activities_section: &id153
-                  type: string
-                all_activities_html: &id154
-                  type: string
-                notes: &id155
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/CRMNote'
-                  writeOnly: true
-                city: &id156
-                  type: string
-                state: &id157
-                  type: string
-                country: &id158
-                  type: string
-                  x-frappe-target-doctype: Country
-                column_break_emai: &id159
-                  type: string
-                utm_source: &id160
-                  type: string
-                  x-frappe-target-doctype: UTM Source
-                utm_campaign: &id161
-                  type: string
-                  x-frappe-target-doctype: UTM Campaign
-                utm_medium: &id162
-                  type: string
-                  x-frappe-target-doctype: UTM Medium
-                utm_content: &id163
-                  type: string
-                utm_analytics_section: &id164
-                  type: string
-              required:
-              - company
-              - naming_series
-              - opportunity_from
-              - party_name
-              - status
-              - transaction_date
-              additionalProperties: false
-              x-module: CRM
+              $ref: '#/components/schemas/OpportunityWrite'
             example:
               naming_series: ''
               opportunity_from: ''
@@ -887,87 +484,222 @@ components:
     Lead:
       type: object
       properties:
-        name: *id024
-        naming_series: *id025
+        name:
+          type: string
+        naming_series:
+          type: string
+          enum:
+          - CRM-LEAD-.YYYY.-
         lead_name:
           type: string
           readOnly: true
-        company_name: *id026
-        email_id: *id027
-        col_break123: *id028
-        lead_owner: *id029
-        status: *id030
-        salutation: *id031
-        gender: *id032
-        customer: *id033
-        image: *id034
-        contact_info_tab: *id035
+        company_name:
+          type: string
+        email_id:
+          type: string
+          x-frappe-options: Email
+        col_break123:
+          type: string
+        lead_owner:
+          type: string
+          x-frappe-target-doctype: User
+        status:
+          type: string
+          enum:
+          - Lead
+          - Open
+          - Replied
+          - Opportunity
+          - Quotation
+          - Lost Quotation
+          - Interested
+          - Converted
+          - Do Not Contact
+        salutation:
+          type: string
+          x-frappe-target-doctype: Salutation
+        gender:
+          type: string
+          x-frappe-target-doctype: Gender
+        customer:
+          type: string
+          x-frappe-target-doctype: Customer
+        image:
+          type: string
+          writeOnly: true
+        contact_info_tab:
+          type: string
         address_html:
           type: string
           readOnly: true
-        column_break2: *id036
+        column_break2:
+          type: string
         contact_html:
           type: string
           readOnly: true
-        phone: *id037
-        mobile_no: *id038
-        fax: *id039
-        type: *id040
-        market_segment: *id041
-        industry: *id042
-        request_type: *id043
-        company: *id044
-        website: *id045
-        territory: *id046
-        unsubscribed: *id047
-        blog_subscriber: *id048
+        phone:
+          type: string
+          x-frappe-options: Phone
+        mobile_no:
+          type: string
+          x-frappe-options: Phone
+        fax:
+          type: string
+        type:
+          type: string
+          enum:
+          - Client
+          - Channel Partner
+          - Consultant
+        market_segment:
+          type: string
+          x-frappe-target-doctype: Market Segment
+        industry:
+          type: string
+          x-frappe-target-doctype: Industry Type
+        request_type:
+          type: string
+          enum:
+          - Product Enquiry
+          - Request for Information
+          - Suggestions
+          - Other
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        website:
+          type: string
+        territory:
+          type: string
+          x-frappe-target-doctype: Territory
+        unsubscribed:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        blog_subscriber:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
         title:
           type: string
           readOnly: true
           writeOnly: true
-        language: *id049
-        first_name: *id050
-        middle_name: *id051
-        last_name: *id052
-        no_of_employees: *id053
-        column_break_22: *id054
-        whatsapp_no: *id055
-        column_break_50: *id056
-        column_break_16: *id057
-        phone_ext: *id058
-        qualification_tab: *id059
-        notes_tab: *id060
-        other_info_tab: *id061
-        column_break_1: *id062
-        qualified_by: *id063
-        qualified_on: *id064
-        qualification_status: *id065
-        address_section: *id066
-        column_break_64: *id067
-        column_break_20: *id068
-        job_title: *id069
-        annual_revenue: *id070
-        activities_tab: *id071
-        organization_section: *id072
-        column_break_28: *id073
-        column_break_31: *id074
-        notes_html: *id075
-        open_activities_html: *id076
-        all_activities_section: *id077
-        all_activities_html: *id078
-        notes: *id079
-        disabled: *id080
-        column_break_38: *id081
-        city: *id082
-        state: *id083
-        country: *id084
-        dashboard_tab: *id085
-        column_break_gkxo: *id086
-        utm_content: *id087
-        utm_source: *id088
-        utm_medium: *id089
-        utm_campaign: *id090
-        utm_analytics_section: *id091
+        language:
+          type: string
+          x-frappe-target-doctype: Language
+        first_name:
+          type: string
+        middle_name:
+          type: string
+        last_name:
+          type: string
+        no_of_employees:
+          type: string
+          enum:
+          - 1-10
+          - 11-50
+          - 51-200
+          - 201-500
+          - 501-1000
+          - 1000+
+        column_break_22:
+          type: string
+        whatsapp_no:
+          type: string
+          x-frappe-options: Phone
+        column_break_50:
+          type: string
+        column_break_16:
+          type: string
+        phone_ext:
+          type: string
+        qualification_tab:
+          type: string
+        notes_tab:
+          type: string
+        other_info_tab:
+          type: string
+        column_break_1:
+          type: string
+        qualified_by:
+          type: string
+          x-frappe-target-doctype: User
+        qualified_on:
+          type: string
+          format: date
+        qualification_status:
+          type: string
+          enum:
+          - Unqualified
+          - In Process
+          - Qualified
+        address_section:
+          type: string
+        column_break_64:
+          type: string
+        column_break_20:
+          type: string
+        job_title:
+          type: string
+        annual_revenue:
+          type: number
+        activities_tab:
+          type: string
+        organization_section:
+          type: string
+        column_break_28:
+          type: string
+        column_break_31:
+          type: string
+        notes_html:
+          type: string
+        open_activities_html:
+          type: string
+        all_activities_section:
+          type: string
+        all_activities_html:
+          type: string
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CRMNote'
+          writeOnly: true
+        disabled:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        column_break_38:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+          x-frappe-target-doctype: Country
+        dashboard_tab:
+          type: string
+        column_break_gkxo:
+          type: string
+        utm_content:
+          type: string
+        utm_source:
+          type: string
+          x-frappe-target-doctype: UTM Source
+        utm_medium:
+          type: string
+          x-frappe-target-doctype: UTM Medium
+        utm_campaign:
+          type: string
+          x-frappe-target-doctype: UTM Campaign
+        utm_analytics_section:
+          type: string
       required:
       - name
       - status
@@ -976,49 +708,109 @@ components:
     Opportunity:
       type: object
       properties:
-        name: *id092
-        naming_series: *id093
-        opportunity_from: *id094
-        party_name: *id095
+        name:
+          type: string
+        naming_series:
+          type: string
+          enum:
+          - CRM-OPP-.YYYY.-
+        opportunity_from:
+          type: string
+          x-frappe-target-doctype: DocType
+        party_name:
+          type: string
+          x-frappe-options: opportunity_from
         customer_name:
           type: string
           readOnly: true
           writeOnly: true
-        column_break0: *id096
-        title: *id097
-        opportunity_type: *id098
-        status: *id099
+        column_break0:
+          type: string
+        title:
+          type: string
+          writeOnly: true
+        opportunity_type:
+          type: string
+          x-frappe-target-doctype: Opportunity Type
+        status:
+          type: string
+          enum:
+          - Open
+          - Quotation
+          - Converted
+          - Lost
+          - Replied
+          - Closed
         order_lost_reason:
           type: string
           readOnly: true
-        expected_closing: *id100
-        section_break_14: *id101
-        currency: *id102
-        opportunity_amount: *id103
-        column_break_17: *id104
-        sales_stage: *id105
-        probability: *id106
-        items_section: *id107
-        items: *id108
-        contact_info: *id109
-        customer_address: *id110
+        expected_closing:
+          type: string
+          format: date
+        section_break_14:
+          type: string
+        currency:
+          type: string
+          x-frappe-target-doctype: Currency
+        opportunity_amount:
+          type: number
+          x-frappe-options: currency
+        column_break_17:
+          type: string
+        sales_stage:
+          type: string
+          x-frappe-target-doctype: Sales Stage
+        probability:
+          type: number
+        items_section:
+          type: string
+          x-frappe-options: fa fa-shopping-cart
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpportunityItem'
+        contact_info:
+          type: string
+          x-frappe-options: fa fa-bullhorn
+        customer_address:
+          type: string
+          x-frappe-target-doctype: Address
+          writeOnly: true
         address_display:
           type: string
           readOnly: true
           writeOnly: true
-        territory: *id111
-        customer_group: *id112
-        column_break3: *id113
-        contact_person: *id114
+        territory:
+          type: string
+          x-frappe-target-doctype: Territory
+        customer_group:
+          type: string
+          x-frappe-target-doctype: Customer Group
+        column_break3:
+          type: string
+        contact_person:
+          type: string
+          x-frappe-target-doctype: Contact
         contact_display:
           type: string
           readOnly: true
-        contact_email: *id115
-        contact_mobile: *id116
-        more_info: *id117
-        column_break1: *id118
-        company: *id119
-        transaction_date: *id120
+        contact_email:
+          type: string
+          x-frappe-options: Email
+        contact_mobile:
+          type: string
+          x-frappe-options: Phone
+        more_info:
+          type: string
+          x-frappe-options: fa fa-file-text
+        column_break1:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        transaction_date:
+          type: string
+          format: date
         amended_from:
           type: string
           x-frappe-target-doctype: Opportunity
@@ -1030,12 +822,15 @@ components:
         first_response_time:
           type: number
           readOnly: true
-        language: *id121
+        language:
+          type: string
+          x-frappe-target-doctype: Language
         base_opportunity_amount:
           type: number
           x-frappe-options: Company:company:default_currency
           readOnly: true
-        section_break_32: *id122
+        section_break_32:
+          type: string
         base_total:
           type: number
           x-frappe-options: Company:company:default_currency
@@ -1044,52 +839,113 @@ components:
           type: number
           x-frappe-options: currency
           readOnly: true
-        conversion_rate: *id123
-        column_break_33: *id124
-        lost_detail_section: *id125
-        column_break_56: *id126
+        conversion_rate:
+          type: number
+        column_break_33:
+          type: string
+        lost_detail_section:
+          type: string
+        column_break_56:
+          type: string
         competitors:
           type: string
           x-frappe-options: Competitor Detail
           readOnly: true
-        column_break_10: *id127
-        organization_details_section: *id128
-        no_of_employees: *id129
-        annual_revenue: *id130
-        industry: *id131
-        market_segment: *id132
-        column_break_23: *id133
-        address_contact_section: *id134
-        column_break_36: *id135
-        opportunity_owner: *id136
-        website: *id137
-        column_break_22: *id138
-        whatsapp: *id139
-        phone: *id140
-        phone_ext: *id141
-        column_break_31: *id142
-        primary_contact_section: *id143
-        column_break_54: *id144
-        dashboard_tab: *id145
-        notes_tab: *id146
-        notes_html: *id147
-        activities_tab: *id148
-        job_title: *id149
-        address_html: *id150
-        contact_html: *id151
-        open_activities_html: *id152
-        all_activities_section: *id153
-        all_activities_html: *id154
-        notes: *id155
-        city: *id156
-        state: *id157
-        country: *id158
-        column_break_emai: *id159
-        utm_source: *id160
-        utm_campaign: *id161
-        utm_medium: *id162
-        utm_content: *id163
-        utm_analytics_section: *id164
+        column_break_10:
+          type: string
+        organization_details_section:
+          type: string
+        no_of_employees:
+          type: string
+          enum:
+          - 1-10
+          - 11-50
+          - 51-200
+          - 201-500
+          - 501-1000
+          - 1000+
+        annual_revenue:
+          type: number
+        industry:
+          type: string
+          x-frappe-target-doctype: Industry Type
+        market_segment:
+          type: string
+          x-frappe-target-doctype: Market Segment
+        column_break_23:
+          type: string
+        address_contact_section:
+          type: string
+        column_break_36:
+          type: string
+        opportunity_owner:
+          type: string
+          x-frappe-target-doctype: User
+        website:
+          type: string
+        column_break_22:
+          type: string
+        whatsapp:
+          type: string
+          x-frappe-options: Phone
+        phone:
+          type: string
+          x-frappe-options: Phone
+        phone_ext:
+          type: string
+        column_break_31:
+          type: string
+        primary_contact_section:
+          type: string
+        column_break_54:
+          type: string
+        dashboard_tab:
+          type: string
+        notes_tab:
+          type: string
+        notes_html:
+          type: string
+        activities_tab:
+          type: string
+        job_title:
+          type: string
+        address_html:
+          type: string
+        contact_html:
+          type: string
+        open_activities_html:
+          type: string
+        all_activities_section:
+          type: string
+        all_activities_html:
+          type: string
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CRMNote'
+          writeOnly: true
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+          x-frappe-target-doctype: Country
+        column_break_emai:
+          type: string
+        utm_source:
+          type: string
+          x-frappe-target-doctype: UTM Source
+        utm_campaign:
+          type: string
+          x-frappe-target-doctype: UTM Campaign
+        utm_medium:
+          type: string
+          x-frappe-target-doctype: UTM Medium
+        utm_content:
+          type: string
+        utm_analytics_section:
+          type: string
       required:
       - company
       - name
@@ -1286,6 +1142,1485 @@ components:
       required:
       - allocations
       additionalProperties: false
+    PurchaseOrchestrationRequest: &id024
+      type: object
+      additionalProperties: false
+      required:
+      - material_request
+      - suppliers
+      properties:
+        material_request:
+          type: object
+          additionalProperties: false
+          required:
+          - material_request_type
+          - company
+          - transaction_date
+          - items
+          properties:
+            material_request_type:
+              type: string
+              enum:
+              - Purchase
+              - Material Transfer
+              - Material Issue
+              - Manufacture
+            company:
+              type: string
+            transaction_date:
+              type: string
+              format: date
+            schedule_date:
+              type: string
+              format: date
+            title:
+              type: string
+            items:
+              type: array
+              minItems: 1
+              items:
+                type: object
+                additionalProperties: false
+                required:
+                - item_code
+                - qty
+                - schedule_date
+                - warehouse
+                properties:
+                  item_code:
+                    type: string
+                  qty:
+                    type: number
+                    exclusiveMinimum: 0
+                  schedule_date:
+                    type: string
+                    format: date
+                  warehouse:
+                    type: string
+                  uom:
+                    type: string
+                  rate:
+                    type: number
+                    minimum: 0
+        suppliers:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
+        justification:
+          type: string
+    PurchaseOrchestrationResponse: &id025
+      type: object
+      additionalProperties: true
+      required:
+      - id
+      - status
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+    CRMNoteWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        note:
+          type: string
+        added_by:
+          type: string
+          x-frappe-target-doctype: User
+        added_on:
+          type: string
+          format: date-time
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required: []
+      additionalProperties: false
+      x-module: CRM
+    CRMNoteResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        note:
+          type:
+          - string
+          - 'null'
+        added_by:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: User
+        added_on:
+          type:
+          - string
+          - 'null'
+          format: date-time
+      required:
+      - name
+      additionalProperties: true
+      x-module: CRM
+    LeadWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        naming_series:
+          type: string
+        company_name:
+          type: string
+        email_id:
+          type: string
+          x-frappe-options: Email
+        col_break123:
+          type: string
+        lead_owner:
+          type: string
+          x-frappe-target-doctype: User
+        status:
+          type: string
+          enum:
+          - Lead
+          - Open
+          - Replied
+          - Opportunity
+          - Quotation
+          - Lost Quotation
+          - Interested
+          - Converted
+          - Do Not Contact
+        salutation:
+          type: string
+          x-frappe-target-doctype: Salutation
+        gender:
+          type: string
+          x-frappe-target-doctype: Gender
+        customer:
+          type: string
+          x-frappe-target-doctype: Customer
+        image:
+          type: string
+          writeOnly: true
+        contact_info_tab:
+          type: string
+        column_break2:
+          type: string
+        phone:
+          type: string
+          x-frappe-options: Phone
+        mobile_no:
+          type: string
+          x-frappe-options: Phone
+        fax:
+          type: string
+        type:
+          type: string
+          enum:
+          - Client
+          - Channel Partner
+          - Consultant
+        market_segment:
+          type: string
+          x-frappe-target-doctype: Market Segment
+        industry:
+          type: string
+          x-frappe-target-doctype: Industry Type
+        request_type:
+          type: string
+          enum:
+          - Product Enquiry
+          - Request for Information
+          - Suggestions
+          - Other
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        website:
+          type: string
+        territory:
+          type: string
+          x-frappe-target-doctype: Territory
+        unsubscribed:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        blog_subscriber:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        language:
+          type: string
+          x-frappe-target-doctype: Language
+        first_name:
+          type: string
+        middle_name:
+          type: string
+        last_name:
+          type: string
+        no_of_employees:
+          type: string
+          enum:
+          - 1-10
+          - 11-50
+          - 51-200
+          - 201-500
+          - 501-1000
+          - 1000+
+        column_break_22:
+          type: string
+        whatsapp_no:
+          type: string
+          x-frappe-options: Phone
+        column_break_50:
+          type: string
+        column_break_16:
+          type: string
+        phone_ext:
+          type: string
+        qualification_tab:
+          type: string
+        notes_tab:
+          type: string
+        other_info_tab:
+          type: string
+        column_break_1:
+          type: string
+        qualified_by:
+          type: string
+          x-frappe-target-doctype: User
+        qualified_on:
+          type: string
+          format: date
+        qualification_status:
+          type: string
+          enum:
+          - Unqualified
+          - In Process
+          - Qualified
+        address_section:
+          type: string
+        column_break_64:
+          type: string
+        column_break_20:
+          type: string
+        job_title:
+          type: string
+        annual_revenue:
+          type: number
+        activities_tab:
+          type: string
+        organization_section:
+          type: string
+        column_break_28:
+          type: string
+        column_break_31:
+          type: string
+        notes_html:
+          type: string
+        open_activities_html:
+          type: string
+        all_activities_section:
+          type: string
+        all_activities_html:
+          type: string
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CRMNoteWrite'
+          writeOnly: true
+        disabled:
+          type:
+          - boolean
+          - integer
+          minimum: 0
+          maximum: 1
+        column_break_38:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+          x-frappe-target-doctype: Country
+        dashboard_tab:
+          type: string
+        column_break_gkxo:
+          type: string
+        utm_content:
+          type: string
+        utm_source:
+          type: string
+          x-frappe-target-doctype: UTM Source
+        utm_medium:
+          type: string
+          x-frappe-target-doctype: UTM Medium
+        utm_campaign:
+          type: string
+          x-frappe-target-doctype: UTM Campaign
+        utm_analytics_section:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - status
+      additionalProperties: false
+      x-module: CRM
+    LeadResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        naming_series:
+          type:
+          - string
+          - 'null'
+        lead_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        company_name:
+          type:
+          - string
+          - 'null'
+        email_id:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: Email
+        col_break123:
+          type:
+          - string
+          - 'null'
+        lead_owner:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: User
+        status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Lead
+          - Open
+          - Replied
+          - Opportunity
+          - Quotation
+          - Lost Quotation
+          - Interested
+          - Converted
+          - Do Not Contact
+          - ''
+          - null
+        salutation:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Salutation
+        gender:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Gender
+        customer:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Customer
+        image:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        contact_info_tab:
+          type:
+          - string
+          - 'null'
+        address_html:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        column_break2:
+          type:
+          - string
+          - 'null'
+        contact_html:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        phone:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: Phone
+        mobile_no:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: Phone
+        fax:
+          type:
+          - string
+          - 'null'
+        type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Client
+          - Channel Partner
+          - Consultant
+          - ''
+          - null
+        market_segment:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Market Segment
+        industry:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Industry Type
+        request_type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Product Enquiry
+          - Request for Information
+          - Suggestions
+          - Other
+          - ''
+          - null
+        company:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+        website:
+          type:
+          - string
+          - 'null'
+        territory:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Territory
+        unsubscribed:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        blog_subscriber:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        title:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          writeOnly: true
+        language:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Language
+        first_name:
+          type:
+          - string
+          - 'null'
+        middle_name:
+          type:
+          - string
+          - 'null'
+        last_name:
+          type:
+          - string
+          - 'null'
+        no_of_employees:
+          type:
+          - string
+          - 'null'
+          enum:
+          - 1-10
+          - 11-50
+          - 51-200
+          - 201-500
+          - 501-1000
+          - 1000+
+          - ''
+          - null
+        column_break_22:
+          type:
+          - string
+          - 'null'
+        whatsapp_no:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: Phone
+        column_break_50:
+          type:
+          - string
+          - 'null'
+        column_break_16:
+          type:
+          - string
+          - 'null'
+        phone_ext:
+          type:
+          - string
+          - 'null'
+        qualification_tab:
+          type:
+          - string
+          - 'null'
+        notes_tab:
+          type:
+          - string
+          - 'null'
+        other_info_tab:
+          type:
+          - string
+          - 'null'
+        column_break_1:
+          type:
+          - string
+          - 'null'
+        qualified_by:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: User
+        qualified_on:
+          type:
+          - string
+          - 'null'
+          format: date
+        qualification_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Unqualified
+          - In Process
+          - Qualified
+          - ''
+          - null
+        address_section:
+          type:
+          - string
+          - 'null'
+        column_break_64:
+          type:
+          - string
+          - 'null'
+        column_break_20:
+          type:
+          - string
+          - 'null'
+        job_title:
+          type:
+          - string
+          - 'null'
+        annual_revenue:
+          type:
+          - number
+          - 'null'
+        activities_tab:
+          type:
+          - string
+          - 'null'
+        organization_section:
+          type:
+          - string
+          - 'null'
+        column_break_28:
+          type:
+          - string
+          - 'null'
+        column_break_31:
+          type:
+          - string
+          - 'null'
+        notes_html:
+          type:
+          - string
+          - 'null'
+        open_activities_html:
+          type:
+          - string
+          - 'null'
+        all_activities_section:
+          type:
+          - string
+          - 'null'
+        all_activities_html:
+          type:
+          - string
+          - 'null'
+        notes:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/CRMNoteResponse'
+          writeOnly: true
+        disabled:
+          anyOf:
+          - type:
+            - boolean
+            - integer
+            minimum: 0
+            maximum: 1
+          - type: 'null'
+        column_break_38:
+          type:
+          - string
+          - 'null'
+        city:
+          type:
+          - string
+          - 'null'
+        state:
+          type:
+          - string
+          - 'null'
+        country:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Country
+        dashboard_tab:
+          type:
+          - string
+          - 'null'
+        column_break_gkxo:
+          type:
+          - string
+          - 'null'
+        utm_content:
+          type:
+          - string
+          - 'null'
+        utm_source:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: UTM Source
+        utm_medium:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: UTM Medium
+        utm_campaign:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: UTM Campaign
+        utm_analytics_section:
+          type:
+          - string
+          - 'null'
+      required:
+      - name
+      additionalProperties: true
+      x-module: CRM
+    OpportunityWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        naming_series:
+          type: string
+        opportunity_from:
+          type: string
+          x-frappe-target-doctype: DocType
+        party_name:
+          type: string
+          x-frappe-options: opportunity_from
+        column_break0:
+          type: string
+        title:
+          type: string
+          writeOnly: true
+        opportunity_type:
+          type: string
+          x-frappe-target-doctype: Opportunity Type
+        status:
+          type: string
+          enum:
+          - Open
+          - Quotation
+          - Converted
+          - Lost
+          - Replied
+          - Closed
+        expected_closing:
+          type: string
+          format: date
+        section_break_14:
+          type: string
+        currency:
+          type: string
+          x-frappe-target-doctype: Currency
+        opportunity_amount:
+          type: number
+          x-frappe-options: currency
+        column_break_17:
+          type: string
+        sales_stage:
+          type: string
+          x-frappe-target-doctype: Sales Stage
+        probability:
+          type: number
+        items_section:
+          type: string
+          x-frappe-options: fa fa-shopping-cart
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpportunityItemWrite'
+        contact_info:
+          type: string
+          x-frappe-options: fa fa-bullhorn
+        customer_address:
+          type: string
+          x-frappe-target-doctype: Address
+          writeOnly: true
+        territory:
+          type: string
+          x-frappe-target-doctype: Territory
+        customer_group:
+          type: string
+          x-frappe-target-doctype: Customer Group
+        column_break3:
+          type: string
+        contact_person:
+          type: string
+          x-frappe-target-doctype: Contact
+        contact_email:
+          type: string
+          x-frappe-options: Email
+        contact_mobile:
+          type: string
+          x-frappe-options: Phone
+        more_info:
+          type: string
+          x-frappe-options: fa fa-file-text
+        column_break1:
+          type: string
+        company:
+          type: string
+          x-frappe-target-doctype: Company
+        transaction_date:
+          type: string
+          format: date
+        language:
+          type: string
+          x-frappe-target-doctype: Language
+        section_break_32:
+          type: string
+        conversion_rate:
+          type: number
+        column_break_33:
+          type: string
+        lost_detail_section:
+          type: string
+        column_break_56:
+          type: string
+        column_break_10:
+          type: string
+        organization_details_section:
+          type: string
+        no_of_employees:
+          type: string
+          enum:
+          - 1-10
+          - 11-50
+          - 51-200
+          - 201-500
+          - 501-1000
+          - 1000+
+        annual_revenue:
+          type: number
+        industry:
+          type: string
+          x-frappe-target-doctype: Industry Type
+        market_segment:
+          type: string
+          x-frappe-target-doctype: Market Segment
+        column_break_23:
+          type: string
+        address_contact_section:
+          type: string
+        column_break_36:
+          type: string
+        opportunity_owner:
+          type: string
+          x-frappe-target-doctype: User
+        website:
+          type: string
+        column_break_22:
+          type: string
+        whatsapp:
+          type: string
+          x-frappe-options: Phone
+        phone:
+          type: string
+          x-frappe-options: Phone
+        phone_ext:
+          type: string
+        column_break_31:
+          type: string
+        primary_contact_section:
+          type: string
+        column_break_54:
+          type: string
+        dashboard_tab:
+          type: string
+        notes_tab:
+          type: string
+        notes_html:
+          type: string
+        activities_tab:
+          type: string
+        job_title:
+          type: string
+        address_html:
+          type: string
+        contact_html:
+          type: string
+        open_activities_html:
+          type: string
+        all_activities_section:
+          type: string
+        all_activities_html:
+          type: string
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CRMNoteWrite'
+          writeOnly: true
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+          x-frappe-target-doctype: Country
+        column_break_emai:
+          type: string
+        utm_source:
+          type: string
+          x-frappe-target-doctype: UTM Source
+        utm_campaign:
+          type: string
+          x-frappe-target-doctype: UTM Campaign
+        utm_medium:
+          type: string
+          x-frappe-target-doctype: UTM Medium
+        utm_content:
+          type: string
+        utm_analytics_section:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - company
+      - naming_series
+      - opportunity_from
+      - party_name
+      - status
+      - transaction_date
+      additionalProperties: false
+      x-module: CRM
+    OpportunityResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        naming_series:
+          type:
+          - string
+          - 'null'
+        opportunity_from:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: DocType
+        party_name:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: opportunity_from
+        customer_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          writeOnly: true
+        column_break0:
+          type:
+          - string
+          - 'null'
+        title:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        opportunity_type:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Opportunity Type
+        status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Open
+          - Quotation
+          - Converted
+          - Lost
+          - Replied
+          - Closed
+          - ''
+          - null
+        order_lost_reason:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        expected_closing:
+          type:
+          - string
+          - 'null'
+          format: date
+        section_break_14:
+          type:
+          - string
+          - 'null'
+        currency:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Currency
+        opportunity_amount:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: currency
+        column_break_17:
+          type:
+          - string
+          - 'null'
+        sales_stage:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Sales Stage
+        probability:
+          type:
+          - number
+          - 'null'
+        items_section:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: fa fa-shopping-cart
+        items:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/OpportunityItemResponse'
+        contact_info:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: fa fa-bullhorn
+        customer_address:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Address
+          writeOnly: true
+        address_display:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          writeOnly: true
+        territory:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Territory
+        customer_group:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Customer Group
+        column_break3:
+          type:
+          - string
+          - 'null'
+        contact_person:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Contact
+        contact_display:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        contact_email:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: Email
+        contact_mobile:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: Phone
+        more_info:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: fa fa-file-text
+        column_break1:
+          type:
+          - string
+          - 'null'
+        company:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Company
+        transaction_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        amended_from:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Opportunity
+          readOnly: true
+        lost_reasons:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: Opportunity Lost Reason Detail
+          readOnly: true
+        first_response_time:
+          type:
+          - number
+          - 'null'
+          readOnly: true
+        language:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Language
+        base_opportunity_amount:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        section_break_32:
+          type:
+          - string
+          - 'null'
+        base_total:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        total:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: currency
+          readOnly: true
+        conversion_rate:
+          type:
+          - number
+          - 'null'
+        column_break_33:
+          type:
+          - string
+          - 'null'
+        lost_detail_section:
+          type:
+          - string
+          - 'null'
+        column_break_56:
+          type:
+          - string
+          - 'null'
+        competitors:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: Competitor Detail
+          readOnly: true
+        column_break_10:
+          type:
+          - string
+          - 'null'
+        organization_details_section:
+          type:
+          - string
+          - 'null'
+        no_of_employees:
+          type:
+          - string
+          - 'null'
+          enum:
+          - 1-10
+          - 11-50
+          - 51-200
+          - 201-500
+          - 501-1000
+          - 1000+
+          - ''
+          - null
+        annual_revenue:
+          type:
+          - number
+          - 'null'
+        industry:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Industry Type
+        market_segment:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Market Segment
+        column_break_23:
+          type:
+          - string
+          - 'null'
+        address_contact_section:
+          type:
+          - string
+          - 'null'
+        column_break_36:
+          type:
+          - string
+          - 'null'
+        opportunity_owner:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: User
+        website:
+          type:
+          - string
+          - 'null'
+        column_break_22:
+          type:
+          - string
+          - 'null'
+        whatsapp:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: Phone
+        phone:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: Phone
+        phone_ext:
+          type:
+          - string
+          - 'null'
+        column_break_31:
+          type:
+          - string
+          - 'null'
+        primary_contact_section:
+          type:
+          - string
+          - 'null'
+        column_break_54:
+          type:
+          - string
+          - 'null'
+        dashboard_tab:
+          type:
+          - string
+          - 'null'
+        notes_tab:
+          type:
+          - string
+          - 'null'
+        notes_html:
+          type:
+          - string
+          - 'null'
+        activities_tab:
+          type:
+          - string
+          - 'null'
+        job_title:
+          type:
+          - string
+          - 'null'
+        address_html:
+          type:
+          - string
+          - 'null'
+        contact_html:
+          type:
+          - string
+          - 'null'
+        open_activities_html:
+          type:
+          - string
+          - 'null'
+        all_activities_section:
+          type:
+          - string
+          - 'null'
+        all_activities_html:
+          type:
+          - string
+          - 'null'
+        notes:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/CRMNoteResponse'
+          writeOnly: true
+        city:
+          type:
+          - string
+          - 'null'
+        state:
+          type:
+          - string
+          - 'null'
+        country:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Country
+        column_break_emai:
+          type:
+          - string
+          - 'null'
+        utm_source:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: UTM Source
+        utm_campaign:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: UTM Campaign
+        utm_medium:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: UTM Medium
+        utm_content:
+          type:
+          - string
+          - 'null'
+        utm_analytics_section:
+          type:
+          - string
+          - 'null'
+      required:
+      - name
+      additionalProperties: true
+      x-module: CRM
+    OpportunityItemWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        item_code:
+          type: string
+          x-frappe-target-doctype: Item
+        col_break1:
+          type: string
+        qty:
+          type: number
+        item_group:
+          type: string
+          x-frappe-target-doctype: Item Group
+          writeOnly: true
+        brand:
+          type: string
+          x-frappe-target-doctype: Brand
+          writeOnly: true
+        section_break_6:
+          type: string
+        uom:
+          type: string
+          x-frappe-target-doctype: UOM
+        item_name:
+          type: string
+        description:
+          type: string
+        column_break_8:
+          type: string
+        image:
+          type: string
+          writeOnly: true
+        image_view:
+          type: string
+          x-frappe-options: image
+        rate:
+          type: number
+          x-frappe-options: currency
+        quantity_and_rate_section:
+          type: string
+        column_break_16:
+          type: string
+        custom_letron_orchestration_id:
+          type: string
+        custom_lark_approval_status:
+          type: string
+      required:
+      - rate
+      additionalProperties: false
+      x-module: CRM
+    OpportunityItemResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        item_code:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Item
+        col_break1:
+          type:
+          - string
+          - 'null'
+        qty:
+          type:
+          - number
+          - 'null'
+        item_group:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Item Group
+          writeOnly: true
+        brand:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: Brand
+          writeOnly: true
+        section_break_6:
+          type:
+          - string
+          - 'null'
+        uom:
+          type:
+          - string
+          - 'null'
+          x-frappe-target-doctype: UOM
+        item_name:
+          type:
+          - string
+          - 'null'
+        description:
+          type:
+          - string
+          - 'null'
+        column_break_8:
+          type:
+          - string
+          - 'null'
+        image:
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        image_view:
+          type:
+          - string
+          - 'null'
+          x-frappe-options: image
+        rate:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: currency
+        quantity_and_rate_section:
+          type:
+          - string
+          - 'null'
+        base_amount:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+        column_break_16:
+          type:
+          - string
+          - 'null'
+        amount:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: currency
+          readOnly: true
+        base_rate:
+          type:
+          - number
+          - 'null'
+          x-frappe-options: Company:company:default_currency
+          readOnly: true
+      required:
+      - name
+      additionalProperties: true
+      x-module: CRM
 x-contract:
   runtime:
     source_of_truth: erpnext
@@ -1638,6 +2973,26 @@ x-contract:
       operation: read
       operation_id: getAssetDashboard
       handler: letron_api.assets.assets.asset_dashboard
+    controller_contracts:
+    - doctype: Request for Quotation Item
+      required_write_fields:
+        conversion_factor:
+          type: number
+        stock_uom:
+          type: string
+    - doctype: Supplier Quotation Item
+      allowed_write_fields:
+        request_for_quotation:
+          type: string
+        request_for_quotation_item:
+          type: string
+        material_request:
+          type: string
+        material_request_item:
+          type: string
+    generated_schemas:
+      PurchaseOrchestrationRequest: *id024
+      PurchaseOrchestrationResponse: *id025
     include_methods:
     - letron_api.control.api.health
     - letron_api.control.api.runtime_info

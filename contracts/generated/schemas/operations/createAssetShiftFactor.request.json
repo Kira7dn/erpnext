@@ -1,25 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://letron.local/schemas/operations/createAssetShiftFactor.request.json",
-  "type": "object",
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "shift_name": {
-      "type": "string"
-    },
-    "shift_factor": {
-      "type": "number"
-    },
-    "default": {
-      "type": "boolean"
-    }
-  },
-  "required": [
-    "shift_factor",
-    "shift_name"
-  ],
-  "additionalProperties": false,
-  "x-module": "Assets"
+  "$ref": "AssetShiftFactorWrite.json"
 }

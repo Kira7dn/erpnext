@@ -122,10 +122,20 @@
       "x-frappe-target-doctype": "Territory"
     },
     "unsubscribed": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "blog_subscriber": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "title": {
       "type": "string",
@@ -247,7 +257,12 @@
       "writeOnly": true
     },
     "disabled": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break_38": {
       "type": "string"

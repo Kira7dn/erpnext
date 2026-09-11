@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/TaxWithholdingEntryWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "section_break_krko": {
+      "type": "string"
+    },
+    "column_break_egzm": {
+      "type": "string"
+    },
+    "tax_rate": {
+      "type": "number"
+    },
+    "taxable_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "source_section": {
+      "type": "string"
+    },
+    "column_break_dahw": {
+      "type": "string"
+    },
+    "target_section": {
+      "type": "string"
+    },
+    "column_break_fqoe": {
+      "type": "string"
+    },
+    "section_break_ggna": {
+      "type": "string"
+    },
+    "column_break_jfjf": {
+      "type": "string"
+    },
+    "withholding_doctype": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "withholding_name": {
+      "type": "string",
+      "x-frappe-options": "withholding_doctype"
+    },
+    "taxable_doctype": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "taxable_name": {
+      "type": "string",
+      "x-frappe-options": "taxable_doctype"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

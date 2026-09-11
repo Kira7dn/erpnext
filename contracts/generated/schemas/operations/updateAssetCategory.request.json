@@ -1,49 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://letron.local/schemas/operations/updateAssetCategory.request.json",
-  "type": "object",
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "asset_category_name": {
-      "type": "string"
-    },
-    "column_break_3": {
-      "type": "string"
-    },
-    "finance_book_detail": {
-      "type": "string"
-    },
-    "finance_books": {
-      "type": "array",
-      "items": {
-        "$ref": "AssetFinanceBook.json"
-      }
-    },
-    "section_break_2": {
-      "type": "string"
-    },
-    "accounts": {
-      "type": "array",
-      "items": {
-        "$ref": "AssetCategoryAccount.json"
-      }
-    },
-    "depreciation_options": {
-      "type": "string"
-    },
-    "enable_cwip_accounting": {
-      "type": "boolean"
-    },
-    "non_depreciable_category": {
-      "type": "boolean"
-    }
-  },
-  "required": [
-    "accounts",
-    "asset_category_name"
-  ],
-  "additionalProperties": false,
-  "x-module": "Assets"
+  "$ref": "AssetCategoryWrite.json"
 }

@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/StockEntryDetailWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "barcode": {
+      "type": "string"
+    },
+    "section_break_2": {
+      "type": "string"
+    },
+    "s_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "t_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "sec_break1": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "section_break_8": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "column_break_10": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "image_view": {
+      "type": "string",
+      "x-frappe-options": "image"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "basic_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "col_break3": {
+      "type": "string"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "conversion_factor": {
+      "type": "number"
+    },
+    "sample_quantity": {
+      "type": "integer"
+    },
+    "serial_no_batch": {
+      "type": "string"
+    },
+    "serial_no": {
+      "type": "string"
+    },
+    "col_break4": {
+      "type": "string"
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "quality_inspection": {
+      "type": "string",
+      "x-frappe-target-doctype": "Quality Inspection"
+    },
+    "accounting": {
+      "type": "string"
+    },
+    "expense_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "more_info": {
+      "type": "string"
+    },
+    "allow_zero_valuation_rate": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "bom_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "BOM",
+      "writeOnly": true
+    },
+    "col_break6": {
+      "type": "string"
+    },
+    "subcontracted_item": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "reference_section": {
+      "type": "string"
+    },
+    "column_break_51": {
+      "type": "string"
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "item_group": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "set_basic_rate_manually": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "quantity_section": {
+      "type": "string"
+    },
+    "column_break_20": {
+      "type": "string"
+    },
+    "rates_section": {
+      "type": "string"
+    },
+    "is_finished_item": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "add_serial_batch_bundle": {
+      "type": "string"
+    },
+    "serial_and_batch_bundle": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "use_serial_batch_fields": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "section_break_rdtg": {
+      "type": "string"
+    },
+    "column_break_prps": {
+      "type": "string"
+    },
+    "against_fg": {
+      "type": "string",
+      "x-frappe-target-doctype": "Subcontracting Inward Order Item"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Co-Product",
+        "By-Product",
+        "Scrap",
+        "Additional Finished Good"
+      ]
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "item_code",
+    "qty"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

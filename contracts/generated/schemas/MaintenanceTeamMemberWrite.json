@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/MaintenanceTeamMemberWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "team_member": {
+      "type": "string",
+      "x-frappe-target-doctype": "User"
+    },
+    "maintenance_role": {
+      "type": "string",
+      "x-frappe-target-doctype": "Role"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "maintenance_role",
+    "team_member"
+  ],
+  "additionalProperties": false,
+  "x-module": "Assets"
+}

@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankTransactionRuleResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "rule_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "transaction_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Any",
+        "Withdrawal",
+        "Deposit",
+        "",
+        null
+      ]
+    },
+    "min_amount": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "max_amount": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "column_break_zcez": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rule_description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_licn": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "description_rules": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "BankTransactionRuleDescriptionConditionsResponse.json"
+      }
+    },
+    "action_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "classify_as": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Bank Entry",
+        "Payment Entry",
+        "Transfer",
+        "",
+        null
+      ]
+    },
+    "account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account"
+    },
+    "column_break_jdyr": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "party_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType"
+    },
+    "party": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "party_type"
+    },
+    "priority": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "bank_entry_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Single Account",
+        "Multiple Accounts",
+        "",
+        null
+      ]
+    },
+    "section_break_zdro": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "accounts": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "BankTransactionRuleAccountsResponse.json"
+      }
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

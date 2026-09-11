@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AddressResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "address_details": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-map-marker"
+    },
+    "address_title": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "address_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Billing",
+        "Shipping",
+        "Office",
+        "Personal",
+        "Plant",
+        "Postal",
+        "Shop",
+        "Subsidiary",
+        "Warehouse",
+        "Current",
+        "Permanent",
+        "Other",
+        "",
+        null
+      ]
+    },
+    "address_line1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "address_line2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "city": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "county": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "state": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "country": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Country"
+    },
+    "pincode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break0": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "email_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "Email"
+    },
+    "phone": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "Phone"
+    },
+    "fax": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_primary_address": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_shipping_address": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "disabled": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "linked_with": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-pushpin"
+    },
+    "links": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "DynamicLinkResponse.json"
+      }
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Contacts"
+}

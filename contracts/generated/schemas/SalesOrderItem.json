@@ -16,7 +16,12 @@
       "writeOnly": true
     },
     "ensure_delivery_based_on_produced_serial_no": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "col_break1": {
       "type": "string"
@@ -145,7 +150,12 @@
       "writeOnly": true
     },
     "is_free_item": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "section_break_24": {
@@ -178,7 +188,12 @@
       "type": "string"
     },
     "delivered_by_supplier": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "supplier": {
       "type": "string",
@@ -288,7 +303,12 @@
       "x-frappe-target-doctype": "Item Tax Template"
     },
     "page_break": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "planned_qty": {
       "type": "number",
@@ -327,7 +347,12 @@
       "type": "string"
     },
     "against_blanket_order": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "bom_no": {
       "type": "string",
@@ -342,7 +367,12 @@
       "readOnly": true
     },
     "grant_commission": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "picked_qty": {
@@ -377,7 +407,12 @@
       "type": "string"
     },
     "reserve_stock": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "stock_reserved_qty": {
       "type": "number",
@@ -388,7 +423,12 @@
       "readOnly": true
     },
     "is_stock_item": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "writeOnly": true
     },
     "distributed_discount_amount": {

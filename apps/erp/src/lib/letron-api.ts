@@ -7,6 +7,7 @@ import { publicErrorMessage } from "./error-contract";
 import { portalAuthBaseUrl } from "./portal-config";
 import { APP_SESSION_COOKIES, type AppKey } from "./erp-auth-session";
 import type { ZodType } from "zod";
+import { GENERATED_OPERATION_CONTRACTS } from "@/generated/zod";
 
 export type BankAccount = {
   name: string;
@@ -255,6 +256,48 @@ export class GatewayUnavailableError extends ApiRequestError {
 
 export class GatewayRequestError extends ApiRequestError {}
 
+type GeneratedOperationContract = {
+  method: string;
+  path: string;
+  request?: { parse(value: unknown): unknown };
+  response?: { parse(value: unknown): unknown };
+};
+
+function generatedOperation(path: string, method: string): GeneratedOperationContract {
+  const pathname = path.split("?", 1)[0];
+  const match = Object.values(GENERATED_OPERATION_CONTRACTS).find((operation) => {
+    if (operation.method !== method.toUpperCase()) return false;
+    const expected = operation.path.split("/");
+    const actual = pathname.split("/");
+    return expected.length === actual.length && expected.every((part, index) =>
+      part.startsWith("{") && part.endsWith("}") ? Boolean(actual[index]) : part === actual[index],
+    );
+  });
+  if (!match) {
+    throw new ApiRequestError(
+      "contract_operation_missing",
+      `No generated contract exists for ${method.toUpperCase()} ${pathname}.`,
+      500,
+    );
+  }
+  return match;
+}
+
+function validateGeneratedRequest(operation: GeneratedOperationContract | undefined, init: RequestInit): void {
+  if (!operation) return;
+  if (!operation.request || init.body === undefined || init.body === null) return;
+  if (typeof init.body !== "string") return;
+  try {
+    operation.request.parse(JSON.parse(init.body));
+  } catch (cause) {
+    throw new ApiRequestError(
+      "contract_request_invalid",
+      cause instanceof Error ? cause.message : "Request does not match the generated contract.",
+      500,
+    );
+  }
+}
+
 function gatewayErrorCode(status: number): string {
   if (status === 404) return "not_found";
   if (status === 409) return "conflict";
@@ -374,6 +417,10 @@ export async function gatewayRequest<T>(
   cookieHeader: string,
   init: RequestInit = {},
 ): Promise<T> {
+  const operation = path.startsWith("/api/v1/")
+    ? generatedOperation(path, init.method ?? "GET")
+    : undefined;
+  validateGeneratedRequest(operation, init);
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
   const appKey = appKeyForGatewayPath(path);
@@ -406,6 +453,14 @@ export async function gatewayRequest<T>(
     } catch {
       // The typed status contract is still usable for a non-JSON response.
     }
+    if (response.status === 417) {
+      console.error("[gateway] upstream validation", {
+        status: response.status,
+        error: payload.error,
+        exception: (payload as RemoteErrorPayload & { exception?: unknown }).exception,
+        exc_type: (payload as RemoteErrorPayload & { exc_type?: unknown }).exc_type,
+      });
+    }
     throw new GatewayRequestError(
       gatewayErrorCode(response.status),
       publicErrorMessage(payload.error, response.status),
@@ -414,6 +469,18 @@ export async function gatewayRequest<T>(
     );
   }
   const payload = (await response.json()) as ApiResponse<T>;
+  if (operation?.response) {
+    try {
+      operation.response.parse(payload);
+    } catch (cause) {
+      throw new ApiRequestError(
+        "contract_response_invalid",
+        cause instanceof Error ? cause.message : "Response does not match the generated contract.",
+        502,
+        true,
+      );
+    }
+  }
   return (payload.data ?? payload.message) as T;
 }
 

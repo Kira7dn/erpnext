@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/LandedCostTaxesandChargesWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "col_break3": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "account_currency"
+    },
+    "expense_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "exchange_rate": {
+      "type": "number"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "amount",
+    "description"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ItemReorderWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "warehouse_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "warehouse_reorder_level": {
+      "type": "number"
+    },
+    "warehouse_reorder_qty": {
+      "type": "number"
+    },
+    "material_request_type": {
+      "type": "string",
+      "enum": [
+        "Purchase",
+        "Transfer",
+        "Material Issue",
+        "Manufacture"
+      ]
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "material_request_type",
+    "warehouse"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

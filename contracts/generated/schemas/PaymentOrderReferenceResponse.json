@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PaymentOrderReferenceResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "reference_doctype": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType",
+      "readOnly": true
+    },
+    "reference_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "reference_doctype",
+      "readOnly": true
+    },
+    "amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "supplier": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Supplier",
+      "readOnly": true
+    },
+    "payment_request": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Payment Request",
+      "readOnly": true
+    },
+    "mode_of_payment": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Mode of Payment",
+      "readOnly": true
+    },
+    "bank_account_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bank_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank Account",
+      "readOnly": true
+    },
+    "column_break_10": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account",
+      "readOnly": true
+    },
+    "payment_reference": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

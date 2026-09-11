@@ -66,7 +66,12 @@
       "type": "string"
     },
     "formula_based_criteria": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "min_value": {
       "type": "number"
@@ -81,10 +86,20 @@
       "type": "string"
     },
     "manual_inspection": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "numeric": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "parameter_group": {
       "type": "string",

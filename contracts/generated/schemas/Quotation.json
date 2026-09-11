@@ -131,7 +131,12 @@
       "type": "number"
     },
     "ignore_pricing_rule": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "items_section": {
       "type": "string",
@@ -348,7 +353,12 @@
       "x-frappe-target-doctype": "Letter Head"
     },
     "group_same_items": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break_73": {
       "type": "string"
@@ -505,14 +515,24 @@
       "type": "string"
     },
     "disable_rounded_total": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "company_contact_person": {
       "type": "string",
       "x-frappe-target-doctype": "Contact"
     },
     "has_unit_price_items": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "writeOnly": true
     },
     "last_scanned_warehouse": {

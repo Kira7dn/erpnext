@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "QualityInspection.json"
+      "$ref": "QualityInspectionResponse.json"
     }
   },
   "required": [

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/LocationWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "location_name": {
+      "type": "string"
+    },
+    "parent_location": {
+      "type": "string",
+      "x-frappe-target-doctype": "Location"
+    },
+    "cb_details": {
+      "type": "string"
+    },
+    "is_container": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "is_group": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "sb_location_details": {
+      "type": "string"
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
+    },
+    "cb_latlong": {
+      "type": "string"
+    },
+    "area_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "sb_geolocation": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "tree_details": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "location_name"
+  ],
+  "additionalProperties": false,
+  "x-module": "Assets"
+}

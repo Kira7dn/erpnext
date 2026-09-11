@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetFinanceBookWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "finance_book": {
+      "type": "string",
+      "x-frappe-target-doctype": "Finance Book"
+    },
+    "depreciation_method": {
+      "type": "string",
+      "enum": [
+        "Straight Line",
+        "Double Declining Balance",
+        "Written Down Value",
+        "Manual"
+      ]
+    },
+    "total_number_of_depreciations": {
+      "type": "integer"
+    },
+    "column_break_5": {
+      "type": "string"
+    },
+    "frequency_of_depreciation": {
+      "type": "integer"
+    },
+    "depreciation_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "expected_value_after_useful_life": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "rate_of_depreciation": {
+      "type": "number"
+    },
+    "salvage_value_percentage": {
+      "type": "number"
+    },
+    "daily_prorata_based": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "shift_based": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "section_break_jkdf": {
+      "type": "string"
+    },
+    "column_break_sigk": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "depreciation_method",
+    "frequency_of_depreciation",
+    "total_number_of_depreciations"
+  ],
+  "additionalProperties": false,
+  "x-module": "Assets"
+}

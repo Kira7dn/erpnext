@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/StockReconciliationResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "purpose": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Opening Stock",
+        "Stock Reconciliation",
+        "",
+        null
+      ]
+    },
+    "col1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "posting_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "posting_time": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "time"
+    },
+    "set_posting_time": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sb9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "items": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "StockReconciliationItemResponse.json"
+      }
+    },
+    "section_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "expense_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account"
+    },
+    "cost_center": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "column_break_13": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "difference_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Stock Reconciliation",
+      "readOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dimension_col_break": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_8": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "scan_barcode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "Barcode"
+    },
+    "scan_mode": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "set_warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "section_break_22": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_12": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "last_scanned_warehouse": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

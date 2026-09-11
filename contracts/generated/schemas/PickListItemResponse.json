@@ -1,0 +1,273 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PickListItemResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "qty": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "picked_qty": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse",
+      "readOnly": true
+    },
+    "item_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "serial_no": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "batch_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Batch"
+    },
+    "column_break_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_5": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stock_uom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "column_break_11": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "uom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "UOM"
+    },
+    "conversion_factor": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "stock_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "item_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item"
+    },
+    "quantity_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_15": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sales_order": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Sales Order",
+      "readOnly": true
+    },
+    "sales_order_item": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "serial_no_and_batch_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_20": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "material_request": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Material Request",
+      "readOnly": true
+    },
+    "material_request_item": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "item_group": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "product_bundle_item": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "serial_and_batch_bundle": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "pick_serial_and_batch": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stock_reserved_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "use_serial_batch_fields": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "section_break_ecxc": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_belw": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "delivered_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "transferred_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "available_quantity_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "actual_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break_kyek": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "company_total_stock": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

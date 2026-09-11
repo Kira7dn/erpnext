@@ -144,7 +144,12 @@
       "x-frappe-options": "currency"
     },
     "is_rule_evaluated": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "matched_transaction_rule": {

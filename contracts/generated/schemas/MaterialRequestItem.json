@@ -137,7 +137,12 @@
       "x-frappe-target-doctype": "Cost Center"
     },
     "page_break": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "received_qty": {
       "type": "number",

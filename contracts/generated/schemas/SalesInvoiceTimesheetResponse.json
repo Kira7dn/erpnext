@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SalesInvoiceTimesheetResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "time_sheet": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Timesheet",
+      "readOnly": true
+    },
+    "billing_hours": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "billing_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "timesheet_detail": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "activity_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Activity Type",
+      "readOnly": true
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "from_time": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "to_time": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "section_break_3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_5": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_7": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_11": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break_13": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

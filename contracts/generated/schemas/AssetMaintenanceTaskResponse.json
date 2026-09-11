@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetMaintenanceTaskResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "maintenance_task": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "maintenance_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Preventive Maintenance",
+        "Calibration",
+        "",
+        null
+      ]
+    },
+    "column_break_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "maintenance_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Planned",
+        "Overdue",
+        "Cancelled",
+        "",
+        null
+      ]
+    },
+    "section_break_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "start_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "periodicity": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Daily",
+        "Weekly",
+        "Monthly",
+        "Quarterly",
+        "Half-yearly",
+        "Yearly",
+        "2 Yearly",
+        "3 Yearly",
+        "",
+        null
+      ]
+    },
+    "column_break_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "end_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "certificate_required": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "section_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assign_to": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "User"
+    },
+    "column_break_10": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assign_to_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_10": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "next_due_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "column_break_14": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "last_completion_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "section_break_7": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

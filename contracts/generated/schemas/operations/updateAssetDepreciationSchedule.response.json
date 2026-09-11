@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "AssetDepreciationSchedule.json"
+      "$ref": "AssetDepreciationScheduleResponse.json"
     }
   },
   "required": [

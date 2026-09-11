@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PaymentEntryDeductionWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "column_break_2": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "account",
+    "amount",
+    "cost_center"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

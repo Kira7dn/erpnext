@@ -300,6 +300,7 @@ def add_request_headers(response=None, request=None) -> None:
         try:
             validate_response(request.method if request is not None else frappe.local.request.method, public_path, response.get_json())
         except ValueError as exc:
+            frappe.logger("letron_api").error("Public response contract failed: %s", exc)
             response.status_code = 500
             response.set_data(json.dumps({"error": "schema_validation_failed", "message": str(exc)}, ensure_ascii=False))
             response.headers["Content-Type"] = "application/json"

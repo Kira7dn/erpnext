@@ -90,7 +90,12 @@
       "format": "date"
     },
     "calculate_depreciation": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "opening_accumulated_depreciation": {
       "type": "number",
@@ -159,7 +164,12 @@
       "type": "string"
     },
     "maintenance_required": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "status": {
       "type": "string",
@@ -181,7 +191,12 @@
       "readOnly": true
     },
     "booked_fixed_asset": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
@@ -244,7 +259,12 @@
       "writeOnly": true
     },
     "is_fully_depreciated": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "total_asset_cost": {
       "type": "number",

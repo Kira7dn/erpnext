@@ -1,57 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://letron.local/schemas/operations/createLocation.request.json",
-  "type": "object",
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "location_name": {
-      "type": "string"
-    },
-    "parent_location": {
-      "type": "string",
-      "x-frappe-target-doctype": "Location"
-    },
-    "cb_details": {
-      "type": "string"
-    },
-    "is_container": {
-      "type": "boolean"
-    },
-    "is_group": {
-      "type": "boolean"
-    },
-    "sb_location_details": {
-      "type": "string"
-    },
-    "latitude": {
-      "type": "number"
-    },
-    "longitude": {
-      "type": "number"
-    },
-    "cb_latlong": {
-      "type": "string"
-    },
-    "area_uom": {
-      "type": "string",
-      "x-frappe-target-doctype": "UOM"
-    },
-    "sb_geolocation": {
-      "type": "string"
-    },
-    "location": {
-      "type": "string"
-    },
-    "tree_details": {
-      "type": "string",
-      "writeOnly": true
-    }
-  },
-  "required": [
-    "location_name"
-  ],
-  "additionalProperties": false,
-  "x-module": "Assets"
+  "$ref": "LocationWrite.json"
 }

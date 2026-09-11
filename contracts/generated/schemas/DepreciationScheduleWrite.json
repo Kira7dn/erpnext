@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/DepreciationScheduleWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "schedule_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "depreciation_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "make_depreciation_entry": {
+      "type": "string"
+    },
+    "shift": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset Shift Factor"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "depreciation_amount",
+    "schedule_date"
+  ],
+  "additionalProperties": false,
+  "x-module": "Assets"
+}

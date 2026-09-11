@@ -1,0 +1,1106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ItemResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "item_code": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "variant_of": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item",
+      "readOnly": true
+    },
+    "item_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "item_group": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item Group"
+    },
+    "stock_uom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "UOM"
+    },
+    "column_break0": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "disabled": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "allow_alternative_item": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_stock_item": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "include_item_in_manufacturing": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "opening_stock": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "valuation_rate": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "standard_rate": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "is_fixed_asset": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "asset_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset Category"
+    },
+    "asset_naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "image": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "image",
+      "writeOnly": true
+    },
+    "section_break_11": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "brand": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Brand"
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sb_barcodes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "barcodes": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "ItemBarcodeResponse.json"
+      }
+    },
+    "inventory_section": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-truck"
+    },
+    "shelf_life_in_days": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "end_of_life": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "default_material_request_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Purchase",
+        "Material Transfer",
+        "Material Issue",
+        "Manufacture",
+        "Customer Provided",
+        "",
+        null
+      ]
+    },
+    "valuation_method": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "FIFO",
+        "Moving Average",
+        "LIFO",
+        "",
+        null
+      ]
+    },
+    "column_break1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "warranty_period": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "weight_per_unit": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "weight_uom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "UOM"
+    },
+    "reorder_section": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-rss"
+    },
+    "reorder_levels": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "ItemReorderResponse.json"
+      }
+    },
+    "unit_of_measure_conversion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "uoms": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "UOMConversionDetailResponse.json"
+      }
+    },
+    "serial_nos_and_batches": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "has_batch_no": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "create_new_batch": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "batch_number_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "has_expiry_date": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retain_sample": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sample_quantity": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "column_break_37": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "has_serial_no": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "serial_no_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "variants_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "has_variants": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "variant_based_on": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Item Attribute",
+        "Manufacturer",
+        "",
+        null
+      ]
+    },
+    "attributes": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "ItemVariantAttributeResponse.json"
+      },
+      "writeOnly": true
+    },
+    "item_defaults": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "ItemDefaultResponse.json"
+      }
+    },
+    "is_purchase_item": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "purchase_uom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "UOM"
+    },
+    "min_order_qty": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "safety_stock": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "purchase_details_cb": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "lead_time_days": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "last_purchase_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "is_customer_provided_item": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "supplier_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "delivered_by_supplier": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "supplier_items": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "ItemSupplierResponse.json"
+      }
+    },
+    "foreign_trade_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "country_of_origin": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Country"
+    },
+    "column_break_59": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "customs_tariff_number": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Customs Tariff Number"
+    },
+    "sales_details": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-tag"
+    },
+    "sales_uom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "UOM"
+    },
+    "is_sales_item": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "column_break3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "max_discount": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "enable_deferred_revenue": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "no_of_months": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "enable_deferred_expense": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "no_of_months_exp": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "customer_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "customer_items": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "ItemCustomerDetailResponse.json"
+      }
+    },
+    "item_tax_section_break": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-money"
+    },
+    "taxes": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "ItemTaxResponse.json"
+      }
+    },
+    "inspection_required_before_purchase": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "inspection_required_before_delivery": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "quality_inspection_template": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Quality Inspection Template"
+    },
+    "manufacturing": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-cogs"
+    },
+    "default_bom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "BOM",
+      "readOnly": true
+    },
+    "is_sub_contracted_item": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "column_break_74": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "customer_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "total_projected_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "over_delivery_receipt_allowance": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "over_billing_allowance": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "auto_create_assets": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "default_item_manufacturer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Manufacturer",
+      "readOnly": true
+    },
+    "default_manufacturer_part_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "grant_commission": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_grouped_asset": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "allow_negative_stock": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "inventory_settings_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "purchasing_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "quality_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "details": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-flag"
+    },
+    "dashboard_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "accounting": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_9s9o": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "deferred_accounting_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "production_capacity": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "section_break_znra": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_wugd": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_oilf": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_aytr": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_fxqz": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "purchase_tax_withholding_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Tax Withholding Category"
+    },
+    "column_break_ltlb": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sales_tax_withholding_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Tax Withholding Category"
+    },
+    "column_break_cqdk": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "inventory_valuation_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_gjns": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_ixrh": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_pxjh": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_xili": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_vipt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stock_levels_html": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "<div id=\"stock-levels-placeholder\"></div>"
+    },
+    "section_break_wfkx": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_ylma": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "uom_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stock_levels_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "uom_conversion_details_column": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "uom_help_html": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "<div style=\"margin-bottom:10px; color: var(--gray-500) !important;\">Define alternate units for this item. Eg: 1 Box = 12 Nos, set conversion factor as 12. (Will also apply for variants) <a href=\"https://docs.frappe.io/erpnext/uom\" target=\"_blank\">Learn more &#8594;</a></div>"
+    },
+    "section_break_zlmj": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_kpmi": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "prices_html": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "<div id=\\\"item-prices-container\\\"></div>"
+    },
+    "pricing_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "item_prices_column": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

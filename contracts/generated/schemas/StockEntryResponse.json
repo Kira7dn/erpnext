@@ -1,0 +1,701 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/StockEntryResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stock_entry_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Stock Entry Type"
+    },
+    "outgoing_stock_entry": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Stock Entry",
+      "readOnly": true
+    },
+    "source_stock_entry": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Stock Entry"
+    },
+    "purpose": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Material Issue",
+        "Material Receipt",
+        "Material Transfer",
+        "Material Transfer for Manufacture",
+        "Material Consumption for Manufacture",
+        "Manufacture",
+        "Repack",
+        "Send to Subcontractor",
+        "Disassemble",
+        "Receive from Customer",
+        "Return Raw Material to Customer",
+        "Subcontracting Delivery",
+        "Subcontracting Return",
+        "",
+        null
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "work_order": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Work Order"
+    },
+    "purchase_order": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Purchase Order"
+    },
+    "subcontracting_order": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Subcontracting Order",
+      "readOnly": true
+    },
+    "delivery_note_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Delivery Note",
+      "readOnly": true
+    },
+    "sales_invoice_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Sales Invoice",
+      "readOnly": true
+    },
+    "purchase_receipt_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Purchase Receipt",
+      "readOnly": true
+    },
+    "col2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "posting_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "posting_time": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "time"
+    },
+    "set_posting_time": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "inspection_required": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "from_bom": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "bom_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "BOM"
+    },
+    "fg_completed_qty": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "cb1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "use_multi_level_bom": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "get_items": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "from_warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "source_warehouse_address": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Address"
+    },
+    "source_address_display": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "cb0": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "to_warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "target_warehouse_address": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Address"
+    },
+    "target_address_display": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "sb0": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "Simple"
+    },
+    "scan_barcode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "Barcode"
+    },
+    "items": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "StockEntryDetailResponse.json"
+      }
+    },
+    "get_stock_and_rate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "get_stock_and_rate"
+    },
+    "section_break_19": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "total_incoming_value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "column_break_22": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "total_outgoing_value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "value_difference": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "additional_costs_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "additional_costs": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "LandedCostTaxesandChargesResponse.json"
+      }
+    },
+    "total_additional_costs": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "contact_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "supplier": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Supplier"
+    },
+    "supplier_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "supplier_address": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Address"
+    },
+    "address_display": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "printing_settings": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "select_print_heading": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Print Heading"
+    },
+    "letter_head": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Letter Head"
+    },
+    "more_info": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_opening": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "No",
+        "Yes",
+        "",
+        null
+      ]
+    },
+    "project": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Project"
+    },
+    "remarks": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "col5": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "per_transferred": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "total_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "job_card": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Job Card",
+      "readOnly": true
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Stock Entry",
+      "readOnly": true
+    },
+    "credit_note": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Journal Entry",
+      "writeOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pick_list": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Pick List",
+      "readOnly": true
+    },
+    "print_settings_col_break": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "add_to_transit": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "apply_putaway_rule": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_return": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true,
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "bom_info_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_jwgn": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "other_info_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "supplier_info_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stock_entry_details_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_7qsm": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "process_loss_qty": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "column_break_e92r": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "process_loss_percentage": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "items_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "asset_repair": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset Repair",
+      "readOnly": true
+    },
+    "tab_connections": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "last_scanned_warehouse": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_additional_transfer_entry": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true,
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "subcontracting_inward_order": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Subcontracting Inward Order",
+      "readOnly": true
+    },
+    "reference_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_jabv": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reference_details_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_qpvo": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_wgvc": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cost_center": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Cost Center"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

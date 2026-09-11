@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PurchaseInvoiceAdvanceResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "reference_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType",
+      "readOnly": true
+    },
+    "reference_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "reference_type",
+      "readOnly": true
+    },
+    "remarks": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "reference_row": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "col_break1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "advance_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "party_account_currency",
+      "readOnly": true
+    },
+    "allocated_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "party_account_currency"
+    },
+    "exchange_gain_loss": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "ref_exchange_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "difference_posting_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

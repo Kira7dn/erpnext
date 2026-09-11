@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/RequestforQuotationSupplierResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "send_email": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "email_sent": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "supplier": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Supplier"
+    },
+    "contact": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Contact"
+    },
+    "quote_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Pending",
+        "Received",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "column_break_3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "supplier_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "email_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Buying"
+}

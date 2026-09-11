@@ -97,7 +97,12 @@
       "type": "number"
     },
     "ignore_pricing_rule": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "items_section": {
       "type": "string",
@@ -295,7 +300,12 @@
       "readOnly": true
     },
     "disable_rounded_total": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "tc_name": {
       "type": "string",
@@ -312,7 +322,12 @@
       "x-frappe-target-doctype": "Print Heading"
     },
     "group_same_items": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break_72": {
       "type": "string"
@@ -352,7 +367,12 @@
       "type": "string"
     },
     "is_subcontracted": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "opportunity": {
       "type": "string",
@@ -440,7 +460,12 @@
       "type": "string"
     },
     "has_unit_price_items": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "writeOnly": true
     },
     "item_wise_tax_details": {

@@ -6,7 +6,7 @@
     "data": {
       "type": "array",
       "items": {
-        "$ref": "AssetCategory.json"
+        "$ref": "AssetCategoryResponse.json"
       }
     },
     "message": {}

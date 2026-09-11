@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/StockReservationEntryResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item",
+      "readOnly": true
+    },
+    "warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse",
+      "readOnly": true
+    },
+    "voucher_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Sales Order",
+        "Work Order",
+        "Subcontracting Inward Order",
+        "Production Plan",
+        "Subcontracting Order",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "voucher_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "voucher_type",
+      "readOnly": true
+    },
+    "voucher_detail_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "stock_uom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "project": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Project",
+      "readOnly": true
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company",
+      "readOnly": true
+    },
+    "reserved_qty": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Draft",
+        "Partially Reserved",
+        "Reserved",
+        "Partially Delivered",
+        "Partially Used",
+        "Delivered",
+        "Cancelled",
+        "Closed",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "delivered_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Stock Reservation Entry",
+      "readOnly": true
+    },
+    "available_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "voucher_qty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break_elik": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_xt4m": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_o6ex": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_3vb3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_jbyr": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "has_serial_no": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "has_batch_no": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sb_entries": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "SerialandBatchEntryResponse.json"
+      }
+    },
+    "serial_and_batch_reservation_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reservation_based_on": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Qty",
+        "Serial and Batch",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "column_break_7dxj": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_grdt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "from_voucher_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Pick List",
+        "Purchase Receipt",
+        "Stock Entry",
+        "Work Order",
+        "Production Plan",
+        "Subcontracting Inward Order",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "from_voucher_detail_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "from_voucher_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "from_voucher_type",
+      "readOnly": true
+    },
+    "production_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_qdwj": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "consumed_qty": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "item_information_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "transferred_qty": {
+      "type": [
+        "number",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

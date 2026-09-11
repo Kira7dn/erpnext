@@ -6,7 +6,7 @@
     "data": {
       "type": "array",
       "items": {
-        "$ref": "PickList.json"
+        "$ref": "PickListResponse.json"
       }
     },
     "message": {}

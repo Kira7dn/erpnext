@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "PaymentEntry.json"
+      "$ref": "PaymentEntryResponse.json"
     }
   },
   "required": [

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetShiftAllocationResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "section_break_esaa": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset Shift Allocation",
+      "readOnly": true
+    },
+    "asset": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset"
+    },
+    "column_break_tdae": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "finance_book": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Finance Book"
+    },
+    "depreciation_schedule_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "depreciation_schedule": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "DepreciationScheduleResponse.json"
+      },
+      "readOnly": true
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_jomc": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

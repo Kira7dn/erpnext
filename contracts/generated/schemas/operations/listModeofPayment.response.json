@@ -6,7 +6,7 @@
     "data": {
       "type": "array",
       "items": {
-        "$ref": "ModeofPayment.json"
+        "$ref": "ModeofPaymentResponse.json"
       }
     },
     "message": {}

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetRepairConsumedItemResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "valuation_rate": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "consumed_quantity": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "total_value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "serial_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "item_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item"
+    },
+    "serial_and_batch_bundle": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "pick_serial_and_batch": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_xzfr": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

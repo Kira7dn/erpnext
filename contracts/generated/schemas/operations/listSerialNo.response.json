@@ -6,7 +6,7 @@
     "data": {
       "type": "array",
       "items": {
-        "$ref": "SerialNo.json"
+        "$ref": "SerialNoResponse.json"
       }
     },
     "message": {}

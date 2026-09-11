@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankTransactionRuleAccountsResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account"
+    },
+    "party_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Party Type"
+    },
+    "party": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "party_type"
+    },
+    "debit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "credit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "user_remark": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetRepairResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "failure_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "completion_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "repair_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Pending",
+        "Completed",
+        "Cancelled",
+        "",
+        null
+      ]
+    },
+    "section_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_9": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "actions_performed": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "downtime": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "repair_cost": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset Repair",
+      "readOnly": true
+    },
+    "asset": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset"
+    },
+    "asset_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "capitalize_repair_cost": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "accounting_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stock_items": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AssetRepairConsumedItemResponse.json"
+      }
+    },
+    "cost_center": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "project": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Project"
+    },
+    "column_break_14": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stock_consumption_details_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "total_repair_cost": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "increase_in_asset_life": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "invoices": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AssetRepairPurchaseInvoiceResponse.json"
+      }
+    },
+    "section_break_muyc": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_hkem": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "capitalizations_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_spre": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_ajbh": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_ltbb": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_ewor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_ceuc": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "consumed_items_cost": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "column_break_xebe": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "accounting_dimensions_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "connection_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

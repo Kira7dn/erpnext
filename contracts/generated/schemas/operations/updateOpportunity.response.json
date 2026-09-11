@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "Opportunity.json"
+      "$ref": "OpportunityResponse.json"
     }
   },
   "required": [

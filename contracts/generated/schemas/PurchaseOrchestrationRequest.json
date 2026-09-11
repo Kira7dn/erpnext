@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PurchaseOrchestrationRequest.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "material_request",
+    "suppliers"
+  ],
+  "properties": {
+    "material_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "material_request_type",
+        "company",
+        "transaction_date",
+        "items"
+      ],
+      "properties": {
+        "material_request_type": {
+          "type": "string",
+          "enum": [
+            "Purchase",
+            "Material Transfer",
+            "Material Issue",
+            "Manufacture"
+          ]
+        },
+        "company": {
+          "type": "string"
+        },
+        "transaction_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "schedule_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "title": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "item_code",
+              "qty",
+              "schedule_date",
+              "warehouse"
+            ],
+            "properties": {
+              "item_code": {
+                "type": "string"
+              },
+              "qty": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "schedule_date": {
+                "type": "string",
+                "format": "date"
+              },
+              "warehouse": {
+                "type": "string"
+              },
+              "uom": {
+                "type": "string"
+              },
+              "rate": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "suppliers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "justification": {
+      "type": "string"
+    }
+  }
+}

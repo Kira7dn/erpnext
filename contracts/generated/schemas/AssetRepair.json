@@ -64,7 +64,12 @@
       "type": "string"
     },
     "capitalize_repair_cost": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "accounting_details": {
       "type": "string"

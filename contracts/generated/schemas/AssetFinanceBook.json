@@ -48,10 +48,20 @@
       "type": "number"
     },
     "daily_prorata_based": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "shift_based": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "total_number_of_booked_depreciations": {
       "type": "integer",

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PaymentEntryReferenceWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "reference_doctype": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "reference_name": {
+      "type": "string",
+      "x-frappe-options": "reference_doctype"
+    },
+    "column_break_4": {
+      "type": "string"
+    },
+    "allocated_amount": {
+      "type": "number"
+    },
+    "payment_term": {
+      "type": "string",
+      "x-frappe-target-doctype": "Payment Term"
+    },
+    "account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "account_type": {
+      "type": "string"
+    },
+    "payment_type": {
+      "type": "string"
+    },
+    "payment_request": {
+      "type": "string",
+      "x-frappe-target-doctype": "Payment Request"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reference_doctype",
+    "reference_name"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

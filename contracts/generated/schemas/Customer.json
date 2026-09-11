@@ -70,10 +70,20 @@
       "x-frappe-target-doctype": "Tax Category"
     },
     "disabled": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "is_internal_customer": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "represents_company": {
       "type": "string",
@@ -169,7 +179,12 @@
       "x-frappe-target-doctype": "Industry Type"
     },
     "is_frozen": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "loyalty_program": {
       "type": "string",
@@ -206,10 +221,20 @@
       }
     },
     "so_required": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "dn_required": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "tax_withholding_category": {
       "type": "string",

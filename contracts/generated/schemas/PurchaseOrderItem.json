@@ -125,7 +125,12 @@
       "writeOnly": true
     },
     "is_free_item": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "section_break_29": {
@@ -215,7 +220,12 @@
       "writeOnly": true
     },
     "delivered_by_supplier": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "blanket_order": {
@@ -247,7 +257,12 @@
       "readOnly": true
     },
     "include_exploded_items": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_break_56": {
       "type": "string"
@@ -289,7 +304,12 @@
       "x-frappe-target-doctype": "Cost Center"
     },
     "page_break": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "item_tax_template": {
       "type": "string",
@@ -318,10 +338,20 @@
       "type": "string"
     },
     "against_blanket_order": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "is_fixed_asset": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "more_info_section_break": {

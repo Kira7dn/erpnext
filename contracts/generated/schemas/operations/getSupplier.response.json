@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "Supplier.json"
+      "$ref": "SupplierResponse.json"
     }
   },
   "required": [

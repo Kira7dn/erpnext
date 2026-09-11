@@ -1,0 +1,601 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SupplierResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "supplier_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "alias": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "country": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Country"
+    },
+    "default_bank_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank Account"
+    },
+    "tax_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tax_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Tax Category"
+    },
+    "tax_withholding_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Tax Withholding Category"
+    },
+    "is_transporter": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_internal_supplier": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "represents_company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "image": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "column_break0": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "supplier_group": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Supplier Group"
+    },
+    "supplier_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Company",
+        "Individual",
+        "Partnership",
+        "",
+        null
+      ]
+    },
+    "language": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Language"
+    },
+    "disabled": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "warn_rfqs": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true,
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "warn_pos": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true,
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "prevent_rfqs": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true,
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "prevent_pos": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true,
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "companies": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AllowedToTransactWithResponse.json"
+      }
+    },
+    "default_currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Currency"
+    },
+    "column_break_10": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "default_price_list": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Price List"
+    },
+    "payment_terms": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Payment Terms Template"
+    },
+    "on_hold": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "hold_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "All",
+        "Invoices",
+        "Payments",
+        "",
+        null
+      ]
+    },
+    "release_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "address_contacts": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-map-marker"
+    },
+    "address_html": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "contact_html": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "accounts": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "PartyAccountResponse.json"
+      }
+    },
+    "column_break2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "website": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "supplier_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_30": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_frozen": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "allow_purchase_invoice_creation_without_purchase_order": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "allow_purchase_invoice_creation_without_purchase_receipt": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "primary_address_and_contact_detail_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "supplier_primary_contact": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Contact"
+    },
+    "mobile_no": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "email_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "primary_address": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "supplier_primary_address": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Address"
+    },
+    "dashboard_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "settings_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "contact_and_address_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "accounting_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "defaults_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tax_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "internal_supplier_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_16": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_27": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_54": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "block_supplier_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "default_accounts_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "portal_users_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "portal_users": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "PortalUserResponse.json"
+      }
+    },
+    "column_break_mglr": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "customer_numbers": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "CustomerNumberAtSupplierResponse.json"
+      }
+    },
+    "tax_withholding_group": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Tax Withholding Group"
+    },
+    "gender": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Gender"
+    },
+    "rfq_and_purchase_order_settings_section": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "column_break_oxjw": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "taxation_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "invoice_settings_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "more_info_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_jqla": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_pgad": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Buying"
+}

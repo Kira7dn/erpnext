@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ContactWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "contact_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-user"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "user": {
+      "type": "string",
+      "x-frappe-target-doctype": "User"
+    },
+    "cb00": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Passive",
+        "Open",
+        "Replied"
+      ]
+    },
+    "salutation": {
+      "type": "string",
+      "x-frappe-target-doctype": "Salutation"
+    },
+    "gender": {
+      "type": "string",
+      "x-frappe-target-doctype": "Gender"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "contact_details": {
+      "type": "string",
+      "x-frappe-options": "fa fa-pushpin"
+    },
+    "is_primary_contact": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "DynamicLinkWrite.json"
+      }
+    },
+    "more_info": {
+      "type": "string",
+      "x-frappe-options": "fa fa-file-text"
+    },
+    "department": {
+      "type": "string"
+    },
+    "designation": {
+      "type": "string"
+    },
+    "unsubscribed": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "middle_name": {
+      "type": "string"
+    },
+    "sb_00": {
+      "type": "string"
+    },
+    "email_ids": {
+      "type": "array",
+      "items": {
+        "$ref": "ContactEmailWrite.json"
+      }
+    },
+    "address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "phone_nos": {
+      "type": "array",
+      "items": {
+        "$ref": "ContactPhoneWrite.json"
+      }
+    },
+    "sync_with_google_contacts": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "google_contacts": {
+      "type": "string",
+      "x-frappe-target-doctype": "Google Contacts"
+    },
+    "cb_00": {
+      "type": "string"
+    },
+    "sb_01": {
+      "type": "string"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+  "x-module": "Contacts"
+}

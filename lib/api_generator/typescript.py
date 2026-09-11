@@ -1,5 +1,6 @@
 """Small dependency-free TypeScript/Zod emitter for generated JSON Schema."""
 
+import json
 from typing import Any
 
 
@@ -11,11 +12,16 @@ def _ref_name(value: str) -> str:
     return value.rsplit("/", 1)[-1].replace(".json", "")
 
 
+def _literal(value: Any) -> str:
+    """Render JSON values as valid TypeScript literals."""
+    return json.dumps(value, ensure_ascii=False)
+
+
 def _ts(schema: dict[str, Any]) -> str:
     if "$ref" in schema:
         return _ref_name(schema["$ref"])
     if "enum" in schema:
-        return " | ".join(repr(item) for item in schema["enum"]) or "string"
+        return " | ".join(_literal(item) for item in schema["enum"]) or "string"
     if schema.get("type") == "array":
         return f"Array<{_ts(schema.get('items', {}))}>"
     if isinstance(schema.get("type"), list):
@@ -28,13 +34,21 @@ def _zod(schema: dict[str, Any]) -> str:
         return f"z.lazy(() => {_ref_name(schema['$ref'])}Schema)"
     if "enum" in schema:
         values = schema["enum"]
-        return f"z.enum([{', '.join(repr(item) for item in values)}])" if values else "z.string()"
+        if values and all(isinstance(item, str) for item in values):
+            return f"z.enum([{', '.join(_literal(item) for item in values)}])"
+        if values:
+            literals = ", ".join("z.null()" if item is None else f"z.literal({_literal(item)})" for item in values)
+            return f"z.union([{literals}])"
+        return "z.string()"
     if schema.get("type") == "array":
         return f"z.array({_zod(schema.get('items', {}))})"
     types = schema.get("type")
     if isinstance(types, list):
         non_null = [item for item in types if item != "null"]
-        base = _zod({"type": non_null[0]}) if non_null else "z.unknown()"
+        if len(non_null) > 1:
+            base = f"z.union([{', '.join(_zod({'type': item}) for item in non_null)}])"
+        else:
+            base = _zod({"type": non_null[0]}) if non_null else "z.unknown()"
         return f"{base}.nullable()" if "null" in types else base
     if types == "object" and schema.get("properties") is not None:
         required = set(schema.get("required", []))
@@ -77,4 +91,19 @@ def emit_zod(schemas: dict[str, dict[str, Any]], operations: list[dict[str, Any]
             name = operation["operation_id"]
             lines.append(f"export const {name}ResponseSchema = {_zod(operation['response_schema'])};")
             lines.append(f"export type {name}Response = z.infer<typeof {name}ResponseSchema>;")
+    if operations:
+        lines.append("")
+        lines.append("export const GENERATED_OPERATION_CONTRACTS = {")
+        for operation in operations:
+            name = operation["operation_id"]
+            fields = [
+                f'method: {_literal(operation["method"])}',
+                f'path: {_literal(operation["path"])}',
+            ]
+            if operation.get("request_schema"):
+                fields.append(f"request: {name}RequestSchema")
+            if operation.get("response_schema"):
+                fields.append(f"response: {name}ResponseSchema")
+            lines.append(f"  {_literal(name)}: {{ {', '.join(fields)} }},")
+        lines.append("} as const;")
     return "\n".join(lines) + "\n"

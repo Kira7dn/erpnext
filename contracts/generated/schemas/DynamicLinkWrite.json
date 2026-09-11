@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/DynamicLinkWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "link_doctype": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "link_name": {
+      "type": "string",
+      "x-frappe-options": "link_doctype"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "link_doctype",
+    "link_name"
+  ],
+  "additionalProperties": false,
+  "x-module": "Core"
+}

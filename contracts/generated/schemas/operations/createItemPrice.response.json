@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "ItemPrice.json"
+      "$ref": "ItemPriceResponse.json"
     }
   },
   "required": [

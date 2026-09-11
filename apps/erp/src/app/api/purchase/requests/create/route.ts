@@ -6,30 +6,34 @@ import {
   orchestrationHttpStatus,
   type PurchaseOrchestrationInput,
 } from "@/lib/purchase-orchestration";
+import {
+  PurchaseOrchestrationRequestSchema,
+  PurchaseOrchestrationResponseSchema,
+} from "@/generated/zod";
 
 export async function POST(request: NextRequest) {
   const cookieHeader = await requestAuthCredential(request);
   if (!cookieHeader)
     return apiErrorResponse("authentication_required", 401, "Authentication is required.");
-  const input = (await request.json().catch(() => null)) as Record<
-    string,
-    unknown
-  > | null;
+  const input = (await request.json().catch(() => null)) as Record<string, unknown> | null;
   const idempotencyKey =
     request.headers.get("X-Idempotency-Key") ??
     String(input?.idempotency_key ?? "");
   if (!input)
     return apiErrorResponse("invalid_json", 400, "Request body must be valid JSON.");
   try {
+    PurchaseOrchestrationRequestSchema.parse(input);
     const state = await createPurchaseOrchestration(
       cookieHeader,
       input as unknown as PurchaseOrchestrationInput,
       idempotencyKey,
     );
-    return NextResponse.json({
+    const response = {
       data: state,
       message: state.status,
-    });
+    };
+    PurchaseOrchestrationResponseSchema.parse(state);
+    return NextResponse.json(response);
   } catch (cause) {
     const state = (cause as { orchestration?: unknown }).orchestration;
     if (

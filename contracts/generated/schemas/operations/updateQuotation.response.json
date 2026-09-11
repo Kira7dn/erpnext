@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "Quotation.json"
+      "$ref": "QuotationResponse.json"
     }
   },
   "required": [

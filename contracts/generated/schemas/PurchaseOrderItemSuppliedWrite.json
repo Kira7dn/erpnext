@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PurchaseOrderItemSuppliedWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "column_break_6": {
+      "type": "string"
+    },
+    "reserve_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "section_break1": {
+      "type": "string"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "section_break2": {
+      "type": "string"
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+  "x-module": "Buying"
+}

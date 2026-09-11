@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/JournalEntryAccountResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account"
+    },
+    "account_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "cost_center": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "col_break1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "party_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType"
+    },
+    "party": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "party_type"
+    },
+    "currency_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "account_currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true
+    },
+    "column_break_10": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "exchange_rate": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "sec_break1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "debit_in_account_currency": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "account_currency"
+    },
+    "debit": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "col_break2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "credit_in_account_currency": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "account_currency"
+    },
+    "credit": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "reference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reference_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Sales Invoice",
+        "Purchase Invoice",
+        "Journal Entry",
+        "Sales Order",
+        "Purchase Order",
+        "Expense Claim",
+        "Asset",
+        "Loan",
+        "Payroll Entry",
+        "Employee Advance",
+        "Exchange Rate Revaluation",
+        "Invoice Discounting",
+        "Fees",
+        "Full and Final Statement",
+        "Payment Entry",
+        "Bank Transaction",
+        "",
+        null
+      ]
+    },
+    "reference_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "reference_type"
+    },
+    "reference_due_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "project": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Project"
+    },
+    "col_break3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_advance": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "No",
+        "Yes",
+        "",
+        null
+      ]
+    },
+    "user_remark": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "against_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dimension_col_break": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bank_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank Account"
+    },
+    "reference_detail_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "advance_voucher_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType",
+      "readOnly": true
+    },
+    "advance_voucher_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "advance_voucher_type",
+      "readOnly": true
+    },
+    "is_tax_withholding_account": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

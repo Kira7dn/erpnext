@@ -1,0 +1,607 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "asset_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "item_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Item"
+    },
+    "asset_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset Category",
+      "readOnly": true
+    },
+    "asset_owner": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Company",
+        "Supplier",
+        "Customer",
+        "",
+        null
+      ]
+    },
+    "asset_owner_company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "supplier": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Supplier"
+    },
+    "customer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Customer"
+    },
+    "image": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "column_break_3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "location": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Location"
+    },
+    "custodian": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Employee"
+    },
+    "cost_center": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "department": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Department"
+    },
+    "purchase_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "disposal_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date",
+      "readOnly": true
+    },
+    "journal_entry_for_scrap": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Journal Entry",
+      "readOnly": true
+    },
+    "available_for_use_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "calculate_depreciation": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "opening_accumulated_depreciation": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "finance_books": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AssetFinanceBookResponse.json"
+      }
+    },
+    "section_break_33": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "depreciation_method": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Straight Line",
+        "Double Declining Balance",
+        "Written Down Value",
+        "Manual",
+        "",
+        null
+      ]
+    },
+    "value_after_depreciation": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "total_number_of_depreciations": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "column_break_24": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "frequency_of_depreciation": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "next_depreciation_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date",
+      "writeOnly": true
+    },
+    "policy_number": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "insurer": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "insured_value": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_48": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "insurance_start_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "insurance_end_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "comprehensive_insurance": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "maintenance_required": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Draft",
+        "Submitted",
+        "Cancelled",
+        "Partially Depreciated",
+        "Fully Depreciated",
+        "Sold",
+        "Scrapped",
+        "In Maintenance",
+        "Out of Order",
+        "Issue",
+        "Receipt",
+        "Capitalized",
+        "Work In Progress",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "booked_fixed_asset": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true,
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "column_break_51": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "purchase_receipt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Purchase Receipt"
+    },
+    "purchase_invoice": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Purchase Invoice"
+    },
+    "default_finance_book": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Finance Book",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset",
+      "readOnly": true
+    },
+    "purchase_details_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_23": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_33": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_36": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "split_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset",
+      "readOnly": true
+    },
+    "asset_quantity": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "depr_entry_posting_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Successful",
+        "Failed",
+        "",
+        null
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "depreciation_schedule_sb": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "depreciation_schedule_view": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "is_fully_depreciated": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "total_asset_cost": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "additional_asset_cost": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "purchase_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "opening_number_of_booked_depreciations": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "purchase_receipt_item": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "purchase_invoice_item": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "other_info_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "connections_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "depreciation_tab": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "accounting_dimensions_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_jtou": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "net_purchase_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "currency"
+    },
+    "asset_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Existing Asset",
+        "Composite Asset",
+        "Composite Component",
+        "",
+        null
+      ]
+    },
+    "column_break_wqzi": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_rjyw": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "insurance_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_uiyd": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_bbwr": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_bfkm": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "item_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "asset_owner_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_yeds": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

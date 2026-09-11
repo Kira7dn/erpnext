@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetDepreciationScheduleResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "asset": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset"
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Asset Depreciation Schedule",
+      "readOnly": true
+    },
+    "column_break_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "depreciation_details_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "finance_book": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Finance Book"
+    },
+    "depreciation_method": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Straight Line",
+        "Double Declining Balance",
+        "Written Down Value",
+        "Manual",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "rate_of_depreciation": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break_8": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "total_number_of_depreciations": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "depreciation_schedule_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "depreciation_schedule": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "DepreciationScheduleResponse.json"
+      }
+    },
+    "details_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Draft",
+        "Active",
+        "Cancelled",
+        "",
+        null
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "frequency_of_depreciation": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "expected_value_after_useful_life": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "finance_book_id": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "opening_accumulated_depreciation": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "opening_number_of_booked_depreciations": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "daily_prorata_based": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "shift_based": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company",
+      "readOnly": true
+    },
+    "value_after_depreciation": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "net_purchase_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true,
+      "writeOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

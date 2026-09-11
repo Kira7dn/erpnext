@@ -1,56 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://letron.local/schemas/operations/createCostCenter.request.json",
-  "type": "object",
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "sb0": {
-      "type": "string"
-    },
-    "cost_center_name": {
-      "type": "string"
-    },
-    "cost_center_number": {
-      "type": "string"
-    },
-    "parent_cost_center": {
-      "type": "string",
-      "x-frappe-target-doctype": "Cost Center"
-    },
-    "company": {
-      "type": "string",
-      "x-frappe-target-doctype": "Company"
-    },
-    "cb0": {
-      "type": "string"
-    },
-    "is_group": {
-      "type": "boolean"
-    },
-    "lft": {
-      "type": "integer",
-      "writeOnly": true
-    },
-    "rgt": {
-      "type": "integer",
-      "writeOnly": true
-    },
-    "old_parent": {
-      "type": "string",
-      "x-frappe-target-doctype": "Cost Center",
-      "writeOnly": true
-    },
-    "disabled": {
-      "type": "boolean"
-    }
-  },
-  "required": [
-    "company",
-    "cost_center_name",
-    "parent_cost_center"
-  ],
-  "additionalProperties": false,
-  "x-module": "Accounts"
+  "$ref": "CostCenterWrite.json"
 }

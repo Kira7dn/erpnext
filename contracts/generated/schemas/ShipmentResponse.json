@@ -1,0 +1,442 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ShipmentResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "heading_pickup_from": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pickup_from_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Company",
+        "Customer",
+        "Supplier",
+        "",
+        null
+      ]
+    },
+    "pickup_company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "pickup_customer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Customer"
+    },
+    "pickup_supplier": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Supplier"
+    },
+    "pickup": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "pickup_address_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Address"
+    },
+    "pickup_address": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "pickup_contact_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Contact"
+    },
+    "pickup_contact_email": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "pickup_contact": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "heading_delivery_to": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "delivery_to_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Company",
+        "Customer",
+        "Supplier",
+        "",
+        null
+      ]
+    },
+    "delivery_company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "delivery_customer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Customer"
+    },
+    "delivery_supplier": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Supplier"
+    },
+    "delivery_to": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "delivery_address_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Address"
+    },
+    "delivery_address": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "delivery_contact_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Contact"
+    },
+    "delivery_contact_email": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "delivery_contact": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "parcels_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "shipment_parcel": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "ShipmentParcelResponse.json"
+      }
+    },
+    "parcel_template": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Shipment Parcel Template"
+    },
+    "add_template": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_28": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "shipment_details_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pallets": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "No",
+        "Yes",
+        "",
+        null
+      ]
+    },
+    "value_of_goods": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "pickup_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "pickup_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "time"
+    },
+    "pickup_to": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "time"
+    },
+    "column_break_36": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "shipment_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Goods",
+        "Documents",
+        "",
+        null
+      ]
+    },
+    "pickup_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Pickup",
+        "Self delivery",
+        "",
+        null
+      ]
+    },
+    "description_of_content": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_40": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "shipment_information_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "service_provider": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "shipment_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "shipment_amount": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Draft",
+        "Submitted",
+        "Booked",
+        "Cancelled",
+        "Completed",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "tracking_url": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "carrier": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "carrier_service": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "awb_number": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tracking_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "In Progress",
+        "Delivered",
+        "Returned",
+        "Lost",
+        "",
+        null
+      ]
+    },
+    "tracking_status_info": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Shipment",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "column_break_55": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "incoterm": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Incoterm"
+    },
+    "shipment_delivery_note": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "ShipmentDeliveryNoteResponse.json"
+      }
+    },
+    "pickup_contact_person": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "User"
+    },
+    "total_weight": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

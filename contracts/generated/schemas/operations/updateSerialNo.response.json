@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "SerialNo.json"
+      "$ref": "SerialNoResponse.json"
     }
   },
   "required": [

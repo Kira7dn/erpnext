@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankAccountResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "account_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account"
+    },
+    "bank": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank"
+    },
+    "account_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank Account Type"
+    },
+    "account_subtype": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank Account Subtype"
+    },
+    "column_break_7": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_default": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_company_account": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "section_break_11": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "party_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType"
+    },
+    "column_break_14": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "party": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "party_type"
+    },
+    "account_details_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "iban": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "IBAN"
+    },
+    "column_break_12": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bank_account_no": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "statement_password": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "address_and_contact": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "fa fa-map-marker"
+    },
+    "address_html": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_13": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "contact_html": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "integration_details_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "integration_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "last_integration_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "column_break_27": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "mask": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "branch_code": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "disabled": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_credit_card": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

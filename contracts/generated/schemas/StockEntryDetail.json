@@ -101,7 +101,12 @@
       "readOnly": true
     },
     "retain_sample": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "sample_quantity": {
@@ -139,7 +144,12 @@
       "type": "string"
     },
     "allow_zero_valuation_rate": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "actual_qty": {
       "type": "number",
@@ -151,7 +161,12 @@
       "writeOnly": true
     },
     "allow_alternative_item": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "col_break6": {
@@ -233,7 +248,12 @@
       "writeOnly": true
     },
     "set_basic_rate_manually": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "putaway_rule": {
       "type": "string",
@@ -250,7 +270,12 @@
       "type": "string"
     },
     "is_finished_item": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "job_card_item": {
       "type": "string",
@@ -258,7 +283,12 @@
       "writeOnly": true
     },
     "has_item_scanned": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "add_serial_batch_bundle": {
@@ -269,7 +299,12 @@
       "x-frappe-target-doctype": "Serial and Batch Bundle"
     },
     "use_serial_batch_fields": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_break_rdtg": {
       "type": "string"
@@ -310,7 +345,12 @@
       "writeOnly": true
     },
     "is_legacy_scrap_item": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     }
   },

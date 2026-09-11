@@ -77,7 +77,12 @@
       "readOnly": true
     },
     "page_break": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "prevdoc_doctype": {
@@ -126,7 +131,12 @@
       "type": "string"
     },
     "use_serial_batch_fields": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_break_bgys": {
       "type": "string"
@@ -135,7 +145,12 @@
       "type": "string"
     },
     "delivered_by_supplier": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "requested_qty": {

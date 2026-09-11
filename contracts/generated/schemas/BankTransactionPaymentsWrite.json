@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankTransactionPaymentsWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "payment_document": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "payment_entry": {
+      "type": "string",
+      "x-frappe-options": "payment_document"
+    },
+    "allocated_amount": {
+      "type": "number"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "allocated_amount",
+    "payment_document",
+    "payment_entry"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

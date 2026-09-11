@@ -58,7 +58,12 @@
       "x-frappe-options": "fa fa-pushpin"
     },
     "is_primary_contact": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "links": {
       "type": "array",
@@ -77,7 +82,12 @@
       "type": "string"
     },
     "unsubscribed": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "middle_name": {
       "type": "string"
@@ -107,11 +117,21 @@
       "readOnly": true
     },
     "pulled_from_google_contacts": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "sync_with_google_contacts": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "google_contacts": {
       "type": "string",

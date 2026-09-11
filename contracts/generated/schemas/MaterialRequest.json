@@ -182,7 +182,12 @@
       "type": "string"
     },
     "auto_created_via_reorder": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     }
   },

@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PaymentScheduleWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "payment_term": {
+      "type": "string",
+      "x-frappe-target-doctype": "Payment Term"
+    },
+    "description": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "invoice_portion": {
+      "type": "number"
+    },
+    "payment_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "mode_of_payment": {
+      "type": "string",
+      "x-frappe-target-doctype": "Mode of Payment"
+    },
+    "paid_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "column_break_5": {
+      "type": "string"
+    },
+    "discount_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "discount_type": {
+      "type": "string",
+      "enum": [
+        "Percentage",
+        "Amount"
+      ]
+    },
+    "discount": {
+      "type": "number"
+    },
+    "section_break_9": {
+      "type": "string"
+    },
+    "section_break_15": {
+      "type": "string"
+    },
+    "section_break_6": {
+      "type": "string"
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "section_break_4": {
+      "type": "string"
+    },
+    "base_payment_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "due_date",
+    "payment_amount"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

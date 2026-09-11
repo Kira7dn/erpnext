@@ -44,7 +44,12 @@
       "readOnly": true
     },
     "is_outward": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
@@ -89,7 +94,12 @@
       "type": "string"
     },
     "is_cancelled": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "item_code": {

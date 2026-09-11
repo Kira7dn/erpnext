@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "$ref": "AssetMaintenanceLog.json"
+      "$ref": "AssetMaintenanceLogResponse.json"
     }
   },
   "required": [

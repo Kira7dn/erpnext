@@ -1,0 +1,736 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PaymentEntryResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "type_of_payment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "naming_series": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payment_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Receive",
+        "Pay",
+        "Internal Transfer",
+        "",
+        null
+      ]
+    },
+    "column_break_5": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "posting_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "cost_center": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "mode_of_payment": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Mode of Payment"
+    },
+    "party_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "party_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType"
+    },
+    "party": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "party_type"
+    },
+    "party_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_11": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "contact_person": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Contact"
+    },
+    "contact_email": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "Email",
+      "readOnly": true
+    },
+    "payment_accounts_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "paid_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account"
+    },
+    "paid_from_account_currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true
+    },
+    "column_break_18": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "paid_to": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account"
+    },
+    "paid_to_account_currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true
+    },
+    "payment_amounts_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "paid_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "paid_from_account_currency"
+    },
+    "source_exchange_rate": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "base_paid_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "column_break_21": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "received_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "paid_to_account_currency"
+    },
+    "target_exchange_rate": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "base_received_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "section_break_14": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "references": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "PaymentEntryReferenceResponse.json"
+      }
+    },
+    "section_break_34": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "total_allocated_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "base_total_allocated_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "column_break_36": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "unallocated_amount": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "difference_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "write_off_difference_amount": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "deductions_or_loss_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "deductions": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "PaymentEntryDeductionResponse.json"
+      }
+    },
+    "transaction_references": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reference_no": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_23": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reference_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "clearance_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date",
+      "readOnly": true
+    },
+    "section_break_12": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Project"
+    },
+    "remarks": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_16": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "letter_head": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Letter Head"
+    },
+    "print_heading": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Print Heading"
+    },
+    "bank": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bank_account_no": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payment_order": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Payment Order",
+      "readOnly": true
+    },
+    "auto_repeat": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Auto Repeat",
+      "readOnly": true
+    },
+    "amended_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Payment Entry",
+      "readOnly": true
+    },
+    "title": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "bank_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank Account"
+    },
+    "party_bank_account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Bank Account"
+    },
+    "payment_order_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Initiated",
+        "Payment Ordered",
+        "",
+        null
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dimension_col_break": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Draft",
+        "Submitted",
+        "Cancelled",
+        "",
+        null
+      ],
+      "readOnly": true
+    },
+    "custom_remarks": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tax_withholding_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Tax Withholding Category"
+    },
+    "taxes_and_charges_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "purchase_taxes_and_charges_template": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Purchase Taxes and Charges Template"
+    },
+    "sales_taxes_and_charges_template": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Sales Taxes and Charges Template"
+    },
+    "taxes": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AdvanceTaxesandChargesResponse.json"
+      }
+    },
+    "base_total_taxes_and_charges": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "total_taxes_and_charges": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "paid_amount_after_tax": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "paid_from_account_currency",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "base_paid_amount_after_tax": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "received_amount_after_tax": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "paid_to_account_currency",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "base_received_amount_after_tax": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "paid_from_account_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "paid_to_account_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "column_break_61": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "section_break_60": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "get_outstanding_invoices": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "get_outstanding_orders": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "book_advance_payments_in_separate_party_account": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "base_in_words": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "in_words": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "reconcile_on_advance_payment_date": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "readOnly": true,
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_opening": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "No",
+        "Yes",
+        "",
+        null
+      ]
+    },
+    "apply_tds": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "section_tax_withholding_entry": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tax_withholding_group": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Tax Withholding Group"
+    },
+    "ignore_tax_withholding_threshold": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tax_withholding_entries": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "TaxWithholdingEntryResponse.json"
+      }
+    },
+    "override_tax_withholding_entries": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "auto_repeat_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

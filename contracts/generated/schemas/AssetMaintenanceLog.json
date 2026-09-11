@@ -67,7 +67,12 @@
       ]
     },
     "has_certificate": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "certificate_attachement": {
       "type": "string"

@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/RequestforQuotationItemWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "section_break_5": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "image_view": {
+      "type": "string",
+      "x-frappe-options": "image"
+    },
+    "quantity": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "schedule_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "warehouse_and_reference": {
+      "type": "string"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "project_name": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "col_break4": {
+      "type": "string"
+    },
+    "material_request_item": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "page_break": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "image_section": {
+      "type": "string"
+    },
+    "section_break_23": {
+      "type": "string"
+    },
+    "section_break_24": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    },
+    "conversion_factor": {
+      "type": "number"
+    },
+    "stock_uom": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "item_code",
+    "qty",
+    "schedule_date",
+    "conversion_factor",
+    "stock_uom"
+  ],
+  "additionalProperties": false,
+  "x-module": "Buying"
+}

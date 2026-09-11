@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetRepairPurchaseInvoiceWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "purchase_invoice": {
+      "type": "string",
+      "x-frappe-target-doctype": "Purchase Invoice"
+    },
+    "expense_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "repair_cost": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "expense_account",
+    "repair_cost"
+  ],
+  "additionalProperties": false,
+  "x-module": "Assets"
+}

@@ -25,7 +25,12 @@
       }
     },
     "enabled": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     }
   },
   "required": [

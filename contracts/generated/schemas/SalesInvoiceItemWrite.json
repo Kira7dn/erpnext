@@ -1,0 +1,298 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SalesInvoiceItemWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "barcode": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "image_view": {
+      "type": "string",
+      "x-frappe-options": "image"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "quantity_and_rate": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "conversion_factor": {
+      "type": "number"
+    },
+    "section_break_17": {
+      "type": "string"
+    },
+    "discount_and_margin": {
+      "type": "string"
+    },
+    "margin_type": {
+      "type": "string",
+      "enum": [
+        "Percentage",
+        "Amount"
+      ]
+    },
+    "margin_rate_or_amount": {
+      "type": "number"
+    },
+    "column_break_19": {
+      "type": "string"
+    },
+    "discount_percentage": {
+      "type": "number"
+    },
+    "discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "section_break1": {
+      "type": "string"
+    },
+    "rate": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "col_break3": {
+      "type": "string"
+    },
+    "section_break_21": {
+      "type": "string"
+    },
+    "column_break_24": {
+      "type": "string"
+    },
+    "drop_ship": {
+      "type": "string"
+    },
+    "accounting": {
+      "type": "string"
+    },
+    "income_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "expense_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "col_break4": {
+      "type": "string"
+    },
+    "item_tax_template": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Tax Template"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "deferred_revenue": {
+      "type": "string"
+    },
+    "deferred_revenue_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "service_stop_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "enable_deferred_revenue": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "column_break_50": {
+      "type": "string"
+    },
+    "service_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "service_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "section_break_18": {
+      "type": "string"
+    },
+    "column_break_21": {
+      "type": "string"
+    },
+    "warehouse_and_reference": {
+      "type": "string"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "target_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse",
+      "writeOnly": true
+    },
+    "quality_inspection": {
+      "type": "string",
+      "x-frappe-target-doctype": "Quality Inspection"
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "col_break5": {
+      "type": "string"
+    },
+    "allow_zero_valuation_rate": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "serial_no": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "edit_references": {
+      "type": "string"
+    },
+    "column_break_74": {
+      "type": "string"
+    },
+    "asset": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset"
+    },
+    "section_break_54": {
+      "type": "string"
+    },
+    "page_break": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "description_section": {
+      "type": "string"
+    },
+    "image_section": {
+      "type": "string"
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "finance_book": {
+      "type": "string",
+      "x-frappe-target-doctype": "Finance Book"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "incoming_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "discount_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "internal_transfer_section": {
+      "type": "string"
+    },
+    "column_break_92": {
+      "type": "string"
+    },
+    "serial_and_batch_bundle": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "pick_serial_and_batch": {
+      "type": "string"
+    },
+    "use_serial_batch_fields": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "section_break_eoec": {
+      "type": "string"
+    },
+    "column_break_ytgd": {
+      "type": "string"
+    },
+    "available_quantity_section": {
+      "type": "string"
+    },
+    "column_break_ogff": {
+      "type": "string"
+    },
+    "column_break_vwhb": {
+      "type": "string"
+    },
+    "pos_invoice": {
+      "type": "string",
+      "x-frappe-target-doctype": "POS Invoice"
+    },
+    "tax_withholding_category": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Withholding Category"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "cost_center",
+    "income_account",
+    "item_name",
+    "rate"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

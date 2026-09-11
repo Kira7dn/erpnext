@@ -1,0 +1,18 @@
+{
+  "naming_series": "RFQ-.YYYYMMDD.-.####",
+  "company": "Letron Việt Nam",
+  "transaction_date": "2026-09-12",
+  "subject": "Contract test RFQ",
+  "suppliers": [{ "supplier": "Link Strategy" }],
+  "items": [
+    {
+      "item_code": "CONTRACT-TEST-ITEM",
+      "qty": 2,
+      "schedule_date": "2026-10-12",
+      "warehouse": "Cửa hàng - LTVN",
+      "uom": "Nos",
+      "stock_uom": "Nos",
+      "conversion_factor": 1
+    }
+  ]
+}

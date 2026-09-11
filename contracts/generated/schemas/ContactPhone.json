@@ -11,10 +11,20 @@
       "x-frappe-options": "Phone"
     },
     "is_primary_phone": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "is_primary_mobile_no": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     }
   },
   "required": [

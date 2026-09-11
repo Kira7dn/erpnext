@@ -34,10 +34,20 @@
       "type": "string"
     },
     "enable_cwip_accounting": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "non_depreciable_category": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     }
   },
   "required": [

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetCategoryResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "asset_category_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "finance_book_detail": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "finance_books": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AssetFinanceBookResponse.json"
+      }
+    },
+    "section_break_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "accounts": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AssetCategoryAccountResponse.json"
+      }
+    },
+    "depreciation_options": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "enable_cwip_accounting": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "non_depreciable_category": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SerialandBatchEntryWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "serial_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial No"
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "column_break_2": {
+      "type": "string"
+    },
+    "section_break_6": {
+      "type": "string"
+    },
+    "column_break_8": {
+      "type": "string"
+    },
+    "section_break_gmim": {
+      "type": "string"
+    },
+    "column_break_eykr": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

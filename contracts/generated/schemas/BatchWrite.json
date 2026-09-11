@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BatchWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "disabled": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "batch_id": {
+      "type": "string"
+    },
+    "item": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "manufacturing_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "source": {
+      "type": "string"
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "section_break_7": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "sb_batch": {
+      "type": "string"
+    },
+    "manufacturing_section": {
+      "type": "string"
+    },
+    "column_break_23": {
+      "type": "string"
+    },
+    "column_break_xrll": {
+      "type": "string"
+    },
+    "allow_negative_stock_for_batch": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "batch_id",
+    "item"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

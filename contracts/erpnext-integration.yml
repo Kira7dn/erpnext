@@ -162,6 +162,62 @@ runtime:
     - {module: Assets, resource: actions, method: POST, path: '/api/v1/assets/actions/{action}', operation: update, operation_id: runAssetAction, handler: letron_api.assets.assets.asset_action}
     - {module: Assets, resource: reports, method: GET, path: /api/v1/assets/reports/report, operation: read, operation_id: runAssetReport, handler: letron_api.assets.assets.asset_report}
     - {module: Assets, resource: dashboard, method: GET, path: /api/v1/assets/dashboard, operation: read, operation_id: getAssetDashboard, handler: letron_api.assets.assets.asset_dashboard}
+  # Controller rules are part of the public contract. They are maintained
+  # here as catalog data and applied to generated Write schemas; they must
+  # not be rediscovered by trial-and-error in frontend code.
+  controller_contracts:
+    - doctype: Request for Quotation Item
+      required_write_fields:
+        conversion_factor: {type: number}
+        stock_uom: {type: string}
+    - doctype: Supplier Quotation Item
+      allowed_write_fields:
+        request_for_quotation: {type: string}
+        request_for_quotation_item: {type: string}
+        material_request: {type: string}
+        material_request_item: {type: string}
+  generated_schemas:
+    PurchaseOrchestrationRequest:
+      type: object
+      additionalProperties: false
+      required: [material_request, suppliers]
+      properties:
+        material_request:
+          type: object
+          additionalProperties: false
+          required: [material_request_type, company, transaction_date, items]
+          properties:
+            material_request_type: {type: string, enum: [Purchase, Material Transfer, Material Issue, Manufacture]}
+            company: {type: string}
+            transaction_date: {type: string, format: date}
+            schedule_date: {type: string, format: date}
+            title: {type: string}
+            items:
+              type: array
+              minItems: 1
+              items:
+                type: object
+                additionalProperties: false
+                required: [item_code, qty, schedule_date, warehouse]
+                properties:
+                  item_code: {type: string}
+                  qty: {type: number, exclusiveMinimum: 0}
+                  schedule_date: {type: string, format: date}
+                  warehouse: {type: string}
+                  uom: {type: string}
+                  rate: {type: number, minimum: 0}
+        suppliers:
+          type: array
+          minItems: 1
+          items: {type: string, minLength: 1}
+        justification: {type: string}
+    PurchaseOrchestrationResponse:
+      type: object
+      additionalProperties: true
+      required: [id, status]
+      properties:
+        id: {type: string}
+        status: {type: string}
   include_methods:
     - letron_api.control.api.health
     - letron_api.control.api.runtime_info

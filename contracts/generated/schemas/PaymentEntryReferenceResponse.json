@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PaymentEntryReferenceResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "reference_doctype": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType"
+    },
+    "reference_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "reference_doctype"
+    },
+    "due_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date",
+      "readOnly": true
+    },
+    "bill_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "column_break_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "total_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "outstanding_amount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "allocated_amount": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "exchange_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "payment_term": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Payment Term"
+    },
+    "exchange_gain_loss": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account"
+    },
+    "account_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payment_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payment_request": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Payment Request"
+    },
+    "payment_term_outstanding": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "payment_request_outstanding": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "readOnly": true
+    },
+    "reconcile_effect_on": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date",
+      "readOnly": true
+    },
+    "advance_voucher_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "DocType",
+      "readOnly": true
+    },
+    "advance_voucher_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "advance_voucher_type",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

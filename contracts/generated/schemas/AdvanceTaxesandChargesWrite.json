@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AdvanceTaxesandChargesWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "charge_type": {
+      "type": "string",
+      "enum": [
+        "Actual",
+        "On Paid Amount",
+        "On Previous Row Amount",
+        "On Previous Row Total"
+      ]
+    },
+    "row_id": {
+      "type": "string"
+    },
+    "account_head": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "col_break_1": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "section_break_8": {
+      "type": "string"
+    },
+    "rate": {
+      "type": "number"
+    },
+    "section_break_9": {
+      "type": "string"
+    },
+    "tax_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "column_break_13": {
+      "type": "string"
+    },
+    "add_deduct_tax": {
+      "type": "string",
+      "enum": [
+        "Add",
+        "Deduct"
+      ]
+    },
+    "included_in_paid_amount": {
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_head",
+    "add_deduct_tax",
+    "charge_type",
+    "description"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

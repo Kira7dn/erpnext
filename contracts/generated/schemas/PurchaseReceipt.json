@@ -43,14 +43,24 @@
       "format": "time"
     },
     "set_posting_time": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "company": {
       "type": "string",
       "x-frappe-target-doctype": "Company"
     },
     "is_return": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "return_against": {
@@ -125,7 +135,12 @@
       "type": "number"
     },
     "ignore_pricing_rule": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "sec_warehouse": {
       "type": "string"
@@ -142,7 +157,12 @@
       "type": "string"
     },
     "is_subcontracted": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "supplier_warehouse": {
@@ -356,7 +376,12 @@
       "readOnly": true
     },
     "disable_rounded_total": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "tc_name": {
       "type": "string",
@@ -424,7 +449,12 @@
       "readOnly": true
     },
     "group_same_items": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "column_break_97": {
       "type": "string"
@@ -458,7 +488,12 @@
       "format": "date"
     },
     "is_internal_supplier": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "inter_company_reference": {
@@ -479,7 +514,12 @@
       "readOnly": true
     },
     "apply_putaway_rule": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "per_returned": {
       "type": "number",
@@ -505,7 +545,12 @@
       "type": "string"
     },
     "is_old_subcontracting_flow": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },

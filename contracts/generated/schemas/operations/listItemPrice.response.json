@@ -6,7 +6,7 @@
     "data": {
       "type": "array",
       "items": {
-        "$ref": "ItemPrice.json"
+        "$ref": "ItemPriceResponse.json"
       }
     },
     "message": {}

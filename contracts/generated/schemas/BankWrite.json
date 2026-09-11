@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankWrite.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "bank_name": {
+      "type": "string"
+    },
+    "bank_details_section": {
+      "type": "string"
+    },
+    "swift_number": {
+      "type": "string"
+    },
+    "column_break_1": {
+      "type": "string"
+    },
+    "address_and_contact": {
+      "type": "string",
+      "x-frappe-options": "fa fa-map-marker"
+    },
+    "address_html": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "column_break_13": {
+      "type": "string"
+    },
+    "contact_html": {
+      "type": "string"
+    },
+    "data_import_configuration_section": {
+      "type": "string"
+    },
+    "bank_transaction_mapping": {
+      "type": "array",
+      "items": {
+        "$ref": "BankTransactionMappingWrite.json"
+      }
+    },
+    "section_break_4": {
+      "type": "string"
+    },
+    "custom_letron_orchestration_id": {
+      "type": "string"
+    },
+    "custom_lark_approval_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "bank_name"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

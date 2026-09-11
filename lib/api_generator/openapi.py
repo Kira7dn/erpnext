@@ -1,4 +1,5 @@
 import hashlib
+import copy
 import os
 import re
 from typing import Any
@@ -36,7 +37,8 @@ def _field_schema(field: Any, names: dict[str, str]) -> dict[str, Any]:
     elif fieldtype in {"Float", "Currency", "Percent", "Duration"}:
         schema = {"type": "number"}
     elif fieldtype == "Check":
-        schema = {"type": "boolean"}
+        # Frappe accepts and returns Check values as either booleans or 0/1.
+        schema = {"type": ["boolean", "integer"], "minimum": 0, "maximum": 1}
     elif fieldtype == "Date":
         schema = {"type": "string", "format": "date"}
     elif fieldtype == "Datetime":
@@ -72,11 +74,58 @@ def _schema(dt: DocType, names: dict[str, str]) -> dict[str, Any]:
     return {"type": "object", "properties": properties, "required": sorted(set(required)), "additionalProperties": True, "x-module": dt.module or "Uncategorized"}
 
 
-def _write_schema(schema: dict[str, Any]) -> dict[str, Any]:
-    properties = {key: value for key, value in schema["properties"].items() if not value.get("readOnly")}
+def _replace_model_refs(value: Any, suffix: str) -> Any:
+    if isinstance(value, dict):
+        result = {key: _replace_model_refs(item, suffix) for key, item in value.items()}
+        ref = result.get("$ref")
+        if isinstance(ref, str) and ref.startswith("#/components/schemas/"):
+            name = ref.rsplit("/", 1)[-1]
+            if not name.endswith(("Response", "Write")):
+                result["$ref"] = f"#/components/schemas/{name}{suffix}"
+        return result
+    if isinstance(value, list):
+        return [_replace_model_refs(item, suffix) for item in value]
+    return value
+
+
+def _write_schema(
+    schema: dict[str, Any],
+    *,
+    child_table: bool = False,
+    required_overrides: dict[str, dict[str, Any]] | None = None,
+    allowed_overrides: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    properties = {
+        key: _replace_model_refs(copy.deepcopy(value), "Write")
+        for key, value in schema["properties"].items()
+        if not value.get("readOnly")
+    }
+    # Public orchestration fields are custom DocFields and are not present in
+    # the static DocType model. Keep the write contract closed with an
+    # explicit managed overlay instead of accepting arbitrary properties.
+    properties.setdefault("custom_letron_orchestration_id", {"type": "string"})
+    properties.setdefault("custom_lark_approval_status", {"type": "string"})
+    for name, definition in (allowed_overrides or {}).items():
+        properties[name] = copy.deepcopy(definition)
+    for name, field_schema in properties.items():
+        if name == "naming_series" or name.endswith("_series"):
+            field_schema = dict(field_schema)
+            field_schema.pop("enum", None)
+            properties[name] = field_schema
     # Frappe generates `name`; it is a path/output field, never a required
     # public create/update input. Public writes are deliberately closed.
     required = [key for key in schema.get("required", []) if key in properties and key != "name"]
+    if child_table:
+        # Frappe child rows commonly mark values as required because the
+        # controller fills them from the linked Item/UOM after insert. They
+        # are not required public inputs (for example MR item uom and
+        # conversion_factor), so do not expose storage-time requirements as
+        # client payload requirements.
+        required = [key for key in required if key not in {"uom", "stock_uom", "conversion_factor"}]
+    for name, definition in (required_overrides or {}).items():
+        properties[name] = copy.deepcopy(definition)
+        if name not in required:
+            required.append(name)
     return {"type": "object", "properties": properties, "required": required, "additionalProperties": False, "x-module": schema.get("x-module")}
 
 
@@ -89,6 +138,49 @@ def _response(description: str, schema: dict[str, Any] | None = None, status: st
 
 def _document_response(schema: dict[str, Any], envelope: str = "data") -> dict[str, Any]:
     return {"type": "object", "properties": {envelope: schema}, "required": [envelope]}
+
+
+def _nullable_response_properties(properties: dict[str, Any]) -> dict[str, Any]:
+    """Allow sparse Frappe list rows to omit or null non-key fields."""
+    result: dict[str, Any] = {}
+    for name, schema in properties.items():
+        if name == "name":
+            result[name] = schema
+            continue
+        if "$ref" in schema:
+            result[name] = {"anyOf": [schema, {"type": "null"}]}
+            continue
+        nullable = dict(schema)
+        # Naming series are tenant/configuration data. Frappe may return a
+        # configured series that is not present in the DocType's static
+        # Select options.
+        if name == "naming_series" or name.endswith("_series"):
+            nullable.pop("enum", None)
+        field_type = nullable.get("type")
+        if isinstance(field_type, str):
+            accepted_types = [field_type, "null"]
+            if field_type == "boolean":
+                accepted_types.insert(1, "integer")
+                nullable["minimum"] = 0
+                nullable["maximum"] = 1
+            nullable["type"] = accepted_types
+            if isinstance(nullable.get("enum"), list):
+                nullable["enum"] = [*nullable["enum"], "", None]
+        else:
+            nullable = {"anyOf": [schema, {"type": "null"}]}
+        result[name] = nullable
+    return result
+
+
+def _read_schema(schema: dict[str, Any]) -> dict[str, Any]:
+    """Build a sparse native-response schema from a DocType model schema."""
+    return {
+        "type": "object",
+        "properties": _replace_model_refs(_nullable_response_properties(schema["properties"]), "Response"),
+        "required": ["name"],
+        "additionalProperties": True,
+        "x-module": schema.get("x-module"),
+    }
 
 
 def _json_body(schema: dict[str, Any], required: bool = True) -> dict[str, Any]:
@@ -191,6 +283,37 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
         "BankTransactionAllocation": {"type": "object", "properties": {"payment_document": {"type": "string", "enum": ["Payment Entry", "Journal Entry"]}, "payment_entry": {"type": "string"}, "allocated_amount": {"type": "number", "minimum": 0}}, "required": ["payment_document", "payment_entry"], "additionalProperties": False},
         "BankTransactionReconcileRequest": {"type": "object", "properties": {"allocations": {"type": "array", "items": {"$ref": "#/components/schemas/BankTransactionAllocation"}, "minItems": 1}}, "required": ["allocations"], "additionalProperties": False},
     })
+    schemas.update(runtime.get("generated_schemas", {}))
+    # Keep model, write-input and sparse-response contracts separate. In
+    # particular, child-table inputs must not inherit server-generated fields
+    # such as name, stock_uom or conversion_factor as required inputs.
+    for dt in doctypes:
+        if dt.name not in public_names:
+            continue
+        model_schema_name = names[dt.name]
+        overrides = next(
+            (
+                item.get("required_write_fields")
+                for item in runtime.get("controller_contracts", [])
+                if item.get("doctype") == dt.name
+            ),
+            None,
+        )
+        allowed_overrides = next(
+            (
+                item.get("allowed_write_fields")
+                for item in runtime.get("controller_contracts", [])
+                if item.get("doctype") == dt.name
+            ),
+            None,
+        )
+        schemas[f"{model_schema_name}Write"] = _write_schema(
+            schemas[model_schema_name],
+            child_table=dt.is_child_table,
+            required_overrides=overrides,
+            allowed_overrides=allowed_overrides,
+        )
+        schemas[f"{model_schema_name}Response"] = _read_schema(schemas[model_schema_name])
     error_schema = {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/FrappeError"}}}}
     error = {
         "400": {"description": "Invalid request", **error_schema},
@@ -242,10 +365,15 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
         detail_route = route + "/{name}"
         detail_parameters = [{"name": "name", "in": "path", "required": True, "schema": {"type": "string"}}, *request_headers]
         detail_write_parameters = [{"name": "name", "in": "path", "required": True, "schema": {"type": "string"}}, *write_headers]
-        typed_schema = {"$ref": f"#/components/schemas/{names[dt.name]}"}
-        write_schema = _write_schema(schemas[names[dt.name]])
+        model_schema_name = names[dt.name]
+        response_schema_name = f"{model_schema_name}Response"
+        typed_schema = {"$ref": f"#/components/schemas/{response_schema_name}"}
+        write_schema = {"$ref": f"#/components/schemas/{model_schema_name}Write"}
         tag = f"Module: {dt.module or 'Uncategorized'}"
-        list_schema = {"type": "object", "properties": {"data": {"type": "array", "items": typed_schema}, "message": {}}, "required": ["data"]}
+        # Frappe list responses are sparse: callers may request a subset of
+        # fields, so DocType-required fields are not response-required here.
+        list_item_schema = typed_schema
+        list_schema = {"type": "object", "properties": {"data": {"type": "array", "items": list_item_schema}, "message": {}}, "required": ["data"]}
         request_body = _json_body(write_schema)
         request_body["content"]["application/json"]["example"] = _example(dt, write_schema)["example"]
         paths[route] = {

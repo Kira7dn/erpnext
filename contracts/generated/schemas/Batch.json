@@ -7,7 +7,12 @@
       "type": "string"
     },
     "disabled": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "batch_id": {
       "type": "string"
@@ -94,14 +99,24 @@
       "readOnly": true
     },
     "use_batchwise_valuation": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "column_break_xrll": {
       "type": "string"
     },
     "allow_negative_stock_for_batch": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     }
   },
   "required": [

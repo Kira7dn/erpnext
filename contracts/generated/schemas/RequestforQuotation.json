@@ -129,10 +129,20 @@
       "readOnly": true
     },
     "send_attached_files": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "send_document_print": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "billing_address": {
       "type": "string",
@@ -143,7 +153,12 @@
       "readOnly": true
     },
     "has_unit_price_items": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "writeOnly": true
     },
     "subject": {
@@ -153,7 +168,12 @@
       "type": "string"
     },
     "use_html": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "writeOnly": true
     },
     "address_and_contact_tab": {

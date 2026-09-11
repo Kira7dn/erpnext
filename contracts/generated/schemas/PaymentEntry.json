@@ -264,7 +264,12 @@
       "readOnly": true
     },
     "custom_remarks": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "tax_withholding_category": {
       "type": "string",
@@ -341,7 +346,12 @@
       "type": "string"
     },
     "book_advance_payments_in_separate_party_account": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true
     },
     "base_in_words": {
@@ -353,7 +363,12 @@
       "readOnly": true
     },
     "reconcile_on_advance_payment_date": {
-      "type": "boolean",
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1,
       "readOnly": true,
       "writeOnly": true
     },
@@ -365,7 +380,12 @@
       ]
     },
     "apply_tds": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "section_tax_withholding_entry": {
       "type": "string"
@@ -375,7 +395,12 @@
       "x-frappe-target-doctype": "Tax Withholding Group"
     },
     "ignore_tax_withholding_threshold": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "tax_withholding_entries": {
       "type": "array",
@@ -384,7 +409,12 @@
       }
     },
     "override_tax_withholding_entries": {
-      "type": "boolean"
+      "type": [
+        "boolean",
+        "integer"
+      ],
+      "minimum": 0,
+      "maximum": 1
     },
     "auto_repeat_section": {
       "type": "string"

@@ -132,7 +132,6 @@ export async function submitQuotation(accessId: string, payload: Row): Promise<R
     });
     if (seen.size !== source.size) throw new ApiRequestError("validation_failed", "Every RFQ item must be quoted exactly once.", 400);
     const quotationPayload: Record<string, unknown> = {
-      doctype: "Supplier Quotation",
       naming_series: "SQ-.YYYYMMDD.-.####",
       supplier: access.supplier,
       company: rfq.company,
@@ -140,10 +139,11 @@ export async function submitQuotation(accessId: string, payload: Row): Promise<R
       custom_letron_orchestration_id: access.orchestration_id,
       items,
     };
-    const currency = text(rfq.currency);
+    const company = await frappeGet<Row>("Company", text(rfq.company));
+    const currency = text(rfq.currency) || text(company.default_currency) || "VND";
     const conversionRate = Number(rfq.conversion_rate);
-    if (currency) quotationPayload.currency = currency;
-    if (Number.isFinite(conversionRate) && conversionRate > 0) quotationPayload.conversion_rate = conversionRate;
+    quotationPayload.currency = currency;
+    quotationPayload.conversion_rate = Number.isFinite(conversionRate) && conversionRate > 0 ? conversionRate : 1;
     const doc = await frappeCreateSupplierQuotation(quotationPayload);
     const quotationName = text(doc.name);
     if (!quotationName) throw new ApiRequestError("supplier_quotation_missing", "ERPNext did not return the Supplier Quotation name.", 502);

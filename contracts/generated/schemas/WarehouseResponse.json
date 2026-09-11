@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/WarehouseResponse.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "warehouse_detail": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "warehouse_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_group": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "company": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Company"
+    },
+    "disabled": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "column_break_4": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "account": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Account"
+    },
+    "address_and_contact": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "address_html": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_10": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "contact_html": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "warehouse_contact_info": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "email_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "writeOnly": true
+    },
+    "phone_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "Phone"
+    },
+    "mobile_no": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-options": "Phone"
+    },
+    "column_break0": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "address_line_1": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "address_line_2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "city": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "state": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pin": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tree_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "parent_warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "lft": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "rgt": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "old_parent": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "warehouse_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse Type"
+    },
+    "column_break_3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "default_in_transit_warehouse": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "transit_section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_qajx": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_rejected_warehouse": {
+      "anyOf": [
+        {
+          "type": [
+            "boolean",
+            "integer"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-frappe-target-doctype": "Customer"
+    },
+    "section_break_ujhu": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "column_break_qhdh": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}
