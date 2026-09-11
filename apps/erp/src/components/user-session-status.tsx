@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { CircleUserRound } from "lucide-react";
 import { getPortalUser } from "@/lib/portal-session";
 import { larkLoginHref } from "@/lib/auth-navigation";
@@ -7,13 +6,15 @@ export async function UserSessionStatus({ returnTo }: { returnTo: string }) {
   const user = await getPortalUser();
   if (!user) {
     return (
-      <Link
+      <a
         className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
         href={larkLoginHref(returnTo)}
+        target="_top"
+        rel="noopener"
       >
         <span className="size-2 rounded-full bg-slate-400" />
         Chưa đăng nhập
-      </Link>
+      </a>
     );
   }
   return (
