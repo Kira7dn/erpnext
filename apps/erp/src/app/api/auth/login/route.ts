@@ -14,7 +14,10 @@ export function GET(request: NextRequest): NextResponse {
   }
   const callback = new URL("/api/auth/oidc/callback", request.url);
   callback.searchParams.set("return_to", returnTo.pathname + returnTo.search);
-  const loginUrl = new URL("/api/auth/lark/start", authBaseUrl);
+  // Keep the browser on the public login entrypoint. The Lark callback remains
+  // /api/auth/lark/callback, which is the URI registered in Lark Developer
+  // Console; this route only selects the safe start URL.
+  const loginUrl = new URL("/api/auth/start", authBaseUrl);
   loginUrl.searchParams.set("handoff", "1");
   loginUrl.searchParams.set("return_to", callback.toString());
   return NextResponse.redirect(loginUrl, 303);
