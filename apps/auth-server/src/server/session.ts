@@ -19,8 +19,12 @@ export type AuthenticatedUser = {
   subjectType: string | null;
 };
 
-function cookieOptions(req: NextApiRequest): { secure: boolean } {
-  return { secure: requestIsSecure(req) };
+function cookieOptions(req: NextApiRequest): { secure: boolean; domain?: string } {
+  const authHost = new URL(getEnv().LETRON_AUTH_BASE_URL).hostname.toLowerCase().split(".");
+  // Derive one parent domain from Auth itself. Every subdomain receives the
+  // cookie; localhost remains host-only because it has no parent subdomain.
+  const domain = authHost.length >= 3 ? `.${authHost.slice(1).join(".")}` : undefined;
+  return { secure: requestIsSecure(req), ...(domain ? { domain } : {}) };
 }
 
 export async function createSession(userId: string): Promise<{ token: string; expiresAt: Date }> {

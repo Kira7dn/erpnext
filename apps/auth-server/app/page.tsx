@@ -40,7 +40,7 @@ function BackupCardLink() {
 
 export default async function HomePage() {
   const user = await getUserBySessionToken((await cookies()).get(SESSION_COOKIE)?.value);
-  if (!user) redirect("/api/auth/lark/start?return_to=/");
+  if (!user) redirect("/api/auth/start?return_to=/");
 
   getEnv();
   const isAccessAdmin = user.groupIds.includes(GLOBAL_ACCESS_ADMIN_GROUP_ID);
