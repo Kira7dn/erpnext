@@ -264,6 +264,18 @@ function authGatewayUrl(path: string): string {
   return `${baseUrl}/api/gateway${path}`;
 }
 
+function appKeyForGatewayPath(path: string): AppKey {
+  if (path.startsWith("/api/v1/assets/")) return "assets";
+  if (
+    path.startsWith("/api/v1/purchase/") ||
+    path.startsWith("/api/v1/stock/") ||
+    path.startsWith("/api/v1/crm/") ||
+    path.startsWith("/api/v1/buying/") ||
+    path.startsWith("/api/v1/files/")
+  ) return "purchase";
+  return "accounts";
+}
+
 export function isAccountingResource(
   value: string,
 ): value is AccountingResource {
@@ -361,7 +373,7 @@ export async function gatewayRequest<T>(
 ): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
-  const appKey: AppKey = path.startsWith("/api/v1/assets") ? "assets" : path.startsWith("/api/v1/purchase") ? "purchase" : "accounts";
+  const appKey = appKeyForGatewayPath(path);
   const cookieName = APP_SESSION_COOKIES[appKey].replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const bffCookie = cookieHeader.match(new RegExp(`(?:^|;\\s*)${cookieName}=([^;]+)`))?.[1];
   if (bffCookie) {
