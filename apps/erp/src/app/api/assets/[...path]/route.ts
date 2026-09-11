@@ -4,7 +4,7 @@ import { apiErrorFromResponse, apiErrorResponse } from "@/lib/api-error";
 
 import { isAssetResource, isAssetVirtualResource } from "@/lib/letron-api";
 import { portalAuthBaseUrl } from "@/lib/portal-config";
-import { clearErpSessionCookies, ERP_SESSION_COOKIE } from "@/lib/erp-auth-session";
+import { ERP_SESSION_COOKIE } from "@/lib/erp-auth-session";
 
 const METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 
@@ -33,10 +33,8 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   } catch {
     return apiErrorResponse("gateway_unavailable", 503, "Letron Gateway is unavailable.", true);
   }
-  if (!response.ok) {
-    const error = await apiErrorFromResponse(response, "asset_request_failed");
-    return response.status === 401 ? clearErpSessionCookies(error) : error;
-  }
+  if (!response.ok)
+    return apiErrorFromResponse(response, "asset_request_failed");
   const responseHeaders = new Headers({ "content-type": response.headers.get("content-type") ?? "application/json" });
   const gatewayTiming = response.headers.get("server-timing");
   if (gatewayTiming) responseHeaders.set("Server-Timing", `${gatewayTiming}, erp_route;dur=${(performance.now() - startedAt).toFixed(1)}`);

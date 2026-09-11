@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { apiErrorFromResponse, apiErrorResponse } from "@/lib/api-error";
 import { isPurchaseResource } from "@/lib/letron-api";
 import { portalAuthBaseUrl } from "@/lib/portal-config";
-import { clearErpSessionCookies, ERP_SESSION_COOKIE } from "@/lib/erp-auth-session";
+import { ERP_SESSION_COOKIE } from "@/lib/erp-auth-session";
 
 const METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 const OFFICIAL_MODULES: Record<string, string> = {
@@ -83,10 +83,8 @@ async function proxy(
   } catch {
     return apiErrorResponse("gateway_unavailable", 503, "Letron Gateway is unavailable.", true);
   }
-  if (!response.ok) {
-    const error = await apiErrorFromResponse(response, "purchase_request_failed");
-    return response.status === 401 ? clearErpSessionCookies(error) : error;
-  }
+  if (!response.ok)
+    return apiErrorFromResponse(response, "purchase_request_failed");
   const responseHeaders = new Headers({
     "content-type": response.headers.get("content-type") ?? "application/json",
   });
