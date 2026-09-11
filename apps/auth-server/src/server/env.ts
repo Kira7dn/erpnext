@@ -20,7 +20,14 @@ const schema = z.object({
   LARK_APP_SECRET: z.string().min(1),
   LARK_ALLOWED_TENANT_KEY: z.string().min(1),
   FRAPPE_ERP_NEXT_URL: z.url().transform((value) => value.replace(/\/$/, "")),
-  LETRON_ERP_APP_BASE_URL: z.url().transform((value) => value.replace(/\/$/, "")),
+  LETRON_ERP_APP_BASE_URL: z
+    .url()
+    .transform((value) => value.replace(/\/$/, "")),
+  LETRON_ERP_SESSION_TTL_SECONDS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(86400),
   LETRON_INTERNAL_API_SECRET: z.string().min(32).optional(),
   AUTH_DATA_ENCRYPTION_KEY: z.string().min(1),
   OIDC_COOKIE_KEYS: z.string().min(1),
@@ -31,7 +38,9 @@ const schema = z.object({
   AWS_SECRET_ACCESS_KEY: z.string().min(1).optional(),
   AWS_DEFAULT_REGION: z.string().default("ap-southeast-1"),
   S3_BUCKET_NAME: z.string().default("letron-erp-backups"),
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
 });
 
 export type AuthEnv = z.infer<typeof schema>;
@@ -39,15 +48,24 @@ export type AuthEnv = z.infer<typeof schema>;
 function loadLocalFiles(): void {
   if (loadedFiles || process.env.VERCEL) return;
   loadedFiles = true;
-  loadDotEnv({ path: resolve(process.cwd(), "../../.env"), override: false, quiet: true });
+  loadDotEnv({
+    path: resolve(process.cwd(), "../../.env"),
+    override: false,
+    quiet: true,
+  });
 }
 
 export function getEnv(): AuthEnv {
   if (cachedEnv) return cachedEnv;
   loadLocalFiles();
   cachedEnv = schema.parse(process.env);
-  if (AUTH_FEATURE_CONFIG.larkGroupSyncEnabled && !cachedEnv.LETRON_INTERNAL_API_SECRET) {
-    throw new Error("LETRON_INTERNAL_API_SECRET is required when LARK_GROUP_SYNC_ENABLED is true");
+  if (
+    AUTH_FEATURE_CONFIG.larkGroupSyncEnabled &&
+    !cachedEnv.LETRON_INTERNAL_API_SECRET
+  ) {
+    throw new Error(
+      "LETRON_INTERNAL_API_SECRET is required when LARK_GROUP_SYNC_ENABLED is true",
+    );
   }
   return cachedEnv;
 }
@@ -56,7 +74,10 @@ export function resetEnvForTests(): void {
   cachedEnv = undefined;
 }
 
-export function parseJsonEnv<T>(name: "OIDC_COOKIE_KEYS" | "OIDC_JWKS", value: string): T {
+export function parseJsonEnv<T>(
+  name: "OIDC_COOKIE_KEYS" | "OIDC_JWKS",
+  value: string,
+): T {
   try {
     return JSON.parse(value) as T;
   } catch {
