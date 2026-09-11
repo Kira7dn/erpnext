@@ -27,7 +27,7 @@ Flow hiện tại:
 
 ~~~text
 Browser → erp.letron.vn → auth.letron.vn/login
-        → auth.letron.vn/api/auth/start → Lark
+        → auth.letron.vn/login/start → Lark
         → auth.letron.vn/api/auth/lark/callback
         → Set-Cookie: letron_sso; Domain=.letron.vn
         → erp.letron.vn → Portal Gateway → ERPNext /api/v1/*

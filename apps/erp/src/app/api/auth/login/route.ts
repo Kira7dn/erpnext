@@ -17,7 +17,7 @@ export function GET(request: NextRequest): NextResponse {
   // Keep the browser on the public login entrypoint. The Lark callback remains
   // /api/auth/lark/callback, which is the URI registered in Lark Developer
   // Console; this route only selects the safe start URL.
-  const loginUrl = new URL("/api/auth/start", authBaseUrl);
+  const loginUrl = new URL("/login/start", authBaseUrl);
   loginUrl.searchParams.set("handoff", "1");
   loginUrl.searchParams.set("return_to", callback.toString());
   return NextResponse.redirect(loginUrl, 303);

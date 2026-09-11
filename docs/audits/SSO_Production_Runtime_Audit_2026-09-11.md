@@ -23,7 +23,7 @@ phụ và session lifecycle.
 |---|---|---:|
 | 1 | `GET https://erp.letron.vn/` | `307` |
 | 2 | `GET https://auth.letron.vn/login?return_to=https%3A%2F%2Ferp.letron.vn%2F` | `307` |
-| 3 | `GET https://auth.letron.vn/api/auth/start?return_to=...` | `303` |
+| 3 | `GET https://auth.letron.vn/login/start?return_to=...` | `303` |
 | 4 | `GET https://open.larksuite.com/open-apis/authen/v1/authorize` | `302` |
 | 5 | `GET https://accounts.larksuite.com/...` | `200` trang đăng nhập Lark |
 
@@ -56,11 +56,11 @@ Authorization URL có đúng `client_id`, PKCE `code_challenge`, `state`, scope 
 - Xử lý: session cookie được phát hành với parent domain `.letron.vn`.
 - Evidence hiện tại: Playwright login thành công và ERP nhận `letron_sso`.
 
-### SSO-002 — High — Auth flow dùng URL login Lark cũ (đã xử lý)
+### SSO-002 — High — Browser-facing auth entrypoint (đã xử lý)
 
-- Hiện tượng: Chrome hiển thị cảnh báo Dangerous Site khi điều hướng trực tiếp tới `/api/auth/lark/start`.
-- Xử lý: flow điều hướng hiện tại dùng `/api/auth/start`; route này chuyển tiếp nội bộ tới cùng Lark OAuth contract.
-- Evidence hiện tại: request runtime là `/api/auth/start` → `303`, không dùng route cũ làm entrypoint.
+- Hiện tượng: browser bị đưa trực tiếp tới API endpoint trong lúc bắt đầu login.
+- Xử lý: flow browser dùng `/login/start`; endpoint này tạo transaction/cookie rồi chuyển tiếp tới cùng Lark OAuth contract.
+- Callback vẫn giữ nguyên `/api/auth/lark/callback` theo cấu hình Lark.
 
 ### SSO-003 — High — Build production phụ thuộc file `.env` local (đã xử lý)
 
@@ -107,7 +107,7 @@ Authorization URL có đúng `client_id`, PKCE `code_challenge`, `state`, scope 
 
 - ERP production: deployment trạng thái `READY`, branch `main`, commit `c70adb7896d61f2010451cf019bbeda271642d32`.
 - Auth production: deployment trạng thái `READY`, branch `main`, commit `c70adb7896d61f2010451cf019bbeda271642d32`.
-- Auth production có các route `/api/auth/start`, `/api/auth/lark/callback` và `/api/auth/session/refresh`.
+- Auth production có các route `/login/start`, `/api/auth/lark/callback` và `/api/auth/session/refresh`.
 - Vercel logs ghi nhận callback Auth `303`, ERP `/accounts` `200`, và các request Gateway `200`.
 
 ## Rủi ro còn lại và giới hạn bằng chứng
@@ -167,7 +167,7 @@ browser được mở từ deep link.
 
 ### R-03 — High — Browser chặn hoặc cảnh báo URL Auth/Lark
 
-Entry route phải là `/api/auth/start`. Việc điều hướng trực tiếp tới route cũ
+Entry route phải là `/login/start`. Việc điều hướng trực tiếp tới route API
 `/api/auth/lark/start` từng gây cảnh báo Dangerous Site trong Chrome.
 
 Nếu frontend, bookmark, Lark app hoặc redirect config vẫn trỏ route cũ, user có
@@ -208,7 +208,7 @@ variables vẫn là state độc lập. Sai một biến có thể biểu hiện
 Khi `leducanh@ledb.vn` bị lỗi production, thu thập theo đúng thứ tự sau:
 
 1. Xóa riêng site data của `auth.letron.vn` và `erp.letron.vn`, mở context mới.
-2. Xác nhận `/` → `/login` → `/api/auth/start` → Lark.
+2. Xác nhận `/` → `/login` → `/login/start` → Lark.
 3. Kiểm tra không có redirect tới `/api/auth/lark/start` cũ.
 4. Kiểm tra authorization request có `state`, PKCE và callback production.
 5. Kiểm tra callback trả `303`, không phải `400`, `401` hoặc `5xx`.

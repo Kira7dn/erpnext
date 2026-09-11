@@ -34,5 +34,8 @@ export default async function LoginPage({
   const query = new URLSearchParams();
   if (uid) query.set("uid", uid);
   if (returnTo) query.set("return_to", returnTo);
-  redirect(`/api/auth/start${query.toString() ? `?${query.toString()}` : ""}`);
+  // Browser-facing login starts use the App Router entrypoint. OIDC
+  // interactions with a uid still use the Lark API route so the provider
+  // interaction can be resumed server-side.
+  redirect(`${uid ? "/api/auth/lark/start" : "/login/start"}${query.toString() ? `?${query.toString()}` : ""}`);
 }
