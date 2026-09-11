@@ -28,13 +28,7 @@ type ItemRow = {
 };
 type ActiveOrchestration = {
   id: string;
-  status:
-    | "started"
-    | "mr_created"
-    | "partial_failure"
-    | "rfq_created"
-    | "waiting_supplier_quotes"
-    | "failed";
+  status: "started" | "mr_created" | "partial_failure" | "rfq_created" | "waiting_supplier_quotes" | "failed";
   material_request_name?: string;
   request_for_quotation_name?: string;
   retry_count: number;
@@ -256,8 +250,7 @@ async function api(path: string, init?: RequestInit) {
       ...init?.headers,
     },
   });
-  if (!response.ok)
-    throw new PurchaseApiError(response.status, messageFor(response.status));
+  if (!response.ok) throw new PurchaseApiError(response.status, messageFor(response.status));
   const body = (await response.json()) as { data?: unknown; message?: unknown };
   return body.data ?? body.message ?? body;
 }
@@ -274,10 +267,8 @@ function text(value: unknown) {
       : String(value);
 }
 function displayCell(field: string, value: unknown) {
-  if (field === "disabled" || field === "is_stock_item")
-    return value ? "Có" : "Không";
-  if (field === "docstatus")
-    return value === 1 ? "Submitted" : value === 2 ? "Cancelled" : "Draft";
+  if (field === "disabled" || field === "is_stock_item") return value ? "Có" : "Không";
+  if (field === "docstatus") return value === 1 ? "Submitted" : value === 2 ? "Cancelled" : "Draft";
   return text(value);
 }
 function dateValue(value?: unknown) {
@@ -314,13 +305,9 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
     return new URLSearchParams(window.location.search).get("orchestration");
   });
   const [filter, setFilter] = useState<ListFilter>(() => {
-    if (typeof window === "undefined")
-      return { field: filterFields[kind][0].field, value: "" };
+    if (typeof window === "undefined") return { field: filterFields[kind][0].field, value: "" };
     const params = new URLSearchParams(window.location.search);
-    return {
-      field: params.get("filter_field") ?? filterFields[kind][0].field,
-      value: params.get("filter") ?? "",
-    };
+    return { field: params.get("filter_field") ?? filterFields[kind][0].field, value: params.get("filter") ?? "" };
   });
   const [sort, setSort] = useState("modified desc");
   const [toast, setToast] = useState<Toast | null>(null);
@@ -328,9 +315,7 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
   const [creating, setCreating] = useState(false);
   const [opening, setOpening] = useState(false);
   const [hasNext, setHasNext] = useState(false);
-  const [activeOrchestrations, setActiveOrchestrations] = useState<
-    ActiveOrchestration[]
-  >([]);
+  const [activeOrchestrations, setActiveOrchestrations] = useState<ActiveOrchestration[]>([]);
   const [activeBusy, setActiveBusy] = useState(false);
   const [activeError, setActiveError] = useState<string | null>(null);
   const [retryingActiveId, setRetryingActiveId] = useState<string | null>(null);
@@ -340,33 +325,14 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
       setError(null);
       setErrorStatus(null);
       try {
-        const params = new URLSearchParams({
-          limit_page_length: "26",
-          limit_start: String((nextPage - 1) * 25),
-          order_by: sort,
-          fields: JSON.stringify(listFields[kind].map((item) => item.field)),
-        });
-        if (filter.value.trim())
-          params.set(
-            "filters",
-            JSON.stringify([
-              [filter.field, "like", `%${filter.value.trim()}%`],
-            ]),
-          );
+        const params = new URLSearchParams({ limit_page_length: "26", limit_start: String((nextPage - 1) * 25), order_by: sort, fields: JSON.stringify(listFields[kind].map((item) => item.field)) });
+        if (filter.value.trim()) params.set("filters", JSON.stringify([[filter.field, "like", `%${filter.value.trim()}%`]]));
         const result = await api(`${meta.endpoint}?${params.toString()}`);
         const data = Array.isArray(result) ? (result as Row[]) : [];
-        const enriched = await Promise.all(
-          data.slice(0, 25).map(async (row) => {
-            if (!row.name || Object.keys(row).length > 2) return row;
-            try {
-              return (await api(
-                `${meta.endpoint}/${encodeURIComponent(String(row.name))}`,
-              )) as Row;
-            } catch {
-              return row;
-            }
-          }),
-        );
+        const enriched = await Promise.all(data.slice(0, 25).map(async (row) => {
+          if (!row.name || Object.keys(row).length > 2) return row;
+          try { return await api(`${meta.endpoint}/${encodeURIComponent(String(row.name))}`) as Row; } catch { return row; }
+        }));
         setHasNext(data.length > 25);
         setRows(enriched);
         setPage(nextPage);
@@ -457,9 +423,7 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
         if (!cancelled) setEditing(materialRequest);
       } catch (cause) {
         if (!cancelled) {
-          setErrorStatus(
-            cause instanceof PurchaseApiError ? cause.status : null,
-          );
+          setErrorStatus(cause instanceof PurchaseApiError ? cause.status : null);
           setError(
             cause instanceof Error
               ? cause.message
@@ -477,24 +441,11 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
   }, [kind, orchestrationId]);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (query) params.set("q", query);
-    else params.delete("q");
-    if (filter.value) {
-      params.set("filter", filter.value);
-      params.set("filter_field", filter.field);
-    } else {
-      params.delete("filter");
-      params.delete("filter_field");
-    }
-    if (sort !== "modified desc") params.set("sort", sort);
-    else params.delete("sort");
-    if (orchestrationId) params.set("orchestration", orchestrationId);
-    else params.delete("orchestration");
-    window.history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}${params.toString() ? `?${params}` : ""}`,
-    );
+    if (query) params.set("q", query); else params.delete("q");
+    if (filter.value) { params.set("filter", filter.value); params.set("filter_field", filter.field); } else { params.delete("filter"); params.delete("filter_field"); }
+    if (sort !== "modified desc") params.set("sort", sort); else params.delete("sort");
+    if (orchestrationId) params.set("orchestration", orchestrationId); else params.delete("orchestration");
+    window.history.replaceState(null, "", `${window.location.pathname}${params.toString() ? `?${params}` : ""}`);
   }, [filter, orchestrationId, query, sort]);
   async function retryActive(id: string) {
     if (retryingActiveId) return;
@@ -506,9 +457,7 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
         { method: "POST" },
       )) as ActiveOrchestration;
       if (result.status === "waiting_supplier_quotes") {
-        setActiveOrchestrations((current) =>
-          current.filter((item) => item.id !== id),
-        );
+        setActiveOrchestrations((current) => current.filter((item) => item.id !== id));
         setToast({ message: "Đã retry RFQ thành công.", tone: "success" });
       } else {
         setActiveOrchestrations((current) =>
@@ -519,10 +468,7 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
       setActiveError(
         cause instanceof Error ? cause.message : "Không thể retry RFQ.",
       );
-      setToast({
-        message: cause instanceof Error ? cause.message : "Retry RFQ thất bại.",
-        tone: "error",
-      });
+      setToast({ message: cause instanceof Error ? cause.message : "Retry RFQ thất bại.", tone: "error" });
       await loadActive();
     } finally {
       setRetryingActiveId(null);
@@ -530,21 +476,14 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
   }
   const filtered = useMemo(
     () =>
-      rows.filter(
-        (row) =>
-          JSON.stringify(row).toLowerCase().includes(query.toLowerCase()) &&
-          (!filter.value.trim() ||
-            String(row[filter.field] ?? "")
-              .toLowerCase()
-              .includes(filter.value.trim().toLowerCase())),
+      rows.filter((row) =>
+        JSON.stringify(row).toLowerCase().includes(query.toLowerCase()) &&
+        (!filter.value.trim() || String(row[filter.field] ?? "").toLowerCase().includes(filter.value.trim().toLowerCase())),
       ),
     [filter.field, filter.value, rows, query],
   );
   const columns = listFields[kind];
-  const applyFilter = () => {
-    setPage(1);
-    void load(1);
-  };
+  const applyFilter = () => { setPage(1); void load(1); };
   const openDetail = async (row: Row) => {
     if (!row.name || opening) return;
     setOpening(true);
@@ -615,17 +554,16 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
               >
                 <div className="text-sm">
                   <p className="font-medium">
-                    {item.material_request_name ??
-                      "Material Request đang xử lý"}
+                    {item.material_request_name ?? "Material Request đang xử lý"}
                   </p>
                   <p className="text-muted-foreground">
                     {item.status === "partial_failure"
                       ? "MR đã tạo, RFQ chưa tạo được"
                       : item.status === "rfq_created"
-                        ? "RFQ đã tạo, đang tạo Lark Approval"
-                        : item.status === "started"
-                          ? "Đang xử lý"
-                          : "Cần kiểm tra lại"}
+                          ? "RFQ đã tạo, đang tạo Lark Approval"
+                      : item.status === "started"
+                        ? "Đang xử lý"
+                        : "Cần kiểm tra lại"}
                     {item.retry_count ? ` · ${item.retry_count} lần retry` : ""}
                   </p>
                   {item.error ? (
@@ -633,10 +571,7 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
                   ) : null}
                 </div>
                 <Button
-                  disabled={
-                    Boolean(retryingActiveId) ||
-                    (!item.material_request_name && item.status !== "started")
-                  }
+                  disabled={Boolean(retryingActiveId) || (!item.material_request_name && item.status !== "started")}
                   onClick={() => void retryActive(item.id)}
                 >
                   {retryingActiveId === item.id
@@ -648,24 +583,7 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
           </div>
         </section>
       ) : null}
-      {toast ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className={`fixed right-5 top-5 z-[70] max-w-sm rounded-lg border p-4 shadow-lg ${toast.tone === "success" ? "bg-emerald-50 text-emerald-800" : toast.tone === "warning" ? "bg-amber-50 text-amber-900" : "bg-red-50 text-red-800"}`}
-        >
-          <div className="flex items-start gap-3">
-            <span>{toast.message}</span>
-            <button
-              type="button"
-              aria-label="Đóng thông báo"
-              onClick={() => setToast(null)}
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      ) : null}
+      {toast ? <div role="status" aria-live="polite" className={`fixed right-5 top-5 z-[70] max-w-sm rounded-lg border p-4 shadow-lg ${toast.tone === "success" ? "bg-emerald-50 text-emerald-800" : toast.tone === "warning" ? "bg-amber-50 text-amber-900" : "bg-red-50 text-red-800"}`}><div className="flex items-start gap-3"><span>{toast.message}</span><button type="button" aria-label="Đóng thông báo" onClick={() => setToast(null)}>×</button></div></div> : null}
       <section className="rounded-xl border bg-card shadow-sm">
         <div className="flex flex-col gap-4 border-b p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -682,60 +600,15 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
           />
         </div>
         <div className="flex flex-wrap gap-2 border-b p-5">
-          <select
-            className="h-10 rounded-md border bg-background px-3 text-sm"
-            value={filter.field}
-            onChange={(event) =>
-              setFilter({ field: event.target.value, value: filter.value })
-            }
-            aria-label="Trường lọc"
-          >
-            {filterFields[kind].map((item) => (
-              <option key={item.field} value={item.field}>
-                {item.label}
-              </option>
-            ))}
+          <select className="h-10 rounded-md border bg-background px-3 text-sm" value={filter.field} onChange={(event) => setFilter({ field: event.target.value, value: filter.value })} aria-label="Trường lọc">
+            {filterFields[kind].map((item) => <option key={item.field} value={item.field}>{item.label}</option>)}
           </select>
-          <Input
-            className="max-w-xs"
-            placeholder="Giá trị lọc native..."
-            value={filter.value}
-            onChange={(event) =>
-              setFilter((current) => ({
-                ...current,
-                value: event.target.value,
-              }))
-            }
-          />
-          <select
-            className="h-10 rounded-md border bg-background px-3 text-sm"
-            value={sort}
-            onChange={(event) => {
-              setSort(event.target.value);
-              setPage(1);
-            }}
-            aria-label="Sắp xếp"
-          >
-            <option value="modified desc">Mới cập nhật</option>
-            <option value="modified asc">Cũ nhất</option>
-            <option value="name asc">Tên A → Z</option>
-            <option value="name desc">Tên Z → A</option>
+          <Input className="max-w-xs" placeholder="Giá trị lọc native..." value={filter.value} onChange={(event) => setFilter((current) => ({ ...current, value: event.target.value }))} />
+          <select className="h-10 rounded-md border bg-background px-3 text-sm" value={sort} onChange={(event) => { setSort(event.target.value); setPage(1); }} aria-label="Sắp xếp">
+            <option value="modified desc">Mới cập nhật</option><option value="modified asc">Cũ nhất</option><option value="name asc">Tên A → Z</option><option value="name desc">Tên Z → A</option>
           </select>
-          <Button type="button" onClick={applyFilter}>
-            Áp dụng
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              setQuery("");
-              setFilter({ field: filterFields[kind][0].field, value: "" });
-              setSort("modified desc");
-              setPage(1);
-            }}
-          >
-            Xóa lọc
-          </Button>
+          <Button type="button" onClick={applyFilter}>Áp dụng</Button>
+          <Button type="button" variant="outline" onClick={() => { setQuery(""); setFilter({ field: filterFields[kind][0].field, value: "" }); setSort("modified desc"); setPage(1); }}>Xóa lọc</Button>
         </div>
         {busy ? (
           <div className="p-12 text-center text-sm text-muted-foreground">
@@ -745,20 +618,7 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
           <div className="space-y-3 p-8 text-sm text-destructive">
             <p>{error}</p>
             {errorStatus === 401 ? (
-              <a
-                className="block w-fit underline"
-                href="/api/auth/login"
-                target="_top"
-                rel="noopener"
-                onClick={(event) => {
-                  event.preventDefault();
-                  window.top?.location.assign(
-                    larkLoginHref(
-                      `${window.location.pathname}${window.location.search}`,
-                    ),
-                  );
-                }}
-              >
+              <a className="block w-fit underline" href="/api/auth/login" onClick={(event) => { event.preventDefault(); window.location.assign(larkLoginHref(`${window.location.pathname}${window.location.search}`)); }}>
                 Đăng nhập lại bằng Lark
               </a>
             ) : null}
@@ -772,10 +632,10 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
               <thead className="bg-muted/50">
                 <tr>
                   {columns.map(({ field, label }) => (
-                    <th className="whitespace-nowrap px-4 py-3" key={field}>
-                      {label}
-                    </th>
-                  ))}
+                      <th className="whitespace-nowrap px-4 py-3" key={field}>
+                        {label}
+                      </th>
+                    ))}
                   <th className="px-4 py-3">Thao tác</th>
                 </tr>
               </thead>
@@ -783,10 +643,10 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
                 {filtered.map((row, index) => (
                   <tr className="border-t" key={String(row.name ?? index)}>
                     {columns.map(({ field }) => (
-                      <td className="whitespace-nowrap px-4 py-3" key={field}>
-                        {displayCell(field, row[field])}
-                      </td>
-                    ))}
+                        <td className="whitespace-nowrap px-4 py-3" key={field}>
+                          {displayCell(field, row[field])}
+                        </td>
+                      ))}
                     <td className="px-4 py-3">
                       <Button
                         size="sm"
@@ -839,10 +699,7 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
             setOrchestrationId(null);
             void load(page);
             void loadActive();
-            setToast({
-              message: `Đã lưu ${meta.title} thành công.`,
-              tone: "success",
-            });
+            setToast({ message: `Đã lưu ${meta.title} thành công.`, tone: "success" });
           }}
           onToast={setToast}
           onOrchestrationChanged={() => void loadActive()}
@@ -917,9 +774,7 @@ function ResourceModal({
   const [attachment, setAttachment] = useState<File | null>(null);
   const [createdName, setCreatedName] = useState<string | null>(null);
   const [orchestrationId, setOrchestrationId] = useState<string | null>(null);
-  const [orchestrationStatus, setOrchestrationStatus] = useState<
-    ActiveOrchestration["status"] | null
-  >(null);
+  const [orchestrationStatus, setOrchestrationStatus] = useState<ActiveOrchestration["status"] | null>(null);
   const [requestIdempotencyKey] = useState(() => crypto.randomUUID());
   useEffect(() => {
     if (kind !== "request") return;
@@ -1012,10 +867,7 @@ function ResourceModal({
       if (result.status !== "waiting_supplier_quotes") {
         setOrchestrationStatus(result.status as ActiveOrchestration["status"]);
         setError(String(result.error ?? "Không thể tạo RFQ."));
-        onToast({
-          message: String(result.error ?? "Không thể tạo RFQ."),
-          tone: "error",
-        });
+        onToast({ message: String(result.error ?? "Không thể tạo RFQ."), tone: "error" });
         return;
       }
       setOrchestrationStatus(result.status as ActiveOrchestration["status"]);
@@ -1060,15 +912,7 @@ function ResourceModal({
       setError(`${missing.label} là bắt buộc.`);
       return;
     }
-    if (
-      kind === "supplier" &&
-      !Boolean(initial?.disabled) &&
-      Boolean(values.disabled) &&
-      !window.confirm(
-        "Supplier sẽ bị vô hiệu hóa và không dùng được cho RFQ. Tiếp tục?",
-      )
-    )
-      return;
+    if (kind === "supplier" && !Boolean(initial?.disabled) && Boolean(values.disabled) && !window.confirm("Supplier sẽ bị vô hiệu hóa và không dùng được cho RFQ. Tiếp tục?")) return;
     const requestItems = kind === "request" ? buildItems() : [];
     if (kind === "request" && !requestItems.length) {
       setError("Material Request cần ít nhất một Item.");
@@ -1112,9 +956,7 @@ function ResourceModal({
         })) as Row;
         if (result.status !== "waiting_supplier_quotes") {
           setOrchestrationId(String(result.id));
-          setOrchestrationStatus(
-            result.status as ActiveOrchestration["status"],
-          );
+          setOrchestrationStatus(result.status as ActiveOrchestration["status"]);
           onOrchestrationChanged();
           if (result.status === "partial_failure") {
             setStatus(
@@ -1145,15 +987,10 @@ function ResourceModal({
         }
         setStatus(
           attachment
-            ? "Đã tạo Material Request, RFQ và attachment thành công."
-            : "Đã tạo Material Request và RFQ thành công.",
+              ? "Đã tạo Material Request, RFQ và attachment thành công."
+              : "Đã tạo Material Request và RFQ thành công.",
         );
-        onToast({
-          message: attachment
-            ? "Đã tạo Material Request, RFQ và attachment."
-            : "Đã tạo Material Request và RFQ.",
-          tone: "success",
-        });
+        onToast({ message: attachment ? "Đã tạo Material Request, RFQ và attachment." : "Đã tạo Material Request và RFQ.", tone: "success" });
         setDirty(false);
         onSaved();
         return;
@@ -1178,11 +1015,7 @@ function ResourceModal({
       setError(
         cause instanceof Error ? cause.message : "Không thể lưu bản ghi.",
       );
-      onToast({
-        message:
-          cause instanceof Error ? cause.message : "Không thể lưu bản ghi.",
-        tone: "error",
-      });
+      onToast({ message: cause instanceof Error ? cause.message : "Không thể lưu bản ghi.", tone: "error" });
     } finally {
       setSaving(false);
     }
@@ -1210,13 +1043,7 @@ function ResourceModal({
           ? "Đã submit Material Request."
           : "Đã cancel Material Request.",
       );
-      onToast({
-        message:
-          action === "submit"
-            ? "Đã submit Material Request."
-            : "Đã cancel Material Request.",
-        tone: "success",
-      });
+      onToast({ message: action === "submit" ? "Đã submit Material Request." : "Đã cancel Material Request.", tone: "success" });
       setDirty(false);
     } catch (cause) {
       setError(
@@ -1305,16 +1132,9 @@ function ResourceModal({
             </div>
           ))}
         </div>
-        {kind === "request" ? (
-          <p className="mt-4 rounded-md bg-muted/40 p-3 text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Người tạo:</span>{" "}
-            {initial?.owner
-              ? text(initial.owner)
-              : "ERPNext sẽ tự gán sau khi lưu"}
-          </p>
-        ) : null}
+        {kind === "request" ? <p className="mt-4 rounded-md bg-muted/40 p-3 text-sm text-muted-foreground"><span className="font-medium text-foreground">Người tạo:</span> {initial?.owner ? text(initial.owner) : "ERPNext sẽ tự gán sau khi lưu"}</p> : null}
         {kind === "supplier" ? (
-          <ContactAddressPanel
+        <ContactAddressPanel
             supplier={String(initial?.name ?? values.supplier_name ?? "")}
             onToast={onToast}
             onPrimaryChange={(field, value) => set(field, value)}
@@ -1381,8 +1201,7 @@ function ResourceModal({
             {status}
           </p>
         ) : null}
-        {orchestrationId &&
-        orchestrationStatus !== "waiting_supplier_quotes" ? (
+        {orchestrationId && orchestrationStatus !== "waiting_supplier_quotes" ? (
           <div className="mt-3 flex justify-end">
             <Button
               type="button"
@@ -1472,14 +1291,10 @@ function RequestItems({
               placeholder="Nhập mã hoặc tên Item..."
               value={item.item_code}
               onChange={(event) => {
-                const selected =
-                  options.find(
-                    (row) =>
-                      text(row.name ?? row.item_code) === event.target.value,
-                  ) ??
-                  options.find(
-                    (row) => text(row.item_name) === event.target.value,
-                  );
+                const selected = options.find(
+                  (row) =>
+                    text(row.name ?? row.item_code) === event.target.value,
+                ) ?? options.find((row) => text(row.item_name) === event.target.value);
                 const stockUom = text(selected?.stock_uom);
                 const purchaseUom = text(selected?.purchase_uom);
                 onChange(index, {
@@ -1495,14 +1310,7 @@ function RequestItems({
               }}
             />
             <datalist id={`purchase-items-${index}`}>
-              {options.map((row) => (
-                <option
-                  key={text(row.name ?? row.item_code)}
-                  value={text(row.name ?? row.item_code)}
-                >
-                  {text(row.item_name ?? row.item_code)}
-                </option>
-              ))}
+              {options.map((row) => <option key={text(row.name ?? row.item_code)} value={text(row.name ?? row.item_code)}>{text(row.item_name ?? row.item_code)}</option>)}
             </datalist>
             <Input
               aria-label="Số lượng"
@@ -1518,9 +1326,7 @@ function RequestItems({
               min="0"
               step="any"
               value={String(item.rate)}
-              onChange={(event) =>
-                onChange(index, { rate: event.target.value })
-              }
+              onChange={(event) => onChange(index, { rate: event.target.value })}
             />
             <Input
               aria-label="Ngày cần hàng"
@@ -1603,101 +1409,42 @@ function RequestItems({
   );
 }
 
-function ContactAddressPanel({
-  supplier,
-  onToast,
-  onPrimaryChange,
-}: Readonly<{
-  supplier: string;
-  onToast: (toast: Toast) => void;
-  onPrimaryChange: (field: string, value: string) => void;
-}>) {
+function ContactAddressPanel({ supplier, onToast, onPrimaryChange }: Readonly<{ supplier: string; onToast: (toast: Toast) => void; onPrimaryChange: (field: string, value: string) => void }>) {
   const [open, setOpen] = useState(false);
-  const [records, setRecords] = useState<{ contacts: Row[]; addresses: Row[] }>(
-    { contacts: [], addresses: [] },
-  );
-  const [editing, setEditing] = useState<{
-    kind: "contacts" | "addresses";
-    row?: Row;
-  } | null>(null);
+  const [records, setRecords] = useState<{ contacts: Row[]; addresses: Row[] }>({ contacts: [], addresses: [] });
+  const [editing, setEditing] = useState<{ kind: "contacts" | "addresses"; row?: Row } | null>(null);
   const [loading, setLoading] = useState(false);
   const refresh = useCallback(async () => {
     if (!supplier) return;
     setLoading(true);
     try {
-      const [contacts, addresses] = await Promise.all([
-        api("contacts?limit_page_length=100"),
-        api("addresses?limit_page_length=100"),
-      ]);
-      const linked = (value: unknown) =>
-        Array.isArray(value) &&
-        value.some((link) => {
-          const item = link as Row;
-          return (
-            item.link_doctype === "Supplier" &&
-            String(item.link_name) === supplier
-          );
-        });
-      const readDetails = async (
-        kind: "contacts" | "addresses",
-        value: unknown,
-      ) => {
-        const list = Array.isArray(value) ? (value as Row[]) : [];
-        const details = await Promise.all(
-          list.map(async (row) => {
-            if (!row.name) return row;
-            try {
-              return (await api(
-                `${kind}/${encodeURIComponent(String(row.name))}`,
-              )) as Row;
-            } catch {
-              return row;
-            }
-          }),
-        );
+      const [contacts, addresses] = await Promise.all([api("contacts?limit_page_length=100"), api("addresses?limit_page_length=100")]);
+      const linked = (value: unknown) => Array.isArray(value) && value.some((link) => {
+        const item = link as Row;
+        return item.link_doctype === "Supplier" && String(item.link_name) === supplier;
+      });
+      const readDetails = async (kind: "contacts" | "addresses", value: unknown) => {
+        const list = Array.isArray(value) ? value as Row[] : [];
+        const details = await Promise.all(list.map(async (row) => {
+          if (!row.name) return row;
+          try { return await api(`${kind}/${encodeURIComponent(String(row.name))}`) as Row; } catch { return row; }
+        }));
         return details.filter((row) => linked(row.links));
       };
-      const [linkedContacts, linkedAddresses] = await Promise.all([
-        readDetails("contacts", contacts),
-        readDetails("addresses", addresses),
-      ]);
+      const [linkedContacts, linkedAddresses] = await Promise.all([readDetails("contacts", contacts), readDetails("addresses", addresses)]);
       setRecords({ contacts: linkedContacts, addresses: linkedAddresses });
-    } catch (cause) {
-      onToast({
-        message:
-          cause instanceof Error
-            ? cause.message
-            : "Không thể làm mới Contact/Address.",
-        tone: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
+    } catch (cause) { onToast({ message: cause instanceof Error ? cause.message : "Không thể làm mới Contact/Address.", tone: "error" }); }
+    finally { setLoading(false); }
   }, [onToast, supplier]);
   useEffect(() => {
     const timer = window.setTimeout(() => void refresh(), 0);
     return () => window.clearTimeout(timer);
   }, [refresh]);
-  async function setPrimary(
-    field: "supplier_primary_contact" | "supplier_primary_address",
-    value: string,
-  ) {
+  async function setPrimary(field: "supplier_primary_contact" | "supplier_primary_address", value: string) {
     try {
-      await api(`suppliers/${encodeURIComponent(supplier)}`, {
-        method: "PUT",
-        body: JSON.stringify({ [field]: value }),
-      });
-      onPrimaryChange(field, value);
-      onToast({ message: "Đã cập nhật liên kết chính.", tone: "success" });
-    } catch (cause) {
-      onToast({
-        message:
-          cause instanceof Error
-            ? cause.message
-            : "Không thể cập nhật liên kết chính.",
-        tone: "error",
-      });
-    }
+      await api(`suppliers/${encodeURIComponent(supplier)}`, { method: "PUT", body: JSON.stringify({ [field]: value }) });
+      onPrimaryChange(field, value); onToast({ message: "Đã cập nhật liên kết chính.", tone: "success" });
+    } catch (cause) { onToast({ message: cause instanceof Error ? cause.message : "Không thể cập nhật liên kết chính.", tone: "error" }); }
   }
   return (
     <div className="mt-6 rounded-lg border bg-muted/30 p-4">
@@ -1709,27 +1456,16 @@ function ContactAddressPanel({
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            onClick={() => void refresh()}
-            disabled={loading}
-          >
-            {loading ? "Đang tải..." : "Làm mới"}
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={!supplier}
-            onClick={() => {
-              setEditing(null);
-              setOpen(true);
-            }}
-          >
-            {supplier ? "Thêm Contact / Address" : "Lưu Supplier trước"}
-          </Button>
+        <Button type="button" size="sm" variant="ghost" onClick={() => void refresh()} disabled={loading}>{loading ? "Đang tải..." : "Làm mới"}</Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={!supplier}
+          onClick={() => { setEditing(null); setOpen(true); }}
+        >
+          {supplier ? "Thêm Contact / Address" : "Lưu Supplier trước"}
+        </Button>
         </div>
       </div>
       {!supplier ? (
@@ -1737,85 +1473,23 @@ function ContactAddressPanel({
           Contact và Address cần Supplier đã tồn tại để tạo liên kết.
         </p>
       ) : null}
-      {supplier ? (
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          {(["contacts", "addresses"] as const).map((recordKind) => (
-            <div key={recordKind} className="rounded border bg-background p-3">
-              <p className="mb-2 text-sm font-medium">
-                {recordKind === "contacts" ? "Contact" : "Address"}
-              </p>
-              {records[recordKind].length ? (
-                records[recordKind].map((row) => (
-                  <div
-                    className="flex items-center justify-between gap-2 border-t py-2 text-sm"
-                    key={text(row.name)}
-                  >
-                    <span>
-                      {text(row.name ?? row.first_name ?? row.address_title)}
-                    </span>
-                    <div className="flex gap-1">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() =>
-                          setPrimary(
-                            recordKind === "contacts"
-                              ? "supplier_primary_contact"
-                              : "supplier_primary_address",
-                            text(row.name),
-                          )
-                        }
-                      >
-                        Chọn chính
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditing({ kind: recordKind, row });
-                          setOpen(true);
-                        }}
-                      >
-                        Sửa
-                      </Button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-muted-foreground">
-                  Chưa có bản ghi liên kết.
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      ) : null}
+      {supplier ? <div className="mt-4 grid gap-4 md:grid-cols-2">
+        {(["contacts", "addresses"] as const).map((recordKind) => <div key={recordKind} className="rounded border bg-background p-3">
+          <p className="mb-2 text-sm font-medium">{recordKind === "contacts" ? "Contact" : "Address"}</p>
+          {records[recordKind].length ? records[recordKind].map((row) => <div className="flex items-center justify-between gap-2 border-t py-2 text-sm" key={text(row.name)}><span>{text(row.name ?? row.first_name ?? row.address_title)}</span><div className="flex gap-1"><Button type="button" size="sm" variant="ghost" onClick={() => setPrimary(recordKind === "contacts" ? "supplier_primary_contact" : "supplier_primary_address", text(row.name))}>Chọn chính</Button><Button type="button" size="sm" variant="outline" onClick={() => { setEditing({ kind: recordKind, row }); setOpen(true); }}>Sửa</Button></div></div>) : <p className="text-xs text-muted-foreground">Chưa có bản ghi liên kết.</p>}
+        </div>)}
+      </div> : null}
       {open ? (
         <ContactAddressModal
           supplier={supplier}
           initial={editing?.row}
           kind={editing?.kind}
-          onClose={() => {
-            setOpen(false);
-            setEditing(null);
-          }}
+          onClose={() => { setOpen(false); setEditing(null); }}
           onSaved={(saved) => {
-            setOpen(false);
-            setEditing(null);
+            setOpen(false); setEditing(null);
             if (saved?.name) {
-              setRecords((current) => ({
-                ...current,
-                [editing?.kind ?? "contacts"]: [
-                  ...current[editing?.kind ?? "contacts"],
-                  saved,
-                ],
-              }));
-              const primaryField =
-                (editing?.kind ?? "contacts") === "contacts"
-                  ? "supplier_primary_contact"
-                  : "supplier_primary_address";
+              setRecords((current) => ({ ...current, [editing?.kind ?? "contacts"]: [...current[editing?.kind ?? "contacts"], saved] }));
+              const primaryField = (editing?.kind ?? "contacts") === "contacts" ? "supplier_primary_contact" : "supplier_primary_address";
               void setPrimary(primaryField, String(saved.name));
             }
             if (!saved?.name) void refresh();
@@ -1832,16 +1506,8 @@ function ContactAddressModal({
   initial,
   kind: initialKind,
   onSaved,
-}: Readonly<{
-  supplier: string;
-  onClose: () => void;
-  onSaved: (saved?: Row) => void;
-  initial?: Row;
-  kind?: "contacts" | "addresses";
-}>) {
-  const [kind, setKind] = useState<"contacts" | "addresses">(
-    initialKind ?? "contacts",
-  );
+}: Readonly<{ supplier: string; onClose: () => void; onSaved: (saved?: Row) => void; initial?: Row; kind?: "contacts" | "addresses" }>) {
+  const [kind, setKind] = useState<"contacts" | "addresses">(initialKind ?? "contacts");
   const [values, setValues] = useState<Row>({
     first_name: "",
     address_title: "",
@@ -1885,10 +1551,7 @@ function ContactAddressModal({
               country: values.country,
               links: [{ link_doctype: "Supplier", link_name: supplier }],
             };
-      const saved = await api(
-        `${kind}${initial?.name ? `/${encodeURIComponent(String(initial.name))}` : ""}`,
-        { method: initial ? "PUT" : "POST", body: JSON.stringify(payload) },
-      );
+      const saved = await api(`${kind}${initial?.name ? `/${encodeURIComponent(String(initial.name))}` : ""}`, { method: initial ? "PUT" : "POST", body: JSON.stringify(payload) });
       onSaved(saved as Row);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Không thể lưu.");

@@ -9,7 +9,7 @@ export function ClientAuthRecovery() {
       href="/api/auth/login"
       onClick={(event) => {
         event.preventDefault();
-        window.top?.location.assign(
+        window.location.assign(
           larkLoginHref(`${window.location.pathname}${window.location.search}`),
         );
       }}
