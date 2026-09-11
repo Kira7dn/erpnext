@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { createErpSession } from "@/lib/erp-auth-session";
 import { portalAuthBaseUrl } from "@/lib/portal-config";
+import { ERP_SESSION_COOKIE } from "@/lib/erp-auth-session";
 
 function isAppPath(pathname: string): boolean {
   return ["/assets", "/purchase", "/accounts"].some(
@@ -51,16 +51,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       avatarUrl: string | null;
     };
     gateway_session?: string;
+    expires_at?: string;
   };
-  if (!payload.user || !payload.gateway_session)
+  if (!payload.user || !payload.gateway_session || !payload.expires_at)
     return NextResponse.json({ error: "handoff_invalid" }, { status: 401 });
-  const session = await createErpSession(payload.user, payload.gateway_session);
   const next = NextResponse.redirect(
     new URL(safeReturnTo(request), request.url),
     303,
   );
-  next.cookies.set(ERP_SESSION_COOKIE, session.token, {
-    expires: session.expiresAt,
+  next.cookies.set(ERP_SESSION_COOKIE, payload.gateway_session, {
+    expires: new Date(payload.expires_at),
     httpOnly: true,
     sameSite: "lax",
     secure: true,
@@ -68,5 +68,3 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   });
   return next;
 }
-
-const ERP_SESSION_COOKIE = "__Host-letron_erp";

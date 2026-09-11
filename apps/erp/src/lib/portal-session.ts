@@ -1,5 +1,6 @@
 import { cache } from "react";
-import { getErpSession } from "./erp-auth-session";
+import { cookies } from "next/headers";
+import { ERP_SESSION_COOKIE } from "./erp-auth-session";
 
 export type PortalUser = {
   email: string;
@@ -8,10 +9,8 @@ export type PortalUser = {
 };
 
 export const getPortalUser = cache(async (): Promise<PortalUser | null> => {
-  const session = await getErpSession();
-  return session?.user ? {
-    email: session.user.email,
-    displayName: session.user.displayName,
-    avatarUrl: session.user.avatarUrl,
-  } : null;
+  const token = (await cookies()).get(ERP_SESSION_COOKIE)?.value;
+  return token
+    ? { email: "", displayName: "Đã đăng nhập", avatarUrl: null }
+    : null;
 });

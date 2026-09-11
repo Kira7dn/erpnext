@@ -6,7 +6,8 @@ Next.js SSO server chạy trên Vercel Functions. Lark là upstream identity pro
 
 - Lark OAuth authorization-code với `state` và PKCE S256.
 - Chỉ cho phép một Lark tenant qua `LARK_ALLOWED_TENANT_KEY`.
-- Phiên SSO opaque 8 giờ, token chỉ được lưu dưới dạng SHA-256 trong PostgreSQL.
+- Phiên SSO OIDC opaque 8 giờ, token chỉ được lưu dưới dạng SHA-256 trong
+  PostgreSQL. ERP handoff dùng Gateway session riêng với TTL mặc định 24 giờ.
 - OIDC Authorization Code Flow, `openid profile email groups`, bắt buộc PKCE.
 - OIDC clients được đăng ký tĩnh trong bảng `oidc_client`; không có dynamic registration, implicit, password, refresh-token hoặc device flow.
 - Không lưu Lark access token sau khi lấy thông tin người dùng.
