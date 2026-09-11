@@ -4,7 +4,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { larkLoginHref } from "@/lib/auth-navigation";
+import { redirectToLarkLogin } from "@/lib/auth-navigation";
 
 type Row = Record<string, unknown>;
 type Kind = "supplier" | "item" | "request";
@@ -256,8 +256,10 @@ async function api(path: string, init?: RequestInit) {
       ...init?.headers,
     },
   });
-  if (!response.ok)
+  if (!response.ok) {
+    if (response.status === 401) redirectToLarkLogin();
     throw new PurchaseApiError(response.status, messageFor(response.status));
+  }
   const body = (await response.json()) as { data?: unknown; message?: unknown };
   return body.data ?? body.message ?? body;
 }
@@ -741,27 +743,9 @@ export function PurchaseResourcePage({ kind }: Readonly<{ kind: Kind }>) {
           <div className="p-12 text-center text-sm text-muted-foreground">
             Đang tải dữ liệu...
           </div>
-        ) : error ? (
+        ) : errorStatus === 401 ? null : error ? (
           <div className="space-y-3 p-8 text-sm text-destructive">
             <p>{error}</p>
-            {errorStatus === 401 ? (
-              <a
-                className="block w-fit underline"
-                href="/api/auth/login"
-                target="_top"
-                rel="noopener"
-                onClick={(event) => {
-                  event.preventDefault();
-                  window.top?.location.assign(
-                    larkLoginHref(
-                      `${window.location.pathname}${window.location.search}`,
-                    ),
-                  );
-                }}
-              >
-                Đăng nhập lại bằng Lark
-              </a>
-            ) : null}
             <Button variant="outline" onClick={() => void load(page)}>
               Thử lại
             </Button>

@@ -6,8 +6,9 @@ Next.js SSO server chạy trên Vercel Functions. Lark là upstream identity pro
 
 - Lark OAuth authorization-code với `state` và PKCE S256.
 - Chỉ cho phép một Lark tenant qua `LARK_ALLOWED_TENANT_KEY`.
-- Phiên SSO OIDC opaque 8 giờ, token chỉ được lưu dưới dạng SHA-256 trong
-  PostgreSQL. ERP handoff dùng Gateway session riêng với TTL mặc định 24 giờ.
+- Phiên SSO OIDC opaque 8 giờ và app session opaque chỉ được lưu dưới dạng
+  SHA-256 trong PostgreSQL. App grant dùng một lần, TTL 2 phút; session nghiệp
+  vụ được giới hạn theo từng app (`assets`, `purchase`, `accounts`).
 - OIDC Authorization Code Flow, `openid profile email groups`, bắt buộc PKCE.
 - OIDC clients được đăng ký tĩnh trong bảng `oidc_client`; không có dynamic registration, implicit, password, refresh-token hoặc device flow.
 - Không lưu Lark access token sau khi lấy thông tin người dùng.
@@ -43,11 +44,12 @@ npm run dev
 
 Không cần ERPNext hoặc Docker để chạy auth server này.
 
-## Global Portal client
+## ERP app session
 
-ERPNext không còn là OIDC client và không có callback/login native. Ứng dụng ERP
-được mở qua Global Portal; Portal giữ session `letron_sso`, kiểm tra policy và
-chuyển request nghiệp vụ qua Gateway với claims đã ký.
+ERP không còn là OIDC client. Mỗi app bắt đầu login bằng top-level browser
+navigation tới Auth Server, nhận one-time grant sau callback Lark, rồi đổi grant
+server-to-server thành app session. Browser không gọi cross-origin login bằng
+`fetch` và không lưu Lark access token.
 
 URL đặt làm trang chủ Web App trong Lark để đăng nhập vào ứng dụng nghiệp vụ là:
 
@@ -55,9 +57,8 @@ URL đặt làm trang chủ Web App trong Lark để đăng nhập vào ứng d�
 http://localhost:3000/login?return_to=http%3A%2F%2Flocalhost%3A3001%2Faccounts
 ```
 
-LeTRON-Global Portal tự động chuyển qua Lark khi chưa có phiên, sau đó trả người dùng về
-ứng dụng đã yêu cầu đăng nhập. LeTRON-Global Portal không còn hiển thị thẻ hoặc launch
-URL của ERP.
+Auth Server trả người dùng đúng app đã yêu cầu đăng nhập. Ba app dùng chung
+identity/policy nhưng cookie host-only và session namespace riêng.
 
 `localhost` chỉ hợp lệ với Lark Desktop chạy trên cùng máy. Lark mobile và máy
 khác không truy cập được server local; môi trường dùng chung phải có HTTPS

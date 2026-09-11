@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-const ERP_SESSION_COOKIE = "__Host-letron_erp_v2";
+const SESSION_COOKIES = [["/assets", "__Host-letron_assets_session"], ["/purchase", "__Host-letron_purchase_session"], ["/accounts", "__Host-letron_accounts_session"]] as const;
 
 export function proxy(request: NextRequest) {
   if (
@@ -13,7 +13,8 @@ export function proxy(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/supplier/")
   )
     return NextResponse.next();
-  if (request.cookies.has(ERP_SESSION_COOKIE)) return NextResponse.next();
+  const sessionCookie = SESSION_COOKIES.find(([root]) => request.nextUrl.pathname === root || request.nextUrl.pathname.startsWith(`${root}/`))?.[1];
+  if (sessionCookie && request.cookies.has(sessionCookie)) return NextResponse.next();
 
   const loginUrl = new URL("/api/auth/login", request.url);
   loginUrl.searchParams.set(

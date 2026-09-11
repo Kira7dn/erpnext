@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { ApiRequestError, type RemoteErrorPayload } from "./api-error";
 import { publicErrorMessage } from "./error-contract";
 import { portalAuthBaseUrl } from "./portal-config";
+import { APP_SESSION_COOKIES, type AppKey } from "./erp-auth-session";
 
 export type BankAccount = {
   name: string;
@@ -360,11 +361,12 @@ export async function gatewayRequest<T>(
 ): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
-  const bffCookie = cookieHeader.match(
-    /(?:^|;\s*)__Host-letron_erp_v2=([^;]+)/,
-  )?.[1];
+  const appKey: AppKey = path.startsWith("/api/v1/assets") ? "assets" : path.startsWith("/api/v1/purchase") ? "purchase" : "accounts";
+  const cookieName = APP_SESSION_COOKIES[appKey].replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const bffCookie = cookieHeader.match(new RegExp(`(?:^|;\\s*)${cookieName}=([^;]+)`))?.[1];
   if (bffCookie) {
-    headers.set("X-Letron-BFF-Session", decodeURIComponent(bffCookie));
+    headers.set("X-Letron-App-Session", decodeURIComponent(bffCookie));
+    headers.set("X-Letron-App", appKey);
   } else if (/^Bearer\s+\S+$/i.test(cookieHeader)) {
     headers.set("Authorization", cookieHeader);
   }

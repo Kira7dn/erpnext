@@ -93,10 +93,10 @@ export async function getUserBySessionToken(token: string | undefined): Promise<
   return user;
 }
 
-export async function getUserByGatewaySessionToken(token: string | undefined): Promise<AuthenticatedUser | null> {
+export async function getUserByGatewaySessionToken(token: string | undefined, appKey?: "assets" | "purchase" | "accounts"): Promise<AuthenticatedUser | null> {
   if (!token) return null;
   const session = await getDb().erpGatewaySession.findFirst({
-    where: { tokenHash: sha256(token), revokedAt: null, expiresAt: { gt: new Date() }, user: { status: "ACTIVE" } },
+    where: { tokenHash: sha256(token), revokedAt: null, expiresAt: { gt: new Date() }, ...(appKey ? { appKey } : {}), user: { status: "ACTIVE" } },
     include: { user: { include: { identities: { where: { provider: "lark" }, orderBy: { id: "asc" }, take: 1 } } } },
   });
   if (!session) return null;

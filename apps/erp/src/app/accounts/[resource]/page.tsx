@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { AlertCircle } from "lucide-react";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 
 import { AccountingResourceTable } from "@/components/accounting-resource-table";
@@ -29,15 +30,16 @@ export default async function AccountingResourcePage({ params, searchParams }: {
   let needsLogin = false;
   let accessDenied = false;
   let hasNext = false;
+  const returnTo = `/accounts/${resource}${page > 1 ? `?page=${page}` : ""}`;
   try {
     rows = await listAccountingResource(resource, (await cookies()).toString(), resourcePageQuery(page));
     hasNext = rows.length > RESOURCE_PAGE_SIZE;
     rows = rows.slice(0, RESOURCE_PAGE_SIZE);
   } catch (cause) {
+    if (cause instanceof GatewayAuthenticationRequiredError) redirect(larkLoginHref(returnTo));
     needsLogin = cause instanceof GatewayAuthenticationRequiredError;
     accessDenied = cause instanceof GatewayAccessDeniedError;
     error = cause instanceof Error ? cause.message : "Không thể kết nối Letron Gateway.";
   }
-  const returnTo = `/accounts/${resource}${page > 1 ? `?page=${page}` : ""}`;
   return <main className="mx-auto max-w-7xl space-y-6 p-5 md:p-8"><div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><div className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-blue-600">Accounting / API resource</div><h1 className="text-3xl font-bold tracking-tight">{title(resource)}</h1><p className="mt-2 text-muted-foreground">Dữ liệu lấy trực tiếp qua Letron Gateway.</p></div><Button asChild><Link href={`/accounts/${resource}/new`}>New record</Link></Button></div>{error ? <Alert variant="destructive"><AlertCircle className="size-4" /><AlertTitle>{needsLogin ? "Đăng nhập bằng Lark" : accessDenied ? "Chưa được cấp quyền" : "Không lấy được dữ liệu"}</AlertTitle><AlertDescription>{error}{needsLogin ? <AuthErrorActions loginHref={larkLoginHref(returnTo)} /> : null}</AlertDescription></Alert> : <><AccountingResourceTable resource={resource} rows={rows} />{rows.length || page > 1 ? <ResourcePagination basePath={`/accounts/${resource}`} page={page} hasNext={hasNext} /> : null}</>}</main>;
 }

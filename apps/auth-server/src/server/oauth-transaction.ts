@@ -12,6 +12,7 @@ export async function saveOAuthTransaction(input: {
     interactionUid?: string;
     returnTo?: string;
     handoff?: boolean;
+    appKey?: "assets" | "purchase" | "accounts";
 }): Promise<void> {
   await getDb().oAuthTransaction.create({
     data: {
@@ -21,6 +22,7 @@ export async function saveOAuthTransaction(input: {
       interactionUid: input.interactionUid,
       returnTo: input.returnTo,
       handoff: input.handoff ?? false,
+      appKey: input.appKey,
       expiresAt: new Date(Date.now() + TRANSACTION_TTL_MS),
     },
   });
@@ -31,6 +33,7 @@ export async function consumeOAuthTransaction(state: string, browserBinding: str
   interactionUid: string | null;
   returnTo: string | null;
   handoff: boolean;
+  appKey: string | null;
 } | null> {
   const stateHash = sha256(state);
   return getDb().$transaction(async (tx) => {
@@ -50,6 +53,7 @@ export async function consumeOAuthTransaction(state: string, browserBinding: str
       interactionUid: row.interactionUid,
       returnTo: row.returnTo,
       handoff: row.handoff,
+      appKey: row.appKey,
     };
   });
 }

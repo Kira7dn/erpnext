@@ -1,9 +1,11 @@
 import { CircleUserRound } from "lucide-react";
 import { getPortalUser } from "@/lib/portal-session";
 import { larkLoginHref } from "@/lib/auth-navigation";
+import type { AppKey } from "@/lib/erp-auth-session";
 
 export async function UserSessionStatus({ returnTo }: { returnTo: string }) {
-  const user = await getPortalUser();
+  const appKey: AppKey = returnTo.startsWith("/assets") ? "assets" : returnTo.startsWith("/purchase") ? "purchase" : "accounts";
+  const user = await getPortalUser(appKey);
   if (!user) {
     return (
       <a

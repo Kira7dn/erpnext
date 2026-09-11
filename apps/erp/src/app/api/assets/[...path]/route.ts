@@ -4,7 +4,7 @@ import { apiErrorFromResponse, apiErrorResponse } from "@/lib/api-error";
 
 import { isAssetResource, isAssetVirtualResource } from "@/lib/letron-api";
 import { portalAuthBaseUrl } from "@/lib/portal-config";
-import { ERP_SESSION_COOKIE } from "@/lib/erp-auth-session";
+import { APP_SESSION_COOKIES } from "@/lib/erp-auth-session";
 
 const METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 
@@ -21,8 +21,8 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   if (!path?.length || (!isAssetResource(path[0]) && !isAssetVirtualResource(path[0]))) return apiErrorResponse("unknown_asset_resource", 404, "Asset resource was not found.");
   const target = `${portalAuthBaseUrl()}/api/gateway/api/v1/assets/${path.map(encodeURIComponent).join("/")}${request.nextUrl.search}`;
   const headers = new Headers({ Accept: "application/json" });
-  const sessionCookie = (await cookies()).get(ERP_SESSION_COOKIE)?.value;
-  if (sessionCookie) headers.set("X-Letron-BFF-Session", sessionCookie);
+  const sessionCookie = (await cookies()).get(APP_SESSION_COOKIES.assets)?.value;
+  if (sessionCookie) { headers.set("X-Letron-App-Session", sessionCookie); headers.set("X-Letron-App", "assets"); }
   const authorization = request.headers.get("authorization");
   if (authorization) headers.set("Authorization", authorization);
   const contentType = request.headers.get("content-type");

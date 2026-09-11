@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { AlertCircle, Plus } from "lucide-react";
+import { redirect } from "next/navigation";
 
 import { BankAccountsTable } from "@/components/bank-accounts-table";
 import { ResourcePagination } from "@/components/resource-pagination";
@@ -27,18 +28,19 @@ export default async function BankAccountsPage({ searchParams }: { searchParams:
   let error: string | null = null;
   let needsLogin = false;
   let accessDenied = false;
+  const returnTo = `/accounts/bank-accounts${page > 1 ? `?page=${page}` : ""}`;
 
   try {
     accounts = await listBankAccounts((await cookies()).toString(), resourcePageQuery(page));
     hasNext = accounts.length > RESOURCE_PAGE_SIZE;
     accounts = accounts.slice(0, RESOURCE_PAGE_SIZE);
   } catch (cause) {
+    if (cause instanceof GatewayAuthenticationRequiredError) redirect(larkLoginHref(returnTo));
     needsLogin = cause instanceof GatewayAuthenticationRequiredError;
     accessDenied = cause instanceof GatewayAccessDeniedError;
     error = cause instanceof Error ? cause.message : "Không thể kết nối Letron Gateway.";
   }
 
-  const returnTo = `/accounts/bank-accounts${page > 1 ? `?page=${page}` : ""}`;
   return (
     <main className="mx-auto max-w-7xl space-y-6 p-5 md:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

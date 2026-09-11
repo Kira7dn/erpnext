@@ -8,6 +8,7 @@ import {
   LARK_TRANSACTION_TTL_SECONDS,
   saveOAuthTransaction,
 } from "../../../src/server/oauth-transaction";
+import type { AppKey } from "../../../src/server/erp-handoff";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,10 @@ function safeReturnTo(value: string | null): string {
   }
 }
 
+function parseAppKey(value: string | null): AppKey | undefined {
+  return value === "assets" || value === "purchase" || value === "accounts" ? value : undefined;
+}
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
 
@@ -33,13 +38,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const browserBinding = randomToken();
     const codeVerifier = randomToken(48);
     const redirectUri = larkCallbackUri(env.LETRON_AUTH_BASE_URL);
-    const handoff = request.nextUrl.searchParams.get("handoff") === "1";
+    const appKey = parseAppKey(request.nextUrl.searchParams.get("app"));
 
     await saveOAuthTransaction({
       state,
       browserBinding,
       codeVerifier,
-      handoff,
+      handoff: false,
+      appKey,
       returnTo: safeReturnTo(request.nextUrl.searchParams.get("return_to")),
     });
 

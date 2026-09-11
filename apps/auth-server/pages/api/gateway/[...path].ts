@@ -120,7 +120,10 @@ export default async function handler(
   const bffSession = typeof req.headers["x-letron-bff-session"] === "string"
     ? req.headers["x-letron-bff-session"]
     : undefined;
-  let user = (await getUserByGatewaySessionToken(bffSession))
+  const appHeader = typeof req.headers["x-letron-app"] === "string" ? req.headers["x-letron-app"] : undefined;
+  const appKey = appHeader === "assets" || appHeader === "purchase" || appHeader === "accounts" ? appHeader : undefined;
+  const appSession = typeof req.headers["x-letron-app-session"] === "string" ? req.headers["x-letron-app-session"] : bffSession;
+  let user = (await getUserByGatewaySessionToken(appSession, appKey))
     ?? (await getUserBySessionToken(tokenFromRequest(req)))
     ?? (await authenticateTestCredential(req));
   timings.session = duration(sessionStartedAt);
@@ -129,7 +132,7 @@ export default async function handler(
     errorResponse(res, 401, "authentication_required", "Authentication is required.");
     return;
   }
-  if (bffSession) {
+  if (appSession) {
     try {
       const groupIds = await syncLarkGroupsIfStale(user.id);
       user = { ...user, groupIds };

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  ERP_SESSION_COOKIE,
+  APP_SESSION_COOKIES,
   getErpSession,
   LEGACY_ERP_SESSION_COOKIE,
 } from "@/lib/erp-auth-session";
@@ -23,24 +23,26 @@ function safeReturnTo(request: NextRequest): string {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const authBaseUrl = portalAuthBaseUrl();
-  const session = await getErpSession();
+  const returnTo = safeReturnTo(request);
+  const app = returnTo.startsWith("/assets") ? "assets" : returnTo.startsWith("/purchase") ? "purchase" : "accounts";
+  const session = await getErpSession(undefined, app);
   if (session?.gatewaySession && process.env.LETRON_INTERNAL_API_SECRET)
-    await fetch(`${authBaseUrl}/api/internal/erp/logout`, {
+    await fetch(`${authBaseUrl}/api/internal/app/logout`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.LETRON_INTERNAL_API_SECRET}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ gateway_session: session.gatewaySession }),
+      body: JSON.stringify({ session: session.gatewaySession, app }),
       cache: "no-store",
     }).catch(() => undefined);
   const nextResponse = NextResponse.redirect(
     new URL(
-      safeReturnTo(request),
+      returnTo,
       portalAppBaseUrl(new URL(request.url).origin),
     ),
   );
-  nextResponse.cookies.set(ERP_SESSION_COOKIE, "", {
+  nextResponse.cookies.set(APP_SESSION_COOKIES[app], "", {
     expires: new Date(0),
     maxAge: 0,
     httpOnly: true,

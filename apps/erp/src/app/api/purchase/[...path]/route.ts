@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { apiErrorFromResponse, apiErrorResponse } from "@/lib/api-error";
 import { isPurchaseResource } from "@/lib/letron-api";
 import { portalAuthBaseUrl } from "@/lib/portal-config";
-import { ERP_SESSION_COOKIE } from "@/lib/erp-auth-session";
+import { APP_SESSION_COOKIES } from "@/lib/erp-auth-session";
 
 const METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 const OFFICIAL_MODULES: Record<string, string> = {
@@ -63,8 +63,8 @@ async function proxy(
     .join("")}`;
   const target = `${portalAuthBaseUrl()}/api/gateway/api/v1/${officialPath}${request.nextUrl.search}`;
   const headers = new Headers({ Accept: "application/json" });
-  const sessionCookie = (await cookies()).get(ERP_SESSION_COOKIE)?.value;
-  if (sessionCookie) headers.set("X-Letron-BFF-Session", sessionCookie);
+  const sessionCookie = (await cookies()).get(APP_SESSION_COOKIES.purchase)?.value;
+  if (sessionCookie) { headers.set("X-Letron-App-Session", sessionCookie); headers.set("X-Letron-App", "purchase"); }
   const authorization = request.headers.get("authorization");
   if (authorization) headers.set("Authorization", authorization);
   const contentType = request.headers.get("content-type");

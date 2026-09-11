@@ -10,6 +10,11 @@ import { getOidcProvider } from "../../../../src/server/oidc";
 import { getUserBySessionToken, rotateSession, tokenFromRequest } from "../../../../src/server/session";
 import { getEnv } from "../../../../src/server/env";
 import { canonicalAuthOrigin } from "../../../../src/server/auth-origin";
+import type { AppKey } from "../../../../src/server/erp-handoff";
+
+function parseAppKey(value: string | undefined): AppKey | undefined {
+  return value === "assets" || value === "purchase" || value === "accounts" ? value : undefined;
+}
 
 function safeReturnTo(value: string | undefined): string {
   if (!value) return "/";
@@ -33,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const uid = firstQueryValue(req.query.uid);
-  const handoff = firstQueryValue(req.query.handoff) === "1";
+  const appKey = parseAppKey(firstQueryValue(req.query.app));
   try {
     const redirectUri = larkCallbackUri(canonicalAuthOrigin(req));
     if (uid) {
@@ -59,7 +64,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       browserBinding,
       codeVerifier,
       interactionUid: uid,
-      handoff,
+      handoff: false,
+      appKey,
       returnTo: uid ? undefined : safeReturnTo(firstQueryValue(req.query.return_to)),
     });
     appendSetCookie(res, serializeCookie(LARK_TRANSACTION_COOKIE, browserBinding, {

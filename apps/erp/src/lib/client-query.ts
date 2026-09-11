@@ -1,6 +1,7 @@
 "use client";
 
 import { ErpQueryError } from "@/components/query-provider";
+import { redirectToLarkLogin } from "@/lib/auth-navigation";
 import {
   publicErrorMessage,
   type RemoteErrorPayload,
@@ -18,6 +19,7 @@ export async function clientQuery<T>(
   });
   const payload = (await response.json().catch(() => ({}))) as ApiPayload<T>;
   if (!response.ok) {
+    if (response.status === 401) redirectToLarkLogin();
     const code =
       typeof payload.error === "string" && /^[a-z0-9_]+$/.test(payload.error)
         ? payload.error

@@ -4,7 +4,7 @@ import { apiErrorFromResponse, apiErrorResponse } from "@/lib/api-error";
 
 import { isAccountingResource } from "@/lib/letron-api";
 import { portalAuthBaseUrl } from "@/lib/portal-config";
-import { ERP_SESSION_COOKIE } from "@/lib/erp-auth-session";
+import { APP_SESSION_COOKIES } from "@/lib/erp-auth-session";
 
 const ALLOWED_METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 
@@ -36,8 +36,8 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
 
   const target = `${portalAuthBaseUrl()}/api/gateway/api/v1/accounts/${path.map(encodeURIComponent).join("/")}${request.nextUrl.search}`;
   const forwardedHeaders = new Headers({ Accept: "application/json" });
-  const sessionCookie = (await cookies()).get(ERP_SESSION_COOKIE)?.value;
-  if (sessionCookie) forwardedHeaders.set("X-Letron-BFF-Session", sessionCookie);
+  const sessionCookie = (await cookies()).get(APP_SESSION_COOKIES.accounts)?.value;
+  if (sessionCookie) { forwardedHeaders.set("X-Letron-App-Session", sessionCookie); forwardedHeaders.set("X-Letron-App", "accounts"); }
   const authorization = request.headers.get("authorization");
   if (authorization) forwardedHeaders.set("Authorization", authorization);
   const contentType = request.headers.get("content-type");

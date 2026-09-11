@@ -28,13 +28,12 @@ import { getOidcProvider } from "../../../../src/server/oidc";
 import { AUTH_FEATURE_CONFIG } from "../../../../src/server/env";
 import { rotateSession } from "../../../../src/server/session";
 import { upsertLarkUser } from "../../../../src/server/users";
-import { getEnv } from "../../../../src/server/env";
 import { canonicalAuthOrigin } from "../../../../src/server/auth-origin";
 import {
   completeLarkMailOAuth,
   LARK_MAIL_OAUTH_COOKIE,
 } from "../../../../src/server/lark-mail";
-import { createErpHandoff } from "../../../../src/server/erp-handoff";
+import { createErpHandoff, type AppKey } from "../../../../src/server/erp-handoff";
 
 export default async function handler(
   req: NextApiRequest,
@@ -134,17 +133,17 @@ export default async function handler(
       : undefined;
     const user = await upsertLarkUser({ ...identity, groupIds });
     if (user.status !== "ACTIVE") throw new Error("USER_DISABLED");
-    if (transaction.handoff && transaction.returnTo) {
-      const handoff = await createErpHandoff(user.id);
+    if (transaction.appKey && transaction.returnTo) {
+      const handoff = await createErpHandoff(user.id, (transaction.appKey as AppKey | null) ?? "accounts");
       await audit({
         eventType: "lark.login",
         outcome: "success",
         userId: user.id,
         requestId: id,
-        detail: { flow: "erp_handoff" },
+        detail: { flow: "app_session_grant", app: transaction.appKey },
       });
       const target = new URL(transaction.returnTo, canonicalAuthOrigin(req));
-      target.searchParams.set("handoff", handoff.code);
+      target.searchParams.set("grant", handoff.code);
       res.redirect(303, target.toString());
       return;
     }
