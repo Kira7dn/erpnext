@@ -56,7 +56,8 @@ function assertErpName(value: string, label: string): void {
 }
 
 async function env(name: string): Promise<string> {
-  const content = await readFile(resolve(root, ".env"), "utf8");
+  const envFile = process.env.REALTEST_ENV_FILE ?? ".env";
+  const content = await readFile(resolve(root, envFile), "utf8");
   const line = content.split(/\r?\n/).find((entry) => new RegExp(`^\\s*${name}\\s*=`).test(entry));
   const value = line?.replace(new RegExp(`^\\s*${name}\\s*=\\s*`), "").trim().replace(/^['"]|['"]$/g, "");
   if (!value) throw new Error(`${name} is missing from .env`);
@@ -225,7 +226,10 @@ async function autoApproveLarkInstance(instanceCode: string): Promise<void> {
   console.log(`LARK_APPROVAL_INSTANCE=${instanceCode}`);
   const response = await request(`${erpBaseUrl}/api/internal/lark/approval/approve`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${await env("LETRON_INTERNAL_API_SECRET")}` },
+    headers: {
+      Authorization: `Bearer ${await env("LETRON_INTERNAL_API_SECRET")}`,
+      ...(process.env.REALTEST_APPROVAL_HEADER ? { "X-Letron-Realtest": process.env.REALTEST_APPROVAL_HEADER } : {}),
+    },
     body: JSON.stringify({ instance_code: instanceCode }),
   });
   if (response.status !== 200) throw new Error(`Lark approval auto-approve failed (${response.status}): ${response.raw}`);
