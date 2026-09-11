@@ -3,6 +3,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { config as loadDotEnv } from "dotenv";
+import { Redis } from "@upstash/redis";
 
 loadDotEnv({ path: resolve(process.cwd(), "../../.env"), override: false, quiet: true });
 
@@ -22,6 +23,32 @@ const migrationNames = readdirSync(migrationsPath, { withFileTypes: true })
 
 const client = new Client(databaseUrl);
 await client.connect();
+
+async function clearSsoRuntimeCache(): Promise<void> {
+  const url = process.env.KV_REST_API_URL;
+  const token = process.env.KV_REST_API_TOKEN;
+  if (!url || !token) {
+    throw new Error("KV_REST_API_URL and KV_REST_API_TOKEN are required to clear SSO runtime cache");
+  }
+  const redis = new Redis({ url: url.replace(/\/$/, ""), token });
+  const keys = new Set<string>(["letron:sso:policy:published"]);
+  let cursor: string | number = "0";
+  do {
+    const scanResult: [string, string[]] = await redis.scan(cursor, {
+      match: "letron:sso:session:*",
+      count: 100,
+    });
+    const nextCursor = scanResult[0];
+    const found = scanResult[1];
+    found.forEach((key) => keys.add(key));
+    cursor = nextCursor;
+  } while (String(cursor) !== "0");
+  const keyList = [...keys];
+  for (let index = 0; index < keyList.length; index += 100) {
+    await redis.del(...keyList.slice(index, index + 100));
+  }
+  console.log(`cleared ${keyList.length} SSO runtime cache keys; refresh tokens untouched`);
+}
 
 try {
   await client.query("CREATE TABLE IF NOT EXISTS _prisma_migrations (id VARCHAR(36) NOT NULL PRIMARY KEY, checksum VARCHAR(64) NOT NULL, finished_at TIMESTAMPTZ, migration_name VARCHAR(255) NOT NULL, logs TEXT, rolled_back_at TIMESTAMPTZ, started_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, applied_steps_count INTEGER NOT NULL DEFAULT 0)");
@@ -49,6 +76,7 @@ try {
       throw error;
     }
   }
+  await clearSsoRuntimeCache();
 } finally {
   await client.end();
 }
