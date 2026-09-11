@@ -49,7 +49,8 @@ Không cần ERPNext hoặc Docker để chạy auth server này.
 ERP không còn là OIDC client. Mỗi app bắt đầu login bằng top-level browser
 navigation tới Auth Server, nhận one-time grant sau callback Lark, rồi đổi grant
 server-to-server thành app session. Browser không gọi cross-origin login bằng
-`fetch` và không lưu Lark access token.
+`fetch` và không lưu Lark access token. Mọi gateway request phải dùng app session
+đúng namespace của app; không dùng trực tiếp `letron_sso` của Auth Server.
 
 URL đặt làm trang chủ Web App trong Lark để đăng nhập vào ứng dụng nghiệp vụ là:
 
@@ -88,10 +89,11 @@ quản lý cố định trong runtime config. Policy được lưu trong Postgre
 autosave thành bản published mới; không có draft/approve/rollback workflow.
 Policy v1 chỉ tham chiếu các public OpenAPI routes đã đăng ký.
 
-`/api/gateway/*` là gateway server-side: phải có Global Portal session, published
-policy và entitlement từ Lark group phù hợp. Route ngoài public registry hoặc
-operation không được cấp sẽ fail closed. Gateway truyền authorization context
-bằng header HMAC nội bộ; ERP origin phải private và chỉ nhận traffic từ gateway.
+`/api/gateway/*` là gateway server-side: phải có app session hợp lệ, published
+policy và entitlement từ Lark group phù hợp. Session được giới hạn theo app
+(`assets`, `purchase`, `accounts`). Route ngoài public registry hoặc operation
+không được cấp sẽ fail closed. Gateway truyền authorization context bằng header
+HMAC nội bộ; ERP origin phải private và chỉ nhận traffic từ gateway.
 Không đưa authorization decision vào query string hoặc tin header do client gửi.
 
 Gateway và policy publication dùng lại `FRAPPE_ERP_NEXT_URL` và

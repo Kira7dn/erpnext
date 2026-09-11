@@ -28,8 +28,9 @@ https://auth.letron.vn/api/auth/lark/callback
 ### Đã đúng
 
 - ERP có ba route namespace độc lập: `/assets`, `/purchase`, `/accounts`.
-- ERP session là host-only cookie `__Host-letron_erp`, chứa opaque Gateway
-  session token; không có thêm Redis BFF session.
+- ERP session là ba host-only cookie theo app:
+  `__Host-letron_assets_session`, `__Host-letron_purchase_session` và
+  `__Host-letron_accounts_session`, mỗi cookie chứa opaque Gateway session token.
 - Gateway trả `401` riêng cho thiếu/hết session và `403` riêng cho thiếu quyền.
 - ERP login đã dùng `return_to` và BFF handoff; callback nhận Gateway session và
   phát hành cookie ERP duy nhất.
@@ -80,7 +81,7 @@ flowchart TD
     H --> I[auth.letron.vn/api/auth/lark/callback]
     I --> J[Auth tạo one-time ERP handoff]
     J --> K[/api/auth/oidc/callback]
-    K --> L[ERP tạo __Host-letron_erp]
+    K --> L[ERP tạo app-scoped host-only session]
     L --> C
 ```
 

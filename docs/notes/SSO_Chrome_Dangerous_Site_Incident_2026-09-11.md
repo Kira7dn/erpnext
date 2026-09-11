@@ -77,9 +77,14 @@ khi chưa có log hoặc readback schema.
 
 ### C. Production real-test contract — lỗi test riêng
 
-`scripts/real-test-mr.ts` gọi `/api/internal/test-session` và gửi cookie Auth
-cũ `letron_sso`, trong khi ERP BFF mới yêu cầu `__Host-letron_erp`. Đây là
-nguyên nhân của `401` trong real-test, không phải bằng chứng cho Dangerous Site.
+`scripts/real-test-mr.ts` gọi `/api/internal/test-session` và trước đây gửi
+cookie Auth `letron_sso` trực tiếp sang ERP. Sau khi chuyển sang app-scoped
+session, ERP BFF yêu cầu cookie tương ứng như
+`__Host-letron_purchase_session`; đồng thời `gatewayRequest()` phải suy ra
+`purchase` cho các namespace nghiệp vụ `/api/v1/stock`, `/api/v1/crm`,
+`/api/v1/buying` và `/api/v1/files`. Hai điểm lệch contract này gây `401` trong
+real-test, không phải bằng chứng cho Dangerous Site. Đã sửa và production
+real-test đã pass.
 
 ## Test để đóng issue
 
@@ -97,6 +102,6 @@ nguyên nhân của `401` trong real-test, không phải bằng chứng cho Dang
 ```text
 Browser Dangerous Site: OPEN — chưa xác định nguồn đánh dấu
 Auth 303 login_start_failed: OPEN — exception gốc bị handler che
-real-test 401: CONFIRMED — test dùng session contract cũ
+real-test 401: RESOLVED — runner và gateway đã đồng bộ purchase app session;
+production full real-test pass ngày 2026-09-11
 ```
-

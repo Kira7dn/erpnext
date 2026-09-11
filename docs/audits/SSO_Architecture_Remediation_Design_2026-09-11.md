@@ -72,13 +72,14 @@ Frappe thực thi permission, không phải nguồn login.
 Auth dùng cookie host-only và ERP dùng cookie host-only khác:
 
 ~~~http
-Set-Cookie: __Host-letron_auth=<opaque>; Secure; HttpOnly; SameSite=Lax; Path=/
-Set-Cookie: __Host-letron_erp=<opaque>; Secure; HttpOnly; SameSite=Lax; Path=/
+Set-Cookie: letron_sso=<opaque>; Secure; HttpOnly; SameSite=Lax; Path=/
+Set-Cookie: __Host-letron_<app>_session=<opaque>; Secure; HttpOnly; SameSite=Lax; Path=/
 ~~~
 
 Không cookie nào có Domain. Cookie Auth không gửi sang ERP và cookie ERP không
-gửi sang Auth. Prefix __Host- yêu cầu Secure, Path=/ và không có Domain; browser
-enforce các thuộc tính này. [1][2]
+gửi sang Auth. ERP dùng namespace riêng cho `assets`, `purchase`, `accounts`;
+prefix `__Host-` yêu cầu Secure, Path=/ và không có Domain; browser enforce các
+thuộc tính này. [1][2]
 
 ### 3.3 Login flow mới
 
@@ -208,7 +209,8 @@ dùng Secure, HttpOnly, SameSite=Lax, Path=/ cho session cookie.
 
 ### Phase 1 — Shadow session
 
-- Giữ flow parent-cookie hiện tại.
+- (Lịch sử) Giữ flow parent-cookie trong giai đoạn shadow; flow production hiện
+  tại đã chuyển sang host-only app session.
 - Tạo ERP session exchange shadow cho leducanh@ledb.vn.
 - So sánh identity, tenant, subject và policy; chưa đổi authorization.
 
@@ -286,16 +288,19 @@ Nó loại bỏ nguyên nhân gốc của redirect loop và giảm rủi ro subd
 trong khi giữ ownership: Lark là upstream identity, Global Portal sở hữu policy,
 ERPNext thực thi business permission.
 
-Acceptance hiện tại của leducanh@ledb.vn chứng minh flow parent-cookie đang hoạt
-động; không được dùng nó làm bằng chứng phương án mới đã triển khai. Cần hoàn
-tất Phase 0–2 và acceptance matrix trước khi tuyên bố remediation hoàn tất.
+Acceptance browser của `leducanh@ledb.vn` và CLI business real-test là hai bằng
+chứng riêng. Browser chứng minh Lark OAuth/handoff; CLI chứng minh app session,
+Gateway routing và business flow. Không dùng một loại acceptance để thay thế
+loại còn lại.
 
 ## 13. Trạng thái triển khai ngày 2026-09-11
 
 Đã triển khai phần mã nguồn của phương án BFF exchange:
 
-- Auth cookie đã trở thành host-only; ERP nhận cookie `__Host-letron_erp` và
-  không còn phụ thuộc cookie cha `.letron.vn`.
+- Auth cookie đã trở thành host-only; ERP nhận app-scoped cookie
+  (`__Host-letron_assets_session`, `__Host-letron_purchase_session` hoặc
+  `__Host-letron_accounts_session`) và không còn phụ thuộc cookie cha
+  `.letron.vn`.
 - Lark callback có one-time ERP handoff TTL 2 phút; ERP đổi handoff lấy session
   server-side trong Redis và không đưa gateway token vào URL sau callback.
 - ERP API route chuyển gateway session qua header server-to-server; không gửi

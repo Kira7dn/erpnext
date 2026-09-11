@@ -528,9 +528,11 @@ khi chạy toàn bộ flow để tránh tạo dữ liệu dang dở khi OAuth cr
 revoke hoặc hết hạn.
 Trong real test, sau khi tạo approval thật, test gọi
 `POST /api/internal/lark/approval/approve`; `apps/erp` dùng tenant token gọi
-`POST /open-apis/approval/v4/tasks/approve` cho task của approver. Đây là bước
-để test chạy tự động; route bị khóa bằng `LETRON_API_KEY` và bị vô hiệu hóa ở
-production. Production vẫn yêu cầu người có quyền approve trên Lark.
+`POST /open-apis/approval/v4/tasks/approve` cho task của approver. Route chỉ
+được gọi bằng `LETRON_INTERNAL_API_SECRET` và trong production còn bắt buộc
+header `X-Letron-Realtest: production`; vì vậy đây là thao tác explicit dành
+cho production real test, không phải public approval API. Production flow
+thông thường vẫn yêu cầu người có quyền approve trên Lark.
 
 Cấu hình không-secret của Supplier Portal nằm trong
 `config/supplier_portal.json`, gồm `erp_base_url`,
@@ -640,7 +642,7 @@ Supplier submit quotation
 → Chọn quotation có tổng giá thấp nhất
 → ERPNext tạo PO Draft native và cấp số PO thật
 → Lark Approval
-→ Real test auto-approve task (chỉ môi trường non-production)
+→ Real test auto-approve task (chỉ khi explicit production real-test marker)
 → ERPNext submit đúng PO Draft, giữ nguyên số PO
 ```
 

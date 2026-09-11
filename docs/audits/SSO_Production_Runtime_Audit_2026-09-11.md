@@ -7,8 +7,10 @@ Audit bằng Playwright trên `https://erp.letron.vn/` với browser context ri�
 ## Kết luận
 
 Production SSO đã chạy thành công với `leducanh@ledb.vn` trong flow browser đã
-kiểm chứng. Cookie `letron_sso` được phát hành ở domain `.letron.vn`, ERP nhận
-được cookie từ Auth, callback quay lại đúng URL và trang ERP mở được.
+kiểm chứng. Auth giữ session host-only; sau handoff ERP phát hành app session
+host-only tương ứng (`__Host-letron_assets_session`,
+`__Host-letron_purchase_session` hoặc `__Host-letron_accounts_session`).
+Callback quay lại đúng URL và trang ERP mở được.
 
 Kết luận này chỉ khẳng định login/redirect happy path và không đồng nghĩa rằng
 mọi failure mode production đã được loại bỏ. Các rủi ro còn lại cần tập trung
@@ -41,9 +43,9 @@ Authorization URL có đúng `client_id`, PKCE `code_challenge`, `state`, scope 
 
 ## Cookie và identity evidence
 
-- Cookie session: `letron_sso`.
-- Domain: `.letron.vn`.
-- Browser context sau callback gửi được session sang `erp.letron.vn`.
+- Auth cookie: `letron_sso`, host-only tại `auth.letron.vn`.
+- ERP cookie: app-scoped, host-only tại `erp.letron.vn`.
+- Browser context sau callback nhận đúng app session qua one-time handoff.
 - UI ERP hiển thị user `leducanh@ledb.vn` và trạng thái “Đã đăng nhập”.
 - Các route `/accounts/*` và request Gateway sau đăng nhập trả `200`.
 
@@ -53,8 +55,9 @@ Authorization URL có đúng `client_id`, PKCE `code_challenge`, `state`, scope 
 
 - Hiện tượng: Chrome báo `ERR_TOO_MANY_REDIRECTS` tại `erp.letron.vn`.
 - Nguyên nhân: cookie cũ chỉ thuộc host `auth.letron.vn`; ERP không nhận được session nên liên tục đẩy người dùng về Auth/Lark.
-- Xử lý: session cookie được phát hành với parent domain `.letron.vn`.
-- Evidence hiện tại: Playwright login thành công và ERP nhận `letron_sso`.
+- Xử lý hiện tại: Auth và ERP dùng host-only cookie; ERP nhận app session qua
+  one-time handoff, không chia sẻ cookie parent domain.
+- Evidence hiện tại: Playwright login thành công và ERP nhận đúng app session.
 
 ### SSO-002 — High — Browser-facing auth entrypoint (đã xử lý)
 
@@ -212,12 +215,31 @@ Khi `leducanh@ledb.vn` bị lỗi production, thu thập theo đúng thứ tự 
 3. Kiểm tra không có redirect tới `/api/auth/lark/start` cũ.
 4. Kiểm tra authorization request có `state`, PKCE và callback production.
 5. Kiểm tra callback trả `303`, không phải `400`, `401` hoặc `5xx`.
-6. Kiểm tra cookie `letron_sso` xuất hiện ở `.letron.vn` và được gửi ở request
-   ERP kế tiếp.
+6. Kiểm tra callback tạo đúng app session host-only của app đang mở:
+   `__Host-letron_assets_session`, `__Host-letron_purchase_session` hoặc
+   `__Host-letron_accounts_session`. Không kỳ vọng `letron_sso` được chia sẻ
+   sang ERP.
 7. Nếu callback pass nhưng ERP trả `401/403`, kiểm tra Gateway identity/policy;
    không tiếp tục xóa cookie và retry vô hạn.
 8. Nếu chỉ có CORS/abort ở request phụ Lark nhưng callback pass, phân loại là
    non-blocking và lưu lại thời điểm/browser/version để theo dõi.
+
+### Production CLI evidence sau remediation
+
+Ngày 2026-09-11, `npm run realtest:production` đã chạy pass sau khi đồng bộ
+runner với app session và sửa mapping namespace Gateway. Luồng đã xác nhận:
+
+```text
+purchase app session
+→ Material Request → RFQ → Supplier Magic Link/OTP
+→ Supplier Quotation → Lark Approval webhook
+→ Purchase Order → Purchase Receipt → Purchase Invoice
+→ payment_status=Invoiced
+```
+
+Real test này dùng internal test credential cho user
+`leducanh@ledb.vn`; nó xác nhận contract app session và business flow qua CLI,
+không thay thế browser acceptance của Lark OAuth/Dangerous Site.
 
 ## Handover decision
 
