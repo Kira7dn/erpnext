@@ -26,7 +26,7 @@ export default function PurchaseHomePage() {
     <main className="mx-auto max-w-7xl space-y-8 p-5 md:p-8">
       <div>
         <div className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-violet-700">
-          Purchase workspace
+          LeTRON-Mua hàng / Purchase
         </div>
         <h1 className="text-3xl font-bold tracking-tight">Mua hàng</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
