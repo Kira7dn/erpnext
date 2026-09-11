@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/HealthResponse.json",
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "app": {
+          "type": "string"
+        },
+        "site": {
+          "type": "string"
+        },
+        "frappe_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "installed_apps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "bootstrap": {
+          "$ref": "RuntimeStatus.json"
+        },
+        "config": {
+          "$ref": "RuntimeStatus.json"
+        },
+        "policy": {
+          "$ref": "RuntimeStatus.json"
+        },
+        "configuration_bundle": {
+          "$ref": "RuntimeStatus.json"
+        }
+      },
+      "required": [
+        "ok",
+        "app",
+        "bootstrap",
+        "config",
+        "policy",
+        "configuration_bundle"
+      ]
+    }
+  },
+  "required": [
+    "message"
+  ]
+}

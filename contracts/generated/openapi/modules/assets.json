@@ -189,6 +189,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -463,10 +464,9 @@
                   "company",
                   "item_code",
                   "location",
-                  "name",
                   "purchase_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -579,6 +579,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -706,6 +707,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -986,10 +988,9 @@
                   "company",
                   "item_code",
                   "location",
-                  "name",
                   "purchase_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -1095,6 +1096,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1215,6 +1217,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1347,6 +1350,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1479,6 +1483,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1644,6 +1649,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1789,12 +1795,11 @@
                 },
                 "required": [
                   "company",
-                  "name",
                   "naming_series",
                   "posting_date",
                   "posting_time"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -1906,6 +1911,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2033,6 +2039,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2184,12 +2191,11 @@
                 },
                 "required": [
                   "company",
-                  "name",
                   "naming_series",
                   "posting_date",
                   "posting_time"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -2295,6 +2301,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2415,6 +2422,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2547,6 +2555,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2679,6 +2688,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2844,6 +2854,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2912,10 +2923,9 @@
                 },
                 "required": [
                   "accounts",
-                  "asset_category_name",
-                  "name"
+                  "asset_category_name"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -3025,6 +3035,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3152,6 +3163,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3226,10 +3238,9 @@
                 },
                 "required": [
                   "accounts",
-                  "asset_category_name",
-                  "name"
+                  "asset_category_name"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -3335,6 +3346,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3455,6 +3467,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3620,6 +3633,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3689,10 +3703,9 @@
                   }
                 },
                 "required": [
-                  "asset",
-                  "name"
+                  "asset"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -3801,6 +3814,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3928,6 +3942,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4003,10 +4018,9 @@
                   }
                 },
                 "required": [
-                  "asset",
-                  "name"
+                  "asset"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -4112,6 +4126,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4232,6 +4247,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4397,6 +4413,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4476,10 +4493,9 @@
                   "asset_maintenance_tasks",
                   "asset_name",
                   "company",
-                  "maintenance_team",
-                  "name"
+                  "maintenance_team"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -4591,6 +4607,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4718,6 +4735,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4803,10 +4821,9 @@
                   "asset_maintenance_tasks",
                   "asset_name",
                   "company",
-                  "maintenance_team",
-                  "name"
+                  "maintenance_team"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -4912,6 +4929,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5032,6 +5050,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5197,6 +5216,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5295,10 +5315,9 @@
                 },
                 "required": [
                   "maintenance_status",
-                  "name",
                   "naming_series"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -5408,6 +5427,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5535,6 +5555,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5639,10 +5660,9 @@
                 },
                 "required": [
                   "maintenance_status",
-                  "name",
                   "naming_series"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -5748,6 +5768,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5868,6 +5889,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6033,6 +6055,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6095,10 +6118,9 @@
                 "required": [
                   "company",
                   "maintenance_team_members",
-                  "maintenance_team_name",
-                  "name"
+                  "maintenance_team_name"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -6209,6 +6231,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6336,6 +6359,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6404,10 +6428,9 @@
                 "required": [
                   "company",
                   "maintenance_team_members",
-                  "maintenance_team_name",
-                  "name"
+                  "maintenance_team_name"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -6513,6 +6536,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6633,6 +6657,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6798,6 +6823,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6877,11 +6903,10 @@
                 "required": [
                   "assets",
                   "company",
-                  "name",
                   "purpose",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -6993,6 +7018,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -7120,6 +7146,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -7205,11 +7232,10 @@
                 "required": [
                   "assets",
                   "company",
-                  "name",
                   "purpose",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -7315,6 +7341,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -7435,6 +7462,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -7567,6 +7595,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -7699,6 +7728,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -7864,6 +7894,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8019,10 +8050,9 @@
                 "required": [
                   "asset",
                   "failure_date",
-                  "name",
                   "naming_series"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -8133,6 +8163,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8260,6 +8291,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8421,10 +8453,9 @@
                 "required": [
                   "asset",
                   "failure_date",
-                  "name",
                   "naming_series"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -8530,6 +8561,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8650,6 +8682,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8782,6 +8815,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8914,6 +8948,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9079,6 +9114,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9140,10 +9176,9 @@
                 },
                 "required": [
                   "asset",
-                  "name",
                   "naming_series"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -9253,6 +9288,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9380,6 +9416,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9447,10 +9484,9 @@
                 },
                 "required": [
                   "asset",
-                  "name",
                   "naming_series"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -9556,6 +9592,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9676,6 +9713,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9841,6 +9879,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9884,11 +9923,10 @@
                   }
                 },
                 "required": [
-                  "name",
                   "shift_factor",
                   "shift_name"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -9998,6 +10036,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -10125,6 +10164,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -10174,11 +10214,10 @@
                   }
                 },
                 "required": [
-                  "name",
                   "shift_factor",
                   "shift_name"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -10284,6 +10323,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -10404,6 +10444,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -10569,6 +10610,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -10651,10 +10693,9 @@
                   "asset",
                   "date",
                   "difference_account",
-                  "name",
                   "new_asset_value"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -10766,6 +10807,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -10893,6 +10935,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -10981,10 +11024,9 @@
                   "asset",
                   "date",
                   "difference_account",
-                  "name",
                   "new_asset_value"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -11090,6 +11132,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -11210,6 +11253,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -11342,6 +11386,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -11474,6 +11519,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -11639,6 +11685,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -11715,10 +11762,9 @@
                   }
                 },
                 "required": [
-                  "location_name",
-                  "name"
+                  "location_name"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               },
               "example": {
@@ -11827,6 +11873,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -11954,6 +12001,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -12036,10 +12084,9 @@
                   }
                 },
                 "required": [
-                  "location_name",
-                  "name"
+                  "location_name"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Assets"
               }
             }
@@ -12145,6 +12192,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -12265,6 +12313,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -14922,6 +14971,11 @@
         "Selling",
         "Stock"
       ],
+      "permission_dependencies": {
+        "stock/purchase-receipts": [
+          "Account"
+        ]
+      },
       "document_actions": [
         {
           "doctype": "Asset",

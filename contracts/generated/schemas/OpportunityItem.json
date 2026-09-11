@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/OpportunityItem.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "item_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Group",
+      "writeOnly": true
+    },
+    "brand": {
+      "type": "string",
+      "x-frappe-target-doctype": "Brand",
+      "writeOnly": true
+    },
+    "section_break_6": {
+      "type": "string"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "column_break_8": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "image_view": {
+      "type": "string",
+      "x-frappe-options": "image"
+    },
+    "rate": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "quantity_and_rate_section": {
+      "type": "string"
+    },
+    "base_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "column_break_16": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "base_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "amount",
+    "base_amount",
+    "base_rate",
+    "name",
+    "rate"
+  ],
+  "additionalProperties": true,
+  "x-module": "CRM"
+}

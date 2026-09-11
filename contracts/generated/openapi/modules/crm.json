@@ -189,6 +189,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -486,10 +487,9 @@
                   }
                 },
                 "required": [
-                  "name",
                   "status"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "CRM"
               },
               "example": {
@@ -598,6 +598,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -725,6 +726,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1028,10 +1030,9 @@
                   }
                 },
                 "required": [
-                  "name",
                   "status"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "CRM"
               }
             }
@@ -1137,6 +1138,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1257,6 +1259,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1422,6 +1425,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1729,14 +1733,13 @@
                 },
                 "required": [
                   "company",
-                  "name",
                   "naming_series",
                   "opportunity_from",
                   "party_name",
                   "status",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "CRM"
               },
               "example": {
@@ -1850,6 +1853,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1977,6 +1981,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2290,14 +2295,13 @@
                 },
                 "required": [
                   "company",
-                  "name",
                   "naming_series",
                   "opportunity_from",
                   "party_name",
                   "status",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "CRM"
               }
             }
@@ -2403,6 +2407,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2523,6 +2528,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3549,6 +3555,11 @@
         "Selling",
         "Stock"
       ],
+      "permission_dependencies": {
+        "stock/purchase-receipts": [
+          "Account"
+        ]
+      },
       "document_actions": [
         {
           "doctype": "Asset",

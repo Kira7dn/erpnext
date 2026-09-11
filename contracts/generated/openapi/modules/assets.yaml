@@ -95,6 +95,7 @@ paths:
         '500': &id011
           description: Server or rollback failure
           content: *id001
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -292,9 +293,8 @@ paths:
               - company
               - item_code
               - location
-              - name
               - purchase_date
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               asset_name: ''
@@ -321,6 +321,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -357,6 +358,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -398,6 +400,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -423,6 +426,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -455,6 +459,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -487,6 +492,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -529,6 +535,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -628,11 +635,10 @@ paths:
                   type: string
               required:
               - company
-              - name
               - naming_series
               - posting_date
               - posting_time
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               company: ''
@@ -658,6 +664,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -694,6 +701,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -735,6 +743,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -760,6 +769,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -792,6 +802,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -824,6 +835,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -866,6 +878,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -912,8 +925,7 @@ paths:
               required:
               - accounts
               - asset_category_name
-              - name
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               asset_category_name: ''
@@ -937,6 +949,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -973,6 +986,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1014,6 +1028,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1039,6 +1054,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1081,6 +1097,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1129,8 +1146,7 @@ paths:
                   type: string
               required:
               - asset
-              - name
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               asset: ''
@@ -1153,6 +1169,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1189,6 +1206,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1230,6 +1248,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1255,6 +1274,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1297,6 +1317,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1352,8 +1373,7 @@ paths:
               - asset_name
               - company
               - maintenance_team
-              - name
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               asset_name: ''
@@ -1379,6 +1399,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1415,6 +1436,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1456,6 +1478,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1481,6 +1504,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1523,6 +1547,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1590,9 +1615,8 @@ paths:
                   type: string
               required:
               - maintenance_status
-              - name
               - naming_series
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               naming_series: ''
@@ -1616,6 +1640,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1652,6 +1677,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1693,6 +1719,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1718,6 +1745,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1760,6 +1788,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1803,8 +1832,7 @@ paths:
               - company
               - maintenance_team_members
               - maintenance_team_name
-              - name
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               maintenance_team_name: ''
@@ -1829,6 +1857,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1865,6 +1894,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1906,6 +1936,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1931,6 +1962,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1973,6 +2005,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2028,10 +2061,9 @@ paths:
               required:
               - assets
               - company
-              - name
               - purpose
               - transaction_date
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               company: ''
@@ -2057,6 +2089,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2093,6 +2126,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2134,6 +2168,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2159,6 +2194,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2191,6 +2227,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2223,6 +2260,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2265,6 +2303,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2371,9 +2410,8 @@ paths:
               required:
               - asset
               - failure_date
-              - name
               - naming_series
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               naming_series: ''
@@ -2398,6 +2436,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2434,6 +2473,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2475,6 +2515,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2500,6 +2541,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2532,6 +2574,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2564,6 +2607,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2606,6 +2650,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2647,9 +2692,8 @@ paths:
                   type: string
               required:
               - asset
-              - name
               - naming_series
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               asset: ''
@@ -2673,6 +2717,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2709,6 +2754,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2750,6 +2796,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2775,6 +2822,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2817,6 +2865,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2845,10 +2894,9 @@ paths:
                 default: &id267
                   type: boolean
               required:
-              - name
               - shift_factor
               - shift_name
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               shift_name: ''
@@ -2872,6 +2920,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2908,6 +2957,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2949,6 +2999,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2974,6 +3025,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3016,6 +3068,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3073,9 +3126,8 @@ paths:
               - asset
               - date
               - difference_account
-              - name
               - new_asset_value
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               asset: ''
@@ -3101,6 +3153,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3137,6 +3190,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3178,6 +3232,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3203,6 +3258,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3235,6 +3291,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3267,6 +3324,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3309,6 +3367,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3361,8 +3420,7 @@ paths:
                   writeOnly: true
               required:
               - location_name
-              - name
-              additionalProperties: true
+              additionalProperties: false
               x-module: Assets
             example:
               location_name: ''
@@ -3385,6 +3443,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3421,6 +3480,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3462,6 +3522,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3487,6 +3548,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -4905,6 +4967,9 @@ x-contract:
     - Contacts
     - Selling
     - Stock
+    permission_dependencies:
+      stock/purchase-receipts:
+      - Account
     document_actions:
     - doctype: Asset
       module: Assets

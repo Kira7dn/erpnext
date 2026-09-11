@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/MaintenanceTeamMember.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "team_member": {
+      "type": "string",
+      "x-frappe-target-doctype": "User"
+    },
+    "full_name": {
+      "type": "string",
+      "readOnly": true
+    },
+    "maintenance_role": {
+      "type": "string",
+      "x-frappe-target-doctype": "Role"
+    }
+  },
+  "required": [
+    "maintenance_role",
+    "name",
+    "team_member"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

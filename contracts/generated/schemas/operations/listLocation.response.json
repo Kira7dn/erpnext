@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/listLocation.response.json",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "array",
+      "items": {
+        "$ref": "Location.json"
+      }
+    },
+    "message": {}
+  },
+  "required": [
+    "data"
+  ]
+}

@@ -1,0 +1,454 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SalesOrderItem.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "customer_item_code": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "ensure_delivery_based_on_produced_serial_no": {
+      "type": "boolean"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "section_break_5": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "delivery_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "image_view": {
+      "type": "string",
+      "x-frappe-options": "image"
+    },
+    "quantity_and_rate": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "stock_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "conversion_factor": {
+      "type": "number",
+      "readOnly": true
+    },
+    "stock_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "section_break_16": {
+      "type": "string"
+    },
+    "price_list_rate": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "base_price_list_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "discount_and_margin": {
+      "type": "string"
+    },
+    "margin_type": {
+      "type": "string",
+      "enum": [
+        "Percentage",
+        "Amount"
+      ]
+    },
+    "margin_rate_or_amount": {
+      "type": "number"
+    },
+    "rate_with_margin": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "column_break_19": {
+      "type": "string"
+    },
+    "discount_percentage": {
+      "type": "number"
+    },
+    "discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "base_rate_with_margin": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "section_break_simple1": {
+      "type": "string"
+    },
+    "rate": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "col_break3": {
+      "type": "string"
+    },
+    "base_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "pricing_rules": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "is_free_item": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "section_break_24": {
+      "type": "string"
+    },
+    "net_rate": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "net_amount": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "column_break_27": {
+      "type": "string"
+    },
+    "base_net_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_net_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "drop_ship_section": {
+      "type": "string"
+    },
+    "delivered_by_supplier": {
+      "type": "boolean"
+    },
+    "supplier": {
+      "type": "string",
+      "x-frappe-target-doctype": "Supplier"
+    },
+    "item_weight_details": {
+      "type": "string"
+    },
+    "weight_per_unit": {
+      "type": "number"
+    },
+    "total_weight": {
+      "type": "number",
+      "readOnly": true
+    },
+    "column_break_21": {
+      "type": "string"
+    },
+    "weight_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "warehouse_and_reference": {
+      "type": "string"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "target_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse",
+      "writeOnly": true
+    },
+    "prevdoc_docname": {
+      "type": "string",
+      "x-frappe-target-doctype": "Quotation",
+      "readOnly": true
+    },
+    "brand": {
+      "type": "string",
+      "x-frappe-target-doctype": "Brand",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "item_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Group",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "billed_amt": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "valuation_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "gross_profit": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "blanket_order": {
+      "type": "string",
+      "x-frappe-target-doctype": "Blanket Order"
+    },
+    "blanket_order_rate": {
+      "type": "number",
+      "readOnly": true
+    },
+    "col_break4": {
+      "type": "string"
+    },
+    "projected_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "actual_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "ordered_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "delivered_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "work_order_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "returned_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "section_break_63": {
+      "type": "string"
+    },
+    "item_tax_template": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Tax Template"
+    },
+    "page_break": {
+      "type": "boolean"
+    },
+    "planned_qty": {
+      "type": "number",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "produced_qty": {
+      "type": "number",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "item_tax_rate": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "planning_section": {
+      "type": "string"
+    },
+    "column_break_69": {
+      "type": "string"
+    },
+    "image_section": {
+      "type": "string"
+    },
+    "shopping_cart_section": {
+      "type": "string"
+    },
+    "additional_notes": {
+      "type": "string"
+    },
+    "against_blanket_order": {
+      "type": "boolean"
+    },
+    "bom_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "BOM"
+    },
+    "manufacturing_section_section": {
+      "type": "string"
+    },
+    "stock_uom_rate": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "grant_commission": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "picked_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "inter_transfer_reference_section": {
+      "type": "string"
+    },
+    "purchase_order": {
+      "type": "string",
+      "x-frappe-target-doctype": "Purchase Order",
+      "readOnly": true
+    },
+    "column_break_89": {
+      "type": "string"
+    },
+    "purchase_order_item": {
+      "type": "string",
+      "readOnly": true
+    },
+    "quotation_item": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "material_request": {
+      "type": "string",
+      "x-frappe-target-doctype": "Material Request"
+    },
+    "material_request_item": {
+      "type": "string"
+    },
+    "reserve_stock": {
+      "type": "boolean"
+    },
+    "stock_reserved_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "production_plan_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "is_stock_item": {
+      "type": "boolean",
+      "writeOnly": true
+    },
+    "distributed_discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "company_total_stock": {
+      "type": "number",
+      "readOnly": true
+    },
+    "column_break_jpky": {
+      "type": "string"
+    },
+    "available_quantity_section": {
+      "type": "string"
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "column_break_ihdh": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "sales_order_schedule_section": {
+      "type": "string"
+    },
+    "add_schedule": {
+      "type": "string"
+    },
+    "subcontracted_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "fg_item": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "fg_item_qty": {
+      "type": "number"
+    },
+    "requested_qty": {
+      "type": "number",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "conversion_factor",
+    "item_code",
+    "item_name",
+    "name",
+    "qty",
+    "uom"
+  ],
+  "additionalProperties": true,
+  "x-module": "Selling"
+}

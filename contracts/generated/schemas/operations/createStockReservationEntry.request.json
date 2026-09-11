@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/createStockReservationEntry.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "reserved_qty": {
+      "type": "number"
+    },
+    "column_break_elik": {
+      "type": "string"
+    },
+    "section_break_xt4m": {
+      "type": "string"
+    },
+    "column_break_o6ex": {
+      "type": "string"
+    },
+    "section_break_3vb3": {
+      "type": "string"
+    },
+    "column_break_jbyr": {
+      "type": "string"
+    },
+    "sb_entries": {
+      "type": "array",
+      "items": {
+        "$ref": "SerialandBatchEntry.json"
+      }
+    },
+    "serial_and_batch_reservation_section": {
+      "type": "string"
+    },
+    "column_break_7dxj": {
+      "type": "string"
+    },
+    "column_break_grdt": {
+      "type": "string"
+    },
+    "production_section": {
+      "type": "string"
+    },
+    "column_break_qdwj": {
+      "type": "string"
+    },
+    "consumed_qty": {
+      "type": "number"
+    },
+    "item_information_section": {
+      "type": "string"
+    },
+    "transferred_qty": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SerialNo.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "details": {
+      "type": "string"
+    },
+    "column_break0": {
+      "type": "string"
+    },
+    "serial_no": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "column_break1": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string",
+      "readOnly": true
+    },
+    "description": {
+      "type": "string",
+      "readOnly": true
+    },
+    "item_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Group",
+      "readOnly": true
+    },
+    "brand": {
+      "type": "string",
+      "x-frappe-target-doctype": "Brand",
+      "readOnly": true
+    },
+    "asset_details": {
+      "type": "string"
+    },
+    "asset": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset",
+      "readOnly": true
+    },
+    "asset_status": {
+      "type": "string",
+      "enum": [
+        "Issue",
+        "Receipt",
+        "Transfer"
+      ],
+      "readOnly": true
+    },
+    "column_break_24": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "x-frappe-target-doctype": "Location",
+      "readOnly": true
+    },
+    "employee": {
+      "type": "string",
+      "x-frappe-target-doctype": "Employee",
+      "readOnly": true
+    },
+    "warranty_amc_details": {
+      "type": "string"
+    },
+    "column_break6": {
+      "type": "string"
+    },
+    "maintenance_status": {
+      "type": "string",
+      "enum": [
+        "Under Warranty",
+        "Out of Warranty",
+        "Under AMC",
+        "Out of AMC"
+      ],
+      "readOnly": true
+    },
+    "warranty_period": {
+      "type": "integer",
+      "readOnly": true
+    },
+    "column_break7": {
+      "type": "string"
+    },
+    "warranty_expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "amc_expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "more_info": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "work_order": {
+      "type": "string",
+      "x-frappe-target-doctype": "Work Order"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse",
+      "readOnly": true
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch",
+      "readOnly": true
+    },
+    "purchase_rate": {
+      "type": "number",
+      "readOnly": true
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "Inactive",
+        "Consumed",
+        "Delivered",
+        "Expired"
+      ],
+      "readOnly": true
+    },
+    "column_break_2cmm": {
+      "type": "string"
+    },
+    "customer": {
+      "type": "string",
+      "x-frappe-target-doctype": "Customer",
+      "readOnly": true
+    },
+    "source_document_section": {
+      "type": "string"
+    },
+    "reference_doctype": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType",
+      "readOnly": true
+    },
+    "column_break_ctcx": {
+      "type": "string"
+    },
+    "reference_name": {
+      "type": "string",
+      "x-frappe-options": "reference_doctype",
+      "readOnly": true
+    },
+    "posting_date": {
+      "type": "string",
+      "format": "date",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "company",
+    "item_code",
+    "name",
+    "serial_no"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

@@ -96,6 +96,7 @@ paths:
         '500': &id011
           description: Server or rollback failure
           content: *id001
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -183,8 +184,7 @@ paths:
               - address_type
               - city
               - country
-              - name
-              additionalProperties: true
+              additionalProperties: false
               x-module: Contacts
             example:
               address_type: ''
@@ -210,6 +210,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -246,6 +247,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -287,6 +289,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -312,6 +315,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -354,6 +358,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -446,9 +451,8 @@ paths:
                   type: string
                 company_name: &id070
                   type: string
-              required:
-              - name
-              additionalProperties: true
+              required: []
+              additionalProperties: false
               x-module: Contacts
             example: {}
       responses:
@@ -470,6 +474,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -506,6 +511,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -547,6 +553,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -572,6 +579,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -916,6 +924,9 @@ x-contract:
     - Contacts
     - Selling
     - Stock
+    permission_dependencies:
+      stock/purchase-receipts:
+      - Account
     document_actions:
     - doctype: Asset
       module: Assets

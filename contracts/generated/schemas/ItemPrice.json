@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ItemPrice.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "packing_unit": {
+      "type": "integer"
+    },
+    "column_break_17": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string",
+      "readOnly": true
+    },
+    "brand": {
+      "type": "string",
+      "x-frappe-target-doctype": "Brand",
+      "readOnly": true
+    },
+    "item_description": {
+      "type": "string",
+      "readOnly": true
+    },
+    "price_list_details": {
+      "type": "string",
+      "x-frappe-options": "fa fa-tags"
+    },
+    "price_list": {
+      "type": "string",
+      "x-frappe-target-doctype": "Price List"
+    },
+    "customer": {
+      "type": "string",
+      "x-frappe-target-doctype": "Customer"
+    },
+    "supplier": {
+      "type": "string",
+      "x-frappe-target-doctype": "Supplier"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "buying": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "selling": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "item_details": {
+      "type": "string",
+      "x-frappe-options": "fa fa-tag"
+    },
+    "currency": {
+      "type": "string",
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true
+    },
+    "col_br_1": {
+      "type": "string"
+    },
+    "price_list_rate": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "section_break_15": {
+      "type": "string"
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date"
+    },
+    "lead_time_days": {
+      "type": "integer"
+    },
+    "column_break_18": {
+      "type": "string"
+    },
+    "valid_upto": {
+      "type": "string",
+      "format": "date"
+    },
+    "section_break_24": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    }
+  },
+  "required": [
+    "item_code",
+    "name",
+    "price_list",
+    "price_list_rate",
+    "uom"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

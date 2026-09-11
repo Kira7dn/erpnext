@@ -37,6 +37,12 @@ def validate_contract(data: dict[str, Any], doctypes: list[Any] | None = None, m
             raise ValueError(f"runtime.public_resources doctype collision: {item['doctype']}")
         seen_paths.add(item["path"])
         seen_doctypes.add(item["doctype"])
+    dependencies = runtime.get("permission_dependencies", {})
+    if not isinstance(dependencies, dict) or any(
+        not isinstance(key, str) or not isinstance(value, list) or any(not isinstance(dep, str) or not dep.strip() for dep in value)
+        for key, value in dependencies.items()
+    ):
+        raise TypeError("runtime.permission_dependencies must map resource keys to string lists")
     actions = runtime.get("document_actions", [])
     if not isinstance(actions, list) or any(not isinstance(item, dict) for item in actions):
         raise TypeError("runtime.document_actions must be a list of mappings")

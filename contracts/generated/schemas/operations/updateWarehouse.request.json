@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/updateWarehouse.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "warehouse_detail": {
+      "type": "string"
+    },
+    "warehouse_name": {
+      "type": "string"
+    },
+    "is_group": {
+      "type": "boolean"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "disabled": {
+      "type": "boolean",
+      "writeOnly": true
+    },
+    "column_break_4": {
+      "type": "string"
+    },
+    "account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "address_and_contact": {
+      "type": "string"
+    },
+    "address_html": {
+      "type": "string"
+    },
+    "column_break_10": {
+      "type": "string"
+    },
+    "contact_html": {
+      "type": "string"
+    },
+    "warehouse_contact_info": {
+      "type": "string"
+    },
+    "email_id": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "phone_no": {
+      "type": "string",
+      "x-frappe-options": "Phone"
+    },
+    "mobile_no": {
+      "type": "string",
+      "x-frappe-options": "Phone"
+    },
+    "column_break0": {
+      "type": "string"
+    },
+    "address_line_1": {
+      "type": "string"
+    },
+    "address_line_2": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "pin": {
+      "type": "string"
+    },
+    "tree_details": {
+      "type": "string"
+    },
+    "parent_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "warehouse_type": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse Type"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "default_in_transit_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "transit_section": {
+      "type": "string"
+    },
+    "column_break_qajx": {
+      "type": "string"
+    },
+    "is_rejected_warehouse": {
+      "type": "boolean"
+    },
+    "customer": {
+      "type": "string",
+      "x-frappe-target-doctype": "Customer"
+    },
+    "section_break_ujhu": {
+      "type": "string"
+    },
+    "column_break_qhdh": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company",
+    "warehouse_name"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

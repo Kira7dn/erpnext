@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/createStockEntry.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": "string",
+      "enum": [
+        "MAT-STE-.YYYY.-"
+      ]
+    },
+    "stock_entry_type": {
+      "type": "string",
+      "x-frappe-target-doctype": "Stock Entry Type"
+    },
+    "source_stock_entry": {
+      "type": "string",
+      "x-frappe-target-doctype": "Stock Entry"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "work_order": {
+      "type": "string",
+      "x-frappe-target-doctype": "Work Order"
+    },
+    "purchase_order": {
+      "type": "string",
+      "x-frappe-target-doctype": "Purchase Order"
+    },
+    "col2": {
+      "type": "string"
+    },
+    "posting_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "posting_time": {
+      "type": "string",
+      "format": "time"
+    },
+    "set_posting_time": {
+      "type": "boolean"
+    },
+    "inspection_required": {
+      "type": "boolean"
+    },
+    "from_bom": {
+      "type": "boolean"
+    },
+    "bom_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "BOM"
+    },
+    "fg_completed_qty": {
+      "type": "number"
+    },
+    "cb1": {
+      "type": "string"
+    },
+    "use_multi_level_bom": {
+      "type": "boolean"
+    },
+    "get_items": {
+      "type": "string"
+    },
+    "from_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "source_warehouse_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "cb0": {
+      "type": "string"
+    },
+    "to_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "target_warehouse_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "sb0": {
+      "type": "string",
+      "x-frappe-options": "Simple"
+    },
+    "scan_barcode": {
+      "type": "string",
+      "x-frappe-options": "Barcode"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "StockEntryDetail.json"
+      }
+    },
+    "get_stock_and_rate": {
+      "type": "string",
+      "x-frappe-options": "get_stock_and_rate"
+    },
+    "section_break_19": {
+      "type": "string"
+    },
+    "column_break_22": {
+      "type": "string"
+    },
+    "additional_costs_section": {
+      "type": "string"
+    },
+    "additional_costs": {
+      "type": "array",
+      "items": {
+        "$ref": "LandedCostTaxesandCharges.json"
+      }
+    },
+    "contact_section": {
+      "type": "string"
+    },
+    "supplier": {
+      "type": "string",
+      "x-frappe-target-doctype": "Supplier"
+    },
+    "supplier_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "address_display": {
+      "type": "string"
+    },
+    "printing_settings": {
+      "type": "string"
+    },
+    "select_print_heading": {
+      "type": "string",
+      "x-frappe-target-doctype": "Print Heading"
+    },
+    "letter_head": {
+      "type": "string",
+      "x-frappe-target-doctype": "Letter Head"
+    },
+    "more_info": {
+      "type": "string"
+    },
+    "is_opening": {
+      "type": "string",
+      "enum": [
+        "No",
+        "Yes"
+      ]
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "remarks": {
+      "type": "string"
+    },
+    "col5": {
+      "type": "string"
+    },
+    "credit_note": {
+      "type": "string",
+      "x-frappe-target-doctype": "Journal Entry",
+      "writeOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "print_settings_col_break": {
+      "type": "string"
+    },
+    "add_to_transit": {
+      "type": "boolean"
+    },
+    "apply_putaway_rule": {
+      "type": "boolean"
+    },
+    "bom_info_section": {
+      "type": "string"
+    },
+    "section_break_jwgn": {
+      "type": "string"
+    },
+    "other_info_tab": {
+      "type": "string"
+    },
+    "supplier_info_tab": {
+      "type": "string"
+    },
+    "stock_entry_details_tab": {
+      "type": "string"
+    },
+    "section_break_7qsm": {
+      "type": "string"
+    },
+    "process_loss_qty": {
+      "type": "number"
+    },
+    "column_break_e92r": {
+      "type": "string"
+    },
+    "process_loss_percentage": {
+      "type": "number"
+    },
+    "items_section": {
+      "type": "string"
+    },
+    "tab_connections": {
+      "type": "string"
+    },
+    "last_scanned_warehouse": {
+      "type": "string"
+    },
+    "reference_section": {
+      "type": "string"
+    },
+    "column_break_jabv": {
+      "type": "string"
+    },
+    "reference_details_section": {
+      "type": "string"
+    },
+    "column_break_qpvo": {
+      "type": "string"
+    },
+    "column_break_wgvc": {
+      "type": "string"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    }
+  },
+  "required": [
+    "company",
+    "items",
+    "naming_series",
+    "stock_entry_type"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

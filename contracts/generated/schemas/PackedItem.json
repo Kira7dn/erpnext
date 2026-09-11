@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PackedItem.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "parent_item": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item",
+      "readOnly": true
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item",
+      "readOnly": true
+    },
+    "item_name": {
+      "type": "string",
+      "readOnly": true
+    },
+    "column_break_5": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "section_break_6": {
+      "type": "string"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "target_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "section_break_9": {
+      "type": "string"
+    },
+    "serial_no": {
+      "type": "string"
+    },
+    "column_break_11": {
+      "type": "string"
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "section_break_13": {
+      "type": "string"
+    },
+    "actual_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "projected_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "column_break_16": {
+      "type": "string"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "page_break": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "prevdoc_doctype": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "parent_detail_docname": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "actual_batch_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "incoming_rate": {
+      "type": "number",
+      "readOnly": true
+    },
+    "conversion_factor": {
+      "type": "number"
+    },
+    "rate": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "ordered_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "picked_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "packed_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "serial_and_batch_bundle": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "pick_serial_and_batch": {
+      "type": "string"
+    },
+    "use_serial_batch_fields": {
+      "type": "boolean"
+    },
+    "section_break_bgys": {
+      "type": "string"
+    },
+    "column_break_qlha": {
+      "type": "string"
+    },
+    "delivered_by_supplier": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "requested_qty": {
+      "type": "number",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

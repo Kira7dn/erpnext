@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/FrappeResponse.json",
+  "type": "object",
+  "properties": {
+    "message": {}
+  },
+  "required": [
+    "message"
+  ]
+}

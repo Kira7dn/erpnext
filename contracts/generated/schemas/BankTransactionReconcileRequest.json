@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankTransactionReconcileRequest.json",
+  "type": "object",
+  "properties": {
+    "allocations": {
+      "type": "array",
+      "items": {
+        "$ref": "BankTransactionAllocation.json"
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "allocations"
+  ],
+  "additionalProperties": false
+}

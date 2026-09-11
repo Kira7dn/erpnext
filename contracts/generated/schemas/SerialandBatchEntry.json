@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SerialandBatchEntry.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "serial_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial No"
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "column_break_2": {
+      "type": "string"
+    },
+    "section_break_6": {
+      "type": "string"
+    },
+    "incoming_rate": {
+      "type": "number",
+      "readOnly": true
+    },
+    "outgoing_rate": {
+      "type": "number",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "column_break_8": {
+      "type": "string"
+    },
+    "stock_value_difference": {
+      "type": "number",
+      "readOnly": true
+    },
+    "is_outward": {
+      "type": "boolean",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "stock_queue": {
+      "type": "string",
+      "readOnly": true
+    },
+    "delivered_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "section_break_gmim": {
+      "type": "string"
+    },
+    "reference_for_reservation": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "posting_datetime": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "voucher_type": {
+      "type": "string",
+      "readOnly": true
+    },
+    "voucher_no": {
+      "type": "string",
+      "readOnly": true
+    },
+    "voucher_detail_no": {
+      "type": "string",
+      "readOnly": true
+    },
+    "type_of_transaction": {
+      "type": "string",
+      "readOnly": true
+    },
+    "column_break_eykr": {
+      "type": "string"
+    },
+    "is_cancelled": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

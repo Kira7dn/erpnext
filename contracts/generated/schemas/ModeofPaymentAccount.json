@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ModeofPaymentAccount.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "default_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

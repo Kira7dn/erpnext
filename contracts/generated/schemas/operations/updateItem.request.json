@@ -1,0 +1,465 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/updateItem.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": "string",
+      "enum": [
+        "STO-ITEM-.YYYY.-"
+      ]
+    },
+    "item_code": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "item_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Group"
+    },
+    "stock_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "column_break0": {
+      "type": "string"
+    },
+    "disabled": {
+      "type": "boolean"
+    },
+    "allow_alternative_item": {
+      "type": "boolean"
+    },
+    "is_stock_item": {
+      "type": "boolean"
+    },
+    "include_item_in_manufacturing": {
+      "type": "boolean"
+    },
+    "opening_stock": {
+      "type": "number",
+      "writeOnly": true
+    },
+    "valuation_rate": {
+      "type": "number"
+    },
+    "standard_rate": {
+      "type": "number"
+    },
+    "is_fixed_asset": {
+      "type": "boolean"
+    },
+    "asset_category": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset Category"
+    },
+    "asset_naming_series": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string",
+      "x-frappe-options": "image",
+      "writeOnly": true
+    },
+    "section_break_11": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string",
+      "x-frappe-target-doctype": "Brand"
+    },
+    "description": {
+      "type": "string"
+    },
+    "sb_barcodes": {
+      "type": "string"
+    },
+    "barcodes": {
+      "type": "array",
+      "items": {
+        "$ref": "ItemBarcode.json"
+      }
+    },
+    "inventory_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-truck"
+    },
+    "shelf_life_in_days": {
+      "type": "integer"
+    },
+    "end_of_life": {
+      "type": "string",
+      "format": "date"
+    },
+    "default_material_request_type": {
+      "type": "string",
+      "enum": [
+        "Purchase",
+        "Material Transfer",
+        "Material Issue",
+        "Manufacture",
+        "Customer Provided"
+      ]
+    },
+    "valuation_method": {
+      "type": "string",
+      "enum": [
+        "FIFO",
+        "Moving Average",
+        "LIFO"
+      ]
+    },
+    "column_break1": {
+      "type": "string"
+    },
+    "warranty_period": {
+      "type": "string"
+    },
+    "weight_per_unit": {
+      "type": "number"
+    },
+    "weight_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "reorder_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-rss"
+    },
+    "reorder_levels": {
+      "type": "array",
+      "items": {
+        "$ref": "ItemReorder.json"
+      }
+    },
+    "unit_of_measure_conversion": {
+      "type": "string"
+    },
+    "uoms": {
+      "type": "array",
+      "items": {
+        "$ref": "UOMConversionDetail.json"
+      }
+    },
+    "serial_nos_and_batches": {
+      "type": "string"
+    },
+    "has_batch_no": {
+      "type": "boolean"
+    },
+    "create_new_batch": {
+      "type": "boolean"
+    },
+    "batch_number_series": {
+      "type": "string"
+    },
+    "has_expiry_date": {
+      "type": "boolean"
+    },
+    "retain_sample": {
+      "type": "boolean"
+    },
+    "sample_quantity": {
+      "type": "integer"
+    },
+    "column_break_37": {
+      "type": "string"
+    },
+    "has_serial_no": {
+      "type": "boolean"
+    },
+    "serial_no_series": {
+      "type": "string"
+    },
+    "variants_section": {
+      "type": "string"
+    },
+    "has_variants": {
+      "type": "boolean"
+    },
+    "variant_based_on": {
+      "type": "string",
+      "enum": [
+        "Item Attribute",
+        "Manufacturer"
+      ]
+    },
+    "attributes": {
+      "type": "array",
+      "items": {
+        "$ref": "ItemVariantAttribute.json"
+      },
+      "writeOnly": true
+    },
+    "item_defaults": {
+      "type": "array",
+      "items": {
+        "$ref": "ItemDefault.json"
+      }
+    },
+    "is_purchase_item": {
+      "type": "boolean"
+    },
+    "purchase_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "min_order_qty": {
+      "type": "number"
+    },
+    "safety_stock": {
+      "type": "number"
+    },
+    "purchase_details_cb": {
+      "type": "string"
+    },
+    "lead_time_days": {
+      "type": "integer"
+    },
+    "is_customer_provided_item": {
+      "type": "boolean"
+    },
+    "supplier_details": {
+      "type": "string"
+    },
+    "delivered_by_supplier": {
+      "type": "boolean"
+    },
+    "supplier_items": {
+      "type": "array",
+      "items": {
+        "$ref": "ItemSupplier.json"
+      }
+    },
+    "foreign_trade_details": {
+      "type": "string"
+    },
+    "country_of_origin": {
+      "type": "string",
+      "x-frappe-target-doctype": "Country"
+    },
+    "column_break_59": {
+      "type": "string"
+    },
+    "customs_tariff_number": {
+      "type": "string",
+      "x-frappe-target-doctype": "Customs Tariff Number"
+    },
+    "sales_details": {
+      "type": "string",
+      "x-frappe-options": "fa fa-tag"
+    },
+    "sales_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "is_sales_item": {
+      "type": "boolean"
+    },
+    "column_break3": {
+      "type": "string"
+    },
+    "max_discount": {
+      "type": "number"
+    },
+    "enable_deferred_revenue": {
+      "type": "boolean"
+    },
+    "no_of_months": {
+      "type": "integer"
+    },
+    "enable_deferred_expense": {
+      "type": "boolean"
+    },
+    "no_of_months_exp": {
+      "type": "integer"
+    },
+    "customer_details": {
+      "type": "string"
+    },
+    "customer_items": {
+      "type": "array",
+      "items": {
+        "$ref": "ItemCustomerDetail.json"
+      }
+    },
+    "item_tax_section_break": {
+      "type": "string",
+      "x-frappe-options": "fa fa-money"
+    },
+    "taxes": {
+      "type": "array",
+      "items": {
+        "$ref": "ItemTax.json"
+      }
+    },
+    "inspection_required_before_purchase": {
+      "type": "boolean"
+    },
+    "inspection_required_before_delivery": {
+      "type": "boolean"
+    },
+    "quality_inspection_template": {
+      "type": "string",
+      "x-frappe-target-doctype": "Quality Inspection Template"
+    },
+    "manufacturing": {
+      "type": "string",
+      "x-frappe-options": "fa fa-cogs"
+    },
+    "is_sub_contracted_item": {
+      "type": "boolean"
+    },
+    "column_break_74": {
+      "type": "string"
+    },
+    "customer_code": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "over_delivery_receipt_allowance": {
+      "type": "number"
+    },
+    "over_billing_allowance": {
+      "type": "number"
+    },
+    "auto_create_assets": {
+      "type": "boolean"
+    },
+    "grant_commission": {
+      "type": "boolean"
+    },
+    "is_grouped_asset": {
+      "type": "boolean"
+    },
+    "allow_negative_stock": {
+      "type": "boolean"
+    },
+    "inventory_settings_section": {
+      "type": "string"
+    },
+    "purchasing_tab": {
+      "type": "string"
+    },
+    "quality_tab": {
+      "type": "string"
+    },
+    "details": {
+      "type": "string",
+      "x-frappe-options": "fa fa-flag"
+    },
+    "dashboard_tab": {
+      "type": "string"
+    },
+    "accounting": {
+      "type": "string"
+    },
+    "column_break_9s9o": {
+      "type": "string"
+    },
+    "deferred_accounting_section": {
+      "type": "string"
+    },
+    "production_capacity": {
+      "type": "integer"
+    },
+    "section_break_znra": {
+      "type": "string"
+    },
+    "column_break_wugd": {
+      "type": "string"
+    },
+    "section_break_oilf": {
+      "type": "string"
+    },
+    "column_break_aytr": {
+      "type": "string"
+    },
+    "section_break_fxqz": {
+      "type": "string"
+    },
+    "purchase_tax_withholding_category": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Withholding Category"
+    },
+    "column_break_ltlb": {
+      "type": "string"
+    },
+    "sales_tax_withholding_category": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Withholding Category"
+    },
+    "column_break_cqdk": {
+      "type": "string"
+    },
+    "inventory_valuation_section": {
+      "type": "string"
+    },
+    "section_break_gjns": {
+      "type": "string"
+    },
+    "column_break_ixrh": {
+      "type": "string"
+    },
+    "column_break_pxjh": {
+      "type": "string"
+    },
+    "section_break_xili": {
+      "type": "string"
+    },
+    "column_break_vipt": {
+      "type": "string"
+    },
+    "stock_levels_html": {
+      "type": "string",
+      "x-frappe-options": "<div id=\"stock-levels-placeholder\"></div>"
+    },
+    "section_break_wfkx": {
+      "type": "string"
+    },
+    "section_break_ylma": {
+      "type": "string"
+    },
+    "uom_tab": {
+      "type": "string"
+    },
+    "stock_levels_section": {
+      "type": "string"
+    },
+    "uom_conversion_details_column": {
+      "type": "string"
+    },
+    "uom_help_html": {
+      "type": "string",
+      "x-frappe-options": "<div style=\"margin-bottom:10px; color: var(--gray-500) !important;\">Define alternate units for this item. Eg: 1 Box = 12 Nos, set conversion factor as 12. (Will also apply for variants) <a href=\"https://docs.frappe.io/erpnext/uom\" target=\"_blank\">Learn more &#8594;</a></div>"
+    },
+    "section_break_zlmj": {
+      "type": "string"
+    },
+    "column_break_kpmi": {
+      "type": "string"
+    },
+    "prices_html": {
+      "type": "string",
+      "x-frappe-options": "<div id=\\\"item-prices-container\\\"></div>"
+    },
+    "pricing_tab": {
+      "type": "string"
+    },
+    "item_prices_column": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "item_code",
+    "item_group",
+    "stock_uom"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

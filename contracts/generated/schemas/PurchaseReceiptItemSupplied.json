@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PurchaseReceiptItemSupplied.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "main_item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item",
+      "readOnly": true
+    },
+    "rm_item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item",
+      "readOnly": true
+    },
+    "description": {
+      "type": "string",
+      "readOnly": true
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "serial_no": {
+      "type": "string"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "required_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "consumed_qty": {
+      "type": "number"
+    },
+    "stock_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "conversion_factor": {
+      "type": "number",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "current_stock": {
+      "type": "number",
+      "readOnly": true
+    },
+    "reference_name": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "bom_detail_no": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "secbreak_1": {
+      "type": "string"
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "secbreak_2": {
+      "type": "string"
+    },
+    "col_break3": {
+      "type": "string"
+    },
+    "secbreak_3": {
+      "type": "string"
+    },
+    "col_break4": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string",
+      "readOnly": true
+    },
+    "purchase_order": {
+      "type": "string",
+      "x-frappe-target-doctype": "Purchase Order",
+      "readOnly": true,
+      "writeOnly": true
+    }
+  },
+  "required": [
+    "consumed_qty",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Buying"
+}

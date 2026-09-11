@@ -198,6 +198,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -523,10 +524,9 @@
                 },
                 "required": [
                   "customer_name",
-                  "customer_type",
-                  "name"
+                  "customer_type"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Selling"
               },
               "example": {
@@ -636,6 +636,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -763,6 +764,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1094,10 +1096,9 @@
                 },
                 "required": [
                   "customer_name",
-                  "customer_type",
-                  "name"
+                  "customer_type"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Selling"
               }
             }
@@ -1203,6 +1204,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1323,6 +1325,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1488,6 +1491,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1884,7 +1888,6 @@
                   "conversion_rate",
                   "currency",
                   "items",
-                  "name",
                   "naming_series",
                   "order_type",
                   "plc_conversion_rate",
@@ -1892,7 +1895,7 @@
                   "selling_price_list",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Selling"
               },
               "example": {
@@ -2010,6 +2013,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2137,6 +2141,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2539,7 +2544,6 @@
                   "conversion_rate",
                   "currency",
                   "items",
-                  "name",
                   "naming_series",
                   "order_type",
                   "plc_conversion_rate",
@@ -2547,7 +2551,7 @@
                   "selling_price_list",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Selling"
               }
             }
@@ -2653,6 +2657,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2773,6 +2778,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2938,6 +2944,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3453,14 +3460,13 @@
                   "currency",
                   "customer",
                   "items",
-                  "name",
                   "naming_series",
                   "order_type",
                   "plc_conversion_rate",
                   "selling_price_list",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Selling"
               },
               "example": {
@@ -3578,6 +3584,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3705,6 +3712,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4226,14 +4234,13 @@
                   "currency",
                   "customer",
                   "items",
-                  "name",
                   "naming_series",
                   "order_type",
                   "plc_conversion_rate",
                   "selling_price_list",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Selling"
               }
             }
@@ -4339,6 +4346,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4459,6 +4467,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4591,6 +4600,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4723,6 +4733,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8047,6 +8058,11 @@
         "Selling",
         "Stock"
       ],
+      "permission_dependencies": {
+        "stock/purchase-receipts": [
+          "Account"
+        ]
+      },
       "document_actions": [
         {
           "doctype": "Asset",

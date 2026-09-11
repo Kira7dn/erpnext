@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PurchaseInvoiceAdvance.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "reference_type": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType",
+      "readOnly": true
+    },
+    "reference_name": {
+      "type": "string",
+      "x-frappe-options": "reference_type",
+      "readOnly": true
+    },
+    "remarks": {
+      "type": "string",
+      "readOnly": true
+    },
+    "reference_row": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "advance_amount": {
+      "type": "number",
+      "x-frappe-options": "party_account_currency",
+      "readOnly": true
+    },
+    "allocated_amount": {
+      "type": "number",
+      "x-frappe-options": "party_account_currency"
+    },
+    "exchange_gain_loss": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "ref_exchange_rate": {
+      "type": "number",
+      "readOnly": true
+    },
+    "difference_posting_date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

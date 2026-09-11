@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/updatePickList.response.json",
+  "type": "object",
+  "properties": {
+    "data": {
+      "$ref": "PickList.json"
+    }
+  },
+  "required": [
+    "data"
+  ]
+}

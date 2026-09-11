@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PageInfo.json",
+  "type": "object",
+  "properties": {
+    "limit_start": {
+      "type": "integer"
+    },
+    "limit_page_length": {
+      "type": "integer"
+    }
+  }
+}

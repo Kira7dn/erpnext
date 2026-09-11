@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/updateOpportunity.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": "string",
+      "enum": [
+        "CRM-OPP-.YYYY.-"
+      ]
+    },
+    "opportunity_from": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "party_name": {
+      "type": "string",
+      "x-frappe-options": "opportunity_from"
+    },
+    "column_break0": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "opportunity_type": {
+      "type": "string",
+      "x-frappe-target-doctype": "Opportunity Type"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Open",
+        "Quotation",
+        "Converted",
+        "Lost",
+        "Replied",
+        "Closed"
+      ]
+    },
+    "expected_closing": {
+      "type": "string",
+      "format": "date"
+    },
+    "section_break_14": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string",
+      "x-frappe-target-doctype": "Currency"
+    },
+    "opportunity_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "column_break_17": {
+      "type": "string"
+    },
+    "sales_stage": {
+      "type": "string",
+      "x-frappe-target-doctype": "Sales Stage"
+    },
+    "probability": {
+      "type": "number"
+    },
+    "items_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-shopping-cart"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "OpportunityItem.json"
+      }
+    },
+    "contact_info": {
+      "type": "string",
+      "x-frappe-options": "fa fa-bullhorn"
+    },
+    "customer_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address",
+      "writeOnly": true
+    },
+    "territory": {
+      "type": "string",
+      "x-frappe-target-doctype": "Territory"
+    },
+    "customer_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Customer Group"
+    },
+    "column_break3": {
+      "type": "string"
+    },
+    "contact_person": {
+      "type": "string",
+      "x-frappe-target-doctype": "Contact"
+    },
+    "contact_email": {
+      "type": "string",
+      "x-frappe-options": "Email"
+    },
+    "contact_mobile": {
+      "type": "string",
+      "x-frappe-options": "Phone"
+    },
+    "more_info": {
+      "type": "string",
+      "x-frappe-options": "fa fa-file-text"
+    },
+    "column_break1": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "language": {
+      "type": "string",
+      "x-frappe-target-doctype": "Language"
+    },
+    "section_break_32": {
+      "type": "string"
+    },
+    "conversion_rate": {
+      "type": "number"
+    },
+    "column_break_33": {
+      "type": "string"
+    },
+    "lost_detail_section": {
+      "type": "string"
+    },
+    "column_break_56": {
+      "type": "string"
+    },
+    "column_break_10": {
+      "type": "string"
+    },
+    "organization_details_section": {
+      "type": "string"
+    },
+    "no_of_employees": {
+      "type": "string",
+      "enum": [
+        "1-10",
+        "11-50",
+        "51-200",
+        "201-500",
+        "501-1000",
+        "1000+"
+      ]
+    },
+    "annual_revenue": {
+      "type": "number"
+    },
+    "industry": {
+      "type": "string",
+      "x-frappe-target-doctype": "Industry Type"
+    },
+    "market_segment": {
+      "type": "string",
+      "x-frappe-target-doctype": "Market Segment"
+    },
+    "column_break_23": {
+      "type": "string"
+    },
+    "address_contact_section": {
+      "type": "string"
+    },
+    "column_break_36": {
+      "type": "string"
+    },
+    "opportunity_owner": {
+      "type": "string",
+      "x-frappe-target-doctype": "User"
+    },
+    "website": {
+      "type": "string"
+    },
+    "column_break_22": {
+      "type": "string"
+    },
+    "whatsapp": {
+      "type": "string",
+      "x-frappe-options": "Phone"
+    },
+    "phone": {
+      "type": "string",
+      "x-frappe-options": "Phone"
+    },
+    "phone_ext": {
+      "type": "string"
+    },
+    "column_break_31": {
+      "type": "string"
+    },
+    "primary_contact_section": {
+      "type": "string"
+    },
+    "column_break_54": {
+      "type": "string"
+    },
+    "dashboard_tab": {
+      "type": "string"
+    },
+    "notes_tab": {
+      "type": "string"
+    },
+    "notes_html": {
+      "type": "string"
+    },
+    "activities_tab": {
+      "type": "string"
+    },
+    "job_title": {
+      "type": "string"
+    },
+    "address_html": {
+      "type": "string"
+    },
+    "contact_html": {
+      "type": "string"
+    },
+    "open_activities_html": {
+      "type": "string"
+    },
+    "all_activities_section": {
+      "type": "string"
+    },
+    "all_activities_html": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "$ref": "CRMNote.json"
+      },
+      "writeOnly": true
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string",
+      "x-frappe-target-doctype": "Country"
+    },
+    "column_break_emai": {
+      "type": "string"
+    },
+    "utm_source": {
+      "type": "string",
+      "x-frappe-target-doctype": "UTM Source"
+    },
+    "utm_campaign": {
+      "type": "string",
+      "x-frappe-target-doctype": "UTM Campaign"
+    },
+    "utm_medium": {
+      "type": "string",
+      "x-frappe-target-doctype": "UTM Medium"
+    },
+    "utm_content": {
+      "type": "string"
+    },
+    "utm_analytics_section": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company",
+    "naming_series",
+    "opportunity_from",
+    "party_name",
+    "status",
+    "transaction_date"
+  ],
+  "additionalProperties": false,
+  "x-module": "CRM"
+}

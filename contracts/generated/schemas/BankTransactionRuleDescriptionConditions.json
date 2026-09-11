@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankTransactionRuleDescriptionConditions.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "check": {
+      "type": "string",
+      "enum": [
+        "Contains",
+        "Starts With",
+        "Ends With",
+        "Regex"
+      ]
+    },
+    "value": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "check",
+    "name",
+    "value"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

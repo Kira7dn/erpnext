@@ -5,6 +5,8 @@ import { isPurchaseResource } from "@/lib/letron-api";
 import { portalAuthBaseUrl } from "@/lib/portal-config";
 import { APP_SESSION_COOKIES } from "@/lib/erp-auth-session";
 import { notifySupplierInvoiceRequest } from "@/lib/supplier-portal";
+import { parsePurchaseReceiptCreate } from "@/lib/purchase-receipt-contract";
+import { createPurchaseReceiptRequestSchema } from "@/generated/zod";
 
 const METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 const OFFICIAL_MODULES: Record<string, string> = {
@@ -71,15 +73,25 @@ async function proxy(
   if (authorization) headers.set("Authorization", authorization);
   const contentType = request.headers.get("content-type");
   if (contentType) headers.set("Content-Type", contentType);
+  let requestBody: ArrayBuffer | undefined;
+  if (request.method !== "GET" && request.method !== "DELETE") {
+    requestBody = await request.arrayBuffer();
+    if (path[0] === "purchase-receipts" && path.length === 1 && request.method === "POST") {
+      try {
+        const payload = JSON.parse(new TextDecoder().decode(requestBody));
+        createPurchaseReceiptRequestSchema.parse(payload);
+        parsePurchaseReceiptCreate(payload);
+      } catch (error) {
+        return apiErrorResponse("purchase_receipt_contract_invalid", 400, error instanceof Error ? error.message : "Purchase Receipt payload is invalid.");
+      }
+    }
+  }
   let response: Response;
   try {
     response = await fetch(target, {
       method: request.method,
       headers,
-      body:
-        request.method === "GET" || request.method === "DELETE"
-          ? undefined
-          : await request.arrayBuffer(),
+      body: requestBody,
       cache: "no-store",
     });
   } catch {

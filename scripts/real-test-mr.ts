@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { createHash, randomUUID } from "node:crypto";
 import { resolve } from "node:path";
 import { parseLarkApprovalAutoApproveResponse } from "../apps/erp/src/lib/internal-api-contract";
+import { assertPurchaseReceiptCreate, type PurchaseReceiptCreate } from "../apps/erp/src/lib/purchase-receipt-contract";
 
 type Json = Record<string, unknown> | unknown[] | string | number | boolean | null;
 
@@ -398,16 +399,32 @@ const poItems = Array.isArray(purchaseOrder.items) ? purchaseOrder.items : [];
 if (!poName || !poItems.length || text(purchaseOrder.status) !== "Submitted") throw new Error(`PO is not submitted: ${JSON.stringify(purchaseOrder)}`);
 if (poName !== poDraftName) throw new Error(`Approval created a different PO: draft=${poDraftName}, submitted=${poName}`);
 
+const receiptPayload: PurchaseReceiptCreate = assertPurchaseReceiptCreate({
+  naming_series: "MAT-PRE-.YYYY.-",
+  supplier: winningFlow.supplier,
+  company,
+  posting_date: transactionDate,
+  posting_time: new Date().toISOString().slice(11, 19),
+  currency: text(purchaseOrder.currency) || "VND",
+  conversion_rate: 1,
+  custom_letron_orchestration_id: text(result.id),
+  items: poItems.map((item) => ({
+    item_code: text(object(item as Json).item_code),
+    item_name: text(object(item as Json).item_name) || text(object(item as Json).item_code),
+    qty: Number(object(item as Json).qty ?? 0),
+    uom: text(object(item as Json).uom),
+    stock_uom: text(object(item as Json).stock_uom) || text(object(item as Json).uom),
+    conversion_factor: Number(object(item as Json).conversion_factor ?? 1),
+    rate: Number(object(item as Json).rate ?? 0),
+    warehouse: text(object(item as Json).warehouse),
+    purchase_order: poName,
+    purchase_order_item: text(object(item as Json).name),
+  })),
+});
 const receipt = await request(`${erpBaseUrl}/api/purchase/purchase-receipts`, {
   method: "POST",
   headers: auth,
-  body: JSON.stringify({
-    supplier: winningFlow.supplier,
-    company: text(purchaseOrder.company),
-    posting_date: transactionDate,
-    custom_letron_orchestration_id: text(result.id),
-    items: poItems.map((item) => ({ item_code: text(object(item as Json).item_code), qty: Number(object(item as Json).qty ?? 0), uom: text(object(item as Json).uom), rate: Number(object(item as Json).rate ?? 0), warehouse: text(object(item as Json).warehouse), purchase_order: poName, purchase_order_item: text(object(item as Json).name) })),
-  }),
+  body: JSON.stringify(receiptPayload),
 });
 if (receipt.status < 200 || receipt.status >= 300) throw new Error(`Warehouse Purchase Receipt creation failed (${receipt.status}): ${receipt.raw}`);
 const receiptName = text(object(apiData(receipt.body)).name || object(apiData(receipt.body)).purchase_receipt);

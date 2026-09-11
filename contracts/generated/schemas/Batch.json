@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/Batch.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "disabled": {
+      "type": "boolean"
+    },
+    "batch_id": {
+      "type": "string"
+    },
+    "item": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "parent_batch": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch",
+      "readOnly": true
+    },
+    "manufacturing_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "source": {
+      "type": "string"
+    },
+    "supplier": {
+      "type": "string",
+      "x-frappe-target-doctype": "Supplier",
+      "readOnly": true
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "reference_doctype": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType",
+      "readOnly": true
+    },
+    "reference_name": {
+      "type": "string",
+      "x-frappe-options": "reference_doctype",
+      "readOnly": true
+    },
+    "section_break_7": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "sb_batch": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string",
+      "readOnly": true
+    },
+    "batch_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "stock_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "manufacturing_section": {
+      "type": "string"
+    },
+    "qty_to_produce": {
+      "type": "number",
+      "readOnly": true
+    },
+    "column_break_23": {
+      "type": "string"
+    },
+    "produced_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "use_batchwise_valuation": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "column_break_xrll": {
+      "type": "string"
+    },
+    "allow_negative_stock_for_batch": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "batch_id",
+    "item",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

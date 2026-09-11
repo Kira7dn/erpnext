@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/updatePickList.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "column_break_4": {
+      "type": "string"
+    },
+    "section_break_6": {
+      "type": "string"
+    },
+    "parent_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "customer": {
+      "type": "string",
+      "x-frappe-target-doctype": "Customer"
+    },
+    "work_order": {
+      "type": "string",
+      "x-frappe-target-doctype": "Work Order"
+    },
+    "locations": {
+      "type": "array",
+      "items": {
+        "$ref": "PickListItem.json"
+      }
+    },
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "Material Transfer for Manufacture",
+        "Material Transfer",
+        "Delivery"
+      ]
+    },
+    "material_request": {
+      "type": "string",
+      "x-frappe-target-doctype": "Material Request"
+    },
+    "get_item_locations": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": "string",
+      "enum": [
+        "STO-PICK-.YYYY.-"
+      ]
+    },
+    "print_settings_section": {
+      "type": "string"
+    },
+    "group_same_items": {
+      "type": "boolean"
+    },
+    "section_break_15": {
+      "type": "string"
+    },
+    "scan_barcode": {
+      "type": "string",
+      "x-frappe-options": "Barcode"
+    },
+    "column_break_13": {
+      "type": "string"
+    },
+    "scan_mode": {
+      "type": "boolean"
+    },
+    "prompt_qty": {
+      "type": "boolean"
+    },
+    "consider_rejected_warehouses": {
+      "type": "boolean"
+    },
+    "pick_manually": {
+      "type": "boolean"
+    },
+    "ignore_pricing_rule": {
+      "type": "boolean"
+    },
+    "status_section": {
+      "type": "string"
+    },
+    "delivery_status": {
+      "type": "string",
+      "enum": [
+        "Not Delivered",
+        "Fully Delivered",
+        "Partly Delivered"
+      ],
+      "writeOnly": true
+    },
+    "section_break_cfiw": {
+      "type": "string"
+    },
+    "column_break_nwpf": {
+      "type": "string"
+    },
+    "other_info_tab": {
+      "type": "string"
+    },
+    "column_break_refl": {
+      "type": "string"
+    },
+    "reference_section": {
+      "type": "string"
+    },
+    "column_break_feoy": {
+      "type": "string"
+    },
+    "connections_tab": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company",
+    "naming_series"
+  ],
+  "additionalProperties": false,
+  "x-module": "Stock"
+}

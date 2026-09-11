@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/Address.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "address_details": {
+      "type": "string",
+      "x-frappe-options": "fa fa-map-marker"
+    },
+    "address_title": {
+      "type": "string"
+    },
+    "address_type": {
+      "type": "string",
+      "enum": [
+        "Billing",
+        "Shipping",
+        "Office",
+        "Personal",
+        "Plant",
+        "Postal",
+        "Shop",
+        "Subsidiary",
+        "Warehouse",
+        "Current",
+        "Permanent",
+        "Other"
+      ]
+    },
+    "address_line1": {
+      "type": "string"
+    },
+    "address_line2": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string",
+      "x-frappe-target-doctype": "Country"
+    },
+    "pincode": {
+      "type": "string"
+    },
+    "column_break0": {
+      "type": "string"
+    },
+    "email_id": {
+      "type": "string",
+      "x-frappe-options": "Email"
+    },
+    "phone": {
+      "type": "string",
+      "x-frappe-options": "Phone"
+    },
+    "fax": {
+      "type": "string"
+    },
+    "is_primary_address": {
+      "type": "boolean"
+    },
+    "is_shipping_address": {
+      "type": "boolean"
+    },
+    "disabled": {
+      "type": "boolean"
+    },
+    "linked_with": {
+      "type": "string",
+      "x-frappe-options": "fa fa-pushpin"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "DynamicLink.json"
+      }
+    }
+  },
+  "required": [
+    "address_line1",
+    "address_type",
+    "city",
+    "country",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Contacts"
+}

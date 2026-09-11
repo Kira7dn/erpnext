@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/listQualityInspection.response.json",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "array",
+      "items": {
+        "$ref": "QualityInspection.json"
+      }
+    },
+    "message": {}
+  },
+  "required": [
+    "data"
+  ]
+}

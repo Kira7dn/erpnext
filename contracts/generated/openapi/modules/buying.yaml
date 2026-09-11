@@ -97,6 +97,7 @@ paths:
         '500': &id011
           description: Server or rollback failure
           content: *id001
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -410,11 +411,10 @@ paths:
               - conversion_rate
               - currency
               - items
-              - name
               - naming_series
               - supplier
               - transaction_date
-              additionalProperties: true
+              additionalProperties: false
               x-module: Buying
             example:
               naming_series: ''
@@ -443,6 +443,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -479,6 +480,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -520,6 +522,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -545,6 +548,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -577,6 +581,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -609,6 +614,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -651,6 +657,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -766,12 +773,11 @@ paths:
               required:
               - company
               - items
-              - name
               - naming_series
               - subject
               - suppliers
               - transaction_date
-              additionalProperties: true
+              additionalProperties: false
               x-module: Buying
             example:
               naming_series: ''
@@ -799,6 +805,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -835,6 +842,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -876,6 +884,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -901,6 +910,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -943,6 +953,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1131,10 +1142,9 @@ paths:
                 section_break_pgad: &id241
                   type: string
               required:
-              - name
               - supplier_name
               - supplier_type
-              additionalProperties: true
+              additionalProperties: false
               x-module: Buying
             example:
               supplier_name: ''
@@ -1158,6 +1168,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1194,6 +1205,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1235,6 +1247,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1260,6 +1273,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1302,6 +1316,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1517,11 +1532,10 @@ paths:
               - conversion_rate
               - currency
               - items
-              - name
               - naming_series
               - supplier
               - transaction_date
-              additionalProperties: true
+              additionalProperties: false
               x-module: Buying
             example:
               naming_series: ''
@@ -1550,6 +1564,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1586,6 +1601,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1627,6 +1643,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1652,6 +1669,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1684,7 +1702,12 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
   /api/v1/crm/supplier-quotations/{name}/cancel:
     post:
       tags:
@@ -1712,7 +1735,12 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
   /api/v1/crm/supplier-quotations/{name}/make-purchase-order:
     post:
       tags:
@@ -1750,7 +1778,12 @@ paths:
         '500': *id011
       x-frappe-handler: letron_api.control.api.make_purchase_order
       x-native-action: make-purchase-order
+      x-public-operation: update
       x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
 components:
   securitySchemes:
     frappeToken:
@@ -3774,6 +3807,9 @@ x-contract:
     - Contacts
     - Selling
     - Stock
+    permission_dependencies:
+      stock/purchase-receipts:
+      - Account
     document_actions:
     - doctype: Asset
       module: Assets

@@ -6,6 +6,7 @@ import { ApiRequestError, type RemoteErrorPayload } from "./api-error";
 import { publicErrorMessage } from "./error-contract";
 import { portalAuthBaseUrl } from "./portal-config";
 import { APP_SESSION_COOKIES, type AppKey } from "./erp-auth-session";
+import type { ZodType } from "zod";
 
 export type BankAccount = {
   name: string;
@@ -414,6 +415,16 @@ export async function gatewayRequest<T>(
   }
   const payload = (await response.json()) as ApiResponse<T>;
   return (payload.data ?? payload.message) as T;
+}
+
+export async function validatedGatewayRequest<T>(
+  path: string,
+  schema: ZodType<T>,
+  cookieHeader: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const value = await gatewayRequest<unknown>(path, cookieHeader, init);
+  return schema.parse(value);
 }
 
 export async function listAccountingResource(

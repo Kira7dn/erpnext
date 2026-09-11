@@ -98,6 +98,7 @@ paths:
         '500': &id011
           description: Server or rollback failure
           content: *id001
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -151,8 +152,7 @@ paths:
                   type: string
               required:
               - bank_name
-              - name
-              additionalProperties: true
+              additionalProperties: false
               x-module: Accounts
             example:
               bank_name: ''
@@ -175,6 +175,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -211,6 +212,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -252,6 +254,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -277,6 +280,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -319,6 +323,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -409,8 +414,7 @@ paths:
               required:
               - account_name
               - bank
-              - name
-              additionalProperties: true
+              additionalProperties: false
               x-module: Accounts
             example:
               account_name: ''
@@ -434,6 +438,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -470,6 +475,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -511,6 +517,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -536,6 +543,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -578,6 +586,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -680,9 +689,8 @@ paths:
                   type: number
                   x-frappe-options: currency
               required:
-              - name
               - naming_series
-              additionalProperties: true
+              additionalProperties: false
               x-module: Accounts
             example:
               naming_series: ''
@@ -705,6 +713,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -741,6 +750,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -782,6 +792,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -807,6 +818,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -839,6 +851,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -871,6 +884,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -911,6 +925,7 @@ paths:
         '500': *id011
       x-frappe-handler: letron_api.finance.accounts_reconciliation.reconcile_bank_transaction
       x-native-action: reconcile
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -953,6 +968,7 @@ paths:
         '500': *id011
       x-frappe-handler: letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction
       x-native-action: unreconcile
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -995,6 +1011,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1077,11 +1094,10 @@ paths:
               - classify_as
               - company
               - description_rules
-              - name
               - priority
               - rule_name
               - transaction_type
-              additionalProperties: true
+              additionalProperties: false
               x-module: Accounts
             example:
               rule_name: ''
@@ -1109,6 +1125,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1145,6 +1162,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1186,6 +1204,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1211,6 +1230,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1253,6 +1273,7 @@ paths:
         '500': *id011
       x-frappe-handler: letron_api.finance.banking.run_rule_evaluation
       x-native-action: run-evaluation
+      x-public-operation: update
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1295,6 +1316,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1347,9 +1369,8 @@ paths:
               required:
               - company
               - cost_center_name
-              - name
               - parent_cost_center
-              additionalProperties: true
+              additionalProperties: false
               x-module: Accounts
             example:
               cost_center_name: ''
@@ -1374,6 +1395,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1410,6 +1432,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1451,6 +1474,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1476,6 +1500,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1518,6 +1543,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1711,11 +1737,10 @@ paths:
               required:
               - accounts
               - company
-              - name
               - naming_series
               - posting_date
               - voucher_type
-              additionalProperties: true
+              additionalProperties: false
               x-module: Accounts
             example:
               voucher_type: ''
@@ -1742,6 +1767,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1778,6 +1804,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1819,6 +1846,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1844,6 +1872,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1876,6 +1905,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1908,6 +1938,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1950,6 +1981,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1988,8 +2020,7 @@ paths:
                   type: boolean
               required:
               - mode_of_payment
-              - name
-              additionalProperties: true
+              additionalProperties: false
               x-module: Accounts
             example:
               mode_of_payment: ''
@@ -2012,6 +2043,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2048,6 +2080,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2089,6 +2122,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2114,6 +2148,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2156,6 +2191,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2355,7 +2391,6 @@ paths:
                   type: string
               required:
               - company
-              - name
               - naming_series
               - paid_amount
               - paid_from
@@ -2365,7 +2400,7 @@ paths:
               - received_amount
               - source_exchange_rate
               - target_exchange_rate
-              additionalProperties: true
+              additionalProperties: false
               x-module: Accounts
             example:
               naming_series: ''
@@ -2397,6 +2432,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2433,6 +2469,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2474,6 +2511,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2499,6 +2537,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2531,6 +2570,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2563,6 +2603,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2605,6 +2646,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2658,10 +2700,9 @@ paths:
               required:
               - company
               - company_bank_account
-              - name
               - naming_series
               - references
-              additionalProperties: true
+              additionalProperties: false
               x-module: Accounts
             example:
               naming_series: ''
@@ -2687,6 +2728,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2723,6 +2765,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2764,6 +2807,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2789,6 +2833,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2821,6 +2866,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2853,6 +2899,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -2895,6 +2942,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3035,10 +3083,9 @@ paths:
                   type: string
               required:
               - grand_total
-              - name
               - naming_series
               - payment_request_type
-              additionalProperties: true
+              additionalProperties: false
               x-module: Accounts
             example:
               payment_request_type: ''
@@ -3063,6 +3110,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3099,6 +3147,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3140,6 +3189,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3165,6 +3215,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3197,6 +3248,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3229,6 +3281,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3271,6 +3324,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3679,11 +3733,10 @@ paths:
               required:
               - credit_to
               - items
-              - name
               - naming_series
               - posting_date
               - supplier
-              additionalProperties: true
+              additionalProperties: false
               x-module: Accounts
             example:
               naming_series: ''
@@ -3710,6 +3763,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3746,6 +3800,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3787,6 +3842,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3812,6 +3868,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3844,6 +3901,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3876,6 +3934,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3918,6 +3977,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -4410,12 +4470,11 @@ paths:
               - customer
               - debit_to
               - items
-              - name
               - naming_series
               - plc_conversion_rate
               - posting_date
               - selling_price_list
-              additionalProperties: true
+              additionalProperties: false
               x-module: Accounts
             example:
               naming_series: ''
@@ -4447,6 +4506,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -4483,6 +4543,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -4524,6 +4585,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -4549,6 +4611,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -4581,6 +4644,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -4613,6 +4677,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -9173,6 +9238,9 @@ x-contract:
     - Contacts
     - Selling
     - Stock
+    permission_dependencies:
+      stock/purchase-receipts:
+      - Account
     document_actions:
     - doctype: Asset
       module: Assets

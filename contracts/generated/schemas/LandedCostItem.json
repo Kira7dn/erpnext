@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/LandedCostItem.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item",
+      "readOnly": true
+    },
+    "description": {
+      "type": "string",
+      "readOnly": true
+    },
+    "receipt_document_type": {
+      "type": "string",
+      "enum": [
+        "Purchase Invoice",
+        "Purchase Receipt",
+        "Stock Entry",
+        "Subcontracting Receipt"
+      ],
+      "readOnly": true
+    },
+    "receipt_document": {
+      "type": "string",
+      "x-frappe-options": "receipt_document_type",
+      "readOnly": true
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "applicable_charges": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "purchase_receipt_item": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "is_fixed_asset": {
+      "type": "boolean",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "stock_entry_item": {
+      "type": "string",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "amount",
+    "item_code",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

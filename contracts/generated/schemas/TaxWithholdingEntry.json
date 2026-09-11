@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/TaxWithholdingEntry.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "section_break_krko": {
+      "type": "string"
+    },
+    "party_type": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType",
+      "readOnly": true
+    },
+    "party": {
+      "type": "string",
+      "x-frappe-options": "party_type",
+      "readOnly": true
+    },
+    "tax_id": {
+      "type": "string",
+      "readOnly": true
+    },
+    "tax_withholding_category": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Withholding Category",
+      "readOnly": true
+    },
+    "column_break_egzm": {
+      "type": "string"
+    },
+    "tax_rate": {
+      "type": "number"
+    },
+    "taxable_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "source_section": {
+      "type": "string"
+    },
+    "column_break_dahw": {
+      "type": "string"
+    },
+    "target_section": {
+      "type": "string"
+    },
+    "column_break_fqoe": {
+      "type": "string"
+    },
+    "section_break_ggna": {
+      "type": "string"
+    },
+    "column_break_jfjf": {
+      "type": "string"
+    },
+    "lower_deduction_certificate": {
+      "type": "string",
+      "x-frappe-target-doctype": "Lower Deduction Certificate",
+      "readOnly": true
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Settled",
+        "Under Withheld",
+        "Over Withheld",
+        "Duplicate",
+        "Cancelled"
+      ],
+      "readOnly": true
+    },
+    "currency": {
+      "type": "string",
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true
+    },
+    "conversion_rate": {
+      "type": "number",
+      "readOnly": true
+    },
+    "withholding_doctype": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "withholding_name": {
+      "type": "string",
+      "x-frappe-options": "withholding_doctype"
+    },
+    "taxable_doctype": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "taxable_name": {
+      "type": "string",
+      "x-frappe-options": "taxable_doctype"
+    },
+    "taxable_date": {
+      "type": "string",
+      "format": "date",
+      "readOnly": true
+    },
+    "withholding_date": {
+      "type": "string",
+      "format": "date",
+      "readOnly": true
+    },
+    "under_withheld_reason": {
+      "type": "string",
+      "enum": [
+        "Threshold Exemption",
+        "Lower Deduction Certificate"
+      ],
+      "readOnly": true
+    },
+    "withholding_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "tax_withholding_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Withholding Group",
+      "readOnly": true
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "created_by_migration": {
+      "type": "boolean",
+      "readOnly": true,
+      "writeOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

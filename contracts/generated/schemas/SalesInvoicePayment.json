@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SalesInvoicePayment.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "mode_of_payment": {
+      "type": "string",
+      "x-frappe-target-doctype": "Mode of Payment"
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account",
+      "readOnly": true
+    },
+    "type": {
+      "type": "string"
+    },
+    "base_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "clearance_date": {
+      "type": "string",
+      "format": "date",
+      "readOnly": true
+    },
+    "default": {
+      "type": "boolean",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "reference_no": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "amount",
+    "mode_of_payment",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

@@ -74,8 +74,10 @@ def _schema(dt: DocType, names: dict[str, str]) -> dict[str, Any]:
 
 def _write_schema(schema: dict[str, Any]) -> dict[str, Any]:
     properties = {key: value for key, value in schema["properties"].items() if not value.get("readOnly")}
-    required = [key for key in schema.get("required", []) if key in properties]
-    return {"type": "object", "properties": properties, "required": required, "additionalProperties": True, "x-module": schema.get("x-module")}
+    # Frappe generates `name`; it is a path/output field, never a required
+    # public create/update input. Public writes are deliberately closed.
+    required = [key for key in schema.get("required", []) if key in properties and key != "name"]
+    return {"type": "object", "properties": properties, "required": required, "additionalProperties": False, "x-module": schema.get("x-module")}
 
 
 def _response(description: str, schema: dict[str, Any] | None = None, status: str = "200") -> dict[str, Any]:
@@ -133,6 +135,7 @@ def _annotate_acceptance(paths: dict[str, Any], contract: dict[str, Any], *, req
     default_status = acceptance.get("default_status", "not-tested")
     declared = acceptance.get("operations", {})
     suites = acceptance.get("suites", {})
+    default_suite_name = next(iter(suites), None)
     found: set[str] = set()
     summary = {status: 0 for status in ("passed", "partial", "not-tested", "blocked")}
     for path_item in paths.values():
@@ -144,12 +147,13 @@ def _annotate_acceptance(paths: dict[str, Any], contract: dict[str, Any], *, req
             status = result["status"]
             operation["x-test-status"] = status
             summary[status] += 1
-            if operation_id in declared:
-                found.add(operation_id)
-                suite_name = result["suite"]
+            suite_name = result.get("suite", default_suite_name)
+            if suite_name and suite_name in suites:
                 suite = suites[suite_name]
                 operation["x-test-level"] = suite["level"]
                 operation["x-test-evidence"] = {"suite": suite_name, "test": suite["test"]}
+            if operation_id in declared:
+                found.add(operation_id)
                 if result.get("note"):
                     operation["x-test-note"] = result["note"]
     unknown = sorted(set(declared) - found)
@@ -245,16 +249,16 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
         request_body = _json_body(write_schema)
         request_body["content"]["application/json"]["example"] = _example(dt, write_schema)["example"]
         paths[route] = {
-            "get": {"tags": [tag], "summary": f"List {dt.name} records", "description": f"List typed {dt.name} documents.", "operationId": f"list{names[dt.name]}", "parameters": [*request_headers, *list_parameters], "responses": {**_response("Typed resource list", list_schema), **error}},
-            "post": {"tags": [tag], "summary": f"Create {dt.name}", "description": f"Create a {dt.name} using the runtime DocType schema.", "operationId": f"create{names[dt.name]}", "parameters": write_headers, "requestBody": request_body, "responses": {**_response("Created typed resource", _document_response(typed_schema)), **error}},
+            "get": {"tags": [tag], "summary": f"List {dt.name} records", "description": f"List typed {dt.name} documents.", "operationId": f"list{names[dt.name]}", "parameters": [*request_headers, *list_parameters], "responses": {**_response("Typed resource list", list_schema), **error}, "x-public-operation": "list"},
+            "post": {"tags": [tag], "summary": f"Create {dt.name}", "description": f"Create a {dt.name} using the runtime DocType schema.", "operationId": f"create{names[dt.name]}", "parameters": write_headers, "requestBody": request_body, "responses": {**_response("Created typed resource", _document_response(typed_schema)), **error}, "x-public-operation": "create"},
         }
         paths[detail_route] = {
-            "get": {"tags": [f"Module: {dt.module or 'Uncategorized'}"], "operationId": f"get{names[dt.name]}", "parameters": detail_parameters, "responses": {**_response("Typed resource", _document_response(typed_schema)), **error}},
-            "put": {"tags": [f"Module: {dt.module or 'Uncategorized'}"], "operationId": f"update{names[dt.name]}", "parameters": detail_write_parameters, "requestBody": _json_body(write_schema), "responses": {**_response("Updated typed resource", _document_response(typed_schema)), **error}},
-            "delete": {"tags": [f"Module: {dt.module or 'Uncategorized'}"], "operationId": f"delete{names[dt.name]}", "parameters": detail_write_parameters, "responses": {**_response("Deleted typed resource", {"$ref": "#/components/schemas/FrappeResponse"}), **error}},
+            "get": {"tags": [f"Module: {dt.module or 'Uncategorized'}"], "operationId": f"get{names[dt.name]}", "parameters": detail_parameters, "responses": {**_response("Typed resource", _document_response(typed_schema)), **error}, "x-public-operation": "read"},
+            "put": {"tags": [f"Module: {dt.module or 'Uncategorized'}"], "operationId": f"update{names[dt.name]}", "parameters": detail_write_parameters, "requestBody": _json_body(write_schema), "responses": {**_response("Updated typed resource", _document_response(typed_schema)), **error}, "x-public-operation": "update"},
+            "delete": {"tags": [f"Module: {dt.module or 'Uncategorized'}"], "operationId": f"delete{names[dt.name]}", "parameters": detail_write_parameters, "responses": {**_response("Deleted typed resource", {"$ref": "#/components/schemas/FrappeResponse"}), **error}, "x-public-operation": "delete"},
         }
         for action in next((item["actions"] for item in runtime.get("document_actions", []) if item["doctype"] == dt.name), []):
-            paths[f"{detail_route}/{action}"] = {"post": {"tags": [f"Module: {dt.module or 'Uncategorized'}", "Document actions"], "operationId": f"{action}{names[dt.name]}", "parameters": detail_write_parameters, "responses": {**_response(f"{action.title()} document", _document_response(typed_schema, "message")), **error}, "x-frappe-action": action}}
+            paths[f"{detail_route}/{action}"] = {"post": {"tags": [f"Module: {dt.module or 'Uncategorized'}", "Document actions"], "operationId": f"{action}{names[dt.name]}", "parameters": detail_write_parameters, "responses": {**_response(f"{action.title()} document", _document_response(typed_schema, "message")), **error}, "x-frappe-action": action, "x-public-operation": "update" if action == "submit" else "delete"}}
         for custom in runtime.get("custom_actions", []):
             if custom["doctype"] != dt.name:
                 continue
@@ -270,6 +274,7 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
                     "responses": {**_response(f"{custom['action'].title()} {dt.name}", _document_response(typed_schema)), **error},
                     "x-frappe-handler": custom["handler"],
                     "x-native-action": custom["action"],
+                    "x-public-operation": "update",
                 }
             }
     for custom in runtime.get("custom_routes", []):

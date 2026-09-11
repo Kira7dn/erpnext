@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/Contact.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "contact_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-user"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "email_id": {
+      "type": "string",
+      "x-frappe-options": "Email",
+      "readOnly": true
+    },
+    "user": {
+      "type": "string",
+      "x-frappe-target-doctype": "User"
+    },
+    "cb00": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Passive",
+        "Open",
+        "Replied"
+      ]
+    },
+    "salutation": {
+      "type": "string",
+      "x-frappe-target-doctype": "Salutation"
+    },
+    "gender": {
+      "type": "string",
+      "x-frappe-target-doctype": "Gender"
+    },
+    "phone": {
+      "type": "string",
+      "x-frappe-options": "Phone",
+      "readOnly": true
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "contact_details": {
+      "type": "string",
+      "x-frappe-options": "fa fa-pushpin"
+    },
+    "is_primary_contact": {
+      "type": "boolean"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "DynamicLink.json"
+      }
+    },
+    "more_info": {
+      "type": "string",
+      "x-frappe-options": "fa fa-file-text"
+    },
+    "department": {
+      "type": "string"
+    },
+    "designation": {
+      "type": "string"
+    },
+    "unsubscribed": {
+      "type": "boolean"
+    },
+    "middle_name": {
+      "type": "string"
+    },
+    "sb_00": {
+      "type": "string"
+    },
+    "email_ids": {
+      "type": "array",
+      "items": {
+        "$ref": "ContactEmail.json"
+      }
+    },
+    "address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "phone_nos": {
+      "type": "array",
+      "items": {
+        "$ref": "ContactPhone.json"
+      }
+    },
+    "mobile_no": {
+      "type": "string",
+      "x-frappe-options": "Phone",
+      "readOnly": true
+    },
+    "pulled_from_google_contacts": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "sync_with_google_contacts": {
+      "type": "boolean"
+    },
+    "google_contacts": {
+      "type": "string",
+      "x-frappe-target-doctype": "Google Contacts"
+    },
+    "cb_00": {
+      "type": "string"
+    },
+    "sb_01": {
+      "type": "string"
+    },
+    "google_contacts_id": {
+      "type": "string",
+      "readOnly": true
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "full_name": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Contacts"
+}

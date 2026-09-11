@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ContactEmail.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "email_id": {
+      "type": "string",
+      "x-frappe-options": "Email"
+    },
+    "is_primary": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "email_id",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Contacts"
+}

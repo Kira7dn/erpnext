@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PaymentEntryReference.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "reference_doctype": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "reference_name": {
+      "type": "string",
+      "x-frappe-options": "reference_doctype"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "readOnly": true
+    },
+    "bill_no": {
+      "type": "string",
+      "readOnly": true
+    },
+    "column_break_4": {
+      "type": "string"
+    },
+    "total_amount": {
+      "type": "number",
+      "readOnly": true
+    },
+    "outstanding_amount": {
+      "type": "number",
+      "readOnly": true
+    },
+    "allocated_amount": {
+      "type": "number"
+    },
+    "exchange_rate": {
+      "type": "number",
+      "readOnly": true
+    },
+    "payment_term": {
+      "type": "string",
+      "x-frappe-target-doctype": "Payment Term"
+    },
+    "exchange_gain_loss": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "account_type": {
+      "type": "string"
+    },
+    "payment_type": {
+      "type": "string"
+    },
+    "payment_request": {
+      "type": "string",
+      "x-frappe-target-doctype": "Payment Request"
+    },
+    "payment_term_outstanding": {
+      "type": "number",
+      "readOnly": true
+    },
+    "payment_request_outstanding": {
+      "type": "number",
+      "readOnly": true
+    },
+    "reconcile_effect_on": {
+      "type": "string",
+      "format": "date",
+      "readOnly": true
+    },
+    "advance_voucher_type": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType",
+      "readOnly": true
+    },
+    "advance_voucher_no": {
+      "type": "string",
+      "x-frappe-options": "advance_voucher_type",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name",
+    "reference_doctype",
+    "reference_name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

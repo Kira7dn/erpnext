@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SalesInvoiceTimesheet.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "time_sheet": {
+      "type": "string",
+      "x-frappe-target-doctype": "Timesheet",
+      "readOnly": true
+    },
+    "billing_hours": {
+      "type": "number",
+      "readOnly": true
+    },
+    "billing_amount": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "timesheet_detail": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "activity_type": {
+      "type": "string",
+      "x-frappe-target-doctype": "Activity Type",
+      "readOnly": true
+    },
+    "description": {
+      "type": "string",
+      "readOnly": true
+    },
+    "from_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "to_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "section_break_3": {
+      "type": "string"
+    },
+    "column_break_5": {
+      "type": "string"
+    },
+    "section_break_7": {
+      "type": "string"
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "section_break_11": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string",
+      "readOnly": true
+    },
+    "column_break_13": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ShipmentParcel.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "length": {
+      "type": "number"
+    },
+    "width": {
+      "type": "number"
+    },
+    "height": {
+      "type": "number"
+    },
+    "weight": {
+      "type": "number"
+    },
+    "count": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "count",
+    "name",
+    "weight"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

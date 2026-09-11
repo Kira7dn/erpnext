@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PaymentSchedule.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "payment_term": {
+      "type": "string",
+      "x-frappe-target-doctype": "Payment Term"
+    },
+    "description": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "invoice_portion": {
+      "type": "number"
+    },
+    "payment_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "mode_of_payment": {
+      "type": "string",
+      "x-frappe-target-doctype": "Mode of Payment"
+    },
+    "paid_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "discounted_amount": {
+      "type": "number",
+      "readOnly": true
+    },
+    "outstanding": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "column_break_5": {
+      "type": "string"
+    },
+    "discount_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "discount_type": {
+      "type": "string",
+      "enum": [
+        "Percentage",
+        "Amount"
+      ]
+    },
+    "discount": {
+      "type": "number"
+    },
+    "section_break_9": {
+      "type": "string"
+    },
+    "section_break_15": {
+      "type": "string"
+    },
+    "section_break_6": {
+      "type": "string"
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "section_break_4": {
+      "type": "string"
+    },
+    "base_payment_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "base_outstanding": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_paid_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "due_date_based_on": {
+      "type": "string",
+      "enum": [
+        "Day(s) after invoice date",
+        "Day(s) after the end of the invoice month",
+        "Month(s) after the end of the invoice month"
+      ],
+      "readOnly": true
+    },
+    "credit_days": {
+      "type": "integer",
+      "readOnly": true
+    },
+    "credit_months": {
+      "type": "integer",
+      "readOnly": true
+    },
+    "discount_validity_based_on": {
+      "type": "string",
+      "enum": [
+        "Day(s) after invoice date",
+        "Day(s) after the end of the invoice month",
+        "Month(s) after the end of the invoice month"
+      ],
+      "readOnly": true
+    },
+    "discount_validity": {
+      "type": "integer",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "due_date",
+    "name",
+    "payment_amount"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

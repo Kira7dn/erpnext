@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ItemSupplier.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "supplier": {
+      "type": "string",
+      "x-frappe-target-doctype": "Supplier"
+    },
+    "supplier_part_no": {
+      "type": "string"
+    },
+    "column_break_vcuv": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "supplier"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/createBankTransactionRule.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "rule_name": {
+      "type": "string"
+    },
+    "transaction_type": {
+      "type": "string",
+      "enum": [
+        "Any",
+        "Withdrawal",
+        "Deposit"
+      ]
+    },
+    "min_amount": {
+      "type": "number"
+    },
+    "max_amount": {
+      "type": "number"
+    },
+    "column_break_zcez": {
+      "type": "string"
+    },
+    "rule_description": {
+      "type": "string"
+    },
+    "section_break_licn": {
+      "type": "string"
+    },
+    "description_rules": {
+      "type": "array",
+      "items": {
+        "$ref": "BankTransactionRuleDescriptionConditions.json"
+      }
+    },
+    "action_section": {
+      "type": "string"
+    },
+    "classify_as": {
+      "type": "string",
+      "enum": [
+        "Bank Entry",
+        "Payment Entry",
+        "Transfer"
+      ]
+    },
+    "account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "column_break_jdyr": {
+      "type": "string"
+    },
+    "party_type": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "party": {
+      "type": "string",
+      "x-frappe-options": "party_type"
+    },
+    "priority": {
+      "type": "integer"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "bank_entry_type": {
+      "type": "string",
+      "enum": [
+        "Single Account",
+        "Multiple Accounts"
+      ]
+    },
+    "section_break_zdro": {
+      "type": "string"
+    },
+    "accounts": {
+      "type": "array",
+      "items": {
+        "$ref": "BankTransactionRuleAccounts.json"
+      }
+    }
+  },
+  "required": [
+    "classify_as",
+    "company",
+    "description_rules",
+    "priority",
+    "rule_name",
+    "transaction_type"
+  ],
+  "additionalProperties": false,
+  "x-module": "Accounts"
+}

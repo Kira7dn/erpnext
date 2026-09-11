@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/updateAssetMovement.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "Issue",
+        "Receipt",
+        "Transfer",
+        "Transfer and Issue"
+      ]
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "column_break_4": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "reference_doctype": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "reference_name": {
+      "type": "string",
+      "x-frappe-options": "reference_doctype"
+    },
+    "section_break_10": {
+      "type": "string"
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "$ref": "AssetMovementItem.json"
+      }
+    },
+    "column_break_9": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "assets",
+    "company",
+    "purpose",
+    "transaction_date"
+  ],
+  "additionalProperties": false,
+  "x-module": "Assets"
+}

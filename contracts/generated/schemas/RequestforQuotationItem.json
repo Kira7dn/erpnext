@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/RequestforQuotationItem.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "supplier_part_no": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "section_break_5": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "image_view": {
+      "type": "string",
+      "x-frappe-options": "image"
+    },
+    "quantity": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "schedule_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "warehouse_and_reference": {
+      "type": "string"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "project_name": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "material_request": {
+      "type": "string",
+      "x-frappe-target-doctype": "Material Request",
+      "readOnly": true
+    },
+    "col_break4": {
+      "type": "string"
+    },
+    "material_request_item": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "brand": {
+      "type": "string",
+      "x-frappe-target-doctype": "Brand",
+      "readOnly": true
+    },
+    "item_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Group",
+      "readOnly": true
+    },
+    "page_break": {
+      "type": "boolean"
+    },
+    "image_section": {
+      "type": "string"
+    },
+    "section_break_23": {
+      "type": "string"
+    },
+    "stock_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "conversion_factor": {
+      "type": "number",
+      "readOnly": true
+    },
+    "stock_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "section_break_24": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "conversion_factor",
+    "item_code",
+    "name",
+    "qty",
+    "schedule_date",
+    "stock_uom",
+    "uom"
+  ],
+  "additionalProperties": true,
+  "x-module": "Buying"
+}

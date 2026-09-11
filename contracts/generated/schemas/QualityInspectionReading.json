@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/QualityInspectionReading.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "specification": {
+      "type": "string",
+      "x-frappe-target-doctype": "Quality Inspection Parameter"
+    },
+    "value": {
+      "type": "string"
+    },
+    "reading_1": {
+      "type": "string"
+    },
+    "reading_2": {
+      "type": "string"
+    },
+    "reading_3": {
+      "type": "string"
+    },
+    "reading_4": {
+      "type": "string"
+    },
+    "reading_5": {
+      "type": "string"
+    },
+    "reading_6": {
+      "type": "string"
+    },
+    "reading_7": {
+      "type": "string"
+    },
+    "reading_8": {
+      "type": "string"
+    },
+    "reading_9": {
+      "type": "string"
+    },
+    "reading_10": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Accepted",
+        "Rejected"
+      ]
+    },
+    "section_break_3": {
+      "type": "string"
+    },
+    "column_break_4": {
+      "type": "string"
+    },
+    "acceptance_formula": {
+      "type": "string"
+    },
+    "column_break_10": {
+      "type": "string"
+    },
+    "column_break_14": {
+      "type": "string"
+    },
+    "formula_based_criteria": {
+      "type": "boolean"
+    },
+    "min_value": {
+      "type": "number"
+    },
+    "max_value": {
+      "type": "number"
+    },
+    "reading_value": {
+      "type": "string"
+    },
+    "section_break_14": {
+      "type": "string"
+    },
+    "manual_inspection": {
+      "type": "boolean"
+    },
+    "numeric": {
+      "type": "boolean"
+    },
+    "parameter_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Quality Inspection Parameter Group",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name",
+    "specification"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

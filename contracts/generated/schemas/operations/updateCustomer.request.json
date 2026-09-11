@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/updateCustomer.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "basic_info": {
+      "type": "string",
+      "x-frappe-options": "fa fa-user"
+    },
+    "naming_series": {
+      "type": "string",
+      "enum": [
+        "CUST-.YYYY.-"
+      ]
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "alias": {
+      "type": "string"
+    },
+    "gender": {
+      "type": "string",
+      "x-frappe-target-doctype": "Gender"
+    },
+    "customer_type": {
+      "type": "string",
+      "enum": [
+        "Company",
+        "Individual",
+        "Partnership"
+      ]
+    },
+    "default_bank_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Bank Account"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "column_break0": {
+      "type": "string"
+    },
+    "account_manager": {
+      "type": "string",
+      "x-frappe-target-doctype": "User"
+    },
+    "customer_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Customer Group"
+    },
+    "territory": {
+      "type": "string",
+      "x-frappe-target-doctype": "Territory"
+    },
+    "tax_id": {
+      "type": "string"
+    },
+    "tax_category": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Category"
+    },
+    "disabled": {
+      "type": "boolean"
+    },
+    "is_internal_customer": {
+      "type": "boolean"
+    },
+    "represents_company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "companies": {
+      "type": "array",
+      "items": {
+        "$ref": "AllowedToTransactWith.json"
+      }
+    },
+    "default_currency": {
+      "type": "string",
+      "x-frappe-target-doctype": "Currency"
+    },
+    "default_price_list": {
+      "type": "string",
+      "x-frappe-target-doctype": "Price List"
+    },
+    "language": {
+      "type": "string",
+      "x-frappe-target-doctype": "Language"
+    },
+    "address_contacts": {
+      "type": "string",
+      "x-frappe-options": "fa fa-map-marker"
+    },
+    "website": {
+      "type": "string"
+    },
+    "column_break1": {
+      "type": "string"
+    },
+    "primary_address_and_contact_detail": {
+      "type": "string"
+    },
+    "customer_primary_contact": {
+      "type": "string",
+      "x-frappe-target-doctype": "Contact"
+    },
+    "mobile_no": {
+      "type": "string",
+      "x-frappe-options": "Mobile"
+    },
+    "email_id": {
+      "type": "string",
+      "x-frappe-options": "Email"
+    },
+    "column_break_26": {
+      "type": "string"
+    },
+    "customer_primary_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "default_receivable_accounts": {
+      "type": "string"
+    },
+    "accounts": {
+      "type": "array",
+      "items": {
+        "$ref": "PartyAccount.json"
+      }
+    },
+    "credit_limit_section": {
+      "type": "string"
+    },
+    "payment_terms": {
+      "type": "string",
+      "x-frappe-target-doctype": "Payment Terms Template"
+    },
+    "customer_details": {
+      "type": "string"
+    },
+    "market_segment": {
+      "type": "string",
+      "x-frappe-target-doctype": "Market Segment"
+    },
+    "industry": {
+      "type": "string",
+      "x-frappe-target-doctype": "Industry Type"
+    },
+    "is_frozen": {
+      "type": "boolean"
+    },
+    "loyalty_program": {
+      "type": "string",
+      "x-frappe-target-doctype": "Loyalty Program"
+    },
+    "default_sales_partner": {
+      "type": "string",
+      "x-frappe-target-doctype": "Sales Partner"
+    },
+    "default_commission_rate": {
+      "type": "number"
+    },
+    "sales_team_section": {
+      "type": "string"
+    },
+    "sales_team": {
+      "type": "array",
+      "items": {
+        "$ref": "SalesTeam.json"
+      }
+    },
+    "credit_limits": {
+      "type": "array",
+      "items": {
+        "$ref": "CustomerCreditLimit.json"
+      }
+    },
+    "so_required": {
+      "type": "boolean"
+    },
+    "dn_required": {
+      "type": "boolean"
+    },
+    "tax_withholding_category": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Withholding Category"
+    },
+    "contact_and_address_tab": {
+      "type": "string"
+    },
+    "settings_tab": {
+      "type": "string"
+    },
+    "sales_team_tab": {
+      "type": "string",
+      "x-frappe-options": "fa fa-group"
+    },
+    "column_break_66": {
+      "type": "string"
+    },
+    "column_break_21": {
+      "type": "string"
+    },
+    "column_break_53": {
+      "type": "string"
+    },
+    "loyalty_points_tab": {
+      "type": "string"
+    },
+    "taxation_section": {
+      "type": "string"
+    },
+    "accounting_tab": {
+      "type": "string"
+    },
+    "tax_tab": {
+      "type": "string"
+    },
+    "internal_customer_section": {
+      "type": "string"
+    },
+    "column_break_54": {
+      "type": "string"
+    },
+    "portal_users_tab": {
+      "type": "string"
+    },
+    "portal_users": {
+      "type": "array",
+      "items": {
+        "$ref": "PortalUser.json"
+      }
+    },
+    "column_break_nwor": {
+      "type": "string"
+    },
+    "first_name": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "last_name": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "supplier_numbers": {
+      "type": "array",
+      "items": {
+        "$ref": "SupplierNumberAtCustomer.json"
+      }
+    },
+    "tax_withholding_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Withholding Group"
+    },
+    "more_info_tab": {
+      "type": "string"
+    },
+    "references_section": {
+      "type": "string"
+    },
+    "column_break_wlbg": {
+      "type": "string"
+    },
+    "section_break_objq": {
+      "type": "string"
+    },
+    "column_break_hdmn": {
+      "type": "string"
+    },
+    "connections_tab": {
+      "type": "string"
+    },
+    "supplier_numbers_section": {
+      "type": "string"
+    },
+    "section_break_hwkr": {
+      "type": "string"
+    },
+    "column_break_yvyu": {
+      "type": "string"
+    },
+    "default_accounts_column": {
+      "type": "string"
+    },
+    "supplier_numbers_column": {
+      "type": "string"
+    },
+    "section_break_nrvh": {
+      "type": "string"
+    },
+    "credit_limit_column": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_name",
+    "customer_type"
+  ],
+  "additionalProperties": false,
+  "x-module": "Selling"
+}

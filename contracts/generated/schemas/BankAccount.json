@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankAccount.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "account_name": {
+      "type": "string"
+    },
+    "account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "bank": {
+      "type": "string",
+      "x-frappe-target-doctype": "Bank"
+    },
+    "account_type": {
+      "type": "string",
+      "x-frappe-target-doctype": "Bank Account Type"
+    },
+    "account_subtype": {
+      "type": "string",
+      "x-frappe-target-doctype": "Bank Account Subtype"
+    },
+    "column_break_7": {
+      "type": "string"
+    },
+    "is_default": {
+      "type": "boolean"
+    },
+    "is_company_account": {
+      "type": "boolean"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "section_break_11": {
+      "type": "string"
+    },
+    "party_type": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "column_break_14": {
+      "type": "string"
+    },
+    "party": {
+      "type": "string",
+      "x-frappe-options": "party_type"
+    },
+    "account_details_section": {
+      "type": "string"
+    },
+    "iban": {
+      "type": "string",
+      "x-frappe-options": "IBAN"
+    },
+    "column_break_12": {
+      "type": "string"
+    },
+    "bank_account_no": {
+      "type": "string"
+    },
+    "statement_password": {
+      "type": "string"
+    },
+    "address_and_contact": {
+      "type": "string",
+      "x-frappe-options": "fa fa-map-marker"
+    },
+    "address_html": {
+      "type": "string"
+    },
+    "column_break_13": {
+      "type": "string"
+    },
+    "contact_html": {
+      "type": "string"
+    },
+    "integration_details_section": {
+      "type": "string"
+    },
+    "integration_id": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "last_integration_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "column_break_27": {
+      "type": "string"
+    },
+    "mask": {
+      "type": "string",
+      "readOnly": true
+    },
+    "branch_code": {
+      "type": "string"
+    },
+    "disabled": {
+      "type": "boolean"
+    },
+    "is_credit_card": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "account_name",
+    "bank",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

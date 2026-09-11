@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ItemReorder.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "warehouse_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "warehouse_reorder_level": {
+      "type": "number"
+    },
+    "warehouse_reorder_qty": {
+      "type": "number"
+    },
+    "material_request_type": {
+      "type": "string",
+      "enum": [
+        "Purchase",
+        "Transfer",
+        "Material Issue",
+        "Manufacture"
+      ]
+    }
+  },
+  "required": [
+    "material_request_type",
+    "name",
+    "warehouse"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

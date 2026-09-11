@@ -53,6 +53,10 @@ runtime:
     - Contacts
     - Selling
     - Stock
+  # Internal read-only permissions materialized for native transaction
+  # controllers. These do not create public routes or write capabilities.
+  permission_dependencies:
+    stock/purchase-receipts: [Account]
   document_actions:
     - doctype: Asset
       module: Assets

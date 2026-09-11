@@ -198,6 +198,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -272,10 +273,9 @@
                   }
                 },
                 "required": [
-                  "bank_name",
-                  "name"
+                  "bank_name"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               },
               "example": {
@@ -384,6 +384,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -511,6 +512,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -591,10 +593,9 @@
                   }
                 },
                 "required": [
-                  "bank_name",
-                  "name"
+                  "bank_name"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               }
             }
@@ -700,6 +701,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -820,6 +822,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -985,6 +988,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1114,10 +1118,9 @@
                 },
                 "required": [
                   "account_name",
-                  "bank",
-                  "name"
+                  "bank"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               },
               "example": {
@@ -1227,6 +1230,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1354,6 +1358,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1489,10 +1494,9 @@
                 },
                 "required": [
                   "account_name",
-                  "bank",
-                  "name"
+                  "bank"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               }
             }
@@ -1598,6 +1602,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1718,6 +1723,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1883,6 +1889,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2030,10 +2037,9 @@
                   }
                 },
                 "required": [
-                  "name",
                   "naming_series"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               },
               "example": {
@@ -2142,6 +2148,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2269,6 +2276,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2422,10 +2430,9 @@
                   }
                 },
                 "required": [
-                  "name",
                   "naming_series"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               }
             }
@@ -2531,6 +2538,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2651,6 +2659,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2783,6 +2792,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2915,6 +2925,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3059,6 +3070,7 @@
         },
         "x-frappe-handler": "letron_api.finance.accounts_reconciliation.reconcile_bank_transaction",
         "x-native-action": "reconcile",
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3205,6 +3217,7 @@
         },
         "x-frappe-handler": "letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction",
         "x-native-action": "unreconcile",
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3370,6 +3383,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3488,12 +3502,11 @@
                   "classify_as",
                   "company",
                   "description_rules",
-                  "name",
                   "priority",
                   "rule_name",
                   "transaction_type"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               },
               "example": {
@@ -3607,6 +3620,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3734,6 +3748,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3858,12 +3873,11 @@
                   "classify_as",
                   "company",
                   "description_rules",
-                  "name",
                   "priority",
                   "rule_name",
                   "transaction_type"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               }
             }
@@ -3969,6 +3983,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4089,6 +4104,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4235,6 +4251,7 @@
         },
         "x-frappe-handler": "letron_api.finance.banking.run_rule_evaluation",
         "x-native-action": "run-evaluation",
+        "x-public-operation": "update",
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4400,6 +4417,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4475,10 +4493,9 @@
                 "required": [
                   "company",
                   "cost_center_name",
-                  "name",
                   "parent_cost_center"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               },
               "example": {
@@ -4589,6 +4606,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4716,6 +4734,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4797,10 +4816,9 @@
                 "required": [
                   "company",
                   "cost_center_name",
-                  "name",
                   "parent_cost_center"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               }
             }
@@ -4906,6 +4924,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5026,6 +5045,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5191,6 +5211,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5460,12 +5481,11 @@
                 "required": [
                   "accounts",
                   "company",
-                  "name",
                   "naming_series",
                   "posting_date",
                   "voucher_type"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               },
               "example": {
@@ -5578,6 +5598,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5705,6 +5726,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5980,12 +6002,11 @@
                 "required": [
                   "accounts",
                   "company",
-                  "name",
                   "naming_series",
                   "posting_date",
                   "voucher_type"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               }
             }
@@ -6091,6 +6112,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6211,6 +6233,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6343,6 +6366,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6475,6 +6499,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6640,6 +6665,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6695,10 +6721,9 @@
                   }
                 },
                 "required": [
-                  "mode_of_payment",
-                  "name"
+                  "mode_of_payment"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               },
               "example": {
@@ -6807,6 +6832,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6934,6 +6960,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -6995,10 +7022,9 @@
                   }
                 },
                 "required": [
-                  "mode_of_payment",
-                  "name"
+                  "mode_of_payment"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               }
             }
@@ -7104,6 +7130,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -7224,6 +7251,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -7389,6 +7417,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -7675,7 +7704,6 @@
                 },
                 "required": [
                   "company",
-                  "name",
                   "naming_series",
                   "paid_amount",
                   "paid_from",
@@ -7686,7 +7714,7 @@
                   "source_exchange_rate",
                   "target_exchange_rate"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               },
               "example": {
@@ -7804,6 +7832,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -7931,6 +7960,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8223,7 +8253,6 @@
                 },
                 "required": [
                   "company",
-                  "name",
                   "naming_series",
                   "paid_amount",
                   "paid_from",
@@ -8234,7 +8263,7 @@
                   "source_exchange_rate",
                   "target_exchange_rate"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               }
             }
@@ -8340,6 +8369,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8460,6 +8490,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8592,6 +8623,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8724,6 +8756,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8889,6 +8922,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -8966,11 +9000,10 @@
                 "required": [
                   "company",
                   "company_bank_account",
-                  "name",
                   "naming_series",
                   "references"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               },
               "example": {
@@ -9082,6 +9115,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9209,6 +9243,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9292,11 +9327,10 @@
                 "required": [
                   "company",
                   "company_bank_account",
-                  "name",
                   "naming_series",
                   "references"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               }
             }
@@ -9402,6 +9436,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9522,6 +9557,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9654,6 +9690,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9786,6 +9823,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -9951,6 +9989,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -10133,11 +10172,10 @@
                 },
                 "required": [
                   "grand_total",
-                  "name",
                   "naming_series",
                   "payment_request_type"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               },
               "example": {
@@ -10248,6 +10286,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -10375,6 +10414,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -10563,11 +10603,10 @@
                 },
                 "required": [
                   "grand_total",
-                  "name",
                   "naming_series",
                   "payment_request_type"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               }
             }
@@ -10673,6 +10712,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -10793,6 +10833,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -10925,6 +10966,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -11057,6 +11099,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -11222,6 +11265,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -11801,12 +11845,11 @@
                 "required": [
                   "credit_to",
                   "items",
-                  "name",
                   "naming_series",
                   "posting_date",
                   "supplier"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               },
               "example": {
@@ -11919,6 +11962,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -12046,6 +12090,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -12631,12 +12676,11 @@
                 "required": [
                   "credit_to",
                   "items",
-                  "name",
                   "naming_series",
                   "posting_date",
                   "supplier"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               }
             }
@@ -12742,6 +12786,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -12862,6 +12907,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -12994,6 +13040,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -13126,6 +13173,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -13291,6 +13339,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -13989,13 +14038,12 @@
                   "customer",
                   "debit_to",
                   "items",
-                  "name",
                   "naming_series",
                   "plc_conversion_rate",
                   "posting_date",
                   "selling_price_list"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               },
               "example": {
@@ -14113,6 +14161,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -14240,6 +14289,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -14944,13 +14994,12 @@
                   "customer",
                   "debit_to",
                   "items",
-                  "name",
                   "naming_series",
                   "plc_conversion_rate",
                   "posting_date",
                   "selling_price_list"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Accounts"
               }
             }
@@ -15056,6 +15105,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -15176,6 +15226,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -15308,6 +15359,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -15440,6 +15492,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -24463,6 +24516,11 @@
         "Selling",
         "Stock"
       ],
+      "permission_dependencies": {
+        "stock/purchase-receipts": [
+          "Account"
+        ]
+      },
       "document_actions": [
         {
           "doctype": "Asset",

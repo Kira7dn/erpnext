@@ -98,6 +98,7 @@ paths:
         '500': &id011
           description: Server or rollback failure
           content: *id001
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -328,8 +329,7 @@ paths:
               required:
               - customer_name
               - customer_type
-              - name
-              additionalProperties: true
+              additionalProperties: false
               x-module: Selling
             example:
               customer_name: ''
@@ -353,6 +353,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -389,6 +390,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -430,6 +432,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -455,6 +458,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -497,6 +501,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -777,14 +782,13 @@ paths:
               - conversion_rate
               - currency
               - items
-              - name
               - naming_series
               - order_type
               - plc_conversion_rate
               - quotation_to
               - selling_price_list
               - transaction_date
-              additionalProperties: true
+              additionalProperties: false
               x-module: Selling
             example:
               naming_series: ''
@@ -816,6 +820,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -852,6 +857,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -893,6 +899,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -918,6 +925,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -960,6 +968,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1327,13 +1336,12 @@ paths:
               - currency
               - customer
               - items
-              - name
               - naming_series
               - order_type
               - plc_conversion_rate
               - selling_price_list
               - transaction_date
-              additionalProperties: true
+              additionalProperties: false
               x-module: Selling
             example:
               naming_series: ''
@@ -1365,6 +1373,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1401,6 +1410,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1442,6 +1452,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1467,6 +1478,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1499,6 +1511,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: submit
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1531,6 +1544,7 @@ paths:
         '429': *id010
         '500': *id011
       x-frappe-action: cancel
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -3483,6 +3497,9 @@ x-contract:
     - Contacts
     - Selling
     - Stock
+    permission_dependencies:
+      stock/purchase-receipts:
+      - Account
     document_actions:
     - doctype: Asset
       module: Assets

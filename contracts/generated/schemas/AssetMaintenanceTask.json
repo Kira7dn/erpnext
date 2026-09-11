@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetMaintenanceTask.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "maintenance_task": {
+      "type": "string"
+    },
+    "maintenance_type": {
+      "type": "string",
+      "enum": [
+        "Preventive Maintenance",
+        "Calibration"
+      ]
+    },
+    "column_break_2": {
+      "type": "string"
+    },
+    "maintenance_status": {
+      "type": "string",
+      "enum": [
+        "Planned",
+        "Overdue",
+        "Cancelled"
+      ]
+    },
+    "section_break_2": {
+      "type": "string"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "periodicity": {
+      "type": "string",
+      "enum": [
+        "Daily",
+        "Weekly",
+        "Monthly",
+        "Quarterly",
+        "Half-yearly",
+        "Yearly",
+        "2 Yearly",
+        "3 Yearly"
+      ]
+    },
+    "column_break_4": {
+      "type": "string"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "certificate_required": {
+      "type": "boolean"
+    },
+    "section_break_9": {
+      "type": "string"
+    },
+    "assign_to": {
+      "type": "string",
+      "x-frappe-target-doctype": "User"
+    },
+    "column_break_10": {
+      "type": "string"
+    },
+    "assign_to_name": {
+      "type": "string"
+    },
+    "section_break_10": {
+      "type": "string"
+    },
+    "next_due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "column_break_14": {
+      "type": "string"
+    },
+    "last_completion_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "section_break_7": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "maintenance_status",
+    "maintenance_task",
+    "name",
+    "periodicity",
+    "start_date"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

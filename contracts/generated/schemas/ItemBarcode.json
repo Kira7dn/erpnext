@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ItemBarcode.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "barcode": {
+      "type": "string"
+    },
+    "barcode_type": {
+      "type": "string",
+      "enum": [
+        "EAN",
+        "UPC-A",
+        "CODE-39",
+        "EAN-13",
+        "EAN-8",
+        "GS1",
+        "GTIN",
+        "GTIN-14",
+        "ISBN",
+        "ISBN-10",
+        "ISBN-13",
+        "ISSN",
+        "JAN",
+        "PZN",
+        "UPC"
+      ]
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    }
+  },
+  "required": [
+    "barcode",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

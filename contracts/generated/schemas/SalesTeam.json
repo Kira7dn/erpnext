@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SalesTeam.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "sales_person": {
+      "type": "string",
+      "x-frappe-target-doctype": "Sales Person"
+    },
+    "contact_no": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "allocated_percentage": {
+      "type": "number"
+    },
+    "allocated_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "commission_rate": {
+      "type": "string",
+      "readOnly": true
+    },
+    "incentives": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    }
+  },
+  "required": [
+    "name",
+    "sales_person"
+  ],
+  "additionalProperties": true,
+  "x-module": "Selling"
+}

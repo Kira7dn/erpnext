@@ -195,6 +195,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -633,12 +634,11 @@
                   "conversion_rate",
                   "currency",
                   "items",
-                  "name",
                   "naming_series",
                   "supplier",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Buying"
               },
               "example": {
@@ -753,6 +753,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -880,6 +881,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1324,12 +1326,11 @@
                   "conversion_rate",
                   "currency",
                   "items",
-                  "name",
                   "naming_series",
                   "supplier",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Buying"
               }
             }
@@ -1435,6 +1436,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1555,6 +1557,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1687,6 +1690,7 @@
           }
         },
         "x-frappe-action": "submit",
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1819,6 +1823,7 @@
           }
         },
         "x-frappe-action": "cancel",
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1984,6 +1989,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2149,13 +2155,12 @@
                 "required": [
                   "company",
                   "items",
-                  "name",
                   "naming_series",
                   "subject",
                   "suppliers",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Buying"
               },
               "example": {
@@ -2269,6 +2274,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2396,6 +2402,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2567,13 +2574,12 @@
                 "required": [
                   "company",
                   "items",
-                  "name",
                   "naming_series",
                   "subject",
                   "suppliers",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Buying"
               }
             }
@@ -2679,6 +2685,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2799,6 +2806,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2964,6 +2972,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3236,11 +3245,10 @@
                   }
                 },
                 "required": [
-                  "name",
                   "supplier_name",
                   "supplier_type"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Buying"
               },
               "example": {
@@ -3350,6 +3358,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3477,6 +3486,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3755,11 +3765,10 @@
                   }
                 },
                 "required": [
-                  "name",
                   "supplier_name",
                   "supplier_type"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Buying"
               }
             }
@@ -3865,6 +3874,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -3985,6 +3995,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4150,6 +4161,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4457,12 +4469,11 @@
                   "conversion_rate",
                   "currency",
                   "items",
-                  "name",
                   "naming_series",
                   "supplier",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Buying"
               },
               "example": {
@@ -4577,6 +4588,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -4704,6 +4716,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5017,12 +5030,11 @@
                   "conversion_rate",
                   "currency",
                   "items",
-                  "name",
                   "naming_series",
                   "supplier",
                   "transaction_date"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Buying"
               }
             }
@@ -5128,6 +5140,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5248,6 +5261,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -5380,7 +5394,13 @@
           }
         },
         "x-frappe-action": "submit",
-        "x-test-status": "not-tested"
+        "x-public-operation": "update",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
       }
     },
     "/api/v1/crm/supplier-quotations/{name}/cancel": {
@@ -5507,7 +5527,13 @@
           }
         },
         "x-frappe-action": "cancel",
-        "x-test-status": "not-tested"
+        "x-public-operation": "delete",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
       }
     },
     "/api/v1/crm/supplier-quotations/{name}/make-purchase-order": {
@@ -5648,7 +5674,13 @@
         },
         "x-frappe-handler": "letron_api.control.api.make_purchase_order",
         "x-native-action": "make-purchase-order",
-        "x-test-status": "not-tested"
+        "x-public-operation": "update",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
       }
     }
   },
@@ -8982,6 +9014,11 @@
         "Selling",
         "Stock"
       ],
+      "permission_dependencies": {
+        "stock/purchase-receipts": [
+          "Account"
+        ]
+      },
       "document_actions": [
         {
           "doctype": "Asset",

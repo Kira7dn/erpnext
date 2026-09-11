@@ -12,6 +12,8 @@ from .handoff import build_control_plane, write_handoff
 from .metadata import discover_doctypes, discover_whitelisted_methods
 from .models import serialize
 from .openapi import build_openapi
+from .registry import build_registry
+from .typescript import emit_types, emit_zod
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -24,6 +26,14 @@ def source_roots(root: Path):
 def collect(root: Path):
     roots = source_roots(root)
     return discover_doctypes(roots), discover_whitelisted_methods(roots)
+
+
+def _local_schema(value):
+    if isinstance(value, dict):
+        return {key: (f"{value['$ref'].rsplit('/', 1)[-1]}.json" if key == "$ref" and isinstance(value.get("$ref"), str) and value["$ref"].startswith("#/components/schemas/") else _local_schema(item)) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_local_schema(item) for item in value]
+    return value
 
 
 def expand_typed_modules(contract, doctypes):
@@ -64,6 +74,37 @@ def generate(root: Path, output: Path, handoff: Path | None = None) -> None:
         module_index.setdefault(item.module or "Uncategorized", []).append(item.name)
     (output / "catalog.json").write_text(json.dumps({"doctypes": serialize(doctypes), "whitelisted_methods": serialize(methods), "modules": {key: sorted(value) for key, value in sorted(module_index.items())}}, indent=2, ensure_ascii=False), encoding="utf-8")
     spec = build_openapi(contract, doctypes, methods)
+    registry = build_registry(spec, contract)
+    schemas = spec["components"]["schemas"]
+    schema_dir = output / "schemas"
+    schema_dir.mkdir(parents=True, exist_ok=True)
+    for stale in schema_dir.glob("*.json"):
+        stale.unlink()
+    for name, schema in schemas.items():
+        schema_dir.joinpath(f"{name}.json").write_text(json.dumps({"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": f"https://letron.local/schemas/{name}.json", **_local_schema(schema)}, indent=2, ensure_ascii=False), encoding="utf-8")
+    operation_schema_dir = schema_dir / "operations"
+    operation_schema_dir.mkdir(parents=True, exist_ok=True)
+    for stale in operation_schema_dir.glob("*.json"):
+        stale.unlink()
+    for operation in registry:
+        for suffix in ("request", "response"):
+            schema = operation.get(f"{suffix}_schema")
+            if schema:
+                operation_schema_dir.joinpath(f"{operation['operation_id']}.{suffix}.json").write_text(json.dumps({"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": f"https://letron.local/schemas/operations/{operation['operation_id']}.{suffix}.json", **_local_schema(schema)}, indent=2, ensure_ascii=False), encoding="utf-8")
+    (output / "types.ts").write_text(emit_types(schemas), encoding="utf-8")
+    (output / "zod.ts").write_text(emit_zod(schemas, registry), encoding="utf-8")
+    (output / "runtime-contract.json").write_text(json.dumps({"version": 1, "registry": registry, "schemas": schemas}, indent=2, ensure_ascii=False), encoding="utf-8")
+    package_generated = root / "apps/letron_api/letron_api/generated"
+    if output.resolve() == (root / "contracts/generated").resolve():
+        package_generated.mkdir(parents=True, exist_ok=True)
+        (package_generated / "runtime-contract.json").write_text(json.dumps({"version": 1, "registry": registry, "schemas": schemas}, indent=2, ensure_ascii=False), encoding="utf-8")
+        frontend_generated = root / "apps/erp/src/generated"
+        frontend_generated.mkdir(parents=True, exist_ok=True)
+        (frontend_generated / "types.ts").write_text(emit_types(schemas), encoding="utf-8")
+        (frontend_generated / "zod.ts").write_text(emit_zod(schemas, registry), encoding="utf-8")
+    catalog = {"version": 1, "doctypes": serialize(doctypes), "whitelisted_methods": serialize(methods), "modules": {key: sorted(value) for key, value in sorted(module_index.items())}, "operations": registry}
+    (output / "catalog.json").write_text(json.dumps(catalog, indent=2, ensure_ascii=False), encoding="utf-8")
+    (output / "registry.json").write_text(json.dumps({"version": 1, "operations": registry}, indent=2, ensure_ascii=False), encoding="utf-8")
     (output / "openapi.json").write_text(json.dumps(spec, indent=2, ensure_ascii=False), encoding="utf-8")
     (output / "openapi.yaml").write_text(yaml.safe_dump(spec, sort_keys=False, allow_unicode=True), encoding="utf-8")
     module_dir = output / "openapi" / "modules"

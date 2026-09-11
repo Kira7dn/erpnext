@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/CRMNote.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    },
+    "added_by": {
+      "type": "string",
+      "x-frappe-target-doctype": "User"
+    },
+    "added_on": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "CRM"
+}

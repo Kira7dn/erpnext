@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetCapitalizationStockItem.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "section_break_6": {
+      "type": "string"
+    },
+    "stock_qty": {
+      "type": "number"
+    },
+    "stock_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "valuation_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "batch_and_serial_no_section": {
+      "type": "string"
+    },
+    "column_break_13": {
+      "type": "string"
+    },
+    "serial_no": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "item_name": {
+      "type": "string",
+      "readOnly": true
+    },
+    "actual_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "serial_and_batch_bundle": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "use_serial_batch_fields": {
+      "type": "boolean"
+    },
+    "section_break_bfqc": {
+      "type": "string"
+    },
+    "column_break_mbuv": {
+      "type": "string"
+    },
+    "purchase_receipt_item": {
+      "type": "string",
+      "writeOnly": true
+    }
+  },
+  "required": [
+    "item_code",
+    "name",
+    "stock_uom",
+    "warehouse"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

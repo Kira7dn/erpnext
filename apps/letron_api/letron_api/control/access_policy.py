@@ -7,6 +7,8 @@ from typing import Any
 
 import frappe
 
+from letron_api.hooks import PUBLIC_PERMISSION_DEPENDENCIES
+
 RESOURCE_DOCTYPES = {
     "accounts/purchase-invoices": "Purchase Invoice",
     "accounts/sales-invoices": "Sales Invoice",
@@ -58,6 +60,15 @@ OPERATION_FIELDS = {
 }
 
 VIRTUAL_POLICY_RESOURCES = {"files/attachments"}
+
+# ERPNext transaction controllers read supporting master data while inserting
+# a document. These dependencies are deliberately internal: they do not add a
+# public API resource or grant broad business access. They only materialize the
+# minimum native read permission required by the explicitly granted operation.
+TRANSACTION_READ_DEPENDENCIES = {
+    f"{module}/{resource}": dependencies
+    for (module, resource), dependencies in PUBLIC_PERMISSION_DEPENDENCIES.items()
+}
 
 
 def _authorized() -> None:
@@ -139,6 +150,12 @@ def publish() -> dict[str, Any]:
                     (rule.get("module"), rule.get("resource")) in DOCUMENT_ACTIONS
                 ):
                     fields["cancel"] = 1
+                for dependency in TRANSACTION_READ_DEPENDENCIES.get(key, set()):
+                    dependency_fields = desired_permissions.setdefault(
+                        (dependency, role),
+                        {name: 0 for name in ("read", "write", "create", "delete", "submit", "cancel", "report")},
+                    )
+                    dependency_fields["read"] = 1
     for (doctype, role), fields in desired_permissions.items():
         existing = frappe.db.get_value("Custom DocPerm", {"parent": doctype, "role": role, "permlevel": 0}, "name")
         values = {"doctype": "Custom DocPerm", "parent": doctype, "role": role, "permlevel": 0, **fields}

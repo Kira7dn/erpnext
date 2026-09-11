@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/StockReconciliationItem.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "barcode": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "item_name": {
+      "type": "string",
+      "readOnly": true
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "column_break_6": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "stock_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "valuation_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "serial_no_and_batch_section": {
+      "type": "string"
+    },
+    "serial_no": {
+      "type": "string"
+    },
+    "column_break_11": {
+      "type": "string"
+    },
+    "section_break_3": {
+      "type": "string"
+    },
+    "current_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "current_serial_no": {
+      "type": "string",
+      "readOnly": true
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "current_valuation_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "current_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "section_break_14": {
+      "type": "string"
+    },
+    "quantity_difference": {
+      "type": "string"
+    },
+    "column_break_16": {
+      "type": "string"
+    },
+    "amount_difference": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "allow_zero_valuation_rate": {
+      "type": "boolean"
+    },
+    "has_item_scanned": {
+      "type": "string",
+      "readOnly": true
+    },
+    "serial_and_batch_bundle": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial and Batch Bundle"
+    },
+    "current_serial_and_batch_bundle": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial and Batch Bundle",
+      "readOnly": true
+    },
+    "add_serial_batch_bundle": {
+      "type": "string"
+    },
+    "item_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Group"
+    },
+    "use_serial_batch_fields": {
+      "type": "boolean"
+    },
+    "section_break_lypk": {
+      "type": "string"
+    },
+    "column_break_eefq": {
+      "type": "string"
+    },
+    "reconcile_all_serial_batch": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "item_code",
+    "name",
+    "warehouse"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

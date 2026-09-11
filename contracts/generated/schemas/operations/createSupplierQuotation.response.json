@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/createSupplierQuotation.response.json",
+  "type": "object",
+  "properties": {
+    "data": {
+      "$ref": "SupplierQuotation.json"
+    }
+  },
+  "required": [
+    "data"
+  ]
+}

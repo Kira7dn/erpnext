@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/updateRequestforQuotation.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": "string",
+      "enum": [
+        "PUR-RFQ-.YYYY.-"
+      ]
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "column_break1": {
+      "type": "string"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "suppliers_section": {
+      "type": "string"
+    },
+    "suppliers": {
+      "type": "array",
+      "items": {
+        "$ref": "RequestforQuotationSupplier.json"
+      }
+    },
+    "items_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-shopping-cart"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "RequestforQuotationItem.json"
+      }
+    },
+    "supplier_response_section": {
+      "type": "string"
+    },
+    "email_template": {
+      "type": "string",
+      "x-frappe-target-doctype": "Email Template"
+    },
+    "message_for_supplier": {
+      "type": "string"
+    },
+    "terms_section_break": {
+      "type": "string",
+      "x-frappe-options": "fa fa-legal"
+    },
+    "tc_name": {
+      "type": "string",
+      "x-frappe-target-doctype": "Terms and Conditions"
+    },
+    "terms": {
+      "type": "string"
+    },
+    "printing_settings": {
+      "type": "string"
+    },
+    "select_print_heading": {
+      "type": "string",
+      "x-frappe-target-doctype": "Print Heading"
+    },
+    "letter_head": {
+      "type": "string",
+      "x-frappe-target-doctype": "Letter Head"
+    },
+    "more_info": {
+      "type": "string",
+      "x-frappe-options": "fa fa-file-text"
+    },
+    "col_break_email_1": {
+      "type": "string"
+    },
+    "preview": {
+      "type": "string"
+    },
+    "sec_break_email_2": {
+      "type": "string"
+    },
+    "schedule_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "incoterm": {
+      "type": "string",
+      "x-frappe-target-doctype": "Incoterm"
+    },
+    "named_place": {
+      "type": "string"
+    },
+    "send_attached_files": {
+      "type": "boolean"
+    },
+    "send_document_print": {
+      "type": "boolean"
+    },
+    "billing_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "has_unit_price_items": {
+      "type": "boolean",
+      "writeOnly": true
+    },
+    "subject": {
+      "type": "string"
+    },
+    "mfs_html": {
+      "type": "string"
+    },
+    "use_html": {
+      "type": "boolean",
+      "writeOnly": true
+    },
+    "address_and_contact_tab": {
+      "type": "string"
+    },
+    "column_break_czul": {
+      "type": "string"
+    },
+    "shipping_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "title": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company",
+    "items",
+    "naming_series",
+    "subject",
+    "suppliers",
+    "transaction_date"
+  ],
+  "additionalProperties": false,
+  "x-module": "Buying"
+}

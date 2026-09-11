@@ -1,0 +1,290 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/updateSupplierQuotation.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "supplier_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-user"
+    },
+    "title": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": "string",
+      "enum": [
+        "PUR-SQTN-.YYYY.-"
+      ]
+    },
+    "supplier": {
+      "type": "string",
+      "x-frappe-target-doctype": "Supplier"
+    },
+    "column_break1": {
+      "type": "string"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "supplier_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "contact_person": {
+      "type": "string",
+      "x-frappe-target-doctype": "Contact"
+    },
+    "currency_and_price_list": {
+      "type": "string",
+      "x-frappe-options": "fa fa-tag"
+    },
+    "currency": {
+      "type": "string",
+      "x-frappe-target-doctype": "Currency"
+    },
+    "conversion_rate": {
+      "type": "number"
+    },
+    "cb_price_list": {
+      "type": "string"
+    },
+    "buying_price_list": {
+      "type": "string",
+      "x-frappe-target-doctype": "Price List"
+    },
+    "plc_conversion_rate": {
+      "type": "number"
+    },
+    "ignore_pricing_rule": {
+      "type": "boolean"
+    },
+    "items_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-shopping-cart"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "SupplierQuotationItem.json"
+      }
+    },
+    "pricing_rule_details": {
+      "type": "string"
+    },
+    "section_break_22": {
+      "type": "string"
+    },
+    "column_break_24": {
+      "type": "string"
+    },
+    "taxes_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-money"
+    },
+    "tax_category": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Category"
+    },
+    "column_break_36": {
+      "type": "string"
+    },
+    "shipping_rule": {
+      "type": "string",
+      "x-frappe-target-doctype": "Shipping Rule"
+    },
+    "section_break_38": {
+      "type": "string"
+    },
+    "taxes_and_charges": {
+      "type": "string",
+      "x-frappe-target-doctype": "Purchase Taxes and Charges Template"
+    },
+    "taxes": {
+      "type": "array",
+      "items": {
+        "$ref": "PurchaseTaxesandCharges.json"
+      }
+    },
+    "tax_breakup": {
+      "type": "string"
+    },
+    "totals": {
+      "type": "string",
+      "x-frappe-options": "fa fa-money"
+    },
+    "column_break_37": {
+      "type": "string"
+    },
+    "section_break_41": {
+      "type": "string"
+    },
+    "apply_discount_on": {
+      "type": "string",
+      "enum": [
+        "Grand Total",
+        "Net Total"
+      ]
+    },
+    "column_break_43": {
+      "type": "string"
+    },
+    "additional_discount_percentage": {
+      "type": "number"
+    },
+    "discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "section_break_46": {
+      "type": "string"
+    },
+    "column_break4": {
+      "type": "string"
+    },
+    "disable_rounded_total": {
+      "type": "boolean"
+    },
+    "tc_name": {
+      "type": "string",
+      "x-frappe-target-doctype": "Terms and Conditions"
+    },
+    "terms": {
+      "type": "string"
+    },
+    "printing_settings": {
+      "type": "string"
+    },
+    "select_print_heading": {
+      "type": "string",
+      "x-frappe-target-doctype": "Print Heading"
+    },
+    "group_same_items": {
+      "type": "boolean"
+    },
+    "column_break_72": {
+      "type": "string"
+    },
+    "letter_head": {
+      "type": "string",
+      "x-frappe-target-doctype": "Letter Head"
+    },
+    "update_auto_repeat_reference": {
+      "type": "string"
+    },
+    "more_info": {
+      "type": "string",
+      "x-frappe-options": "fa fa-file-text"
+    },
+    "column_break_57": {
+      "type": "string"
+    },
+    "is_subcontracted": {
+      "type": "boolean"
+    },
+    "valid_till": {
+      "type": "string",
+      "format": "date"
+    },
+    "quotation_number": {
+      "type": "string"
+    },
+    "address_and_contact_tab": {
+      "type": "string"
+    },
+    "terms_tab": {
+      "type": "string"
+    },
+    "more_info_tab": {
+      "type": "string"
+    },
+    "connections_tab": {
+      "type": "string"
+    },
+    "column_break_26": {
+      "type": "string"
+    },
+    "column_break_34": {
+      "type": "string"
+    },
+    "column_break_85": {
+      "type": "string"
+    },
+    "incoterm": {
+      "type": "string",
+      "x-frappe-target-doctype": "Incoterm"
+    },
+    "named_place": {
+      "type": "string"
+    },
+    "shipping_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "column_break_zjaq": {
+      "type": "string"
+    },
+    "shipping_address_section": {
+      "type": "string"
+    },
+    "supplier_address_section": {
+      "type": "string"
+    },
+    "company_billing_address_section": {
+      "type": "string"
+    },
+    "billing_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "column_break_gcth": {
+      "type": "string"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "has_unit_price_items": {
+      "type": "boolean",
+      "writeOnly": true
+    },
+    "item_wise_tax_details": {
+      "type": "array",
+      "items": {
+        "$ref": "ItemWiseTaxDetail.json"
+      },
+      "writeOnly": true
+    },
+    "auto_repeat_section": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company",
+    "conversion_rate",
+    "currency",
+    "items",
+    "naming_series",
+    "supplier",
+    "transaction_date"
+  ],
+  "additionalProperties": false,
+  "x-module": "Buying"
+}

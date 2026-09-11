@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/MaterialRequest.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "type_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-pushpin"
+    },
+    "naming_series": {
+      "type": "string",
+      "enum": [
+        "MAT-MR-.YYYY.-"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "material_request_type": {
+      "type": "string",
+      "enum": [
+        "Purchase",
+        "Material Transfer",
+        "Material Issue",
+        "Manufacture",
+        "Subcontracting",
+        "Customer Provided"
+      ]
+    },
+    "customer": {
+      "type": "string",
+      "x-frappe-target-doctype": "Customer"
+    },
+    "column_break_2": {
+      "type": "string"
+    },
+    "schedule_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "amended_from": {
+      "type": "string",
+      "x-frappe-target-doctype": "Material Request",
+      "readOnly": true
+    },
+    "items_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-shopping-cart"
+    },
+    "scan_barcode": {
+      "type": "string",
+      "x-frappe-options": "Barcode"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "MaterialRequestItem.json"
+      }
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "column_break2": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Submitted",
+        "Stopped",
+        "Cancelled",
+        "Pending",
+        "Partially Ordered",
+        "Partially Received",
+        "Ordered",
+        "Issued",
+        "Transferred",
+        "Received"
+      ],
+      "readOnly": true
+    },
+    "per_ordered": {
+      "type": "number",
+      "readOnly": true
+    },
+    "per_received": {
+      "type": "number",
+      "readOnly": true
+    },
+    "printing_details": {
+      "type": "string"
+    },
+    "letter_head": {
+      "type": "string",
+      "x-frappe-target-doctype": "Letter Head"
+    },
+    "select_print_heading": {
+      "type": "string",
+      "x-frappe-target-doctype": "Print Heading"
+    },
+    "terms_section_break": {
+      "type": "string",
+      "x-frappe-options": "fa fa-legal"
+    },
+    "tc_name": {
+      "type": "string",
+      "x-frappe-target-doctype": "Terms and Conditions"
+    },
+    "terms": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "job_card": {
+      "type": "string",
+      "x-frappe-target-doctype": "Job Card",
+      "readOnly": true
+    },
+    "warehouse_section": {
+      "type": "string"
+    },
+    "set_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "column_break5": {
+      "type": "string"
+    },
+    "set_from_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "transfer_status": {
+      "type": "string",
+      "enum": [
+        "Not Started",
+        "In Transit",
+        "Completed"
+      ],
+      "readOnly": true
+    },
+    "work_order": {
+      "type": "string",
+      "x-frappe-target-doctype": "Work Order",
+      "readOnly": true
+    },
+    "terms_tab": {
+      "type": "string"
+    },
+    "more_info_tab": {
+      "type": "string"
+    },
+    "connections_tab": {
+      "type": "string"
+    },
+    "status_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-file-text"
+    },
+    "column_break_31": {
+      "type": "string"
+    },
+    "column_break_35": {
+      "type": "string"
+    },
+    "buying_price_list": {
+      "type": "string",
+      "x-frappe-target-doctype": "Price List"
+    },
+    "last_scanned_warehouse": {
+      "type": "string"
+    },
+    "auto_created_via_reorder": {
+      "type": "boolean",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "company",
+    "items",
+    "material_request_type",
+    "name",
+    "naming_series",
+    "transaction_date"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

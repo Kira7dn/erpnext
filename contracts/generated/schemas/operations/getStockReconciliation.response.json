@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/getStockReconciliation.response.json",
+  "type": "object",
+  "properties": {
+    "data": {
+      "$ref": "StockReconciliation.json"
+    }
+  },
+  "required": [
+    "data"
+  ]
+}

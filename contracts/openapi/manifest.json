@@ -3,8 +3,8 @@
   "artifacts": {
     "public": {
       "operations": 322,
-      "json_sha256": "b972fb1d083fc83000184941469ef62298455a7ec44ebce16caf3755e8e9f144",
-      "yaml_sha256": "f2e42980731e31dd8310d08af53d56bdb3fd336c591461eb022bb171ea8cf5de"
+      "json_sha256": "1e97d7c16bca035e06e74062192d50c3277805a59f889e8910014caa5a73e32e",
+      "yaml_sha256": "c4eb2fd5012ef60cecf6c36c5b3b7646eb8788b91a4056853fe1ae7cd470c659"
     },
     "control-plane": {
       "operations": 2,

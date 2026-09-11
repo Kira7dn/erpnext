@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/updateContact.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "contact_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-user"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "user": {
+      "type": "string",
+      "x-frappe-target-doctype": "User"
+    },
+    "cb00": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Passive",
+        "Open",
+        "Replied"
+      ]
+    },
+    "salutation": {
+      "type": "string",
+      "x-frappe-target-doctype": "Salutation"
+    },
+    "gender": {
+      "type": "string",
+      "x-frappe-target-doctype": "Gender"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "contact_details": {
+      "type": "string",
+      "x-frappe-options": "fa fa-pushpin"
+    },
+    "is_primary_contact": {
+      "type": "boolean"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "DynamicLink.json"
+      }
+    },
+    "more_info": {
+      "type": "string",
+      "x-frappe-options": "fa fa-file-text"
+    },
+    "department": {
+      "type": "string"
+    },
+    "designation": {
+      "type": "string"
+    },
+    "unsubscribed": {
+      "type": "boolean"
+    },
+    "middle_name": {
+      "type": "string"
+    },
+    "sb_00": {
+      "type": "string"
+    },
+    "email_ids": {
+      "type": "array",
+      "items": {
+        "$ref": "ContactEmail.json"
+      }
+    },
+    "address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "phone_nos": {
+      "type": "array",
+      "items": {
+        "$ref": "ContactPhone.json"
+      }
+    },
+    "sync_with_google_contacts": {
+      "type": "boolean"
+    },
+    "google_contacts": {
+      "type": "string",
+      "x-frappe-target-doctype": "Google Contacts"
+    },
+    "cb_00": {
+      "type": "string"
+    },
+    "sb_01": {
+      "type": "string"
+    },
+    "company_name": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+  "x-module": "Contacts"
+}

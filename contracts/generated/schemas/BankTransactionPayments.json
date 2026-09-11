@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankTransactionPayments.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "payment_document": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType"
+    },
+    "payment_entry": {
+      "type": "string",
+      "x-frappe-options": "payment_document"
+    },
+    "allocated_amount": {
+      "type": "number"
+    },
+    "clearance_date": {
+      "type": "string",
+      "format": "date",
+      "readOnly": true
+    },
+    "reconciliation_type": {
+      "type": "string",
+      "enum": [
+        "Matched",
+        "Voucher Created"
+      ],
+      "readOnly": true
+    }
+  },
+  "required": [
+    "allocated_amount",
+    "name",
+    "payment_document",
+    "payment_entry"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

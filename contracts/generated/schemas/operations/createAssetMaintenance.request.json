@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/createAssetMaintenance.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "asset_name": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset"
+    },
+    "asset_category": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "column_break_3": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "section_break_6": {
+      "type": "string"
+    },
+    "maintenance_team": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset Maintenance Team"
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "maintenance_manager_name": {
+      "type": "string"
+    },
+    "section_break_8": {
+      "type": "string"
+    },
+    "asset_maintenance_tasks": {
+      "type": "array",
+      "items": {
+        "$ref": "AssetMaintenanceTask.json"
+      }
+    }
+  },
+  "required": [
+    "asset_maintenance_tasks",
+    "asset_name",
+    "company",
+    "maintenance_team"
+  ],
+  "additionalProperties": false,
+  "x-module": "Assets"
+}

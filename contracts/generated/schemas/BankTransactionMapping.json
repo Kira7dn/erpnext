@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankTransactionMapping.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "bank_transaction_field": {
+      "type": "string"
+    },
+    "file_field": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "bank_transaction_field",
+    "file_field",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

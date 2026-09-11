@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/MaterialRequestItem.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "section_break_4": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string",
+      "readOnly": true
+    },
+    "quantity_and_warehouse": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "conversion_factor": {
+      "type": "number"
+    },
+    "stock_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "schedule_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency"
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "stock_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "more_info": {
+      "type": "string"
+    },
+    "item_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Group",
+      "readOnly": true
+    },
+    "brand": {
+      "type": "string",
+      "x-frappe-target-doctype": "Brand",
+      "readOnly": true
+    },
+    "lead_time_date": {
+      "type": "string",
+      "format": "date",
+      "readOnly": true
+    },
+    "sales_order": {
+      "type": "string",
+      "x-frappe-target-doctype": "Sales Order",
+      "readOnly": true
+    },
+    "sales_order_item": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "production_plan": {
+      "type": "string",
+      "x-frappe-target-doctype": "Production Plan",
+      "readOnly": true
+    },
+    "material_request_plan_item": {
+      "type": "string",
+      "readOnly": true
+    },
+    "col_break3": {
+      "type": "string"
+    },
+    "min_order_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "projected_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "actual_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "ordered_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "expense_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "page_break": {
+      "type": "boolean"
+    },
+    "received_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "manufacture_details": {
+      "type": "string"
+    },
+    "manufacturer": {
+      "type": "string",
+      "x-frappe-target-doctype": "Manufacturer"
+    },
+    "column_break_12": {
+      "type": "string"
+    },
+    "manufacturer_part_no": {
+      "type": "string",
+      "readOnly": true
+    },
+    "rate_and_amount_section_break": {
+      "type": "string"
+    },
+    "col_break4": {
+      "type": "string"
+    },
+    "from_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "bom_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "BOM"
+    },
+    "section_break_46": {
+      "type": "string"
+    },
+    "col_break_mfg": {
+      "type": "string"
+    },
+    "qty_info_sec_break": {
+      "type": "string"
+    },
+    "qty_info_col_break": {
+      "type": "string"
+    },
+    "job_card_item": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "accounting_details_section": {
+      "type": "string"
+    },
+    "column_break_glru": {
+      "type": "string"
+    },
+    "wip_composite_asset": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset"
+    },
+    "price_list_rate": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "item_reorder_section": {
+      "type": "string"
+    },
+    "column_break_fdjh": {
+      "type": "string"
+    },
+    "reorder_level": {
+      "type": "number",
+      "readOnly": true
+    },
+    "reorder_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "projected_on_hand": {
+      "type": "number",
+      "readOnly": true
+    },
+    "picked_qty": {
+      "type": "number",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "packed_item": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    }
+  },
+  "required": [
+    "conversion_factor",
+    "item_code",
+    "name",
+    "qty",
+    "schedule_date",
+    "stock_uom",
+    "uom"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

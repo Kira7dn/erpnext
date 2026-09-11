@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ContactPhone.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string",
+      "x-frappe-options": "Phone"
+    },
+    "is_primary_phone": {
+      "type": "boolean"
+    },
+    "is_primary_mobile_no": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "name",
+    "phone"
+  ],
+  "additionalProperties": true,
+  "x-module": "Contacts"
+}

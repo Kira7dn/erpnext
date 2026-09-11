@@ -1,0 +1,327 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/QuotationItem.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "customer_item_code": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "section_break_5": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "image_view": {
+      "type": "string",
+      "x-frappe-options": "image"
+    },
+    "quantity_and_rate": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "number"
+    },
+    "stock_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "col_break2": {
+      "type": "string"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "conversion_factor": {
+      "type": "number",
+      "readOnly": true
+    },
+    "stock_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "section_break_16": {
+      "type": "string"
+    },
+    "price_list_rate": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "base_price_list_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "discount_and_margin": {
+      "type": "string"
+    },
+    "margin_type": {
+      "type": "string",
+      "enum": [
+        "Percentage",
+        "Amount"
+      ]
+    },
+    "margin_rate_or_amount": {
+      "type": "number"
+    },
+    "rate_with_margin": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "column_break_18": {
+      "type": "string"
+    },
+    "discount_percentage": {
+      "type": "number"
+    },
+    "discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "base_rate_with_margin": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "section_break1": {
+      "type": "string"
+    },
+    "rate": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "net_rate": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "net_amount": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "col_break3": {
+      "type": "string"
+    },
+    "base_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_net_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_net_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "pricing_rules": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "is_free_item": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "item_weight_details": {
+      "type": "string"
+    },
+    "weight_per_unit": {
+      "type": "number",
+      "readOnly": true
+    },
+    "total_weight": {
+      "type": "number",
+      "readOnly": true
+    },
+    "column_break_20": {
+      "type": "string"
+    },
+    "weight_uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM",
+      "readOnly": true
+    },
+    "item_balance": {
+      "type": "string"
+    },
+    "warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "column_break_30": {
+      "type": "string"
+    },
+    "projected_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "actual_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "stock_balance": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "prevdoc_doctype": {
+      "type": "string",
+      "x-frappe-target-doctype": "DocType",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "prevdoc_docname": {
+      "type": "string",
+      "x-frappe-options": "prevdoc_doctype",
+      "readOnly": true
+    },
+    "item_tax_rate": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "col_break4": {
+      "type": "string"
+    },
+    "item_tax_template": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Tax Template"
+    },
+    "page_break": {
+      "type": "boolean"
+    },
+    "item_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Group",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "brand": {
+      "type": "string",
+      "x-frappe-target-doctype": "Brand",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "shopping_cart_section": {
+      "type": "string"
+    },
+    "additional_notes": {
+      "type": "string"
+    },
+    "section_break_61": {
+      "type": "string"
+    },
+    "image_section": {
+      "type": "string"
+    },
+    "blanket_order": {
+      "type": "string",
+      "x-frappe-target-doctype": "Blanket Order"
+    },
+    "blanket_order_rate": {
+      "type": "number",
+      "readOnly": true
+    },
+    "against_blanket_order": {
+      "type": "boolean"
+    },
+    "section_break_43": {
+      "type": "string"
+    },
+    "valuation_rate": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "column_break_45": {
+      "type": "string"
+    },
+    "gross_profit": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "stock_uom_rate": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "is_alternative": {
+      "type": "boolean"
+    },
+    "has_alternative_item": {
+      "type": "boolean",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "distributed_discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "available_quantity_section": {
+      "type": "string"
+    },
+    "column_break_ylrv": {
+      "type": "string"
+    },
+    "company_total_stock": {
+      "type": "number",
+      "readOnly": true
+    },
+    "ordered_qty": {
+      "type": "number",
+      "readOnly": true,
+      "writeOnly": true
+    }
+  },
+  "required": [
+    "conversion_factor",
+    "item_name",
+    "name",
+    "ordered_qty",
+    "qty",
+    "uom"
+  ],
+  "additionalProperties": true,
+  "x-module": "Selling"
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PaymentReference.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "payment_term": {
+      "type": "string",
+      "x-frappe-target-doctype": "Payment Term"
+    },
+    "section_break_fjhh": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "section_break_mjlv": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "column_break_qghl": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "currency": {
+      "type": "string",
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "column_break_lnjp": {
+      "type": "string"
+    },
+    "payment_schedule": {
+      "type": "string",
+      "x-frappe-target-doctype": "Payment Schedule",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/BankTransactionAllocation.json",
+  "type": "object",
+  "properties": {
+    "payment_document": {
+      "type": "string",
+      "enum": [
+        "Payment Entry",
+        "Journal Entry"
+      ]
+    },
+    "payment_entry": {
+      "type": "string"
+    },
+    "allocated_amount": {
+      "type": "number",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "payment_document",
+    "payment_entry"
+  ],
+  "additionalProperties": false
+}

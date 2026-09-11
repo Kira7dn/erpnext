@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/createAssetCapitalization.request.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "target_asset": {
+      "type": "string",
+      "x-frappe-target-doctype": "Asset"
+    },
+    "column_break_9": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "posting_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "posting_time": {
+      "type": "string",
+      "format": "time"
+    },
+    "set_posting_time": {
+      "type": "boolean"
+    },
+    "naming_series": {
+      "type": "string",
+      "enum": [
+        "ACC-ASC-.YYYY.-"
+      ]
+    },
+    "section_break_16": {
+      "type": "string"
+    },
+    "stock_items": {
+      "type": "array",
+      "items": {
+        "$ref": "AssetCapitalizationStockItem.json"
+      }
+    },
+    "section_break_26": {
+      "type": "string"
+    },
+    "asset_items": {
+      "type": "array",
+      "items": {
+        "$ref": "AssetCapitalizationAssetItem.json"
+      }
+    },
+    "finance_book": {
+      "type": "string",
+      "x-frappe-target-doctype": "Finance Book"
+    },
+    "service_expenses_section": {
+      "type": "string"
+    },
+    "service_items": {
+      "type": "array",
+      "items": {
+        "$ref": "AssetCapitalizationServiceItem.json"
+      }
+    },
+    "totals_section": {
+      "type": "string"
+    },
+    "column_break_36": {
+      "type": "string"
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "section_break_urtz": {
+      "type": "string"
+    },
+    "column_break_gqep": {
+      "type": "string"
+    },
+    "column_break_yvlx": {
+      "type": "string"
+    },
+    "section_break_arbh": {
+      "type": "string"
+    },
+    "column_break_boeu": {
+      "type": "string"
+    },
+    "column_break_qecy": {
+      "type": "string"
+    },
+    "section_break_ptna": {
+      "type": "string"
+    },
+    "column_break_szvh": {
+      "type": "string"
+    },
+    "column_break_katv": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company",
+    "naming_series",
+    "posting_date",
+    "posting_time"
+  ],
+  "additionalProperties": false,
+  "x-module": "Assets"
+}

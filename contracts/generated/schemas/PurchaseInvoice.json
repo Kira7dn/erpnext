@@ -1,0 +1,810 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PurchaseInvoice.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": "string",
+      "enum": [
+        "ACC-PINV-.YYYY.-",
+        "ACC-PINV-RET-.YYYY.-"
+      ]
+    },
+    "supplier": {
+      "type": "string",
+      "x-frappe-target-doctype": "Supplier"
+    },
+    "supplier_name": {
+      "type": "string",
+      "readOnly": true
+    },
+    "tax_id": {
+      "type": "string",
+      "readOnly": true
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "is_paid": {
+      "type": "boolean"
+    },
+    "is_return": {
+      "type": "boolean"
+    },
+    "apply_tds": {
+      "type": "boolean"
+    },
+    "column_break1": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "posting_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "posting_time": {
+      "type": "string",
+      "format": "time"
+    },
+    "set_posting_time": {
+      "type": "boolean"
+    },
+    "amended_from": {
+      "type": "string",
+      "x-frappe-target-doctype": "Purchase Invoice",
+      "readOnly": true
+    },
+    "sb_14": {
+      "type": "string"
+    },
+    "on_hold": {
+      "type": "boolean"
+    },
+    "release_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "cb_17": {
+      "type": "string"
+    },
+    "hold_comment": {
+      "type": "string"
+    },
+    "supplier_invoice_details": {
+      "type": "string"
+    },
+    "bill_no": {
+      "type": "string"
+    },
+    "column_break_15": {
+      "type": "string"
+    },
+    "bill_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "return_against": {
+      "type": "string",
+      "x-frappe-target-doctype": "Purchase Invoice",
+      "readOnly": true
+    },
+    "update_billed_amount_in_purchase_order": {
+      "type": "boolean"
+    },
+    "update_billed_amount_in_purchase_receipt": {
+      "type": "boolean"
+    },
+    "section_addresses": {
+      "type": "string"
+    },
+    "supplier_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "address_display": {
+      "type": "string",
+      "readOnly": true
+    },
+    "contact_person": {
+      "type": "string",
+      "x-frappe-target-doctype": "Contact"
+    },
+    "contact_display": {
+      "type": "string",
+      "readOnly": true
+    },
+    "contact_mobile": {
+      "type": "string",
+      "x-frappe-options": "Phone",
+      "readOnly": true
+    },
+    "contact_email": {
+      "type": "string",
+      "x-frappe-options": "Email",
+      "readOnly": true
+    },
+    "col_break_address": {
+      "type": "string"
+    },
+    "shipping_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "shipping_address_display": {
+      "type": "string",
+      "readOnly": true
+    },
+    "currency_and_price_list": {
+      "type": "string",
+      "x-frappe-options": "fa fa-tag"
+    },
+    "currency": {
+      "type": "string",
+      "x-frappe-target-doctype": "Currency"
+    },
+    "conversion_rate": {
+      "type": "number"
+    },
+    "column_break2": {
+      "type": "string"
+    },
+    "buying_price_list": {
+      "type": "string",
+      "x-frappe-target-doctype": "Price List"
+    },
+    "price_list_currency": {
+      "type": "string",
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true
+    },
+    "plc_conversion_rate": {
+      "type": "number"
+    },
+    "ignore_pricing_rule": {
+      "type": "boolean"
+    },
+    "sec_warehouse": {
+      "type": "string"
+    },
+    "set_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "rejected_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "col_break_warehouse": {
+      "type": "string"
+    },
+    "is_subcontracted": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "items_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-shopping-cart"
+    },
+    "update_stock": {
+      "type": "boolean"
+    },
+    "scan_barcode": {
+      "type": "string",
+      "x-frappe-options": "Barcode"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "PurchaseInvoiceItem.json"
+      }
+    },
+    "pricing_rule_details": {
+      "type": "string"
+    },
+    "pricing_rules": {
+      "type": "array",
+      "items": {
+        "$ref": "PricingRuleDetail.json"
+      },
+      "readOnly": true
+    },
+    "raw_materials_supplied": {
+      "type": "string"
+    },
+    "supplied_items": {
+      "type": "array",
+      "items": {
+        "$ref": "PurchaseReceiptItemSupplied.json"
+      }
+    },
+    "section_break_26": {
+      "type": "string"
+    },
+    "total_qty": {
+      "type": "number",
+      "readOnly": true
+    },
+    "base_total": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_net_total": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "column_break_28": {
+      "type": "string"
+    },
+    "total": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "net_total": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "total_net_weight": {
+      "type": "number",
+      "readOnly": true
+    },
+    "taxes_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-money"
+    },
+    "tax_category": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Category"
+    },
+    "column_break_49": {
+      "type": "string"
+    },
+    "shipping_rule": {
+      "type": "string",
+      "x-frappe-target-doctype": "Shipping Rule"
+    },
+    "section_break_51": {
+      "type": "string"
+    },
+    "taxes_and_charges": {
+      "type": "string",
+      "x-frappe-target-doctype": "Purchase Taxes and Charges Template"
+    },
+    "taxes": {
+      "type": "array",
+      "items": {
+        "$ref": "PurchaseTaxesandCharges.json"
+      }
+    },
+    "sec_tax_breakup": {
+      "type": "string"
+    },
+    "other_charges_calculation": {
+      "type": "string",
+      "readOnly": true
+    },
+    "totals": {
+      "type": "string",
+      "x-frappe-options": "fa fa-money"
+    },
+    "base_taxes_and_charges_added": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_taxes_and_charges_deducted": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_total_taxes_and_charges": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "column_break_40": {
+      "type": "string"
+    },
+    "taxes_and_charges_added": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "taxes_and_charges_deducted": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "total_taxes_and_charges": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "section_break_44": {
+      "type": "string"
+    },
+    "apply_discount_on": {
+      "type": "string",
+      "enum": [
+        "Grand Total",
+        "Net Total"
+      ]
+    },
+    "base_discount_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "column_break_46": {
+      "type": "string"
+    },
+    "additional_discount_percentage": {
+      "type": "number"
+    },
+    "discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "base_grand_total": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_rounding_adjustment": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_rounded_total": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_in_words": {
+      "type": "string",
+      "readOnly": true
+    },
+    "column_break8": {
+      "type": "string"
+    },
+    "grand_total": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "rounding_adjustment": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "rounded_total": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "in_words": {
+      "type": "string",
+      "readOnly": true
+    },
+    "total_advance": {
+      "type": "number",
+      "x-frappe-options": "party_account_currency",
+      "readOnly": true
+    },
+    "outstanding_amount": {
+      "type": "number",
+      "x-frappe-options": "party_account_currency",
+      "readOnly": true
+    },
+    "disable_rounded_total": {
+      "type": "boolean"
+    },
+    "payments_section": {
+      "type": "string"
+    },
+    "mode_of_payment": {
+      "type": "string",
+      "x-frappe-target-doctype": "Mode of Payment"
+    },
+    "cash_bank_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "clearance_date": {
+      "type": "string",
+      "format": "date",
+      "readOnly": true
+    },
+    "col_br_payments": {
+      "type": "string"
+    },
+    "paid_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "base_paid_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "write_off": {
+      "type": "string"
+    },
+    "write_off_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "base_write_off_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "column_break_61": {
+      "type": "string"
+    },
+    "write_off_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "write_off_cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "advances_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-money"
+    },
+    "allocate_advances_automatically": {
+      "type": "boolean"
+    },
+    "get_advances": {
+      "type": "string",
+      "x-frappe-options": "set_advances"
+    },
+    "advances": {
+      "type": "array",
+      "items": {
+        "$ref": "PurchaseInvoiceAdvance.json"
+      }
+    },
+    "payment_schedule_section": {
+      "type": "string"
+    },
+    "payment_terms_template": {
+      "type": "string",
+      "x-frappe-target-doctype": "Payment Terms Template"
+    },
+    "payment_schedule": {
+      "type": "array",
+      "items": {
+        "$ref": "PaymentSchedule.json"
+      }
+    },
+    "terms_section_break": {
+      "type": "string",
+      "x-frappe-options": "fa fa-legal"
+    },
+    "tc_name": {
+      "type": "string",
+      "x-frappe-target-doctype": "Terms and Conditions"
+    },
+    "terms": {
+      "type": "string"
+    },
+    "printing_settings": {
+      "type": "string"
+    },
+    "letter_head": {
+      "type": "string",
+      "x-frappe-target-doctype": "Letter Head"
+    },
+    "group_same_items": {
+      "type": "boolean"
+    },
+    "column_break_112": {
+      "type": "string"
+    },
+    "select_print_heading": {
+      "type": "string",
+      "x-frappe-target-doctype": "Print Heading"
+    },
+    "language": {
+      "type": "string",
+      "readOnly": true
+    },
+    "is_internal_supplier": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "credit_to": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "party_account_currency": {
+      "type": "string",
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "is_opening": {
+      "type": "string",
+      "enum": [
+        "No",
+        "Yes"
+      ]
+    },
+    "against_expense_account": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "column_break_63": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Return",
+        "Debit Note Issued",
+        "Submitted",
+        "Paid",
+        "Partly Paid",
+        "Unpaid",
+        "Overdue",
+        "Cancelled",
+        "Internal Transfer"
+      ]
+    },
+    "inter_company_invoice_reference": {
+      "type": "string",
+      "x-frappe-target-doctype": "Sales Invoice",
+      "readOnly": true
+    },
+    "remarks": {
+      "type": "string"
+    },
+    "subscription_section": {
+      "type": "string"
+    },
+    "from_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "to_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "column_break_114": {
+      "type": "string"
+    },
+    "auto_repeat": {
+      "type": "string",
+      "x-frappe-target-doctype": "Auto Repeat",
+      "readOnly": true
+    },
+    "update_auto_repeat_reference": {
+      "type": "string"
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "billing_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "billing_address_display": {
+      "type": "string",
+      "readOnly": true
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "unrealized_profit_loss_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "represents_company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company",
+      "readOnly": true
+    },
+    "set_from_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "supplier_warehouse": {
+      "type": "string",
+      "x-frappe-target-doctype": "Warehouse"
+    },
+    "per_received": {
+      "type": "number",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "ignore_default_payment_terms_template": {
+      "type": "boolean",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "accounting_details_section": {
+      "type": "string"
+    },
+    "column_break_147": {
+      "type": "string"
+    },
+    "subscription": {
+      "type": "string",
+      "x-frappe-target-doctype": "Subscription"
+    },
+    "is_old_subcontracting_flow": {
+      "type": "boolean",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "payments_tab": {
+      "type": "string"
+    },
+    "address_and_contact_tab": {
+      "type": "string"
+    },
+    "terms_tab": {
+      "type": "string"
+    },
+    "more_info_tab": {
+      "type": "string"
+    },
+    "connections_tab": {
+      "type": "string"
+    },
+    "column_break_6": {
+      "type": "string"
+    },
+    "column_break_50": {
+      "type": "string"
+    },
+    "column_break_58": {
+      "type": "string"
+    },
+    "company_shipping_address_section": {
+      "type": "string"
+    },
+    "column_break_126": {
+      "type": "string"
+    },
+    "company_billing_address_section": {
+      "type": "string"
+    },
+    "column_break_130": {
+      "type": "string"
+    },
+    "status_section": {
+      "type": "string"
+    },
+    "column_break_177": {
+      "type": "string"
+    },
+    "additional_info_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-file-text"
+    },
+    "incoterm": {
+      "type": "string",
+      "x-frappe-target-doctype": "Incoterm"
+    },
+    "named_place": {
+      "type": "string"
+    },
+    "only_include_allocated_payments": {
+      "type": "boolean"
+    },
+    "use_company_roundoff_cost_center": {
+      "type": "boolean"
+    },
+    "use_transaction_date_exchange_rate": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "supplier_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Supplier Group"
+    },
+    "update_outstanding_for_self": {
+      "type": "boolean"
+    },
+    "sender": {
+      "type": "string",
+      "x-frappe-options": "Email"
+    },
+    "dispatch_address_display": {
+      "type": "string",
+      "readOnly": true
+    },
+    "dispatch_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "last_scanned_warehouse": {
+      "type": "string"
+    },
+    "claimed_landed_cost_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "item_wise_tax_details": {
+      "type": "array",
+      "items": {
+        "$ref": "ItemWiseTaxDetail.json"
+      },
+      "writeOnly": true
+    },
+    "section_tax_withholding_entry": {
+      "type": "string"
+    },
+    "tax_withholding_group": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Withholding Group"
+    },
+    "tax_withholding_entries": {
+      "type": "array",
+      "items": {
+        "$ref": "TaxWithholdingEntry.json"
+      }
+    },
+    "ignore_tax_withholding_threshold": {
+      "type": "boolean"
+    },
+    "override_tax_withholding_entries": {
+      "type": "boolean"
+    },
+    "column_break_hcca": {
+      "type": "string"
+    },
+    "section_break_ttrv": {
+      "type": "string"
+    },
+    "column_break_peap": {
+      "type": "string"
+    },
+    "base_totals_section": {
+      "type": "string"
+    },
+    "totals_section": {
+      "type": "string"
+    },
+    "automation_section": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "credit_to",
+    "items",
+    "name",
+    "naming_series",
+    "posting_date",
+    "supplier"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

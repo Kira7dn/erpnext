@@ -1,4 +1,5 @@
 
+import json
 import uuid
 from threading import Lock
 from typing import Any, cast
@@ -107,6 +108,11 @@ CUSTOM_ACTIONS = {
     ("accounts", "bank-transactions", "unreconcile"): "letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction",
     ("accounts", "bank-transaction-rules", "run-evaluation"): "letron_api.finance.banking.run_rule_evaluation",
 }
+# Shared by route authorization and policy materialization. Dependencies are
+# intentionally read-only and never imply create/write/delete permissions.
+PUBLIC_PERMISSION_DEPENDENCIES = {
+    ("stock", "purchase-receipts"): {"Account"},
+}
 
 VIRTUAL_BANKING_ROUTES = {
     ("accounts", "bank-reconciliation", "transactions"): "letron_api.finance.banking.reconciliation_transactions",
@@ -187,6 +193,13 @@ def rewrite_public_routes() -> None:
     parts = path.strip("/").split("/")
     if len(parts) not in {3, 4, 5, 6} or parts[:2] != ["api", "v1"]:
         return
+    frappe.local.letron_public_path = path
+    if request.method in {"POST", "PUT", "PATCH"} and request.mimetype == "application/json":
+        from letron_api.contract_runtime import validate_request
+        try:
+            validate_request(request.method, path, request.get_data(cache=True))
+        except ValueError as exc:
+            frappe.throw(str(exc), exc=frappe.ValidationError)
     target_method = _virtual_attachment_target(parts)
     if target_method:
         if frappe.session.user in {"Guest", ""}:
@@ -206,7 +219,7 @@ def rewrite_public_routes() -> None:
             request.environ["PATH_INFO"] = target
             request.__dict__["path"] = target
             return
-        return
+        frappe.throw("Unknown public API route", exc=frappe.DoesNotExistError)
     if frappe.session.user in {"Guest", ""}:
         frappe.throw("Authentication required", exc=frappe.AuthenticationError)
     cache_key = (module_slug, doctype_slug)
@@ -223,7 +236,7 @@ def rewrite_public_routes() -> None:
         document_action = action in DOCUMENT_ACTIONS.get((module_slug, doctype_slug), set())
         custom_action = (module_slug, doctype_slug, action) in CUSTOM_ACTIONS
         if not document_action and not custom_action:
-            return
+            frappe.throw("Unknown public API action", exc=frappe.DoesNotExistError)
         from urllib.parse import urlencode
 
         target = (
@@ -280,6 +293,16 @@ def add_request_headers(response=None, request=None) -> None:
     if response is None:
         return
     import frappe
+
+    public_path = getattr(frappe.local, "letron_public_path", None)
+    if public_path and response.status_code < 400 and response.is_json:
+        from letron_api.contract_runtime import validate_response
+        try:
+            validate_response(request.method if request is not None else frappe.local.request.method, public_path, response.get_json())
+        except ValueError as exc:
+            response.status_code = 500
+            response.set_data(json.dumps({"error": "schema_validation_failed", "message": str(exc)}, ensure_ascii=False))
+            response.headers["Content-Type"] = "application/json"
 
     request_id = getattr(frappe.local, "letron_request_id", None)
     if request_id:

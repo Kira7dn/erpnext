@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/SalesTaxesandCharges.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "charge_type": {
+      "type": "string",
+      "enum": [
+        "Actual",
+        "On Net Total",
+        "On Previous Row Amount",
+        "On Previous Row Total",
+        "On Item Quantity"
+      ]
+    },
+    "row_id": {
+      "type": "string"
+    },
+    "account_head": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "col_break_1": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "included_in_print_rate": {
+      "type": "boolean"
+    },
+    "section_break_8": {
+      "type": "string"
+    },
+    "rate": {
+      "type": "number"
+    },
+    "section_break_9": {
+      "type": "string"
+    },
+    "tax_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "total": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "tax_amount_after_discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "column_break_13": {
+      "type": "string"
+    },
+    "base_tax_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_total": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_tax_amount_after_discount_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "included_in_paid_amount": {
+      "type": "boolean"
+    },
+    "dont_recompute_tax": {
+      "type": "boolean",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "account_currency": {
+      "type": "string",
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true
+    },
+    "net_amount": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "base_net_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "set_by_item_tax_template": {
+      "type": "boolean",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "is_tax_withholding_account": {
+      "type": "boolean",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "account_head",
+    "charge_type",
+    "description",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

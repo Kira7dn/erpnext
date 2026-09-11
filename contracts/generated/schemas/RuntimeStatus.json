@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/RuntimeStatus.json",
+  "type": "object",
+  "properties": {
+    "ok": {
+      "type": "boolean"
+    },
+    "status": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer"
+    },
+    "erpnext_version": {
+      "type": "string"
+    },
+    "sha256": {
+      "type": "string"
+    },
+    "drift_count": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "ok"
+  ]
+}

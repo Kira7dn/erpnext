@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PricingRuleDetail.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "pricing_rule": {
+      "type": "string",
+      "x-frappe-target-doctype": "Pricing Rule",
+      "readOnly": true
+    },
+    "item_code": {
+      "type": "string",
+      "readOnly": true
+    },
+    "margin_type": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "rate_or_discount": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "child_docname": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "rule_applied": {
+      "type": "boolean",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

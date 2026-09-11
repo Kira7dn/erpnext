@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ShipmentDeliveryNote.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "delivery_note": {
+      "type": "string",
+      "x-frappe-target-doctype": "Delivery Note"
+    },
+    "grand_total": {
+      "type": "number",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "delivery_note",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

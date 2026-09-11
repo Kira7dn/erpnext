@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ItemTax.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "item_tax_template": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item Tax Template"
+    },
+    "tax_category": {
+      "type": "string",
+      "x-frappe-target-doctype": "Tax Category"
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date"
+    },
+    "maximum_net_rate": {
+      "type": "number"
+    },
+    "minimum_net_rate": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "item_tax_template",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

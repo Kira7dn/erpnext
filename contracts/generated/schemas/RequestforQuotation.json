@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/RequestforQuotation.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": "string",
+      "enum": [
+        "PUR-RFQ-.YYYY.-"
+      ]
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "vendor": {
+      "type": "string",
+      "x-frappe-target-doctype": "Supplier",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "column_break1": {
+      "type": "string"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "suppliers_section": {
+      "type": "string"
+    },
+    "suppliers": {
+      "type": "array",
+      "items": {
+        "$ref": "RequestforQuotationSupplier.json"
+      }
+    },
+    "items_section": {
+      "type": "string",
+      "x-frappe-options": "fa fa-shopping-cart"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "RequestforQuotationItem.json"
+      }
+    },
+    "supplier_response_section": {
+      "type": "string"
+    },
+    "email_template": {
+      "type": "string",
+      "x-frappe-target-doctype": "Email Template"
+    },
+    "message_for_supplier": {
+      "type": "string"
+    },
+    "terms_section_break": {
+      "type": "string",
+      "x-frappe-options": "fa fa-legal"
+    },
+    "tc_name": {
+      "type": "string",
+      "x-frappe-target-doctype": "Terms and Conditions"
+    },
+    "terms": {
+      "type": "string"
+    },
+    "printing_settings": {
+      "type": "string"
+    },
+    "select_print_heading": {
+      "type": "string",
+      "x-frappe-target-doctype": "Print Heading"
+    },
+    "letter_head": {
+      "type": "string",
+      "x-frappe-target-doctype": "Letter Head"
+    },
+    "more_info": {
+      "type": "string",
+      "x-frappe-options": "fa fa-file-text"
+    },
+    "opportunity": {
+      "type": "string",
+      "x-frappe-target-doctype": "Opportunity",
+      "readOnly": true
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Submitted",
+        "Cancelled"
+      ],
+      "readOnly": true
+    },
+    "amended_from": {
+      "type": "string",
+      "x-frappe-target-doctype": "Request for Quotation",
+      "readOnly": true
+    },
+    "col_break_email_1": {
+      "type": "string"
+    },
+    "preview": {
+      "type": "string"
+    },
+    "sec_break_email_2": {
+      "type": "string"
+    },
+    "schedule_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "incoterm": {
+      "type": "string",
+      "x-frappe-target-doctype": "Incoterm"
+    },
+    "named_place": {
+      "type": "string"
+    },
+    "html_llwp": {
+      "type": "string",
+      "x-frappe-options": "<p>In your <b>Email Template</b>, you can use the following special variables:\n</p>\n<ul>\n        <li>\n            <code>{{ update_password_link }}</code>: A link where your supplier can set a new password to log into your portal.\n        </li>\n        <li>\n            <code>{{ portal_link }}</code>: A link to this RFQ in your supplier portal.\n        </li>\n        <li>\n            <code>{{ supplier_name }}</code>: The company name of your supplier.\n        </li>\n        <li>\n            <code>{{ contact.salutation }} {{ contact.last_name }}</code>: The contact person of your supplier.\n        </li><li>\n            <code>{{ user_fullname }}</code>: Your full name.\n        </li>\n    </ul>\n<p></p>\n<p>Apart from these, you can access all values in this RFQ, like <code>{{ message_for_supplier }}</code> or <code>{{ terms }}</code>.</p>",
+      "readOnly": true
+    },
+    "send_attached_files": {
+      "type": "boolean"
+    },
+    "send_document_print": {
+      "type": "boolean"
+    },
+    "billing_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "billing_address_display": {
+      "type": "string",
+      "readOnly": true
+    },
+    "has_unit_price_items": {
+      "type": "boolean",
+      "writeOnly": true
+    },
+    "subject": {
+      "type": "string"
+    },
+    "mfs_html": {
+      "type": "string"
+    },
+    "use_html": {
+      "type": "boolean",
+      "writeOnly": true
+    },
+    "address_and_contact_tab": {
+      "type": "string"
+    },
+    "column_break_czul": {
+      "type": "string"
+    },
+    "shipping_address": {
+      "type": "string",
+      "x-frappe-target-doctype": "Address"
+    },
+    "shipping_address_display": {
+      "type": "string",
+      "readOnly": true
+    },
+    "title": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company",
+    "items",
+    "name",
+    "naming_series",
+    "status",
+    "subject",
+    "suppliers",
+    "transaction_date"
+  ],
+  "additionalProperties": true,
+  "x-module": "Buying"
+}

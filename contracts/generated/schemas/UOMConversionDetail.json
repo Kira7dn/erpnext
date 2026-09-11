@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/UOMConversionDetail.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "uom": {
+      "type": "string",
+      "x-frappe-target-doctype": "UOM"
+    },
+    "conversion_factor": {
+      "type": "number"
+    },
+    "column_break_nmeg": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "uom"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

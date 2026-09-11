@@ -192,6 +192,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -308,10 +309,9 @@
                   "address_line1",
                   "address_type",
                   "city",
-                  "country",
-                  "name"
+                  "country"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Contacts"
               },
               "example": {
@@ -423,6 +423,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -550,6 +551,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -672,10 +674,9 @@
                   "address_line1",
                   "address_type",
                   "city",
-                  "country",
-                  "name"
+                  "country"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "x-module": "Contacts"
               }
             }
@@ -781,6 +782,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -901,6 +903,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1066,6 +1069,7 @@
             }
           }
         },
+        "x-public-operation": "list",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1200,10 +1204,8 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "name"
-                ],
-                "additionalProperties": true,
+                "required": [],
+                "additionalProperties": false,
                 "x-module": "Contacts"
               },
               "example": {}
@@ -1310,6 +1312,7 @@
             }
           }
         },
+        "x-public-operation": "create",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1437,6 +1440,7 @@
             }
           }
         },
+        "x-public-operation": "read",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1577,10 +1581,8 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "name"
-                ],
-                "additionalProperties": true,
+                "required": [],
+                "additionalProperties": false,
                 "x-module": "Contacts"
               }
             }
@@ -1686,6 +1688,7 @@
             }
           }
         },
+        "x-public-operation": "update",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -1806,6 +1809,7 @@
             }
           }
         },
+        "x-public-operation": "delete",
         "x-test-status": "passed",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
@@ -2396,6 +2400,11 @@
         "Selling",
         "Stock"
       ],
+      "permission_dependencies": {
+        "stock/purchase-receipts": [
+          "Account"
+        ]
+      },
       "document_actions": [
         {
           "doctype": "Asset",

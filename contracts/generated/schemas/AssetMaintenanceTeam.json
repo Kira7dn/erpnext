@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/AssetMaintenanceTeam.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "maintenance_team_name": {
+      "type": "string"
+    },
+    "maintenance_manager": {
+      "type": "string",
+      "x-frappe-target-doctype": "User"
+    },
+    "maintenance_manager_name": {
+      "type": "string"
+    },
+    "column_break_2": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "section_break_2": {
+      "type": "string"
+    },
+    "maintenance_team_members": {
+      "type": "array",
+      "items": {
+        "$ref": "MaintenanceTeamMember.json"
+      }
+    }
+  },
+  "required": [
+    "company",
+    "maintenance_team_members",
+    "maintenance_team_name",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Assets"
+}

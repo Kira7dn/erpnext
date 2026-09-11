@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/QualityInspection.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "naming_series": {
+      "type": "string",
+      "enum": [
+        "MAT-QA-.YYYY.-"
+      ]
+    },
+    "report_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "column_break_4": {
+      "type": "string"
+    },
+    "inspection_type": {
+      "type": "string",
+      "enum": [
+        "Incoming",
+        "Outgoing",
+        "In Process"
+      ]
+    },
+    "reference_type": {
+      "type": "string",
+      "enum": [
+        "Purchase Receipt",
+        "Purchase Invoice",
+        "Subcontracting Receipt",
+        "Delivery Note",
+        "Sales Invoice",
+        "Stock Entry",
+        "Job Card"
+      ]
+    },
+    "reference_name": {
+      "type": "string",
+      "x-frappe-options": "reference_type"
+    },
+    "section_break_7": {
+      "type": "string"
+    },
+    "item_code": {
+      "type": "string",
+      "x-frappe-target-doctype": "Item"
+    },
+    "item_serial_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Serial No"
+    },
+    "batch_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "Batch"
+    },
+    "sample_size": {
+      "type": "number"
+    },
+    "column_break1": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string",
+      "readOnly": true
+    },
+    "description": {
+      "type": "string"
+    },
+    "section_break_14": {
+      "type": "string"
+    },
+    "inspected_by": {
+      "type": "string",
+      "x-frappe-target-doctype": "User"
+    },
+    "verified_by": {
+      "type": "string"
+    },
+    "bom_no": {
+      "type": "string",
+      "x-frappe-target-doctype": "BOM",
+      "readOnly": true
+    },
+    "column_break_17": {
+      "type": "string"
+    },
+    "remarks": {
+      "type": "string"
+    },
+    "amended_from": {
+      "type": "string",
+      "x-frappe-target-doctype": "Quality Inspection",
+      "readOnly": true
+    },
+    "specification_details": {
+      "type": "string",
+      "x-frappe-options": "Simple"
+    },
+    "quality_inspection_template": {
+      "type": "string",
+      "x-frappe-target-doctype": "Quality Inspection Template"
+    },
+    "readings": {
+      "type": "array",
+      "items": {
+        "$ref": "QualityInspectionReading.json"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Accepted",
+        "Rejected",
+        "Cancelled"
+      ]
+    },
+    "manual_inspection": {
+      "type": "boolean"
+    },
+    "child_row_reference": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "company": {
+      "type": "string",
+      "x-frappe-target-doctype": "Company"
+    },
+    "print_settings_section": {
+      "type": "string"
+    },
+    "letter_head": {
+      "type": "string",
+      "x-frappe-target-doctype": "Letter Head"
+    }
+  },
+  "required": [
+    "inspected_by",
+    "inspection_type",
+    "item_code",
+    "name",
+    "naming_series",
+    "reference_name",
+    "reference_type",
+    "report_date",
+    "sample_size",
+    "status"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PurchaseTaxesandCharges.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Valuation and Total",
+        "Valuation",
+        "Total"
+      ]
+    },
+    "add_deduct_tax": {
+      "type": "string",
+      "enum": [
+        "Add",
+        "Deduct"
+      ]
+    },
+    "charge_type": {
+      "type": "string",
+      "enum": [
+        "Actual",
+        "On Net Total",
+        "On Previous Row Amount",
+        "On Previous Row Total",
+        "On Item Quantity"
+      ]
+    },
+    "row_id": {
+      "type": "string"
+    },
+    "allocate_full_amount_to_stock_items": {
+      "type": "boolean"
+    },
+    "included_in_print_rate": {
+      "type": "boolean"
+    },
+    "col_break1": {
+      "type": "string"
+    },
+    "account_head": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "cost_center": {
+      "type": "string",
+      "x-frappe-target-doctype": "Cost Center"
+    },
+    "description": {
+      "type": "string"
+    },
+    "section_break_10": {
+      "type": "string"
+    },
+    "rate": {
+      "type": "number"
+    },
+    "section_break_9": {
+      "type": "string"
+    },
+    "tax_amount": {
+      "type": "number",
+      "x-frappe-options": "currency"
+    },
+    "tax_amount_after_discount_amount": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "total": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "column_break_14": {
+      "type": "string"
+    },
+    "base_tax_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "base_total": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "writeOnly": true
+    },
+    "base_tax_amount_after_discount_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "accounting_dimensions_section": {
+      "type": "string"
+    },
+    "dimension_col_break": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "x-frappe-target-doctype": "Project"
+    },
+    "included_in_paid_amount": {
+      "type": "boolean"
+    },
+    "account_currency": {
+      "type": "string",
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true
+    },
+    "is_tax_withholding_account": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "net_amount": {
+      "type": "number",
+      "x-frappe-options": "currency",
+      "readOnly": true
+    },
+    "base_net_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "set_by_item_tax_template": {
+      "type": "boolean",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "dont_recompute_tax": {
+      "type": "boolean",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "section_break_mvae": {
+      "type": "string"
+    },
+    "column_break_odzz": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_head",
+    "add_deduct_tax",
+    "category",
+    "charge_type",
+    "description",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Accounts"
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/LandedCostTaxesandCharges.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "col_break3": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "x-frappe-options": "account_currency"
+    },
+    "expense_account": {
+      "type": "string",
+      "x-frappe-target-doctype": "Account"
+    },
+    "account_currency": {
+      "type": "string",
+      "x-frappe-target-doctype": "Currency",
+      "readOnly": true
+    },
+    "exchange_rate": {
+      "type": "number"
+    },
+    "base_amount": {
+      "type": "number",
+      "x-frappe-options": "Company:company:default_currency",
+      "readOnly": true
+    },
+    "has_corrective_cost": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "has_operating_cost": {
+      "type": "boolean",
+      "readOnly": true
+    },
+    "operation_id": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "qty": {
+      "type": "number",
+      "readOnly": true,
+      "writeOnly": true
+    },
+    "operating_component": {
+      "type": "string",
+      "readOnly": true,
+      "writeOnly": true
+    }
+  },
+  "required": [
+    "amount",
+    "description",
+    "name"
+  ],
+  "additionalProperties": true,
+  "x-module": "Stock"
+}

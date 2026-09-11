@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/FrappeError.json",
+  "type": "object",
+  "properties": {
+    "exc_type": {
+      "type": "string"
+    },
+    "exception": {
+      "type": "string"
+    },
+    "_server_messages": {
+      "type": "string"
+    },
+    "request_id": {
+      "type": "string"
+    }
+  }
+}

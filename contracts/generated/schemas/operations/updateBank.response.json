@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/updateBank.response.json",
+  "type": "object",
+  "properties": {
+    "data": {
+      "$ref": "Bank.json"
+    }
+  },
+  "required": [
+    "data"
+  ]
+}

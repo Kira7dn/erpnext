@@ -95,6 +95,7 @@ paths:
         '500': &id011
           description: Server or rollback failure
           content: *id001
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -309,9 +310,8 @@ paths:
                 utm_analytics_section: &id091
                   type: string
               required:
-              - name
               - status
-              additionalProperties: true
+              additionalProperties: false
               x-module: CRM
             example:
               status: ''
@@ -334,6 +334,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -370,6 +371,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -411,6 +413,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -436,6 +439,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -478,6 +482,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: list
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -696,13 +701,12 @@ paths:
                   type: string
               required:
               - company
-              - name
               - naming_series
               - opportunity_from
               - party_name
               - status
               - transaction_date
-              additionalProperties: true
+              additionalProperties: false
               x-module: CRM
             example:
               naming_series: ''
@@ -730,6 +734,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: create
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -766,6 +771,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: read
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -807,6 +813,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: update
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -832,6 +839,7 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
+      x-public-operation: delete
       x-test-status: passed
       x-test-level: docker-runtime
       x-test-evidence:
@@ -1333,6 +1341,9 @@ x-contract:
     - Contacts
     - Selling
     - Stock
+    permission_dependencies:
+      stock/purchase-receipts:
+      - Account
     document_actions:
     - doctype: Asset
       module: Assets
