@@ -69,7 +69,11 @@ function forwardedHeaders(
   const encodedRoles = Buffer.from(JSON.stringify(roles), "utf8").toString(
     "base64url",
   );
-  const payload = `${timestamp}.${expires}.${method}.${path}.${query}.${bodyHash}.${user.id}.${user.email}.${user.tenantKey ?? ""}.${user.subject ?? ""}.${user.subjectType ?? ""}.${version}.${encodedRoles}.${requestId}`;
+  // Keep this order identical to letron_api.auth.gateway._signature_payload.
+  // Query/body claims were appended to the existing contract; inserting them
+  // before the identity claims makes every downstream ERP request fail HMAC
+  // verification with "Invalid gateway authorization".
+  const payload = `${timestamp}.${expires}.${method}.${path}.${user.id}.${user.email}.${user.tenantKey ?? ""}.${user.subject ?? ""}.${user.subjectType ?? ""}.${version}.${encodedRoles}.${requestId}.${query}.${bodyHash}`;
   const signature = createHmac("sha256", secret).update(payload).digest("hex");
   const headers: Record<string, string> = {
     "X-Letron-Gateway-Timestamp": timestamp,
