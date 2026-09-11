@@ -17,7 +17,13 @@ function parseEnv(content) {
 }
 
 async function loadEnv(file, override) {
-  const content = await readFile(resolve(root, file), "utf8");
+  let content;
+  try {
+    content = await readFile(resolve(root, file), "utf8");
+  } catch (error) {
+    if (error?.code === "ENOENT") return;
+    throw error;
+  }
   for (const [key, value] of parseEnv(content)) {
     if (value && (override || !process.env[key])) process.env[key] = value;
   }
