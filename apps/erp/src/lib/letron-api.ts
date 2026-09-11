@@ -230,11 +230,7 @@ export class GatewayAuthenticationRequiredError extends ApiRequestError {
 
 export class GatewayAccessDeniedError extends ApiRequestError {
   constructor() {
-    super(
-      "access_denied",
-      "Tài khoản hiện tại chưa được cấp quyền cho phân hệ này.",
-      403,
-    );
+    super("access_denied", "Tài khoản hiện tại chưa được cấp quyền cho phân hệ này.", 403);
   }
 }
 
@@ -360,9 +356,7 @@ export async function gatewayRequest<T>(
 ): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
-  const bffCookie = cookieHeader.match(
-    /(?:^|;\s*)__Host-letron_erp_v2=([^;]+)/,
-  )?.[1];
+  const bffCookie = cookieHeader.match(/(?:^|;\s*)__Host-letron_erp=([^;]+)/)?.[1];
   if (bffCookie) {
     headers.set("X-Letron-BFF-Session", decodeURIComponent(bffCookie));
   } else if (/^Bearer\s+\S+$/i.test(cookieHeader)) {

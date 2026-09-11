@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  ERP_SESSION_COOKIE,
-  getErpSession,
-  LEGACY_ERP_SESSION_COOKIE,
-} from "@/lib/erp-auth-session";
+import { ERP_SESSION_COOKIE, getErpSession } from "@/lib/erp-auth-session";
 import { portalAppBaseUrl, portalAuthBaseUrl } from "@/lib/portal-config";
 
 function safeReturnTo(request: NextRequest): string {
@@ -41,14 +37,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     ),
   );
   nextResponse.cookies.set(ERP_SESSION_COOKIE, "", {
-    expires: new Date(0),
-    maxAge: 0,
-    httpOnly: true,
-    sameSite: "lax",
-    secure: true,
-    path: "/",
-  });
-  nextResponse.cookies.set(LEGACY_ERP_SESSION_COOKIE, "", {
     expires: new Date(0),
     maxAge: 0,
     httpOnly: true,
