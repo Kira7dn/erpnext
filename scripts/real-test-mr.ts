@@ -284,10 +284,13 @@ const apiAuth = { Authorization: `Bearer ${apiKey}` };
 const session = await request(`${portalBaseUrl}/api/internal/test-session`, {
   method: "POST",
   headers: apiAuth,
+  body: JSON.stringify({ app: "purchase" }),
 });
 if (session.status !== 200) throw new Error(`test-session failed (${session.status}): ${session.raw}`);
-if (!session.cookie) throw new Error("test-session did not return a session cookie");
-const auth = { Cookie: session.cookie };
+const sessionData = object(apiData(session.body));
+const appSession = text(sessionData.app_session);
+if (!appSession) throw new Error("test-session did not return a purchase app session");
+const auth = { Cookie: `__Host-letron_purchase_session=${appSession}` };
 
 for (const supplier of suppliers) await ensureSupplier(auth, supplier);
 await ensureTestItem(auth);
