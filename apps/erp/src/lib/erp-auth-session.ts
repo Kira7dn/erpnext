@@ -2,7 +2,8 @@ import "server-only";
 
 import { cookies } from "next/headers";
 
-export const ERP_SESSION_COOKIE = "__Host-letron_erp";
+export const ERP_SESSION_COOKIE = "__Host-letron_erp_v2";
+export const LEGACY_ERP_SESSION_COOKIE = "__Host-letron_erp";
 
 export type ErpSession = { gatewaySession: string; token: string };
 

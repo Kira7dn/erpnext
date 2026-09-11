@@ -120,24 +120,9 @@ export default async function handler(
   const bffSession = typeof req.headers["x-letron-bff-session"] === "string"
     ? req.headers["x-letron-bff-session"]
     : undefined;
-  const gatewayUser = await getUserByGatewaySessionToken(bffSession);
-  const ssoUser = gatewayUser
-    ? null
-    : await getUserBySessionToken(tokenFromRequest(req));
-  const testUser = gatewayUser || ssoUser
-    ? null
-    : await authenticateTestCredential(req);
-  const authSource = gatewayUser
-    ? "gateway_session"
-    : ssoUser
-      ? "sso_session"
-      : testUser
-        ? "test_credential"
-        : "none";
-  console.info(
-    `[gateway-auth] session_header_present=${bffSession ? "true" : "false"} gateway_session_found=${gatewayUser ? "true" : "false"} auth_source=${authSource}`,
-  );
-  let user = gatewayUser ?? ssoUser ?? testUser;
+  let user = (await getUserByGatewaySessionToken(bffSession))
+    ?? (await getUserBySessionToken(tokenFromRequest(req)))
+    ?? (await authenticateTestCredential(req));
   timings.session = duration(sessionStartedAt);
   if (!user) {
     finish();
