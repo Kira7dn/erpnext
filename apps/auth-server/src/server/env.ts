@@ -7,7 +7,7 @@ let loadedFiles = false;
 
 export const AUTH_FEATURE_CONFIG = {
   larkGroupSyncEnabled: true,
-  groupSyncStaleSeconds: 600,
+  groupSyncStaleSeconds: 60,
   sessionTtlSeconds: 28800,
   sessionCacheTtlSeconds: 30,
   policyCacheTtlSeconds: 30,

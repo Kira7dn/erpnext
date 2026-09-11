@@ -28,6 +28,8 @@ def _signature_payload(headers: Any) -> str:
             "X-Letron-Gateway-Policy-Version",
             "X-Letron-Gateway-Roles",
             "X-Letron-Gateway-Request-Id",
+            "X-Letron-Gateway-Query",
+            "X-Letron-Gateway-Body-Sha256",
         )
     )
 
@@ -39,6 +41,8 @@ def verify_gateway_request() -> str:
     expires_at = headers.get("X-Letron-Gateway-Expires-At", "")
     signature = headers.get("X-Letron-Gateway-Signature", "")
     path = headers.get("X-Letron-Gateway-Path", "")
+    query = headers.get("X-Letron-Gateway-Query", "")
+    body_hash = headers.get("X-Letron-Gateway-Body-Sha256", "")
     if not secret or not timestamp or not expires_at or not signature or not path.startswith("/api/v1/"):
         frappe.throw("Gateway authorization required", exc=frappe.AuthenticationError)
     try:
@@ -54,12 +58,26 @@ def verify_gateway_request() -> str:
         frappe.throw("Invalid gateway authorization", exc=frappe.AuthenticationError)
     if headers.get("X-Letron-Gateway-Method", "") != frappe.local.request.method:
         frappe.throw("Gateway method mismatch", exc=frappe.AuthenticationError)
+    if path != frappe.local.request.path:
+        frappe.throw("Gateway path mismatch", exc=frappe.AuthenticationError)
+    actual_query = frappe.local.request.query_string.decode("utf-8") if frappe.local.request.query_string else ""
+    if query != (f"?{actual_query}" if actual_query else ""):
+        frappe.throw("Gateway query mismatch", exc=frappe.AuthenticationError)
+    actual_body_hash = hashlib.sha256(frappe.local.request.get_data(cache=True)).hexdigest() if frappe.local.request.method not in {"GET", "HEAD"} else ""
+    if not hmac.compare_digest(body_hash, actual_body_hash):
+        frappe.throw("Gateway body mismatch", exc=frappe.AuthenticationError)
     email = headers.get("X-Letron-Gateway-Email", "").strip().lower()
     tenant = headers.get("X-Letron-Gateway-Tenant", "").strip()
     subject = headers.get("X-Letron-Gateway-Subject", "").strip()
     subject_type = headers.get("X-Letron-Gateway-Subject-Type", "").strip()
     if not email or not tenant or not subject or subject_type != "union_id" or not headers.get("X-Letron-Gateway-User", "").strip() or not headers.get("X-Letron-Gateway-Request-Id", "").strip():
         frappe.throw("Gateway identity missing", exc=frappe.AuthenticationError)
+    cache = cast(Any, frappe.cache)()
+    replay_key = f"letron:gateway:request:{headers.get('X-Letron-Gateway-Request-Id', '')}"
+    with cache.lock(f"{replay_key}:lock", timeout=5, blocking_timeout=5):
+        if cache.get_value(replay_key):
+            frappe.throw("Gateway request replayed", exc=frappe.AuthenticationError)
+        cache.set_value(replay_key, "1", expires_in_sec=60)
     identity = cast(Any, frappe.db.get_value(
         "Letron SSO Identity",
         {"tenant_key": tenant, "subject": subject, "subject_type": subject_type},

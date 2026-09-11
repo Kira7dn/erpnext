@@ -1,9 +1,10 @@
-import { createHmac, randomUUID } from "node:crypto";
+import { createHash, createHmac, randomUUID } from "node:crypto";
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import {
   getUserBySessionToken,
+  getUserByGatewaySessionToken,
   tokenFromRequest,
 } from "../../../src/server/session";
 import { getEnv } from "../../../src/server/env";
@@ -16,6 +17,7 @@ import {
 import { audit } from "../../../src/server/audit";
 import { disableCaching } from "../../../src/server/http";
 import { authenticateTestCredential } from "../../../src/server/test-credential";
+import { syncLarkGroupsIfStale } from "../../../src/server/users";
 
 export const config = { api: { bodyParser: false } };
 
@@ -57,18 +59,17 @@ function forwardedHeaders(
   path: string,
   roles: string[],
   secret: string,
+  query: string,
+  bodyHash: string,
 ): Record<string, string> {
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const expires = String(Number(timestamp) + 60);
   const method = req.method ?? "GET";
-  const requestId =
-    (typeof req.headers["x-request-id"] === "string" &&
-      req.headers["x-request-id"].slice(0, 128)) ||
-    randomUUID();
+  const requestId = randomUUID();
   const encodedRoles = Buffer.from(JSON.stringify(roles), "utf8").toString(
     "base64url",
   );
-  const payload = `${timestamp}.${expires}.${method}.${path}.${user.id}.${user.email}.${user.tenantKey ?? ""}.${user.subject ?? ""}.${user.subjectType ?? ""}.${version}.${encodedRoles}.${requestId}`;
+  const payload = `${timestamp}.${expires}.${method}.${path}.${query}.${bodyHash}.${user.id}.${user.email}.${user.tenantKey ?? ""}.${user.subject ?? ""}.${user.subjectType ?? ""}.${version}.${encodedRoles}.${requestId}`;
   const signature = createHmac("sha256", secret).update(payload).digest("hex");
   const headers: Record<string, string> = {
     "X-Letron-Gateway-Timestamp": timestamp,
@@ -84,6 +85,8 @@ function forwardedHeaders(
     "X-Letron-Gateway-Issued-At": timestamp,
     "X-Letron-Gateway-Expires-At": expires,
     "X-Letron-Gateway-Request-Id": requestId,
+    "X-Letron-Gateway-Query": query,
+    "X-Letron-Gateway-Body-Sha256": bodyHash,
     "X-Letron-Gateway-Signature": signature,
   };
   const authorization = req.headers.authorization;
@@ -114,12 +117,27 @@ export default async function handler(
   };
   disableCaching(res);
   const sessionStartedAt = performance.now();
-  const user = (await getUserBySessionToken(tokenFromRequest(req))) ?? (await authenticateTestCredential(req));
+  const bffSession = typeof req.headers["x-letron-bff-session"] === "string"
+    ? req.headers["x-letron-bff-session"]
+    : undefined;
+  let user = (await getUserByGatewaySessionToken(bffSession))
+    ?? (await getUserBySessionToken(tokenFromRequest(req)))
+    ?? (await authenticateTestCredential(req));
   timings.session = duration(sessionStartedAt);
   if (!user) {
     finish();
     errorResponse(res, 401, "authentication_required", "Authentication is required.");
     return;
+  }
+  if (bffSession) {
+    try {
+      const groupIds = await syncLarkGroupsIfStale(user.id);
+      user = { ...user, groupIds };
+    } catch {
+      finish();
+      errorResponse(res, 503, "authorization_unavailable", "Authorization state is temporarily unavailable.");
+      return;
+    }
   }
   const policyStartedAt = performance.now();
   const policy = await getPublishedPolicy();
@@ -159,15 +177,15 @@ export default async function handler(
       if (item !== undefined) query.append(key, item);
   }
   target.search = query.toString();
+  const requestBody = ["GET", "HEAD"].includes(req.method ?? "GET") ? undefined : await body(req);
+  const bodyHash = requestBody ? createHash("sha256").update(requestBody).digest("hex") : "";
   let response: Response;
   const erpStartedAt = performance.now();
   try {
     response = await fetch(target, {
       method: req.method,
-      headers: forwardedHeaders(req, user, policy.version, path, roles, secret),
-      body: ["GET", "HEAD"].includes(req.method ?? "GET")
-        ? undefined
-        : (await body(req)) as unknown as BodyInit,
+      headers: forwardedHeaders(req, user, policy.version, path, roles, secret, target.search, bodyHash),
+      body: requestBody as unknown as BodyInit,
       signal: AbortSignal.timeout(30_000),
     });
   } catch {

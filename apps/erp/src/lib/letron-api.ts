@@ -356,10 +356,11 @@ export async function gatewayRequest<T>(
 ): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
-  if (/^Bearer\s+\S+$/i.test(cookieHeader)) {
+  const bffCookie = cookieHeader.match(/(?:^|;\s*)__Host-letron_erp=([^;]+)/)?.[1];
+  if (bffCookie) {
+    headers.set("X-Letron-BFF-Session", decodeURIComponent(bffCookie));
+  } else if (/^Bearer\s+\S+$/i.test(cookieHeader)) {
     headers.set("Authorization", cookieHeader);
-  } else if (cookieHeader) {
-    headers.set("Cookie", cookieHeader);
   }
   let response: Response;
   try {

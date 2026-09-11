@@ -10,7 +10,13 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("../src/server/audit", () => ({ audit: mocks.audit }));
 vi.mock("../src/server/db", () => ({ getDb: mocks.getDb }));
-vi.mock("../src/server/env", () => ({ getEnv: mocks.getEnv }));
+vi.mock("../src/server/env", () => ({
+  AUTH_FEATURE_CONFIG: {
+    larkGroupSyncEnabled: true,
+    groupSyncStaleSeconds: 60,
+  },
+  getEnv: mocks.getEnv,
+}));
 vi.mock("../src/server/lark", () => ({ fetchLarkGroupIds: mocks.fetchLarkGroupIds }));
 
 import handler from "../pages/api/internal/lark-role-snapshots";

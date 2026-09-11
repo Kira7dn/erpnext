@@ -19,12 +19,11 @@ export type AuthenticatedUser = {
   subjectType: string | null;
 };
 
-function cookieOptions(req: NextApiRequest): { secure: boolean; domain?: string } {
-  const authHost = new URL(getEnv().LETRON_AUTH_BASE_URL).hostname.toLowerCase().split(".");
-  // Derive one parent domain from Auth itself. Every subdomain receives the
-  // cookie; localhost remains host-only because it has no parent subdomain.
-  const domain = authHost.length >= 3 ? `.${authHost.slice(1).join(".")}` : undefined;
-  return { secure: requestIsSecure(req), ...(domain ? { domain } : {}) };
+function cookieOptions(req: NextApiRequest): { secure: boolean } {
+  // Auth sessions are intentionally host-only. ERP receives its own BFF
+  // session after the one-time handoff exchange; no parent-domain cookie is
+  // shared across applications.
+  return { secure: requestIsSecure(req) };
 }
 
 export async function createSession(userId: string): Promise<{ token: string; expiresAt: Date }> {
@@ -92,6 +91,26 @@ export async function getUserBySessionToken(token: string | undefined): Promise<
   };
   await cacheSet(sessionCacheKey(tokenHash), { user, expiresAt: session.expiresAt.toISOString() }, Math.min(AUTH_FEATURE_CONFIG.sessionCacheTtlSeconds, Math.max(1, Math.ceil((session.expiresAt.getTime() - Date.now()) / 1000))));
   return user;
+}
+
+export async function getUserByGatewaySessionToken(token: string | undefined): Promise<AuthenticatedUser | null> {
+  if (!token) return null;
+  const session = await getDb().erpGatewaySession.findFirst({
+    where: { tokenHash: sha256(token), revokedAt: null, expiresAt: { gt: new Date() }, user: { status: "ACTIVE" } },
+    include: { user: { include: { identities: { where: { provider: "lark" }, orderBy: { id: "asc" }, take: 1 } } } },
+  });
+  if (!session) return null;
+  const identity = session.user.identities[0];
+  return {
+    id: session.user.id,
+    email: session.user.email,
+    displayName: session.user.displayName,
+    avatarUrl: session.user.avatarUrl,
+    groupIds: identity?.groupIds ?? [],
+    tenantKey: identity?.tenantKey ?? null,
+    subject: identity?.subject ?? null,
+    subjectType: identity?.subjectType ?? null,
+  };
 }
 
 export async function rotateSession(req: NextApiRequest, res: NextApiResponse, userId: string): Promise<void> {

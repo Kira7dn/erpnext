@@ -14,6 +14,7 @@ import { upsertLarkUser } from "../../../../src/server/users";
 import { getEnv } from "../../../../src/server/env";
 import { canonicalAuthOrigin } from "../../../../src/server/auth-origin";
 import { completeLarkMailOAuth, LARK_MAIL_OAUTH_COOKIE } from "../../../../src/server/lark-mail";
+import { createErpHandoff } from "../../../../src/server/erp-handoff";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   disableCaching(res);
@@ -68,6 +69,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await rotateSession(req, res, user.id);
     await audit({ eventType: "lark.login", outcome: "success", userId: user.id, requestId: id });
 
+    if (transaction.handoff && transaction.returnTo) {
+      const handoff = await createErpHandoff(user.id);
+      const target = new URL(transaction.returnTo, canonicalAuthOrigin(req));
+      target.searchParams.set("handoff", handoff.code);
+      res.redirect(303, target.toString());
+      return;
+    }
     if (transaction.interactionUid) {
       const interaction = await getOidcProvider().interactionDetails(req, res);
       if (interaction.uid !== transaction.interactionUid) throw new Error("OIDC_INTERACTION_MISMATCH");

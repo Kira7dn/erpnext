@@ -33,6 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const uid = firstQueryValue(req.query.uid);
+  const handoff = firstQueryValue(req.query.handoff) === "1";
   try {
     const redirectUri = larkCallbackUri(canonicalAuthOrigin(req));
     if (uid) {
@@ -58,6 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       browserBinding,
       codeVerifier,
       interactionUid: uid,
+      handoff,
       returnTo: uid ? undefined : safeReturnTo(firstQueryValue(req.query.return_to)),
     });
     appendSetCookie(res, serializeCookie(LARK_TRANSACTION_COOKIE, browserBinding, {
