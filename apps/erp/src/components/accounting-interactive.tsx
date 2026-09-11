@@ -3,10 +3,16 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { clientQuery } from "@/lib/client-query";
+import { ClientAuthRecovery } from "@/components/client-auth-recovery";
+import { clientQuery, isAuthenticationError } from "@/lib/client-query";
 
 type Row = Record<string, unknown>;
-function text(row: Row, ...keys: string[]) { const value = keys.map((key) => row[key]).find((item) => item !== undefined && item !== null && item !== ""); return value === undefined ? "—" : String(value); }
+function text(row: Row, ...keys: string[]) {
+  const value = keys
+    .map((key) => row[key])
+    .find((item) => item !== undefined && item !== null && item !== "");
+  return value === undefined ? "—" : String(value);
+}
 
 export function BankReconciliationWorkbench() {
   const queryClient = useQueryClient();
@@ -14,18 +20,222 @@ export function BankReconciliationWorkbench() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [selected, setSelected] = useState<Row | null>(null);
-  const accounts = useQuery({ queryKey: ["bank-accounts", { limit: 100 }], queryFn: () => clientQuery<Row[]>("/api/accounting/bank-accounts?limit_page_length=100") });
+  const accounts = useQuery({
+    queryKey: ["bank-accounts", { limit: 100 }],
+    queryFn: () =>
+      clientQuery<Row[]>("/api/accounting/bank-accounts?limit_page_length=100"),
+  });
   const transactions = useQuery({
     queryKey: ["bank-reconciliation", account, fromDate, toDate],
-    queryFn: () => { const query = new URLSearchParams({ bank_account: account }); if (fromDate) query.set("from_date", fromDate); if (toDate) query.set("to_date", toDate); return clientQuery<Row[]>(`/api/accounting/bank-reconciliation/transactions?${query}`); },
+    queryFn: () => {
+      const query = new URLSearchParams({ bank_account: account });
+      if (fromDate) query.set("from_date", fromDate);
+      if (toDate) query.set("to_date", toDate);
+      return clientQuery<Row[]>(
+        `/api/accounting/bank-reconciliation/transactions?${query}`,
+      );
+    },
     enabled: false,
   });
   const name = selected ? text(selected, "name") : "";
-  const linked = useQuery({ queryKey: ["bank-reconciliation-linked", name], queryFn: () => clientQuery<Row[]>(`/api/accounting/bank-reconciliation/linked-payments?bank_transaction_name=${encodeURIComponent(name)}`), enabled: Boolean(name && name !== "—") });
-  const clear = useMutation({ mutationFn: () => clientQuery<unknown>("/api/accounting/bank-reconciliation/clear-clearance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ voucher_type: selected?.voucher_type ?? "Bank Transaction", voucher_name: selected?.name }) }), onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ["bank-reconciliation"], refetchType: "none" }); await transactions.refetch(); } });
-  const reconciled = useMemo(() => (transactions.data ?? []).filter((row) => String(row.status ?? "").toLowerCase().includes("reconcil") || Number(row.docstatus) === 1).length, [transactions.data]);
-  const error = accounts.error ?? transactions.error ?? linked.error ?? clear.error;
-  return <div className="space-y-6"><section className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-[2fr_1fr_1fr_auto]"><label className="grid gap-1 text-sm font-medium">Bank Account<select className="h-10 rounded-md border bg-background px-3 font-normal" value={account} onChange={(event) => setAccount(event.target.value)}><option value="">Chọn tài khoản</option>{(accounts.data ?? []).map((item) => <option key={String(item.name)} value={String(item.name)}>{text(item, "account_name", "name")}</option>)}</select></label><label className="grid gap-1 text-sm font-medium">From<input className="h-10 rounded-md border bg-background px-3 font-normal" type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} /></label><label className="grid gap-1 text-sm font-medium">To<input className="h-10 rounded-md border bg-background px-3 font-normal" type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} /></label><button className="mt-auto h-10 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled={!account || transactions.isFetching} onClick={() => void transactions.refetch()}>{transactions.isFetching ? "Đang tải…" : "Load"}</button></section>{error ? <p className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">{error instanceof Error ? error.message : "Không thể tải dữ liệu"}</p> : null}<div className="grid gap-4 sm:grid-cols-3"><Metric label="Transactions" value={(transactions.data ?? []).length} /><Metric label="Reconciled" value={reconciled} /><Metric label="Unreconciled" value={(transactions.data ?? []).length - reconciled} /></div><section className="overflow-hidden rounded-xl border bg-card"><div className="border-b p-4"><h2 className="font-semibold">Bank transactions</h2><p className="text-sm text-muted-foreground">Chọn một dòng để xem payment liên kết và thao tác clearance.</p></div><div className="overflow-x-auto"><table className="w-full text-sm"><thead className="bg-muted/50 text-left"><tr><th className="p-3">Date</th><th className="p-3">Description</th><th className="p-3">Deposit</th><th className="p-3">Withdrawal</th><th className="p-3">Status</th></tr></thead><tbody>{(transactions.data ?? []).map((row, index) => <tr className={`cursor-pointer border-t hover:bg-muted/40 ${selected === row ? "bg-muted" : ""}`} key={String(row.name ?? index)} onClick={() => setSelected(row)}><td className="p-3">{text(row, "date", "posting_date")}</td><td className="p-3">{text(row, "description", "name")}</td><td className="p-3">{text(row, "deposit")}</td><td className="p-3">{text(row, "withdrawal")}</td><td className="p-3">{text(row, "status", "docstatus")}</td></tr>)}</tbody></table></div>{!transactions.data?.length && !transactions.isFetching ? <p className="p-10 text-center text-sm text-muted-foreground">Chưa có giao dịch. Chọn bank account và Load.</p> : null}</section>{selected ? <section className="rounded-xl border bg-card p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">{text(selected, "name")}</h2><p className="text-sm text-muted-foreground">{text(selected, "description")}</p></div><div className="flex gap-2"><Link className="rounded-md border px-3 py-2 text-sm" href={`/accounts/bank-transactions/${encodeURIComponent(text(selected, "name"))}`}>Open</Link><button className="rounded-md border px-3 py-2 text-sm" disabled={clear.isPending} onClick={() => clear.mutate()}>Clear clearance</button></div></div><h3 className="mt-5 text-sm font-semibold">Linked payments</h3>{linked.data?.length ? <ul className="mt-2 space-y-2 text-sm">{linked.data.map((row, index) => <li className="rounded-md border p-3" key={String(row.name ?? index)}>{text(row, "name", "payment_entry")} · {text(row, "allocated_amount", "amount")}</li>)}</ul> : <p className="mt-2 text-sm text-muted-foreground">{linked.isFetching ? "Đang tải…" : "Chưa có payment liên kết hoặc chưa tải được."}</p>}</section> : null}</div>;
+  const linked = useQuery({
+    queryKey: ["bank-reconciliation-linked", name],
+    queryFn: () =>
+      clientQuery<Row[]>(
+        `/api/accounting/bank-reconciliation/linked-payments?bank_transaction_name=${encodeURIComponent(name)}`,
+      ),
+    enabled: Boolean(name && name !== "—"),
+  });
+  const clear = useMutation({
+    mutationFn: () =>
+      clientQuery<unknown>(
+        "/api/accounting/bank-reconciliation/clear-clearance",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            voucher_type: selected?.voucher_type ?? "Bank Transaction",
+            voucher_name: selected?.name,
+          }),
+        },
+      ),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["bank-reconciliation"],
+        refetchType: "none",
+      });
+      await transactions.refetch();
+    },
+  });
+  const reconciled = useMemo(
+    () =>
+      (transactions.data ?? []).filter(
+        (row) =>
+          String(row.status ?? "")
+            .toLowerCase()
+            .includes("reconcil") || Number(row.docstatus) === 1,
+      ).length,
+    [transactions.data],
+  );
+  const error =
+    accounts.error ?? transactions.error ?? linked.error ?? clear.error;
+  return (
+    <div className="space-y-6">
+      <section className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-[2fr_1fr_1fr_auto]">
+        <label className="grid gap-1 text-sm font-medium">
+          Bank Account
+          <select
+            className="h-10 rounded-md border bg-background px-3 font-normal"
+            value={account}
+            onChange={(event) => setAccount(event.target.value)}
+          >
+            <option value="">Chọn tài khoản</option>
+            {(accounts.data ?? []).map((item) => (
+              <option key={String(item.name)} value={String(item.name)}>
+                {text(item, "account_name", "name")}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="grid gap-1 text-sm font-medium">
+          From
+          <input
+            className="h-10 rounded-md border bg-background px-3 font-normal"
+            type="date"
+            value={fromDate}
+            onChange={(event) => setFromDate(event.target.value)}
+          />
+        </label>
+        <label className="grid gap-1 text-sm font-medium">
+          To
+          <input
+            className="h-10 rounded-md border bg-background px-3 font-normal"
+            type="date"
+            value={toDate}
+            onChange={(event) => setToDate(event.target.value)}
+          />
+        </label>
+        <button
+          className="mt-auto h-10 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50"
+          disabled={!account || transactions.isFetching}
+          onClick={() => void transactions.refetch()}
+        >
+          {transactions.isFetching ? "Đang tải…" : "Load"}
+        </button>
+      </section>
+      {error ? (
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
+          <p>
+            {error instanceof Error ? error.message : "Không thể tải dữ liệu"}
+          </p>
+          {isAuthenticationError(error) ? <ClientAuthRecovery /> : null}
+        </div>
+      ) : null}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Metric label="Transactions" value={(transactions.data ?? []).length} />
+        <Metric label="Reconciled" value={reconciled} />
+        <Metric
+          label="Unreconciled"
+          value={(transactions.data ?? []).length - reconciled}
+        />
+      </div>
+      <section className="overflow-hidden rounded-xl border bg-card">
+        <div className="border-b p-4">
+          <h2 className="font-semibold">Bank transactions</h2>
+          <p className="text-sm text-muted-foreground">
+            Chọn một dòng để xem payment liên kết và thao tác clearance.
+          </p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left">
+              <tr>
+                <th className="p-3">Date</th>
+                <th className="p-3">Description</th>
+                <th className="p-3">Deposit</th>
+                <th className="p-3">Withdrawal</th>
+                <th className="p-3">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(transactions.data ?? []).map((row, index) => (
+                <tr
+                  className={`cursor-pointer border-t hover:bg-muted/40 ${selected === row ? "bg-muted" : ""}`}
+                  key={String(row.name ?? index)}
+                  onClick={() => setSelected(row)}
+                >
+                  <td className="p-3">{text(row, "date", "posting_date")}</td>
+                  <td className="p-3">{text(row, "description", "name")}</td>
+                  <td className="p-3">{text(row, "deposit")}</td>
+                  <td className="p-3">{text(row, "withdrawal")}</td>
+                  <td className="p-3">{text(row, "status", "docstatus")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {!transactions.data?.length && !transactions.isFetching ? (
+          <p className="p-10 text-center text-sm text-muted-foreground">
+            Chưa có giao dịch. Chọn bank account và Load.
+          </p>
+        ) : null}
+      </section>
+      {selected ? (
+        <section className="rounded-xl border bg-card p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-semibold">{text(selected, "name")}</h2>
+              <p className="text-sm text-muted-foreground">
+                {text(selected, "description")}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Link
+                className="rounded-md border px-3 py-2 text-sm"
+                href={`/accounts/bank-transactions/${encodeURIComponent(text(selected, "name"))}`}
+              >
+                Open
+              </Link>
+              <button
+                className="rounded-md border px-3 py-2 text-sm"
+                disabled={clear.isPending}
+                onClick={() => clear.mutate()}
+              >
+                Clear clearance
+              </button>
+            </div>
+          </div>
+          <h3 className="mt-5 text-sm font-semibold">Linked payments</h3>
+          {linked.data?.length ? (
+            <ul className="mt-2 space-y-2 text-sm">
+              {linked.data.map((row, index) => (
+                <li
+                  className="rounded-md border p-3"
+                  key={String(row.name ?? index)}
+                >
+                  {text(row, "name", "payment_entry")} ·{" "}
+                  {text(row, "allocated_amount", "amount")}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-sm text-muted-foreground">
+              {linked.isFetching
+                ? "Đang tải…"
+                : "Chưa có payment liên kết hoặc chưa tải được."}
+            </p>
+          )}
+        </section>
+      ) : null}
+    </div>
+  );
 }
 
-function Metric({ label, value }: { label: string; value: number }) { return <div className="rounded-xl border bg-card p-4"><p className="text-sm text-muted-foreground">{label}</p><p className="mt-2 text-2xl font-bold">{value}</p></div>; }
+function Metric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl border bg-card p-4">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl font-bold">{value}</p>
+    </div>
+  );
+}
