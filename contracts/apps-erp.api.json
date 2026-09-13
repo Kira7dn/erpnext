@@ -1,0 +1,30 @@
+{
+  "name": "apps-erp",
+  "operations": [
+    ["GET", "/api/v1/buying/suppliers"],
+    ["GET", "/api/v1/buying/suppliers/{name}"],
+    ["PUT", "/api/v1/buying/suppliers/{name}"],
+    ["GET", "/api/v1/stock/items"],
+    ["GET", "/api/v1/stock/items/{name}"],
+    ["GET", "/api/v1/contacts/contacts"],
+    ["POST", "/api/v1/contacts/contacts"],
+    ["GET", "/api/v1/contacts/contacts/{name}"],
+    ["PUT", "/api/v1/contacts/contacts/{name}"],
+    ["GET", "/api/v1/contacts/addresses"],
+    ["POST", "/api/v1/contacts/addresses"],
+    ["GET", "/api/v1/contacts/addresses/{name}"],
+    ["PUT", "/api/v1/contacts/addresses/{name}"],
+    ["POST", "/api/v1/files/attachments"],
+    ["GET", "/api/v1/stock/material-requests"],
+    ["POST", "/api/v1/stock/material-requests"],
+    ["GET", "/api/v1/stock/material-requests/{name}"],
+    ["POST", "/api/v1/crm/request-for-quotations"],
+    ["GET", "/api/v1/crm/request-for-quotations"],
+    ["GET", "/api/v1/crm/request-for-quotations/{name}"],
+    ["POST", "/api/v1/crm/supplier-quotations"],
+    ["POST", "/api/v1/crm/supplier-quotations/{name}/submit"],
+    ["POST", "/api/v1/crm/supplier-quotations/{name}/make-purchase-order"],
+    ["POST", "/api/v1/buying/purchase-orders/{name}/submit"],
+    ["POST", "/api/v1/stock/purchase-receipts/{name}/submit"]
+  ]
+}

@@ -1,0 +1,1390 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Letron ERPNext Files API",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8080"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Typed Resource API"
+    },
+    {
+      "name": "Whitelisted methods"
+    },
+    {
+      "name": "Metadata"
+    },
+    {
+      "name": "Files"
+    }
+  ],
+  "security": [
+    {
+      "frappeToken": []
+    }
+  ],
+  "paths": {
+    "/api/v1/files/attachments": {
+      "post": {
+        "tags": [
+          "Module: Files",
+          "Business routes"
+        ],
+        "summary": "createAttachment",
+        "operationId": "createAttachment",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.delivery.attachments.create_attachment",
+        "x-public-operation": "create",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "attached_to_doctype",
+                  "attached_to_name"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "attached_to_doctype": {
+                    "type": "string"
+                  },
+                  "attached_to_name": {
+                    "type": "string"
+                  },
+                  "is_private": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-test-status": "passed",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "extended-api",
+          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "frappeToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Frappe token authentication: token api_key:api_secret"
+      }
+    },
+    "parameters": {
+      "RequestId": {
+        "name": "X-Request-Id",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "IdempotencyKey": {
+        "name": "X-Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "schemas": {
+      "FrappeResponse": {
+        "type": "object",
+        "properties": {
+          "message": {}
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "FrappeError": {
+        "type": "object",
+        "properties": {
+          "exc_type": {
+            "type": "string"
+          },
+          "exception": {
+            "type": "string"
+          },
+          "_server_messages": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ResourceListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "message": {}
+        }
+      },
+      "FileUploadResponse": {
+        "type": "object",
+        "properties": {
+          "file_url": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "message": {}
+        }
+      },
+      "PageInfo": {
+        "type": "object",
+        "properties": {
+          "limit_start": {
+            "type": "integer"
+          },
+          "limit_page_length": {
+            "type": "integer"
+          }
+        }
+      },
+      "RuntimeStatus": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "erpnext_version": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "drift_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "app": {
+                "type": "string"
+              },
+              "site": {
+                "type": "string"
+              },
+              "frappe_version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "installed_apps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "bootstrap": {
+                "$ref": "#/components/schemas/RuntimeStatus"
+              },
+              "config": {
+                "$ref": "#/components/schemas/RuntimeStatus"
+              },
+              "policy": {
+                "$ref": "#/components/schemas/RuntimeStatus"
+              },
+              "configuration_bundle": {
+                "$ref": "#/components/schemas/RuntimeStatus"
+              }
+            },
+            "required": [
+              "ok",
+              "app",
+              "bootstrap",
+              "config",
+              "policy",
+              "configuration_bundle"
+            ]
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "BankTransactionAllocation": {
+        "type": "object",
+        "properties": {
+          "payment_document": {
+            "type": "string",
+            "enum": [
+              "Payment Entry",
+              "Journal Entry"
+            ]
+          },
+          "payment_entry": {
+            "type": "string"
+          },
+          "allocated_amount": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "payment_document",
+          "payment_entry"
+        ],
+        "additionalProperties": false
+      },
+      "BankTransactionReconcileRequest": {
+        "type": "object",
+        "properties": {
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BankTransactionAllocation"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "allocations"
+        ],
+        "additionalProperties": false
+      },
+      "PurchaseOrchestrationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "material_request",
+          "suppliers"
+        ],
+        "properties": {
+          "material_request": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "material_request_type",
+              "company",
+              "transaction_date",
+              "items"
+            ],
+            "properties": {
+              "material_request_type": {
+                "type": "string",
+                "enum": [
+                  "Purchase",
+                  "Material Transfer",
+                  "Material Issue",
+                  "Manufacture"
+                ]
+              },
+              "company": {
+                "type": "string"
+              },
+              "transaction_date": {
+                "type": "string",
+                "format": "date"
+              },
+              "schedule_date": {
+                "type": "string",
+                "format": "date"
+              },
+              "title": {
+                "type": "string"
+              },
+              "items": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "item_code",
+                    "qty",
+                    "schedule_date",
+                    "warehouse"
+                  ],
+                  "properties": {
+                    "item_code": {
+                      "type": "string"
+                    },
+                    "qty": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "schedule_date": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "warehouse": {
+                      "type": "string"
+                    },
+                    "uom": {
+                      "type": "string"
+                    },
+                    "rate": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "suppliers": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "justification": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseOrchestrationResponse": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "x-contract": {
+    "runtime": {
+      "source_of_truth": "erpnext",
+      "api_style": "frappe-native",
+      "openapi_version": "3.1.0",
+      "server_url": "http://127.0.0.1:8080",
+      "group_by": "module",
+      "public_module_routes": true,
+      "include_whitelisted_methods": true,
+      "include_doctype_metadata": false,
+      "typed_doctypes": [],
+      "typed_modules": [
+        "Accounts",
+        "Assets",
+        "Automation",
+        "Bulk Transaction",
+        "Buying",
+        "CRM",
+        "Communication",
+        "Contacts",
+        "Core",
+        "Custom",
+        "Desk",
+        "EDI",
+        "ERPNext Integrations",
+        "Email",
+        "Geo",
+        "Integrations",
+        "Maintenance",
+        "Manufacturing",
+        "Printing",
+        "Projects",
+        "Quality Management",
+        "Regional",
+        "Selling",
+        "Setup",
+        "Stock",
+        "Subcontracting",
+        "Support",
+        "Telephony",
+        "Utilities",
+        "Website",
+        "Workflow"
+      ],
+      "public_modules": [
+        "Accounts",
+        "Assets",
+        "Buying",
+        "CRM",
+        "Contacts",
+        "Selling",
+        "Stock"
+      ],
+      "permission_dependencies": {
+        "stock/purchase-receipts": [
+          "Account"
+        ]
+      },
+      "document_actions": [
+        {
+          "doctype": "Asset",
+          "module": "Assets",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Asset Capitalization",
+          "module": "Assets",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Asset Movement",
+          "module": "Assets",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Asset Repair",
+          "module": "Assets",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Asset Value Adjustment",
+          "module": "Assets",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Sales Invoice",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Purchase Invoice",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Supplier Quotation",
+          "module": "CRM",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Sales Order",
+          "module": "Selling",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Purchase Order",
+          "module": "Buying",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Material Request",
+          "module": "Stock",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Purchase Receipt",
+          "module": "Stock",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Stock Entry",
+          "module": "Stock",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Journal Entry",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Payment Request",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Payment Order",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Payment Entry",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        },
+        {
+          "doctype": "Bank Transaction",
+          "module": "Accounts",
+          "actions": [
+            "submit",
+            "cancel"
+          ]
+        }
+      ],
+      "custom_actions": [
+        {
+          "doctype": "Supplier Quotation",
+          "module": "CRM",
+          "action": "make-purchase-order",
+          "operation_id": "makePurchaseOrderFromSupplierQuotation",
+          "path_suffix": "make-purchase-order",
+          "handler": "letron_api.control.api.make_purchase_order",
+          "request_schema": {
+            "type": "object",
+            "additionalProperties": false
+          },
+          "response_schema": "PurchaseOrderResponse",
+          "response_envelope": "message"
+        },
+        {
+          "doctype": "Bank Transaction",
+          "module": "Accounts",
+          "action": "reconcile",
+          "operation_id": "reconcileBankTransaction",
+          "path_suffix": "reconcile",
+          "handler": "letron_api.finance.accounts_reconciliation.reconcile_bank_transaction",
+          "request_schema": "BankTransactionReconcileRequest",
+          "response_schema": "BankTransactionResponse",
+          "response_envelope": "message"
+        },
+        {
+          "doctype": "Bank Transaction",
+          "module": "Accounts",
+          "action": "unreconcile",
+          "operation_id": "unreconcileBankTransaction",
+          "path_suffix": "unreconcile",
+          "handler": "letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction",
+          "request_schema": {
+            "type": "object",
+            "additionalProperties": false
+          },
+          "response_schema": "BankTransactionResponse",
+          "response_envelope": "message"
+        },
+        {
+          "doctype": "Bank Transaction Rule",
+          "module": "Accounts",
+          "action": "run-evaluation",
+          "operation_id": "runBankTransactionRules",
+          "path_suffix": "run-evaluation",
+          "handler": "letron_api.finance.banking.run_rule_evaluation",
+          "request_schema": {
+            "type": "object",
+            "additionalProperties": false
+          },
+          "response_schema": "FrappeResponse",
+          "response_envelope": "message"
+        }
+      ],
+      "custom_routes": [
+        {
+          "module": "Files",
+          "resource": "attachments",
+          "method": "POST",
+          "path": "/api/v1/files/attachments",
+          "operation": "create",
+          "operation_id": "createAttachment",
+          "handler": "letron_api.delivery.attachments.create_attachment",
+          "content_type": "multipart/form-data",
+          "multipart_fields": [
+            "attached_to_doctype",
+            "attached_to_name",
+            "is_private"
+          ],
+          "required_multipart_fields": [
+            "attached_to_doctype",
+            "attached_to_name"
+          ]
+        },
+        {
+          "module": "Accounts",
+          "resource": "bank-reconciliation",
+          "method": "GET",
+          "path": "/api/v1/accounts/bank-reconciliation/transactions",
+          "operation": "list",
+          "operation_id": "listBankReconciliationTransactions",
+          "handler": "letron_api.finance.banking.reconciliation_transactions"
+        },
+        {
+          "module": "Accounts",
+          "resource": "bank-reconciliation",
+          "method": "GET",
+          "path": "/api/v1/accounts/bank-reconciliation/balance",
+          "operation": "read",
+          "operation_id": "getBankReconciliationBalance",
+          "handler": "letron_api.finance.banking.reconciliation_balance"
+        },
+        {
+          "module": "Accounts",
+          "resource": "bank-reconciliation",
+          "method": "GET",
+          "path": "/api/v1/accounts/bank-reconciliation/linked-payments",
+          "operation": "read",
+          "operation_id": "getBankReconciliationLinkedPayments",
+          "handler": "letron_api.finance.banking.reconciliation_linked_payments"
+        },
+        {
+          "module": "Accounts",
+          "resource": "bank-reconciliation",
+          "method": "POST",
+          "path": "/api/v1/accounts/bank-reconciliation/clearance",
+          "operation": "update",
+          "operation_id": "updateBankReconciliationClearance",
+          "handler": "letron_api.finance.banking.reconciliation_update_clearance"
+        },
+        {
+          "module": "Accounts",
+          "resource": "bank-reconciliation",
+          "method": "POST",
+          "path": "/api/v1/accounts/bank-reconciliation/clear-clearance",
+          "operation": "update",
+          "operation_id": "clearBankReconciliationClearance",
+          "handler": "letron_api.finance.banking.reconciliation_clear_clearance"
+        },
+        {
+          "module": "Accounts",
+          "resource": "bank-reconciliation",
+          "method": "POST",
+          "path": "/api/v1/accounts/bank-reconciliation/actions/{action}",
+          "operation": "update",
+          "operation_id": "runBankReconciliationAction",
+          "handler": "letron_api.finance.banking.reconciliation_action"
+        },
+        {
+          "module": "Accounts",
+          "resource": "reports",
+          "method": "GET",
+          "path": "/api/v1/accounts/reports/report",
+          "operation": "read",
+          "operation_id": "runAccountsReport",
+          "handler": "letron_api.finance.banking.report"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "GET",
+          "path": "/api/v1/accounts/statement-imports",
+          "operation": "list",
+          "operation_id": "listStatementImports",
+          "handler": "letron_api.finance.banking.statement_imports"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports",
+          "operation": "create",
+          "operation_id": "createStatementImport",
+          "handler": "letron_api.finance.banking.statement_import_create"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports/upload",
+          "operation": "create",
+          "operation_id": "uploadStatementImport",
+          "handler": "letron_api.finance.banking.statement_import_upload",
+          "content_type": "multipart/form-data"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "GET",
+          "path": "/api/v1/accounts/statement-imports/{name}",
+          "operation": "read",
+          "operation_id": "getStatementImport",
+          "handler": "letron_api.finance.banking.statement_import_get"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "PUT",
+          "path": "/api/v1/accounts/statement-imports/{name}",
+          "operation": "update",
+          "operation_id": "updateStatementImport",
+          "handler": "letron_api.finance.banking.statement_import_update"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "GET",
+          "path": "/api/v1/accounts/statement-imports/{name}/details",
+          "operation": "read",
+          "operation_id": "getStatementImportDetails",
+          "handler": "letron_api.finance.banking.statement_details"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports/{name}/update-pdf-tables",
+          "operation": "update",
+          "operation_id": "updateStatementImportPdfTables",
+          "handler": "letron_api.finance.banking.statement_update_pdf_tables"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports/{name}/reextract-pdf-table",
+          "operation": "update",
+          "operation_id": "reextractStatementImportPdfTable",
+          "handler": "letron_api.finance.banking.statement_reextract_pdf_table"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports/{name}/set-pdf-table-header",
+          "operation": "update",
+          "operation_id": "setStatementImportPdfTableHeader",
+          "handler": "letron_api.finance.banking.statement_set_pdf_table_header"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports/{name}/update-column-mapping",
+          "operation": "update",
+          "operation_id": "updateStatementImportColumnMapping",
+          "handler": "letron_api.finance.banking.statement_update_column_mapping"
+        },
+        {
+          "module": "Accounts",
+          "resource": "statement-imports",
+          "method": "POST",
+          "path": "/api/v1/accounts/statement-imports/{name}/set-header-index",
+          "operation": "update",
+          "operation_id": "setStatementImportHeaderIndex",
+          "handler": "letron_api.finance.banking.statement_set_header_index"
+        },
+        {
+          "module": "Accounts",
+          "resource": "settings",
+          "method": "GET",
+          "path": "/api/v1/accounts/settings",
+          "operation": "read",
+          "operation_id": "getAccountsSettings",
+          "handler": "letron_api.finance.banking.accounts_settings"
+        },
+        {
+          "module": "Accounts",
+          "resource": "settings",
+          "method": "PUT",
+          "path": "/api/v1/accounts/settings",
+          "operation": "update",
+          "operation_id": "updateAccountsSettings",
+          "handler": "letron_api.finance.banking.accounts_settings_update"
+        },
+        {
+          "module": "Assets",
+          "resource": "actions",
+          "method": "POST",
+          "path": "/api/v1/assets/actions/{action}",
+          "operation": "update",
+          "operation_id": "runAssetAction",
+          "handler": "letron_api.assets.assets.asset_action"
+        },
+        {
+          "module": "Assets",
+          "resource": "reports",
+          "method": "GET",
+          "path": "/api/v1/assets/reports/report",
+          "operation": "read",
+          "operation_id": "runAssetReport",
+          "handler": "letron_api.assets.assets.asset_report"
+        },
+        {
+          "module": "Assets",
+          "resource": "dashboard",
+          "method": "GET",
+          "path": "/api/v1/assets/dashboard",
+          "operation": "read",
+          "operation_id": "getAssetDashboard",
+          "handler": "letron_api.assets.assets.asset_dashboard"
+        }
+      ],
+      "controller_contracts": [
+        {
+          "doctype": "Request for Quotation Item",
+          "required_write_fields": {
+            "conversion_factor": {
+              "type": "number"
+            },
+            "stock_uom": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "doctype": "Supplier Quotation Item",
+          "allowed_write_fields": {
+            "request_for_quotation": {
+              "type": "string"
+            },
+            "request_for_quotation_item": {
+              "type": "string"
+            },
+            "material_request": {
+              "type": "string"
+            },
+            "material_request_item": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "doctype": "Purchase Receipt Item",
+          "allowed_write_fields": {
+            "stock_uom": {
+              "type": "string"
+            },
+            "purchase_order": {
+              "type": "string"
+            },
+            "purchase_order_item": {
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "generated_schemas": {
+        "PurchaseOrchestrationRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "material_request",
+            "suppliers"
+          ],
+          "properties": {
+            "material_request": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "material_request_type",
+                "company",
+                "transaction_date",
+                "items"
+              ],
+              "properties": {
+                "material_request_type": {
+                  "type": "string",
+                  "enum": [
+                    "Purchase",
+                    "Material Transfer",
+                    "Material Issue",
+                    "Manufacture"
+                  ]
+                },
+                "company": {
+                  "type": "string"
+                },
+                "transaction_date": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "schedule_date": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "items": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "item_code",
+                      "qty",
+                      "schedule_date",
+                      "warehouse"
+                    ],
+                    "properties": {
+                      "item_code": {
+                        "type": "string"
+                      },
+                      "qty": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "schedule_date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "warehouse": {
+                        "type": "string"
+                      },
+                      "uom": {
+                        "type": "string"
+                      },
+                      "rate": {
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "suppliers": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "justification": {
+              "type": "string"
+            }
+          }
+        },
+        "PurchaseOrchestrationResponse": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "id",
+            "status"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "include_methods": [
+        "letron_api.control.api.health",
+        "letron_api.control.api.runtime_info",
+        "letron_api.control.api.runtime_snapshot"
+      ],
+      "public_resources": [
+        {
+          "doctype": "Asset",
+          "path": "/api/v1/assets/assets"
+        },
+        {
+          "doctype": "Asset Category",
+          "path": "/api/v1/assets/asset-categories"
+        },
+        {
+          "doctype": "Asset Capitalization",
+          "path": "/api/v1/assets/asset-capitalizations"
+        },
+        {
+          "doctype": "Asset Maintenance",
+          "path": "/api/v1/assets/asset-maintenance"
+        },
+        {
+          "doctype": "Asset Movement",
+          "path": "/api/v1/assets/asset-movements"
+        },
+        {
+          "doctype": "Asset Repair",
+          "path": "/api/v1/assets/asset-repairs"
+        },
+        {
+          "doctype": "Asset Value Adjustment",
+          "path": "/api/v1/assets/asset-value-adjustments"
+        },
+        {
+          "doctype": "Asset Maintenance Team",
+          "path": "/api/v1/assets/asset-maintenance-teams"
+        },
+        {
+          "doctype": "Asset Maintenance Log",
+          "path": "/api/v1/assets/asset-maintenance-logs"
+        },
+        {
+          "doctype": "Asset Depreciation Schedule",
+          "path": "/api/v1/assets/asset-depreciation-schedules"
+        },
+        {
+          "doctype": "Asset Shift Factor",
+          "path": "/api/v1/assets/asset-shift-factors"
+        },
+        {
+          "doctype": "Asset Shift Allocation",
+          "path": "/api/v1/assets/asset-shift-allocations"
+        },
+        {
+          "doctype": "Location",
+          "path": "/api/v1/assets/locations"
+        },
+        {
+          "doctype": "Lead",
+          "path": "/api/v1/crm/leads"
+        },
+        {
+          "doctype": "Opportunity",
+          "path": "/api/v1/crm/opportunities"
+        },
+        {
+          "doctype": "Request for Quotation",
+          "path": "/api/v1/crm/request-for-quotations"
+        },
+        {
+          "doctype": "Supplier Quotation",
+          "path": "/api/v1/crm/supplier-quotations"
+        },
+        {
+          "doctype": "Customer",
+          "path": "/api/v1/selling/customers"
+        },
+        {
+          "doctype": "Quotation",
+          "path": "/api/v1/selling/quotations"
+        },
+        {
+          "doctype": "Sales Order",
+          "path": "/api/v1/selling/sales-orders"
+        },
+        {
+          "doctype": "Delivery Note",
+          "path": "/api/v1/selling/delivery-notes"
+        },
+        {
+          "doctype": "Sales Invoice",
+          "path": "/api/v1/accounts/sales-invoices"
+        },
+        {
+          "doctype": "Purchase Invoice",
+          "path": "/api/v1/accounts/purchase-invoices"
+        },
+        {
+          "doctype": "Payment Entry",
+          "path": "/api/v1/accounts/payment-entries"
+        },
+        {
+          "doctype": "Bank",
+          "path": "/api/v1/accounts/banks"
+        },
+        {
+          "doctype": "Bank Account",
+          "path": "/api/v1/accounts/bank-accounts"
+        },
+        {
+          "doctype": "Mode of Payment",
+          "path": "/api/v1/accounts/modes-of-payment"
+        },
+        {
+          "doctype": "Cost Center",
+          "path": "/api/v1/accounts/cost-centers"
+        },
+        {
+          "doctype": "Journal Entry",
+          "path": "/api/v1/accounts/journal-entries"
+        },
+        {
+          "doctype": "Payment Request",
+          "path": "/api/v1/accounts/payment-requests"
+        },
+        {
+          "doctype": "Bank Transaction",
+          "path": "/api/v1/accounts/bank-transactions"
+        },
+        {
+          "doctype": "Payment Order",
+          "path": "/api/v1/accounts/payment-orders"
+        },
+        {
+          "doctype": "Bank Transaction Rule",
+          "path": "/api/v1/accounts/bank-transaction-rules"
+        },
+        {
+          "doctype": "Supplier",
+          "path": "/api/v1/buying/suppliers"
+        },
+        {
+          "doctype": "Purchase Order",
+          "path": "/api/v1/buying/purchase-orders"
+        },
+        {
+          "doctype": "Item",
+          "path": "/api/v1/stock/items"
+        },
+        {
+          "doctype": "Warehouse",
+          "path": "/api/v1/stock/warehouses"
+        },
+        {
+          "doctype": "Address",
+          "path": "/api/v1/contacts/addresses"
+        },
+        {
+          "doctype": "Contact",
+          "path": "/api/v1/contacts/contacts"
+        },
+        {
+          "doctype": "Material Request",
+          "path": "/api/v1/stock/material-requests"
+        },
+        {
+          "doctype": "Purchase Receipt",
+          "path": "/api/v1/stock/purchase-receipts"
+        },
+        {
+          "doctype": "Stock Entry",
+          "path": "/api/v1/stock/stock-entries"
+        },
+        {
+          "doctype": "Item Price",
+          "path": "/api/v1/stock/item-prices"
+        },
+        {
+          "doctype": "Stock Reconciliation",
+          "path": "/api/v1/stock/stock-reconciliations"
+        },
+        {
+          "doctype": "Serial No",
+          "path": "/api/v1/stock/serial-nos"
+        },
+        {
+          "doctype": "Batch",
+          "path": "/api/v1/stock/batches"
+        },
+        {
+          "doctype": "Quality Inspection",
+          "path": "/api/v1/stock/quality-inspections"
+        },
+        {
+          "doctype": "Pick List",
+          "path": "/api/v1/stock/pick-lists"
+        },
+        {
+          "doctype": "Shipment",
+          "path": "/api/v1/stock/shipments"
+        },
+        {
+          "doctype": "Landed Cost Voucher",
+          "path": "/api/v1/stock/landed-cost-vouchers"
+        },
+        {
+          "doctype": "Stock Reservation Entry",
+          "path": "/api/v1/stock/stock-reservation-entries"
+        }
+      ]
+    },
+    "transport": {
+      "rest": true,
+      "webhook": true,
+      "realtime": true
+    },
+    "headers": {
+      "request_id": "X-Request-Id",
+      "idempotency_key": "X-Idempotency-Key"
+    }
+  },
+  "x-capabilities": {
+    "webhook": {
+      "declared": true,
+      "delivery_implemented": true,
+      "delivery": "durable-outbox",
+      "signature": "hmac-sha256",
+      "max_attempts": 3
+    },
+    "realtime": {
+      "declared": true,
+      "delivery_implemented": true,
+      "delivery": "durable-outbox",
+      "source_of_truth": false
+    }
+  },
+  "x-acceptance-summary": {
+    "passed": 1,
+    "partial": 0,
+    "not-tested": 0,
+    "blocked": 0
+  },
+  "x-module": "Files",
+  "x-module-index": {}
+}

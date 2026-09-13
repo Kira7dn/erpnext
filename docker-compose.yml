@@ -58,6 +58,56 @@ x-frappe-defaults: &frappe_defaults
     S3_BUCKET_NAME: ${S3_BUCKET_NAME:-letron-erp-backups}
 
 services:
+  lark-bot:
+    build:
+      context: ./apps/lark-bot-official/mcp_larkbot_demo/nodejs
+      dockerfile: Dockerfile
+    image: ${PROJECT_NAME:-erpnext}-lark-bot:local
+    restart: ${RESTART_POLICY}
+    networks: [frappe_network]
+    ports: ["${LARK_BOT_PORT:-3010}:3000"]
+    environment:
+      APP_ID: ${LARK_APP_ID:-}
+      APP_SECRET: ${LARK_APP_SECRET:-}
+      LARK_DOMAIN: ${LARK_DOMAIN:-https://open.larksuite.com}
+      LARK_BOT_PUBLIC_URL: ${LARK_BOT_PUBLIC_URL:-http://localhost:3010}
+      LARK_VERIFICATION_TOKEN: ${LARK_VERIFICATION_TOKEN:-}
+      LARK_ENCRYPT_KEY: ${LARK_ENCRYPT_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5.6-luna}
+      PORT: "3000"
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/auth.html').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  openclaw-lark:
+    build:
+      context: ./apps/openclaw-lark
+      dockerfile: Dockerfile
+    image: ${PROJECT_NAME:-erpnext}-openclaw-lark:local
+    restart: ${RESTART_POLICY}
+    networks: [frappe_network]
+    ports:
+      - "127.0.0.1:18789:18789"
+    environment:
+      OPENCLAW_LARK_APP_ID: ${OPENCLAW_LARK_APP_ID:-}
+      OPENCLAW_LARK_APP_SECRET: ${OPENCLAW_LARK_APP_SECRET:-}
+      OPENCLAW_LARK_GROUP_ID: ${OPENCLAW_LARK_GROUP_ID:-}
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5.6-luna}
+    volumes:
+      - openclaw-state:/root/.openclaw
+    healthcheck:
+      test: [CMD, node, -e, "const net=require('net'); const s=net.connect(18789,'127.0.0.1',()=>{s.end();process.exit(0)}); s.on('error',()=>process.exit(1)); setTimeout(()=>process.exit(1),2000)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
   db:
     image: ${DB_IMAGE}
     restart: ${RESTART_POLICY}
@@ -83,6 +133,11 @@ services:
     restart: ${RESTART_POLICY}
     networks: [frappe_network]
     volumes: ["redis-queue-data:/data"]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 12
 
   backend:
     <<: *frappe_defaults
@@ -194,5 +249,6 @@ volumes:
   sites: {name: "${SITES_VOLUME}"}
   logs: {name: "${LOGS_VOLUME}"}
   backups: {name: "${BACKUP_VOLUME}"}
+  openclaw-state: {name: "${PROJECT_NAME:-erpnext}-openclaw-state"}
 networks:
   frappe_network: {driver: bridge}

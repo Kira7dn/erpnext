@@ -16,7 +16,7 @@ from urllib.request import Request, urlopen
 import pytest
 from letron_api.delivery.delivery_protocol import webhook_signature
 
-from .api_runtime_harness import (
+from .test_api_runtime_harness import (
     ApiClient,
     RuntimeUnavailable,
     cleanup,
@@ -699,6 +699,7 @@ def test_extended_auth_system_resources_and_business_flows(request: pytest.Fixtu
         "supplier": supplier,
         "company": company,
         "posting_date": "2026-08-10",
+        "supplier_delivery_note": prefix + "Supplier Delivery Note",
         "currency": "VND",
         "conversion_rate": 1,
         "buying_price_list": price_list,
@@ -708,6 +709,7 @@ def test_extended_auth_system_resources_and_business_flows(request: pytest.Fixtu
     }
     draft_receipt = _create(client, "/api/v1/stock/purchase-receipts", receipt_payload, created, "Purchase Receipt")
     draft_receipt_name = str(draft_receipt["name"])
+    assert draft_receipt["supplier_delivery_note"] == prefix + "Supplier Delivery Note"
     _assert_list_controls(client, "/api/v1/stock/purchase-receipts", draft_receipt_name)
     assert response_data(client.public("GET", _path("/api/v1/stock/purchase-receipts", draft_receipt_name), expected={200}))["name"] == draft_receipt_name
     _update_and_assert(client, "/api/v1/stock/purchase-receipts", draft_receipt_name, "remarks", "Phiếu nhận hàng cập nhật")
@@ -1033,7 +1035,7 @@ def test_extended_auth_system_resources_and_business_flows(request: pytest.Fixtu
     concurrent_key = f"acceptance-concurrent-{uuid.uuid4()}"
     concurrent_clients = [ApiClient(), ApiClient()]
     for concurrent_client in concurrent_clients:
-        concurrent_client.login()
+        concurrent_client.authenticate()
     with ThreadPoolExecutor(max_workers=2) as executor:
         responses = list(
             executor.map(

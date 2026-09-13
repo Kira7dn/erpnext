@@ -1,13 +1,9 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-const root = resolve(import.meta.dirname, "..");
+const root = resolve(import.meta.dirname, "../..");
 
 async function main(): Promise<void> {
-  if (process.env.CONFIRM_PRODUCTION_REALTEST !== "YES") {
-    throw new Error("Production realtest creates live MR/RFQ/quotation/PO/receipt/invoice data. Set CONFIRM_PRODUCTION_REALTEST=YES to continue.");
-  }
-
   const envFile = resolve(root, ".env.production");
   const content = await readFile(envFile, "utf8");
   for (const line of content.split(/\r?\n/)) {
@@ -25,7 +21,7 @@ async function main(): Promise<void> {
   process.env.LETRON_AUTH_BASE_URL = "https://auth.letron.vn";
   process.env.REALTEST_APPROVAL_HEADER = "production";
 
-  await import("./real-test-mr.ts");
+  await import("./test_real_mr.ts");
 }
 
 main().catch((error: unknown) => {

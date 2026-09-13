@@ -1,0 +1,12 @@
+{
+  "name": "@letron/lark-bot",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@larksuiteoapi/node-sdk": "^1.50.0",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "openai": "^4.104.0",
+    "redis": "^5.8.0"
+  }
+}

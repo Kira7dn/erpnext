@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-import os
 
 import frappe
 from frappe.utils.nestedset import rebuild_tree
@@ -22,11 +21,11 @@ def _runtime_info() -> dict[str, object]:
 def health() -> dict[str, object]:
     """Return a lightweight authenticated application health response."""
 
+    from letron_api.auth.sso_identity import status as sso_status
     from letron_api.control.policy import cached_status as policy_status
     from letron_api.control.system_config import bundle_status
     from letron_api.control.system_config import cached_status as config_status
     from letron_api.control.tenant_bootstrap import status as bootstrap_status
-    from letron_api.auth.sso_identity import status as sso_status
 
     bootstrap = bootstrap_status()
     policy = policy_status()
@@ -55,11 +54,11 @@ def runtime_info() -> dict[str, object]:
 def runtime_snapshot() -> dict[str, object]:
     """Return runtime metadata used by integration verification, not business logic."""
 
+    from letron_api.auth.sso_identity import status as sso_status
     from letron_api.control.policy import status as policy_status
     from letron_api.control.system_config import bundle_status
     from letron_api.control.system_config import status as config_status
     from letron_api.control.tenant_bootstrap import status as bootstrap_status
-    from letron_api.auth.sso_identity import status as sso_status
 
     snapshot: dict[str, object] = {
         **_runtime_info(),
@@ -117,7 +116,9 @@ def make_purchase_order(name: str, action: str = "make-purchase-order") -> dict[
     """Create a Purchase Order Draft through ERPNext's native document map."""
     if action != "make-purchase-order":
         frappe.throw("Unsupported Supplier Quotation action")
-    from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order as native_make_purchase_order
+    from erpnext.buying.doctype.supplier_quotation.supplier_quotation import (
+        make_purchase_order as native_make_purchase_order,
+    )
 
     purchase_order = native_make_purchase_order(name)
     purchase_order.insert()
@@ -125,7 +126,11 @@ def make_purchase_order(name: str, action: str = "make-purchase-order") -> dict[
 
 
 @frappe.whitelist(methods=["POST"])
-def acceptance_cleanup(prefix: str) -> dict[str, object]:
+def acceptance_cleanup(prefix: str | None = None) -> dict[str, object]:
+    if not prefix and frappe.request:
+        prefix = frappe.request.args.get("prefix")
+    if not prefix:
+        frappe.throw("prefix is required", exc=frappe.ValidationError)
     """Remove only local integration fixtures after runtime acceptance.
 
     This is intentionally not part of the public contract. It is available

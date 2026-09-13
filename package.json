@@ -5,8 +5,8 @@
     "dev": "node scripts/dev.mjs",
     "dev:auth": "npm --prefix apps/auth-server run dev",
     "dev:erp": "npm --prefix apps/erp run dev",
-    "realtest": "npm --prefix apps/auth-server exec -- tsx scripts/real-test-mr.ts",
-    "contracttest": "npm --prefix apps/auth-server exec -- tsx scripts/contract-test.ts",
-    "realtest:production": "npm --prefix apps/auth-server exec -- tsx scripts/real-test-production.ts"
+    "contracttest": "npm --prefix apps/auth-server exec -- tsx tests/unit/test_contract.ts",
+    "test:purchase:dev": "npm --prefix apps/auth-server exec -- tsx tests/integration/test_real_mr.ts",
+    "test:purchase": "npm --prefix apps/auth-server exec -- tsx tests/integration/test_real_production.ts"
   }
 }

@@ -112,7 +112,10 @@ def generate(root: Path, output: Path, handoff: Path | None = None) -> None:
     for stale in (*module_dir.glob("*.json"), *module_dir.glob("*.yaml")):
         stale.unlink()
     public_resources = {item["doctype"] for item in contract["runtime"].get("public_resources", [])}
-    module_names = sorted({item.module or "Uncategorized" for item in doctypes if item.name in public_resources})
+    module_names = sorted(
+        {item.module or "Uncategorized" for item in doctypes if item.name in public_resources}
+        | {item["module"] for item in contract["runtime"].get("custom_routes", [])}
+    )
     try:
         artifact_prefix = output.relative_to(root).as_posix()
     except ValueError:
@@ -128,7 +131,7 @@ def generate(root: Path, output: Path, handoff: Path | None = None) -> None:
                 if field.fieldtype == "Table" and field.options in by_name and field.options not in selected:
                     selected.add(field.options)
                     pending.append(field.options)
-        if not selected:
+        if not selected and not any(item["module"] == module_name for item in contract["runtime"].get("custom_routes", [])):
             continue
         module_contract = copy.deepcopy(contract)
         module_contract["runtime"]["typed_doctypes"] = sorted(selected)

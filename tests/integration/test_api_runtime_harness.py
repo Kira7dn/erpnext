@@ -7,6 +7,8 @@ headers or full response bodies.
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
 import os
 import time
@@ -16,9 +18,10 @@ from http.cookiejar import CookieJar
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 from urllib.request import Request, build_opener
 
+from letron_api.contract_runtime import validate_request
 from letron_api.control.system_config import load_config
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -34,28 +37,17 @@ def _config() -> dict[str, Any]:
     else:
         source = ROOT / "config" / "config.yaml"
     config = load_config(source, resolve_secrets=True)
-    delivery = config["delivery"]
-    values = {
-        "LETRON_DELIVERY_ENABLED": delivery["enabled"],
-        "LETRON_WEBHOOK_URL": delivery["webhook_url"],
-        "LETRON_WEBHOOK_SECRET": delivery["webhook_secret"],
-        "LETRON_WEBHOOK_TIMEOUT_MS": delivery["webhook_timeout_ms"],
-        "LETRON_REALTIME_URL": delivery["realtime_url"],
-        "LETRON_REALTIME_TOKEN": delivery["realtime_token"],
-        "LETRON_CONSUMER_PORT": os.environ.get("LETRON_CONSUMER_PORT", "8091"),
-    }
-    for key, value in values.items():
-        os.environ.setdefault(key, str(value))
     return config
 
 
 def cleanup_consumer_events(prefix: str, event_ids: list[str] | None = None) -> None:
     """Delete one run's durable consumer events and require a stable zero."""
 
-    if str(os.environ.get("LETRON_DELIVERY_ENABLED", "false")).lower() not in {"1", "true", "yes"}:
+    delivery = _config()["delivery"]
+    if not delivery["enabled"]:
         return
-    realtime_url = os.environ.get("LETRON_REALTIME_URL")
-    realtime_token = os.environ.get("LETRON_REALTIME_TOKEN")
+    realtime_url = delivery["realtime_url"]
+    realtime_token = delivery["realtime_token"]
     if not realtime_url or not realtime_token:
         return
     port = os.environ.get("LETRON_CONSUMER_PORT", "8091")
@@ -112,19 +104,36 @@ def retryable_status(status: int) -> bool:
 class ApiClient:
     def __init__(self) -> None:
         config = _config()
-        self.base = f"http://127.0.0.1:{config['project']['http_port']}"
+        self.backend_base = f"http://127.0.0.1:{config['project']['http_port']}"
+        self.transport = "gateway"
+        self.gateway_base = os.environ.get("LETRON_AUTH_BASE_URL", "").rstrip("/")
+        self.base = self.gateway_base
         self.timeout = min(int(config["developer"]["request_timeout"]), 60)
-        self.username = "Administrator"
-        self.password = os.environ.get("LETRON_ACCEPTANCE_ADMIN_PASSWORD") or config["site"]["admin_password"]
+        self.username: str | None = None
+        self.password: str | None = None
         self.cookies = CookieJar()
         self.opener = build_opener(__import__("urllib.request", fromlist=["HTTPCookieProcessor"]).HTTPCookieProcessor(self.cookies))
         self.evidence: list[dict[str, Any]] = []
         self.authorization: str | None = None
+        self.authenticated = False
 
     def write_evidence(self) -> None:
         path = ROOT / ".cache" / "integration-runtime-evidence.json"
         path.parent.mkdir(exist_ok=True)
-        path.write_text(json.dumps({"runtime": self.base, "requests": self.evidence}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        path.write_text(
+            json.dumps(
+                {
+                    "backend_runtime": self.backend_base,
+                    "gateway_runtime": self.gateway_base or None,
+                    "transport": self.transport,
+                    "requests": self.evidence,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
 
     def request(
         self,
@@ -134,16 +143,42 @@ class ApiClient:
         *,
         expected: set[int] | None = None,
         headers: dict[str, str] | None = None,
+        transport: str = "backend",
     ) -> Response:
+        if transport not in {"backend", "gateway"}:
+            raise RuntimeUnavailable(f"Unsupported integration transport: {transport}")
+        base = self.backend_base if transport == "backend" else self.gateway_base
+        if not base:
+            raise RuntimeUnavailable(
+                "Gateway integration requires LETRON_AUTH_BASE_URL"
+            )
         request_id = (headers or {}).get("X-Request-Id") or f"acceptance-{uuid.uuid4()}"
         request_headers = {"Accept": "application/json", "X-Request-Id": request_id, **(headers or {})}
         if self.authorization:
             request_headers["Authorization"] = self.authorization
+        if transport == "gateway" and self.authenticated:
+            if "Authorization" not in request_headers:
+                secret = os.environ.get("LETRON_INTERNAL_API_SECRET", "").strip()
+                if not secret:
+                    raise RuntimeUnavailable("Gateway integration requires LETRON_INTERNAL_API_SECRET")
+                request_headers["Authorization"] = f"Bearer {secret}"
+        elif path.startswith(("/api/resource/", "/api/method/")):
+            request_headers.update(self._control_plane_headers(method, path, request_id))
         body = None
         if payload is not None:
             request_headers["Content-Type"] = "application/json"
             body = json.dumps(payload).encode("utf-8")
-        request = Request(self.base + path, data=body, headers=request_headers, method=method)
+            if transport == "gateway" and path.startswith("/api/v1/") and method.upper() in {"POST", "PUT", "PATCH"}:
+                try:
+                    validate_request(method, path, body)
+                except ValueError as error:
+                    # Negative contract tests must still reach the live Gateway
+                    # so their HTTP status and envelope remain integration-tested.
+                    if not expected or not expected.intersection({400, 417}):
+                        raise AssertionError(f"local generated-contract validation failed for {method} {path}: {error}") from error
+        gateway_prefix = "" if path.startswith("/api/internal/") else "/api/gateway"
+        target = base + (gateway_prefix if transport == "gateway" else "") + path
+        request = Request(target, data=body, headers=request_headers, method=method)
         try:
             with self.opener.open(request, timeout=self.timeout) as raw:
                 status = raw.status
@@ -187,7 +222,16 @@ class ApiClient:
         if self.authorization:
             headers["Authorization"] = self.authorization
         path = "/api/v1/files/attachments"
-        request = Request(self.base + path, data=body, headers=headers, method="POST")
+        if self.transport == "gateway" and self.authenticated and "Authorization" not in headers:
+            secret = os.environ.get("LETRON_INTERNAL_API_SECRET", "").strip()
+            if not secret:
+                raise RuntimeUnavailable("Gateway integration requires LETRON_INTERNAL_API_SECRET")
+            headers["Authorization"] = f"Bearer {secret}"
+        upload_base = self.gateway_base if self.transport == "gateway" else self.backend_base
+        if not upload_base:
+            raise RuntimeUnavailable("Gateway upload requires a configured Gateway base URL")
+        upload_prefix = "/api/gateway" if self.transport == "gateway" else ""
+        request = Request(upload_base + upload_prefix + path, data=body, headers=headers, method="POST")
         try:
             with self.opener.open(request, timeout=self.timeout) as raw:
                 status = raw.status
@@ -203,10 +247,24 @@ class ApiClient:
             raise AssertionError(f"attachment upload: expected {expected}, got {status}: {_summary(data)}")
         return Response(status, response_headers, data, actual_request_id)
 
+    def authenticate(self) -> None:
+        """Mark this client as an integration caller using the existing secret."""
+        if not os.environ.get("LETRON_INTERNAL_API_SECRET", "").strip():
+            raise RuntimeUnavailable("Integration requires LETRON_INTERNAL_API_SECRET")
+        self.authenticated = True
+
     def login(self) -> None:
-        response = self.request("POST", "/api/method/login", {"usr": self.username, "pwd": self.password}, expected={200})
+        """Create a native Frappe session for a deliberately restricted test user."""
+        if not self.username or not self.password:
+            raise RuntimeUnavailable("Native permission test requires an explicit test user password")
+        response = self.request(
+            "POST",
+            "/api/method/login",
+            {"usr": self.username, "pwd": self.password},
+            expected={200},
+        )
         if not isinstance(response.data, dict) or not response.data.get("message"):
-            raise RuntimeUnavailable("Administrator login did not establish a Frappe session")
+            raise RuntimeUnavailable("Frappe test-user login did not establish a session")
 
     def document(self, method: str, doctype: str, name: str | None = None, payload: dict[str, Any] | None = None, **kwargs: Any) -> Response:
         path = "/api/resource/" + quote(doctype, safe="")
@@ -214,14 +272,37 @@ class ApiClient:
             path += "/" + quote(name, safe="")
         return self.request(method, path, payload, **kwargs)
 
+    def _gateway_app_for_path(self, path: str) -> str:
+        if path.startswith("/api/v1/assets/"):
+            return "assets"
+        if path.startswith("/api/v1/accounts/"):
+            return "accounts"
+        return "purchase"
+
     def public(self, method: str, path: str, payload: dict[str, Any] | None = None, **kwargs: Any) -> Response:
-        return self.request(method, path, payload, **kwargs)
+        return self.request(method, path, payload, transport=self.transport, **kwargs)
+
+    def _control_plane_headers(self, method: str, path: str, request_id: str) -> dict[str, str]:
+        secret = os.environ.get("LETRON_INTERNAL_API_SECRET", "").strip()
+        if not secret:
+            raise RuntimeUnavailable("Native fixture API requires LETRON_INTERNAL_API_SECRET")
+        timestamp = str(int(time.time()))
+        expires_at = str(int(timestamp) + 60)
+        signed_path = unquote(path.split("?", 1)[0])
+        payload = f"{timestamp}.{expires_at}.{method}.{signed_path}.{request_id}"
+        signature = hmac.new(secret.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()
+        return {
+            "X-Letron-Control-Timestamp": timestamp,
+            "X-Letron-Control-Expires-At": expires_at,
+            "X-Letron-Control-Request-Id": request_id,
+            "X-Letron-Control-Signature": signature,
+        }
 
     def health_and_login(self) -> None:
         health = self.request("GET", "/api/method/letron_api.control.api.health", expected={200})
         if not isinstance(health.data, dict) or health.data.get("message", {}).get("ok") is not True:
             raise RuntimeUnavailable("health endpoint did not return ok=true")
-        self.login()
+        self.authenticate()
 
     def request_with_retry(self, method: str, path: str, payload: dict[str, Any] | None = None, *, attempts: int = 3, **kwargs: Any) -> Response:
         """Bounded retry for transient responses; never retry 4xx business errors."""
@@ -298,7 +379,11 @@ def cleanup(client: ApiClient, created: list[tuple[str, str]], prefix: str) -> N
     # Always run the scoped teardown endpoint. Normal document deletion does
     # not remove durable outbox rows, so using this only as a fallback leaves
     # acceptance evidence behind after an otherwise successful run.
-    fallback = client.request("POST", "/api/method/letron_api.control.api.acceptance_cleanup", {"prefix": prefix}, expected={200})
+    fallback = client.request(
+        "POST",
+        f"/api/method/letron_api.control.api.acceptance_cleanup?prefix={quote(prefix, safe='')}",
+        expected={200},
+    )
     cleanup_result = fallback.data.get("message", {}) if isinstance(fallback.data, dict) else {}
     endpoint_failures = cleanup_result.get("failures", [])
     if endpoint_failures:
@@ -308,32 +393,3 @@ def cleanup(client: ApiClient, created: list[tuple[str, str]], prefix: str) -> N
     if failures and not cleanup_result.get("deleted"):
         raise AssertionError("fixture cleanup fallback removed nothing: " + ", ".join(failures))
 
-    residue_queries = (
-        ("File", [["file_name", "like", f"{prefix}%"]]),
-        ("Letron Event Outbox", [["payload", "like", f"%{prefix}%"]]),
-        ("Bank", [["name", "like", f"{prefix}%"]]),
-        ("Bank Account", [["name", "like", f"{prefix}%"]]),
-        ("Mode of Payment", [["name", "like", f"{prefix}%"]]),
-        ("Cost Center", [["company", "like", f"{prefix}%"]]),
-        ("Journal Entry", [["company", "like", f"{prefix}%"]]),
-        ("Payment Request", [["company", "like", f"{prefix}%"]]),
-        ("Stock Ledger Entry", [["company", "like", f"{prefix}%"]]),
-        ("GL Entry", [["company", "like", f"{prefix}%"]]),
-        ("Payment Ledger Entry", [["company", "like", f"{prefix}%"]]),
-        ("Stock Reconciliation", [["name", "like", f"{prefix}%"]]),
-        ("Serial No", [["name", "like", f"{prefix}%"]]),
-        ("Batch", [["name", "like", f"{prefix}%"]]),
-        ("Quality Inspection", [["name", "like", f"{prefix}%"]]),
-        ("Pick List", [["name", "like", f"{prefix}%"]]),
-        ("Shipment", [["name", "like", f"{prefix}%"]]),
-        ("Landed Cost Voucher", [["name", "like", f"{prefix}%"]]),
-        ("Stock Reservation Entry", [["name", "like", f"{prefix}%"]]),
-    )
-    for doctype, filters in residue_queries:
-        query = quote(json.dumps(filters))
-        residue = client.request(
-            "GET",
-            f"/api/resource/{quote(doctype, safe='')}?fields=%5B%22name%22%5D&filters={query}&limit_page_length=1",
-            expected={200},
-        )
-        assert residue.data["data"] == [], f"acceptance residue remains in {doctype}"

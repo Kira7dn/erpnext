@@ -15,7 +15,7 @@ from letron_api.control.policy import load_policy, policy_sha256
 from letron_api.control.policy_acceptance import DOCUMENT_BUILDERS, SINGLE_BUILDERS
 from letron_api.control.system_config import load_config
 
-from .api_runtime_harness import ApiClient, RuntimeUnavailable, response_data
+from .test_api_runtime_harness import ApiClient, RuntimeUnavailable, response_data
 
 pytestmark = pytest.mark.integration
 

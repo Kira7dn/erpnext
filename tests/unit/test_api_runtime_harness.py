@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from tests.integration.api_runtime_harness import (
+from tests.integration.test_api_runtime_harness import (
     ApiClient,
     Response,
     RuntimeUnavailable,

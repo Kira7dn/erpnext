@@ -20,6 +20,10 @@
       "json": "contracts/generated/openapi/modules/contacts.json",
       "yaml": "contracts/generated/openapi/modules/contacts.yaml"
     },
+    "Files": {
+      "json": "contracts/generated/openapi/modules/files.json",
+      "yaml": "contracts/generated/openapi/modules/files.yaml"
+    },
     "Selling": {
       "json": "contracts/generated/openapi/modules/selling.json",
       "yaml": "contracts/generated/openapi/modules/selling.yaml"

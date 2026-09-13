@@ -6,8 +6,8 @@ from typing import Any, cast
 
 import frappe
 
-from letron_api.infrastructure.frappe_compat import install_scheduler_compatibility
 from letron_api.control.policy import POLICY_DOCTYPES
+from letron_api.infrastructure.frappe_compat import install_scheduler_compatibility
 
 install_scheduler_compatibility()
 
@@ -298,7 +298,16 @@ def add_request_headers(response=None, request=None) -> None:
     if public_path and response.status_code < 400 and response.is_json:
         from letron_api.contract_runtime import validate_response
         try:
-            validate_response(request.method if request is not None else frappe.local.request.method, public_path, response.get_json())
+            response_value = response.get_json()
+            request_method = request.method if request is not None else frappe.local.request.method
+            # Native Frappe DELETE responses can be an empty JSON object after
+            # the document has already been removed. The public contract uses
+            # the standard FrappeResponse envelope, so normalize that native
+            # success before validating the generated contract.
+            if request_method == "DELETE" and isinstance(response_value, dict):
+                response_value.setdefault("message", "ok")
+                response.set_data(json.dumps(response_value, ensure_ascii=False))
+            validate_response(request_method, public_path, response_value)
         except ValueError as exc:
             frappe.logger("letron_api").error("Public response contract failed: %s", exc)
             response.status_code = 500

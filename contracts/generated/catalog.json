@@ -157514,8 +157514,8 @@
       "parameters": [
         {
           "name": "prefix",
-          "annotation": "str",
-          "required": true
+          "annotation": "str | None",
+          "required": false
         }
       ]
     },
@@ -157613,8 +157613,8 @@
       "parameters": [
         {
           "name": "kind",
-          "annotation": "str",
-          "required": true
+          "annotation": "str | None",
+          "required": false
         }
       ]
     },

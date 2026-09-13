@@ -92,10 +92,14 @@ def _assert_bootstrap_immutable(candidate: Path) -> None:
 
 
 @frappe.whitelist(methods=["GET"])
-def get_configuration(kind: str) -> dict[str, Any]:
+def get_configuration(kind: str | None = None) -> dict[str, Any]:
     """Read one validated YAML SOT without resolving or returning secrets."""
 
     _require_manager()
+    if not kind and frappe.request:
+        kind = frappe.request.args.get("kind")
+    if not kind:
+        frappe.throw("kind is required", exc=frappe.ValidationError)
     source = _source(kind)
     content = source.read_text(encoding="utf-8")
     validation = _validate_candidate(kind, source)

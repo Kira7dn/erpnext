@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from .api_runtime_harness import ApiClient, RuntimeUnavailable
+from .test_api_runtime_harness import ApiClient, RuntimeUnavailable
 
 pytestmark = pytest.mark.integration
 

@@ -309,7 +309,7 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
         )
         schemas[f"{model_schema_name}Write"] = _write_schema(
             schemas[model_schema_name],
-            child_table=dt.is_child_table,
+            child_table=bool(dt.is_child_table),
             required_overrides=overrides,
             allowed_overrides=allowed_overrides,
         )

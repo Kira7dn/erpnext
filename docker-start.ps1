@@ -132,7 +132,7 @@ if ($Action -in @('up','build','reload','restart','down','ps','logs','bootstrap'
 
 switch ($Action) {
     'build' {
-        Invoke-Compose @('build','backend')
+        Invoke-Compose @('build','backend','lark-bot','openclaw-lark')
     }
     'up' {
         Invoke-Compose @('config','--quiet')
@@ -142,6 +142,7 @@ switch ($Action) {
     }
     'reload' {
         Invoke-Compose @('restart','backend')
+        Invoke-Compose @('up','-d','--no-build','--force-recreate','lark-bot','openclaw-lark')
         Invoke-Readiness
     }
     'down' { Invoke-Compose @('down') }

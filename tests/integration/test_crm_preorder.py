@@ -6,7 +6,12 @@ from urllib.parse import quote, urlencode
 
 import pytest
 
-from .api_runtime_harness import ApiClient, RuntimeUnavailable, cleanup, response_data
+from .test_api_runtime_harness import (
+    ApiClient,
+    RuntimeUnavailable,
+    cleanup,
+    response_data,
+)
 
 pytestmark = pytest.mark.integration
 
