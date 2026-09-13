@@ -8,7 +8,7 @@ import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import frappe
 
@@ -100,6 +100,9 @@ def get_configuration(kind: str | None = None) -> dict[str, Any]:
         kind = frappe.request.args.get("kind")
     if not kind:
         frappe.throw("kind is required", exc=frappe.ValidationError)
+    if not isinstance(kind, str):
+        frappe.throw("kind must be a string", exc=frappe.ValidationError)
+    kind = cast(str, kind)
     source = _source(kind)
     content = source.read_text(encoding="utf-8")
     validation = _validate_candidate(kind, source)

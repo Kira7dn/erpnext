@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { redirectToLarkLogin } from "@/lib/auth-navigation";
 
 type Row = Record<string, unknown>;
-type Kind = "supplier" | "item" | "request";
+type Kind = "supplier" | "items" | "request";
 type Field = {
   name: string;
   label: string;
@@ -51,7 +51,7 @@ const filterFields: Record<Kind, { field: string; label: string }[]> = {
     { field: "supplier_type", label: "Loại" },
     { field: "disabled", label: "Trạng thái" },
   ],
-  item: [
+  items: [
     { field: "item_code", label: "Mã" },
     { field: "item_name", label: "Tên" },
     { field: "item_group", label: "Nhóm" },
@@ -74,7 +74,7 @@ const listFields: Record<Kind, { field: string; label: string }[]> = {
     { field: "country", label: "Quốc gia" },
     { field: "disabled", label: "Inactive" },
   ],
-  item: [
+  items: [
     { field: "name", label: "Mã" },
     { field: "item_code", label: "Item code" },
     { field: "item_name", label: "Tên" },
@@ -149,7 +149,7 @@ const config: Record<
       { name: "release_date", label: "Ngày mở lại", type: "date" },
     ],
   },
-  item: {
+  items: {
     code: "PUR-02",
     title: "Item / Vật tư",
     endpoint: "items",
@@ -265,7 +265,7 @@ async function api(path: string, init?: RequestInit) {
 }
 const ATTACHMENT_DOCTYPES: Record<Kind, string> = {
   supplier: "Supplier",
-  item: "Item",
+  items: "Items",
   request: "Material Request",
 };
 function text(value: unknown) {

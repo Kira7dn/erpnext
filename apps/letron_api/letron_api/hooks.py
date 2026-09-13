@@ -7,6 +7,7 @@ from typing import Any, cast
 import frappe
 
 from letron_api.control.policy import POLICY_DOCTYPES
+from letron_api.contract_runtime import public_route_maps
 from letron_api.infrastructure.frappe_compat import install_scheduler_compatibility
 
 install_scheduler_compatibility()
@@ -29,85 +30,7 @@ required_apps = ["frappe", "erpnext"]
 
 _ROUTE_CACHE: dict[tuple[str, str], str] = {}
 _ROUTE_CACHE_LOCK = Lock()
-PUBLIC_RESOURCE_ROUTES = {
-    ("assets", "assets"): "Asset",
-    ("assets", "asset-categories"): "Asset Category",
-    ("assets", "asset-capitalizations"): "Asset Capitalization",
-    ("assets", "asset-maintenance"): "Asset Maintenance",
-    ("assets", "asset-movements"): "Asset Movement",
-    ("assets", "asset-repairs"): "Asset Repair",
-    ("assets", "asset-value-adjustments"): "Asset Value Adjustment",
-    ("assets", "asset-maintenance-teams"): "Asset Maintenance Team",
-    ("assets", "asset-maintenance-logs"): "Asset Maintenance Log",
-    ("assets", "asset-depreciation-schedules"): "Asset Depreciation Schedule",
-    ("assets", "asset-shift-factors"): "Asset Shift Factor",
-    ("assets", "asset-shift-allocations"): "Asset Shift Allocation",
-    ("assets", "locations"): "Location",
-    ("selling", "customers"): "Customer",
-    ("selling", "quotations"): "Quotation",
-    ("selling", "sales-orders"): "Sales Order",
-    ("selling", "delivery-notes"): "Delivery Note",
-    ("crm", "leads"): "Lead",
-    ("crm", "opportunities"): "Opportunity",
-    ("crm", "request-for-quotations"): "Request for Quotation",
-    ("crm", "supplier-quotations"): "Supplier Quotation",
-    ("accounts", "sales-invoices"): "Sales Invoice",
-    ("accounts", "purchase-invoices"): "Purchase Invoice",
-    ("accounts", "payment-entries"): "Payment Entry",
-    ("accounts", "banks"): "Bank",
-    ("accounts", "bank-accounts"): "Bank Account",
-    ("accounts", "modes-of-payment"): "Mode of Payment",
-    ("accounts", "cost-centers"): "Cost Center",
-    ("accounts", "journal-entries"): "Journal Entry",
-    ("accounts", "payment-requests"): "Payment Request",
-    ("accounts", "bank-transactions"): "Bank Transaction",
-    ("accounts", "payment-orders"): "Payment Order",
-    ("accounts", "bank-transaction-rules"): "Bank Transaction Rule",
-    ("buying", "suppliers"): "Supplier",
-    ("buying", "purchase-orders"): "Purchase Order",
-    ("stock", "items"): "Item",
-    ("stock", "warehouses"): "Warehouse",
-    ("contacts", "addresses"): "Address",
-    ("contacts", "contacts"): "Contact",
-    ("stock", "material-requests"): "Material Request",
-    ("stock", "purchase-receipts"): "Purchase Receipt",
-    ("stock", "stock-entries"): "Stock Entry",
-    ("stock", "item-prices"): "Item Price",
-    ("stock", "stock-reconciliations"): "Stock Reconciliation",
-    ("stock", "serial-nos"): "Serial No",
-    ("stock", "batches"): "Batch",
-    ("stock", "quality-inspections"): "Quality Inspection",
-    ("stock", "pick-lists"): "Pick List",
-    ("stock", "shipments"): "Shipment",
-    ("stock", "landed-cost-vouchers"): "Landed Cost Voucher",
-    ("stock", "stock-reservation-entries"): "Stock Reservation Entry",
-}
-DOCUMENT_ACTIONS = {
-    ("crm", "supplier-quotations"): {"submit", "cancel"},
-    ("assets", "assets"): {"submit", "cancel"},
-    ("assets", "asset-capitalizations"): {"submit", "cancel"},
-    ("assets", "asset-movements"): {"submit", "cancel"},
-    ("assets", "asset-repairs"): {"submit", "cancel"},
-    ("assets", "asset-value-adjustments"): {"submit", "cancel"},
-    ("accounts", "sales-invoices"): {"submit", "cancel"},
-    ("accounts", "purchase-invoices"): {"submit", "cancel"},
-    ("selling", "sales-orders"): {"submit", "cancel"},
-    ("buying", "purchase-orders"): {"submit", "cancel"},
-    ("stock", "material-requests"): {"submit", "cancel"},
-    ("stock", "purchase-receipts"): {"submit", "cancel"},
-    ("stock", "stock-entries"): {"submit", "cancel"},
-    ("accounts", "journal-entries"): {"submit", "cancel"},
-    ("accounts", "payment-requests"): {"submit", "cancel"},
-    ("accounts", "payment-orders"): {"submit", "cancel"},
-    ("accounts", "payment-entries"): {"submit", "cancel"},
-    ("accounts", "bank-transactions"): {"submit", "cancel"},
-}
-CUSTOM_ACTIONS = {
-    ("crm", "supplier-quotations", "make-purchase-order"): "letron_api.control.api.make_purchase_order",
-    ("accounts", "bank-transactions", "reconcile"): "letron_api.finance.accounts_reconciliation.reconcile_bank_transaction",
-    ("accounts", "bank-transactions", "unreconcile"): "letron_api.finance.accounts_reconciliation.unreconcile_bank_transaction",
-    ("accounts", "bank-transaction-rules", "run-evaluation"): "letron_api.finance.banking.run_rule_evaluation",
-}
+PUBLIC_RESOURCE_ROUTES, GENERATED_DOCUMENT_ACTIONS, GENERATED_CUSTOM_ACTIONS = public_route_maps()
 # Shared by route authorization and policy materialization. Dependencies are
 # intentionally read-only and never imply create/write/delete permissions.
 PUBLIC_PERMISSION_DEPENDENCIES = {
@@ -233,14 +156,14 @@ def rewrite_public_routes() -> None:
         return
     if len(parts) == 6:
         name, action = parts[4:6]
-        document_action = action in DOCUMENT_ACTIONS.get((module_slug, doctype_slug), set())
-        custom_action = (module_slug, doctype_slug, action) in CUSTOM_ACTIONS
+        document_action = action in GENERATED_DOCUMENT_ACTIONS.get((module_slug, doctype_slug), set())
+        custom_action = (module_slug, doctype_slug, action) in GENERATED_CUSTOM_ACTIONS
         if not document_action and not custom_action:
             frappe.throw("Unknown public API action", exc=frappe.DoesNotExistError)
         from urllib.parse import urlencode
 
         target = (
-            f"/api/method/{CUSTOM_ACTIONS[(module_slug, doctype_slug, action)]}"
+            f"/api/method/{GENERATED_CUSTOM_ACTIONS[(module_slug, doctype_slug, action)]}"
             if custom_action
             else "/api/method/letron_api.control.api.document_action"
         )

@@ -6,6 +6,8 @@ one canonical route, and one native target.  OpenAPI remains the contract for
 request/response schemas.
 """
 
+import hashlib
+import json
 from typing import Any
 
 
@@ -35,12 +37,16 @@ def build_registry(spec: dict[str, Any], contract: dict[str, Any]) -> list[dict[
                 continue
             module, resource = parts[2:4]
             doctype = reverse_aliases.get(path) or reverse_aliases.get(path.split("/{", 1)[0])
-            action = parts[-1] if len(parts) >= 6 and not parts[-1].startswith("{") else None
+            action = operation.get("x-frappe-action") or operation.get("x-native-action")
+            if action is not None and not isinstance(action, str):
+                raise ValueError(f"{operation_id} action metadata must be a string")
             target: dict[str, str] = {}
             if doctype:
                 target["doctype"] = doctype
                 if action:
                     target["action"] = action
+            elif action:
+                raise ValueError(f"{operation_id} action metadata requires a native doctype target")
             handler = operation.get("x-frappe-handler")
             if isinstance(handler, str):
                 target["handler"] = handler
@@ -60,3 +66,12 @@ def build_registry(spec: dict[str, Any], contract: dict[str, Any]) -> list[dict[
                                      if isinstance(operation.get("responses", {}).get("200"), dict) else None),
             })
     return sorted(registry, key=lambda item: (item["path"], item["method"], item["operation_id"]))
+
+
+def registry_sha256(operations: list[dict[str, Any]]) -> str:
+    canonical = json.dumps(operations, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def registry_document(operations: list[dict[str, Any]]) -> dict[str, Any]:
+    return {"version": 1, "sha256": registry_sha256(operations), "operations": operations}

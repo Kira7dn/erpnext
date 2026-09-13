@@ -1,0 +1,7 @@
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+import { getStockResource } from "@/lib/letron-api";
+import { Button } from "@/components/ui/button";
+export const dynamic = "force-dynamic";
+export default async function WarehouseDetailPage({ params }: { params: Promise<{ name: string }> }) { const name = decodeURIComponent((await params).name); let row: Record<string, unknown>; try { row = await getStockResource("warehouses", name, (await cookies()).toString()); } catch (cause) { if (cause instanceof Error && "status" in cause && (cause as { status?: number }).status === 404) notFound(); throw cause; } return <main className="mx-auto max-w-5xl space-y-6 p-5 md:p-8"><div className="flex items-center justify-between"><div><div className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">Stock / WH-01</div><h1 className="text-3xl font-bold tracking-tight">{name}</h1></div><Button asChild><Link href={`/stock/warehouses/${encodeURIComponent(name)}/edit`}>Sửa</Link></Button></div><section className="grid gap-4 rounded-xl border bg-card p-5 shadow-sm sm:grid-cols-2">{Object.entries(row).map(([key, value]) => <div className="rounded-lg border p-4" key={key}><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{key.replaceAll("_", " ")}</dt><dd className="mt-2 break-words text-sm">{typeof value === "object" ? JSON.stringify(value) : String(value ?? "—")}</dd></div>)}</section></main>; }

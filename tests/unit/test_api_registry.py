@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from lib.api_generator.registry import build_registry
+from lib.api_generator.registry import build_registry, registry_document
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -33,3 +33,13 @@ def test_registry_builder_matches_committed_catalog():
 
     contract = yaml.safe_load((ROOT / "contracts/erpnext-integration.yml").read_text(encoding="utf-8"))
     assert build_registry(spec, contract) == catalog["operations"]
+
+
+def test_registry_action_comes_from_operation_metadata_not_url_suffix():
+    spec = {"paths": {"/api/v1/buying/orders/{name}/whatever": {"post": {
+        "operationId": "submitOrder", "x-public-operation": "update", "x-frappe-action": "submit",
+    }}}}
+    contract = {"runtime": {"public_resources": [{"doctype": "Purchase Order", "path": "/api/v1/buying/orders"}]}}
+    result = build_registry(spec, contract)
+    assert result[0]["target"] == {"doctype": "Purchase Order", "action": "submit"}
+    assert registry_document(result)["version"] == 1

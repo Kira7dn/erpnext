@@ -12,7 +12,7 @@ from .handoff import build_control_plane, write_handoff
 from .metadata import discover_doctypes, discover_whitelisted_methods
 from .models import serialize
 from .openapi import build_openapi
-from .registry import build_registry
+from .registry import build_registry, registry_document
 from .typescript import emit_types, emit_zod
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -93,18 +93,19 @@ def generate(root: Path, output: Path, handoff: Path | None = None) -> None:
                 operation_schema_dir.joinpath(f"{operation['operation_id']}.{suffix}.json").write_text(json.dumps({"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": f"https://letron.local/schemas/operations/{operation['operation_id']}.{suffix}.json", **_local_schema(schema)}, indent=2, ensure_ascii=False), encoding="utf-8")
     (output / "types.ts").write_text(emit_types(schemas), encoding="utf-8")
     (output / "zod.ts").write_text(emit_zod(schemas, registry), encoding="utf-8")
-    (output / "runtime-contract.json").write_text(json.dumps({"version": 1, "registry": registry, "schemas": schemas}, indent=2, ensure_ascii=False), encoding="utf-8")
+    registry_meta = registry_document(registry)
+    (output / "runtime-contract.json").write_text(json.dumps({"version": 1, "registry_version": registry_meta["version"], "registry_sha256": registry_meta["sha256"], "registry": registry, "schemas": schemas}, indent=2, ensure_ascii=False), encoding="utf-8")
     package_generated = root / "apps/letron_api/letron_api/generated"
     if output.resolve() == (root / "contracts/generated").resolve():
         package_generated.mkdir(parents=True, exist_ok=True)
-        (package_generated / "runtime-contract.json").write_text(json.dumps({"version": 1, "registry": registry, "schemas": schemas}, indent=2, ensure_ascii=False), encoding="utf-8")
+        (package_generated / "runtime-contract.json").write_text(json.dumps({"version": 1, "registry_version": registry_meta["version"], "registry_sha256": registry_meta["sha256"], "registry": registry, "schemas": schemas}, indent=2, ensure_ascii=False), encoding="utf-8")
         frontend_generated = root / "apps/erp/src/generated"
         frontend_generated.mkdir(parents=True, exist_ok=True)
         (frontend_generated / "types.ts").write_text(emit_types(schemas), encoding="utf-8")
         (frontend_generated / "zod.ts").write_text(emit_zod(schemas, registry), encoding="utf-8")
-    catalog = {"version": 1, "doctypes": serialize(doctypes), "whitelisted_methods": serialize(methods), "modules": {key: sorted(value) for key, value in sorted(module_index.items())}, "operations": registry}
+    catalog = {"version": 1, "registry_version": registry_meta["version"], "registry_sha256": registry_meta["sha256"], "doctypes": serialize(doctypes), "whitelisted_methods": serialize(methods), "modules": {key: sorted(value) for key, value in sorted(module_index.items())}, "operations": registry}
     (output / "catalog.json").write_text(json.dumps(catalog, indent=2, ensure_ascii=False), encoding="utf-8")
-    (output / "registry.json").write_text(json.dumps({"version": 1, "operations": registry}, indent=2, ensure_ascii=False), encoding="utf-8")
+    (output / "registry.json").write_text(json.dumps(registry_meta, indent=2, ensure_ascii=False), encoding="utf-8")
     (output / "openapi.json").write_text(json.dumps(spec, indent=2, ensure_ascii=False), encoding="utf-8")
     (output / "openapi.yaml").write_text(yaml.safe_dump(spec, sort_keys=False, allow_unicode=True), encoding="utf-8")
     module_dir = output / "openapi" / "modules"

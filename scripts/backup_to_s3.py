@@ -25,9 +25,9 @@ from botocore.exceptions import ClientError
 
 # Ensure UTF-8 output on Windows consoles
 if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    getattr(sys.stdout, "reconfigure")(encoding="utf-8", errors="replace")
 if hasattr(sys.stderr, "reconfigure"):
-    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    getattr(sys.stderr, "reconfigure")(encoding="utf-8", errors="replace")
 
 
 def load_env(env_path: Path) -> Dict[str, str]:
@@ -83,11 +83,12 @@ def group_backup_sets(files: List[str]) -> Dict[str, List[str]]:
 
 def format_size(size_bytes: int) -> str:
     """Format bytes into human-readable size."""
+    size = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB"]:
-        if size_bytes < 1024.0:
-            return f"{size_bytes:.1f} {unit}"
-        size_bytes /= 1024.0
-    return f"{size_bytes:.1f} TB"
+        if size < 1024.0:
+            return f"{size:.1f} {unit}"
+        size /= 1024.0
+    return f"{size:.1f} TB"
 
 
 def process_backup_set(

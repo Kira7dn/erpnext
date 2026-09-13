@@ -8,6 +8,7 @@ from typing import Any
 import frappe
 
 from letron_api.hooks import PUBLIC_PERMISSION_DEPENDENCIES
+from letron_api.contract_runtime import contract_metadata, public_route_maps
 
 RESOURCE_DOCTYPES = {
     "accounts/purchase-invoices": "Purchase Invoice",
@@ -96,15 +97,20 @@ def publish() -> dict[str, Any]:
         frappe.throw("Unsupported access policy", exc=frappe.ValidationError)
     version = payload.get("version")
     sha256 = payload.get("sha256")
+    registry_version = payload.get("registry_version")
+    registry_sha256 = payload.get("registry_sha256")
     if not isinstance(version, int) or not isinstance(sha256, str):
         frappe.throw("Policy version/hash missing", exc=frappe.ValidationError)
+    expected_registry_version, expected_registry_sha256 = contract_metadata()
+    if registry_version != expected_registry_version or not isinstance(registry_sha256, str) or not hmac.compare_digest(registry_sha256, expected_registry_sha256):
+        frappe.throw("Generated API registry version/hash mismatch", exc=frappe.ValidationError)
     canonical = json.dumps(policy, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     if not hmac.compare_digest(hashlib.sha256(canonical.encode()).hexdigest(), sha256):
         frappe.throw("Policy hash mismatch", exc=frappe.ValidationError)
     roles: set[str] = set()
     desired_permissions: dict[tuple[str, str], dict[str, int]] = {}
     desired_report_roles: dict[str, set[str]] = {}
-    from letron_api.hooks import DOCUMENT_ACTIONS, PUBLIC_RESOURCE_ROUTES
+    public_resource_routes, document_actions, _ = public_route_maps()
     for entitlement in policy.get("entitlements", []):
         if not isinstance(entitlement, dict):
             frappe.throw("Invalid entitlement", exc=frappe.ValidationError)
@@ -117,7 +123,7 @@ def publish() -> dict[str, Any]:
             frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 0}).insert(ignore_permissions=True)
         for rule in entitlement.get("rules", []):
             key = f"{rule.get('module')}/{rule.get('resource')}"
-            doctype = PUBLIC_RESOURCE_ROUTES.get((rule.get("module"), rule.get("resource"))) or POLICY_RESOURCE_DOCTYPES.get(key)
+            doctype = public_resource_routes.get((rule.get("module"), rule.get("resource"))) or POLICY_RESOURCE_DOCTYPES.get(key)
             if key == "erp/workspace" or key in VIRTUAL_POLICY_RESOURCES:
                 continue
             if not doctype:
@@ -143,11 +149,11 @@ def publish() -> dict[str, Any]:
                         report_fields["read"] = 1
                         report_fields["report"] = 1
                 if operation == "update" and (
-                    (rule.get("module"), rule.get("resource")) in DOCUMENT_ACTIONS
+                    (rule.get("module"), rule.get("resource")) in document_actions
                 ):
                     fields["submit"] = 1
                 if operation == "delete" and (
-                    (rule.get("module"), rule.get("resource")) in DOCUMENT_ACTIONS
+                    (rule.get("module"), rule.get("resource")) in document_actions
                 ):
                     fields["cancel"] = 1
                 for dependency in TRANSACTION_READ_DEPENDENCIES.get(key, set()):
@@ -180,5 +186,38 @@ def publish() -> dict[str, Any]:
     for item in stale:
         if (item.parent, item.role) not in desired_keys and item.permlevel == 0:
             frappe.delete_doc("Custom DocPerm", item.name, ignore_permissions=True, force=True)
+    projection_errors: list[str] = []
+    permission_fields = ("read", "write", "create", "delete", "submit", "cancel", "report")
+    for (doctype, role), expected in desired_permissions.items():
+        actual = frappe.db.get_value(
+            "Custom DocPerm",
+            {"parent": doctype, "role": role, "permlevel": 0},
+            list(permission_fields),
+            as_dict=True,
+        )
+        if not actual:
+            projection_errors.append(f"{doctype}/{role}: missing")
+            continue
+        mismatches = [
+            f"{field}={actual.get(field)} expected={value}"
+            for field, value in expected.items()
+            if int(actual.get(field) or 0) != value
+        ]
+        if mismatches:
+            projection_errors.append(f"{doctype}/{role}: {', '.join(mismatches)}")
+    if projection_errors:
+        frappe.throw(
+            "Access policy projection mismatch: " + "; ".join(projection_errors[:20]),
+            exc=frappe.ValidationError,
+        )
     frappe.clear_cache()
-    return {"ok": True, "version": version, "sha256": sha256, "roles": sorted(roles), "rules": len(desired_permissions)}
+    return {
+        "ok": True,
+        "projection_ok": True,
+        "version": version,
+        "sha256": sha256,
+        "registry_version": expected_registry_version,
+        "registry_sha256": expected_registry_sha256,
+        "roles": sorted(roles),
+        "rules": len(desired_permissions),
+    }

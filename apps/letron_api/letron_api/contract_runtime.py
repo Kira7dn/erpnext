@@ -25,6 +25,40 @@ def _load_contract() -> dict[str, Any]:
     return _CONTRACT
 
 
+def public_route_maps() -> tuple[dict[tuple[str, str], str], dict[tuple[str, str], set[str]], dict[tuple[str, str, str], str]]:
+    """Return route/action maps generated from the public contract registry."""
+
+    resources: dict[tuple[str, str], str] = {}
+    document_actions: dict[tuple[str, str], set[str]] = {}
+    custom_actions: dict[tuple[str, str, str], str] = {}
+    for entry in _load_contract()["registry"]:
+        module = entry.get("module")
+        resource = entry.get("resource")
+        target = entry.get("target") or {}
+        doctype = target.get("doctype")
+        action = target.get("action")
+        if not isinstance(module, str) or not isinstance(resource, str):
+            continue
+        if isinstance(doctype, str) and isinstance(action, str):
+            handler = target.get("handler")
+            if action in {"submit", "cancel"}:
+                document_actions.setdefault((module, resource), set()).add(action)
+            elif isinstance(handler, str):
+                custom_actions[(module, resource, action)] = handler
+        elif isinstance(doctype, str):
+            resources[(module, resource)] = doctype
+    return resources, document_actions, custom_actions
+
+
+def contract_metadata() -> tuple[int, str]:
+    contract = _load_contract()
+    version = contract.get("registry_version", contract.get("version"))
+    sha256 = contract.get("registry_sha256")
+    if not isinstance(version, int) or not isinstance(sha256, str) or len(sha256) != 64:
+        raise ValueError("Generated registry metadata is missing or invalid")
+    return version, sha256
+
+
 def _entry(method: str, path: str) -> dict[str, Any] | None:
     parts = path.strip("/").split("/")
     for item in _load_contract()["registry"]:

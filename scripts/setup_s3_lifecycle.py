@@ -16,9 +16,9 @@ from botocore.exceptions import ClientError
 
 # Ensure UTF-8 output on Windows consoles
 if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    getattr(sys.stdout, "reconfigure")(encoding="utf-8", errors="replace")
 if hasattr(sys.stderr, "reconfigure"):
-    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    getattr(sys.stderr, "reconfigure")(encoding="utf-8", errors="replace")
 
 
 def configure_lifecycle(bucket_name: str = "letron-erp-backups", profile: str = "letron-master"):

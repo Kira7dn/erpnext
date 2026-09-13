@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "sha256": "c3169f026ab7035e0c2b3858fedf041a22f3c8700c6e9f48e8172ce3c29b7edd",
   "operations": [
     {
       "operation_id": "listBankAccount",

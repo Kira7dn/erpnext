@@ -19,6 +19,18 @@ const cards = [
     description: "Tạo request với Item và Supplier; hệ thống tạo RFQ cùng orchestration.",
     href: "/purchase/requests",
   },
+  {
+    code: "PUR-04",
+    title: "Warehouse",
+    description: "Chọn và quản lý kho dùng cho Purchase Receipt.",
+    href: "/purchase/warehouses",
+  },
+  {
+    code: "PUR-05",
+    title: "Purchase Receipt",
+    description: "Tiếp nhận hàng từ Purchase Order đã Submit.",
+    href: "/purchase/receipts",
+  },
 ] as const;
 
 export default function PurchaseHomePage() {

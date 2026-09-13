@@ -11,8 +11,6 @@ const permissionRuleSchema = z.object({
   module: z.string().min(1),
   resource: z.string().min(1),
   operations: z.array(z.enum(PUBLIC_OPERATIONS)),
-  fields: z.array(z.string().min(1)).optional(),
-  scope: z.record(z.string().min(1), z.array(z.string().min(1))).optional(),
 }).strict();
 
 const entitlementSchema = z.object({
@@ -102,6 +100,7 @@ export function validatePolicy(value: unknown): { policy: AccessPolicy; sha256: 
     if (groupOwners.has(entitlement.id)) throw new Error(`Duplicate entitlement: ${entitlement.id}`);
     groupOwners.add(entitlement.id);
     if (!/^group-[a-z0-9-]+$/.test(entitlement.id)) throw new Error("Each role must be derived from a Lark User Group");
+    if (entitlement.rules.some((rule) => rule.operations.length === 0)) throw new Error("Policy rules must grant at least one operation");
   }
   if (!policy.entitlements.some((item) => item.larkGroupIds.includes(policy.requiredAccessGroupId))) {
     throw new Error("requiredAccessGroupId must be assigned to an entitlement");

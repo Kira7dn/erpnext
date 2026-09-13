@@ -68,7 +68,7 @@ export async function getUserBySessionToken(token: string | undefined): Promise<
       user: {
         include: {
           identities: {
-            where: { provider: "lark" },
+            where: { provider: "lark", tenantKey: getEnv().LARK_ALLOWED_TENANT_KEY, subjectType: "union_id" },
             orderBy: { id: "asc" },
             take: 1,
           },
@@ -97,7 +97,7 @@ export async function getUserByGatewaySessionToken(token: string | undefined, ap
   if (!token) return null;
   const session = await getDb().erpGatewaySession.findFirst({
     where: { tokenHash: sha256(token), revokedAt: null, expiresAt: { gt: new Date() }, ...(appKey ? { appKey } : {}), user: { status: "ACTIVE" } },
-    include: { user: { include: { identities: { where: { provider: "lark" }, orderBy: { id: "asc" }, take: 1 } } } },
+    include: { user: { include: { identities: { where: { provider: "lark", tenantKey: getEnv().LARK_ALLOWED_TENANT_KEY, subjectType: "union_id" }, orderBy: { id: "asc" }, take: 1 } } } },
   });
   if (!session) return null;
   const identity = session.user.identities[0];

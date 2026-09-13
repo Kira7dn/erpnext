@@ -22,7 +22,7 @@ export default async function AssetResourcePage({ params, searchParams }: { para
   const page = Math.max(1, Number.parseInt(rawPage ?? "1", 10) || 1);
   let rows: Record<string, unknown>[] = [];
   let error: string | null = null;
-  let login = false;
+  const login = false;
   let denied = false;
   let hasNext = false;
   const returnTo = `/assets/${resource}${page > 1 ? `?page=${page}` : ""}`;

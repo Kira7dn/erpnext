@@ -5,7 +5,7 @@ import { isPurchaseResource } from "@/lib/letron-api";
 import { portalAuthBaseUrl } from "@/lib/portal-config";
 import { APP_SESSION_COOKIES } from "@/lib/erp-auth-session";
 import { notifySupplierInvoiceRequest } from "@/lib/supplier-portal";
-import { createPurchaseReceiptRequestSchema } from "@/generated/zod";
+import { generatedOperation } from "@/lib/letron-api";
 
 const METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 const OFFICIAL_MODULES: Record<string, string> = {
@@ -60,10 +60,20 @@ async function proxy(
   const { path } = await context.params;
   if (!path?.length || !isPurchaseResource(path[0]))
     return apiErrorResponse("unknown_purchase_resource", 404, "Purchase resource was not found.");
+  if (path[0] === "purchase-receipts" && path.at(-1) === "invoice-request" && path.length === 2 && request.method === "POST") {
+    try {
+      const result = await notifySupplierInvoiceRequest(decodeURIComponent(path[1]));
+      return NextResponse.json({ data: result }, { status: 200 });
+    } catch (error) {
+      return apiErrorFromCause(error, "invoice_request_failed", "Purchase Receipt đã Submit nhưng chưa gửi được yêu cầu hóa đơn.", 502, "invoice_handoff");
+    }
+  }
   const officialPath = `${OFFICIAL_MODULES[path[0]]}${path
     .slice(1)
     .map((part) => `/${encodeURIComponent(part)}`)
     .join("")}`;
+  let operation;
+  try { operation = generatedOperation(`/api/v1/${officialPath}`, request.method); } catch { return apiErrorResponse("unknown_purchase_operation", 404, "Purchase operation was not found."); }
   const target = `${portalAuthBaseUrl()}/api/gateway/api/v1/${officialPath}${request.nextUrl.search}`;
   const headers = new Headers({ Accept: "application/json" });
   const sessionCookie = (await cookies()).get(APP_SESSION_COOKIES.purchase)?.value;
@@ -75,12 +85,12 @@ async function proxy(
   let requestBody: ArrayBuffer | undefined;
   if (request.method !== "GET" && request.method !== "DELETE") {
     requestBody = await request.arrayBuffer();
-    if (path[0] === "purchase-receipts" && path.length === 1 && request.method === "POST") {
+    if (request.headers.get("content-type")?.includes("application/json")) {
       try {
         const payload = JSON.parse(new TextDecoder().decode(requestBody));
-        createPurchaseReceiptRequestSchema.parse(payload);
+        generatedOperation(`/api/v1/${officialPath}`, request.method).request?.parse(payload);
       } catch (error) {
-        return apiErrorResponse("purchase_receipt_contract_invalid", 400, error instanceof Error ? error.message : "Purchase Receipt payload is invalid.");
+        return apiErrorResponse("purchase_contract_invalid", 400, error instanceof Error ? error.message : "Purchase payload is invalid.");
       }
     }
   }
@@ -103,6 +113,9 @@ async function proxy(
     } catch (error) {
       return apiErrorFromCause(error, "invoice_request_failed", "Purchase Receipt was submitted but the supplier invoice request could not be sent.");
     }
+  }
+  if (operation.response && response.headers.get("content-type")?.includes("application/json")) {
+    try { operation.response.parse(await response.clone().json()); } catch { return apiErrorResponse("purchase_response_invalid", 502, "Purchase response did not match the generated contract.", true); }
   }
   const responseHeaders = new Headers({
     "content-type": response.headers.get("content-type") ?? "application/json",

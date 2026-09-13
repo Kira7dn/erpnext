@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from typing import cast
 
 import frappe
 from frappe.utils.nestedset import rebuild_tree
@@ -95,11 +96,12 @@ def document_action(doctype: str, name: str, action: str) -> dict[str, object]:
     The route hook supplies the DocType and name from the clean module URL.
     Document methods enforce the normal Frappe permission and validation rules.
     """
-    from letron_api.hooks import DOCUMENT_ACTIONS, PUBLIC_RESOURCE_ROUTES
+    from letron_api.contract_runtime import public_route_maps
+    public_resource_routes, document_actions, _ = public_route_maps()
     supported = {
         (doctype, action)
-        for (module, resource), doctype in PUBLIC_RESOURCE_ROUTES.items()
-        for action in DOCUMENT_ACTIONS.get((module, resource), set())
+        for (module, resource), doctype in public_resource_routes.items()
+        for action in document_actions.get((module, resource), set())
     }
     if (doctype, action) not in supported:
         frappe.throw(f"Unsupported document action: {action}")
@@ -131,6 +133,9 @@ def acceptance_cleanup(prefix: str | None = None) -> dict[str, object]:
         prefix = frappe.request.args.get("prefix")
     if not prefix:
         frappe.throw("prefix is required", exc=frappe.ValidationError)
+    if not isinstance(prefix, str):
+        frappe.throw("prefix must be a string", exc=frappe.ValidationError)
+    prefix = cast(str, prefix)
     """Remove only local integration fixtures after runtime acceptance.
 
     This is intentionally not part of the public contract. It is available

@@ -82,6 +82,17 @@ describe("access policy", () => {
     })).toThrow("derived from a Lark User Group");
   });
 
+  it("rejects unsupported field and scope policy metadata", () => {
+    expect(() => validatePolicy({
+      ...policy,
+      entitlements: [{ ...policy.entitlements[0], rules: [{ ...policy.entitlements[0].rules[0], fields: ["company"] }] }],
+    })).toThrow();
+    expect(() => validatePolicy({
+      ...policy,
+      entitlements: [{ ...policy.entitlements[0], rules: [{ ...policy.entitlements[0].rules[0], scope: { company: ["ACME"] } }] }],
+    })).toThrow();
+  });
+
   it("hashes the canonical validated policy", () => {
     expect(policyHash(policy)).toMatch(/^[a-f0-9]{64}$/);
   });

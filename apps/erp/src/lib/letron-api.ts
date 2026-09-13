@@ -145,6 +145,14 @@ export const PURCHASE_RESOURCES = [
   "attachments",
 ] as const satisfies readonly PurchaseResource[];
 
+export type StockResource = "items" | "warehouses" | "material-requests" | "purchase-receipts";
+
+export function isStockResource(value: string): value is StockResource {
+  return Object.values(GENERATED_OPERATION_CONTRACTS).some((operation) =>
+    operation.path.split("/")[4] === value,
+  );
+}
+
 export function isPurchaseResource(value: string): value is PurchaseResource {
   return (PURCHASE_RESOURCES as readonly string[]).includes(value);
 }
@@ -263,7 +271,7 @@ type GeneratedOperationContract = {
   response?: { parse(value: unknown): unknown };
 };
 
-function generatedOperation(path: string, method: string): GeneratedOperationContract {
+export function generatedOperation(path: string, method: string): GeneratedOperationContract {
   const pathname = path.split("?", 1)[0];
   const match = Object.values(GENERATED_OPERATION_CONTRACTS).find((operation) => {
     if (operation.method !== method.toUpperCase()) return false;
@@ -283,7 +291,7 @@ function generatedOperation(path: string, method: string): GeneratedOperationCon
   return match;
 }
 
-function validateGeneratedRequest(operation: GeneratedOperationContract | undefined, init: RequestInit): void {
+export function validateGeneratedRequest(operation: GeneratedOperationContract | undefined, init: RequestInit): void {
   if (!operation) return;
   if (!operation.request || init.body === undefined || init.body === null) return;
   if (typeof init.body !== "string") return;
@@ -516,6 +524,19 @@ export async function getAccountingResource(
     `/api/v1/accounts/${resource}/${encodeURIComponent(name)}`,
     cookieHeader,
   );
+}
+
+export async function stockGatewayRequest<T>(path: string, cookieHeader: string, init: RequestInit = {}): Promise<T> {
+  return gatewayRequest<T>(`/api/v1/stock/${path.replace(/^\/+/, "")}`, cookieHeader, init);
+}
+
+export async function listStockResource(resource: StockResource, cookieHeader: string, searchParams = ""): Promise<Record<string, unknown>[]> {
+  const data = await stockGatewayRequest<unknown>(`${resource}${searchParams ? `?${searchParams}` : ""}`, cookieHeader);
+  return Array.isArray(data) ? data as Record<string, unknown>[] : [];
+}
+
+export async function getStockResource(resource: StockResource, name: string, cookieHeader: string): Promise<Record<string, unknown>> {
+  return stockGatewayRequest<Record<string, unknown>>(`${resource}/${encodeURIComponent(name)}`, cookieHeader);
 }
 
 export async function listBankAccounts(

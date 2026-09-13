@@ -1,0 +1,5 @@
+import { cookies } from "next/headers";
+import { PurchaseReceiptForm } from "@/components/purchase-receipt-form";
+import { gatewayRequest } from "@/lib/letron-api";
+export const dynamic = "force-dynamic";
+export default async function NewPurchaseReceiptPage() { const cookie = (await cookies()).toString(); const [purchaseOrders, warehouses] = await Promise.all([gatewayRequest<Record<string, unknown>[]>("/api/v1/buying/purchase-orders?limit_page_length=100", cookie), gatewayRequest<Record<string, unknown>[]>("/api/v1/stock/warehouses?limit_page_length=100", cookie)]); return <main className="mx-auto max-w-6xl space-y-6 p-5 md:p-8"><div><div className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-violet-700">Purchase / PUR-05</div><h1 className="text-3xl font-bold tracking-tight">Tạo Purchase Receipt Draft</h1><p className="mt-2 text-muted-foreground">Chọn Purchase Order đã Submit và xác nhận hàng đã giao.</p></div><PurchaseReceiptForm purchaseOrders={purchaseOrders} warehouses={warehouses} basePath="/purchase" /></main>; }
