@@ -1,0 +1,4 @@
+[submodule "apps/frappe"]
+	path = apps/frappe
+	url = https://github.com/Kira7dn/frappe.git
+	branch = letron/v16.30.0-auth-boundary
