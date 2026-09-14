@@ -88,7 +88,7 @@ def verify_gateway_request() -> str:
     if not frappe.db.exists("User", email):
         frappe.throw("Gateway identity is not provisioned in ERP", exc=frappe.AuthenticationError)
     frappe.set_user(email)
-    frappe.flags.ignore_permissions = True
+    frappe.local.letron_authz_granted = True
     frappe.local.letron_gateway_actor = {
         "id": headers.get("X-Letron-Gateway-User", "").strip(),
         "email": email,
@@ -141,10 +141,7 @@ def verify_internal_api_request() -> str:
     if not user or not frappe.db.exists("User", {"name": user, "enabled": 1}):
         frappe.throw("Internal API user is not provisioned in ERP", exc=frappe.AuthenticationError)
     frappe.set_user(user)
-    frappe.flags.ignore_permissions = True
-    frappe.local.letron_internal_authorized = True
     frappe.local.letron_authz_granted = True
-    frappe.local.letron_internal_user = user
     return user
 
 
@@ -190,8 +187,6 @@ def enforce_gateway_ingress() -> None:
             verify_internal_api_request()
             return
         verify_gateway_request()
-        frappe.local.letron_gateway_authorized = True
-        frappe.local.letron_authz_granted = True
         return
 
     # Native business APIs are never an authorization path. Global Portal is

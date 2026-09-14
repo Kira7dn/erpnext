@@ -91,10 +91,7 @@ def runtime_snapshot() -> dict[str, object]:
 
 
 def _require_gateway() -> None:
-    if not (
-        getattr(frappe.local, "letron_gateway_authorized", False)
-        or getattr(frappe.local, "letron_internal_authorized", False)
-    ):
+    if not getattr(frappe.local, "letron_authz_granted", False):
         frappe.throw("Global Portal gateway required", exc=frappe.AuthenticationError)
 
 
@@ -130,7 +127,6 @@ def public_resource_list(doctype: str) -> None:
         limit_start=frappe.local.form_dict.get("limit_start"),
         limit_page_length=frappe.local.form_dict.get("limit_page_length", 20),
         as_list=False,
-        ignore_permissions=True,
     )
     frappe.local.response["data"] = rows
 
@@ -148,7 +144,7 @@ def public_resource_create(doctype: str) -> None:
     payload = _public_document_payload()
     payload["doctype"] = doctype
     document = frappe.get_doc(payload)
-    document.insert(ignore_permissions=True)
+    document.insert()
     frappe.local.response["data"] = document.as_dict()
 
 
@@ -159,14 +155,14 @@ def public_resource_update(doctype: str, name: str) -> None:
     for field, value in _public_document_payload().items():
         if field not in {"doctype", "name", "owner", "creation", "modified", "modified_by"}:
             document.set(field, value)
-    document.save(ignore_permissions=True)
+    document.save()
     frappe.local.response["data"] = document.as_dict()
 
 
 @frappe.whitelist(methods=["DELETE"])
 def public_resource_delete(doctype: str, name: str) -> None:
     _require_gateway()
-    frappe.delete_doc(doctype, name, ignore_permissions=True)
+    frappe.delete_doc(doctype, name)
     frappe.local.response["message"] = "ok"
 
 
