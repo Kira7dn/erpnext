@@ -38,6 +38,39 @@ def _signature_payload(headers: Any) -> str:
     )
 
 
+def _verify_expiring_signature(
+    *,
+    secret: str,
+    timestamp: str,
+    expires_at: str,
+    signature: str,
+    payload: str,
+    request_id: str,
+    scope: str,
+    error_prefix: str,
+) -> None:
+    if not secret or not timestamp or not expires_at or not request_id or not signature:
+        frappe.throw(f"{error_prefix} authorization required", exc=frappe.AuthenticationError)
+    try:
+        issued_at = int(timestamp)
+        expiry = int(expires_at)
+        age = abs(time.time() - issued_at)
+    except ValueError:
+        frappe.throw(f"Invalid {error_prefix.lower()} timestamp", exc=frappe.AuthenticationError)
+    if age > 60 or expiry < time.time() or expiry <= issued_at:
+        frappe.throw(f"Expired {error_prefix.lower()} authorization", exc=frappe.AuthenticationError)
+    expected = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, signature):
+        frappe.throw(f"Invalid {error_prefix.lower()} authorization", exc=frappe.AuthenticationError)
+
+    cache = cast(Any, frappe.cache)()
+    replay_key = f"letron:{scope}:request:{request_id}"
+    with cache.lock(f"{replay_key}:lock", timeout=5, blocking_timeout=5):
+        if cache.get_value(replay_key):
+            frappe.throw(f"{error_prefix} request replayed", exc=frappe.AuthenticationError)
+        cache.set_value(replay_key, "1", expires_in_sec=60)
+
+
 def verify_gateway_request() -> str:
     headers = frappe.local.request.headers
     secret = os.environ.get("LETRON_AUTH_GATEWAY_SECRET", "")
@@ -47,19 +80,19 @@ def verify_gateway_request() -> str:
     path = headers.get("X-Letron-Gateway-Path", "")
     query = headers.get("X-Letron-Gateway-Query", "")
     body_hash = headers.get("X-Letron-Gateway-Body-Sha256", "")
-    if not secret or not timestamp or not expires_at or not signature or not path.startswith("/api/v1/"):
+    if not path.startswith("/api/v1/"):
         frappe.throw("Gateway authorization required", exc=frappe.AuthenticationError)
-    try:
-        issued_at = int(timestamp)
-        expiry = int(expires_at)
-        age = abs(time.time() - issued_at)
-    except ValueError:
-        frappe.throw("Invalid gateway timestamp", exc=frappe.AuthenticationError)
-    if age > 60 or expiry < time.time() or expiry <= issued_at:
-        frappe.throw("Expired gateway authorization", exc=frappe.AuthenticationError)
-    expected = hmac.new(secret.encode(), _signature_payload(headers).encode(), hashlib.sha256).hexdigest()
-    if not hmac.compare_digest(expected, signature):
-        frappe.throw("Invalid gateway authorization", exc=frappe.AuthenticationError)
+    request_id = headers.get("X-Letron-Gateway-Request-Id", "").strip()
+    _verify_expiring_signature(
+        secret=secret,
+        timestamp=timestamp,
+        expires_at=expires_at,
+        signature=signature,
+        payload=_signature_payload(headers),
+        request_id=request_id,
+        scope="gateway",
+        error_prefix="Gateway",
+    )
     if headers.get("X-Letron-Gateway-Method", "") != frappe.local.request.method:
         frappe.throw("Gateway method mismatch", exc=frappe.AuthenticationError)
     if path != frappe.local.request.path:
@@ -76,12 +109,6 @@ def verify_gateway_request() -> str:
     subject_type = headers.get("X-Letron-Gateway-Subject-Type", "").strip()
     if not email or not tenant or not subject or subject_type != "union_id" or not headers.get("X-Letron-Gateway-User", "").strip() or not headers.get("X-Letron-Gateway-Request-Id", "").strip():
         frappe.throw("Gateway identity missing", exc=frappe.AuthenticationError)
-    cache = cast(Any, frappe.cache)()
-    replay_key = f"letron:gateway:request:{headers.get('X-Letron-Gateway-Request-Id', '')}"
-    with cache.lock(f"{replay_key}:lock", timeout=5, blocking_timeout=5):
-        if cache.get_value(replay_key):
-            frappe.throw("Gateway request replayed", exc=frappe.AuthenticationError)
-        cache.set_value(replay_key, "1", expires_in_sec=60)
     # Auth Portal is the sole authorization source. The JIT handshake creates
     # this exact ERP User before a Gateway session is issued; never fall back to
     # Administrator or another technical principal.
@@ -96,8 +123,6 @@ def verify_gateway_request() -> str:
         "subject": subject,
         "subject_type": subject_type,
     }
-    frappe.local.letron_gateway_policy_version = headers.get("X-Letron-Gateway-Policy-Version", "")
-    frappe.local.letron_gateway_user = email
     return email
 
 
@@ -117,26 +142,17 @@ def verify_internal_api_request() -> str:
     signature = headers.get("X-Letron-Control-Signature", "")
     path = frappe.local.request.path
     method = frappe.local.request.method
-    if not secret or not timestamp or not expires_at or not request_id or not signature:
-        frappe.throw("Internal API authorization required", exc=frappe.AuthenticationError)
-    try:
-        issued_at = int(timestamp)
-        expiry = int(expires_at)
-        age = abs(time.time() - issued_at)
-    except ValueError:
-        frappe.throw("Invalid internal API timestamp", exc=frappe.AuthenticationError)
-    if age > 60 or expiry < time.time() or expiry <= issued_at:
-        frappe.throw("Expired internal API authorization", exc=frappe.AuthenticationError)
     payload = f"{timestamp}.{expires_at}.{method}.{path}.{request_id}"
-    expected = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
-    if not hmac.compare_digest(expected, signature):
-        frappe.throw("Invalid internal API authorization", exc=frappe.AuthenticationError)
-    cache = cast(Any, frappe.cache)()
-    replay_key = f"letron:internal-api:request:{request_id}"
-    with cache.lock(f"{replay_key}:lock", timeout=5, blocking_timeout=5):
-        if cache.get_value(replay_key):
-            frappe.throw("Internal API request replayed", exc=frappe.AuthenticationError)
-        cache.set_value(replay_key, "1", expires_in_sec=60)
+    _verify_expiring_signature(
+        secret=secret,
+        timestamp=timestamp,
+        expires_at=expires_at,
+        signature=signature,
+        payload=payload,
+        request_id=request_id,
+        scope="internal-api",
+        error_prefix="Internal API",
+    )
     user = os.environ.get("LETRON_INTERNAL_API_USER", "leducanh@ledb.vn").strip().lower()
     if not user or not frappe.db.exists("User", {"name": user, "enabled": 1}):
         frappe.throw("Internal API user is not provisioned in ERP", exc=frappe.AuthenticationError)
@@ -153,20 +169,17 @@ def verify_jit_request() -> None:
     request_id = headers.get("X-Letron-JIT-Request-Id", "")
     signature = headers.get("X-Letron-JIT-Signature", "")
     path = "/api/method/letron_api.auth.sso_identity.provision_identity"
-    if not secret or not timestamp or not expires_at or not request_id or not signature:
-        frappe.throw("ERP identity provisioning authorization required", exc=frappe.AuthenticationError)
-    try:
-        issued_at = int(timestamp)
-        expiry = int(expires_at)
-        age = abs(time.time() - issued_at)
-    except ValueError:
-        frappe.throw("Invalid identity provisioning timestamp", exc=frappe.AuthenticationError)
-    if age > 60 or expiry < time.time() or expiry <= issued_at:
-        frappe.throw("Expired identity provisioning authorization", exc=frappe.AuthenticationError)
     payload = f"{timestamp}.{expires_at}.POST.{path}.{request_id}"
-    expected = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
-    if not hmac.compare_digest(expected, signature):
-        frappe.throw("Invalid identity provisioning authorization", exc=frappe.AuthenticationError)
+    _verify_expiring_signature(
+        secret=secret,
+        timestamp=timestamp,
+        expires_at=expires_at,
+        signature=signature,
+        payload=payload,
+        request_id=request_id,
+        scope="jit",
+        error_prefix="Identity provisioning",
+    )
     if frappe.local.request.method != "POST" or frappe.local.request.path != path:
         frappe.throw("Invalid identity provisioning route", exc=frappe.AuthenticationError)
     frappe.local.letron_jit_authorized = True
