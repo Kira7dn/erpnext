@@ -2210,6 +2210,21 @@ shared:
             - {code: '60', name: Tiền và tương đương tiền đầu kỳ, line_type: metric, metric: opening_cash}
             - {code: '61', name: Ảnh hưởng của thay đổi tỷ giá hối đoái quy đổi ngoại tệ, line_type: metric, metric: translation_fx_effect}
             - {code: '70', name: Tiền và tương đương tiền cuối kỳ, line_type: subtotal, formula: 50+60+61}
+          B09-DN:
+            name: Bản thuyết minh báo cáo tài chính
+            statement: notes
+            columns: [section, content]
+            lines:
+            - {code: N01, name: Cơ sở lập và chính sách kế toán, line_type: note, source: policy, required: true}
+            - {code: N02, name: Tiền và tương đương tiền, line_type: note, source: balance_sheet.A1, required: true}
+            - {code: N03, name: 'Phải thu, phải trả và phân loại ngắn dài hạn', line_type: note, source: balance_sheet.A3/C1, required: true}
+            - {code: N04, name: Hàng tồn kho và dự phòng giảm giá, line_type: note, source: balance_sheet.A4, required: true}
+            - {code: N05, name: Tài sản cố định và khấu hao, line_type: note, source: balance_sheet.B1, required: true}
+            - {code: N06, name: 'Doanh thu, chi phí và thuế', line_type: note, source: profit_and_loss, required: true}
+            - {code: N07, name: 'Vốn chủ sở hữu, vay nợ và dự phòng', line_type: note, source: balance_sheet.D1/C5, required: true}
+            - {code: N08, name: Giao dịch với bên liên quan và nội bộ, line_type: note, source: consolidation, required: true}
+            - {code: N09, name: 'Cam kết, tài sản nợ tiềm tàng và sự kiện sau ngày khóa sổ', line_type: note, source: accounting_input, required: true}
+            - {code: N10, name: 'Ngoại tệ, tỷ giá, hợp nhất và ngoại lệ đối chiếu', line_type: note, source: accounting_input, required: true}
     company_defaults:
       accumulated_depreciation_account: '2141'
       capital_work_in_progress_account: '2412'

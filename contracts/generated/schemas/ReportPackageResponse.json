@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ReportPackageResponse.json",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "name",
+    "company",
+    "form_code",
+    "status"
+  ],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string"
+    },
+    "form_code": {
+      "type": "string",
+      "enum": [
+        "B01-DN",
+        "B02-DN",
+        "B03-DN",
+        "B09-DN"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Review",
+        "Closed",
+        "Issued",
+        "Rejected"
+      ]
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  }
+}

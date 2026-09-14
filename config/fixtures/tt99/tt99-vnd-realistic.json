@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "sample_id": "tt99-vnd-realistic-2026-v1",
+  "description": "Rollback-safe Vietnamese VND cash-flow and disclosure acceptance sample.",
+  "company": "Letron Holding",
+  "currency": "VND",
+  "periods": {
+    "current": {
+      "from_date": "2026-01-01",
+      "to_date": "2026-06-30"
+    },
+    "comparative": {
+      "from_date": "2025-01-01",
+      "to_date": "2025-06-30"
+    }
+  },
+  "journal_entries": [
+    {
+      "id": "current-tax-payment",
+      "period": "current",
+      "posting_date": "2026-03-20",
+      "purpose": "Nộp thuế thu nhập doanh nghiệp",
+      "lines": [
+        {"account_code": "333", "debit": 10000000, "credit": 0},
+        {"account_code": "111", "debit": 0, "credit": 10000000}
+      ]
+    },
+    {
+      "id": "current-interest-payment",
+      "period": "current",
+      "posting_date": "2026-04-05",
+      "purpose": "Trả chi phí lãi vay",
+      "lines": [
+        {"account_code": "335", "debit": 5000000, "credit": 0},
+        {"account_code": "111", "debit": 0, "credit": 5000000}
+      ]
+    },
+    {
+      "id": "current-fixed-asset-purchase",
+      "period": "current",
+      "posting_date": "2026-04-18",
+      "purpose": "Mua máy chủ phục vụ vận hành",
+      "lines": [
+        {"account_code": "211", "debit": 80000000, "credit": 0},
+        {"account_code": "111", "debit": 0, "credit": 80000000}
+      ]
+    },
+    {
+      "id": "current-loan-proceeds",
+      "period": "current",
+      "posting_date": "2026-05-02",
+      "purpose": "Nhận giải ngân khoản vay ngắn hạn",
+      "lines": [
+        {"account_code": "111", "debit": 200000000, "credit": 0},
+        {"account_code": "341", "debit": 0, "credit": 200000000}
+      ]
+    },
+    {
+      "id": "current-loan-repayment",
+      "period": "current",
+      "posting_date": "2026-06-10",
+      "purpose": "Trả nợ gốc vay",
+      "lines": [
+        {"account_code": "341", "debit": 60000000, "credit": 0},
+        {"account_code": "111", "debit": 0, "credit": 60000000}
+      ]
+    },
+    {
+      "id": "current-equity-injection",
+      "period": "current",
+      "posting_date": "2026-06-15",
+      "purpose": "Chủ sở hữu góp vốn bằng tiền",
+      "lines": [
+        {"account_code": "111", "debit": 150000000, "credit": 0},
+        {"account_code": "411", "debit": 0, "credit": 150000000}
+      ]
+    },
+    {
+      "id": "current-dividend-payment",
+      "period": "current",
+      "posting_date": "2026-06-25",
+      "purpose": "Chi trả lợi nhuận cho chủ sở hữu",
+      "lines": [
+        {"account_code": "332", "debit": 25000000, "credit": 0},
+        {"account_code": "111", "debit": 0, "credit": 25000000}
+      ]
+    },
+    {
+      "id": "comparative-loan-proceeds",
+      "period": "comparative",
+      "posting_date": "2025-04-02",
+      "purpose": "Kỳ so sánh - nhận giải ngân khoản vay",
+      "lines": [
+        {"account_code": "111", "debit": 100000000, "credit": 0},
+        {"account_code": "341", "debit": 0, "credit": 100000000}
+      ]
+    }
+  ],
+  "b09_inputs": {
+    "N08": {
+      "data": {
+        "related_party_transactions": "Không phát sinh ngoài phạm vi giao dịch nội bộ đã đối chiếu trong package hợp nhất mẫu.",
+        "intercompany_reconciliation": "Đã đối chiếu nội bộ cho kỳ mô phỏng."
+      },
+      "source_refs": ["sample://tt99-vnd-realistic-2026-v1/consolidation"]
+    },
+    "N09": {
+      "data": {
+        "commitments": "Không có cam kết trọng yếu ngoài hợp đồng vận hành thông thường.",
+        "contingent_liabilities": "Không có tài sản hoặc công nợ tiềm tàng trọng yếu.",
+        "subsequent_events": "Không phát sinh sự kiện trọng yếu sau ngày khóa sổ mô phỏng."
+      },
+      "source_refs": ["sample://tt99-vnd-realistic-2026-v1/accounting-owner/n09"]
+    },
+    "N10": {
+      "data": {
+        "foreign_currency": "Không phát sinh giao dịch ngoại tệ; báo cáo trình bày bằng VND.",
+        "consolidation": "Phạm vi mô phỏng là Letron Holding; elimination được kiểm thử riêng bằng acceptance fixture.",
+        "exceptions": "Không có ngoại lệ đối chiếu chưa xử lý."
+      },
+      "source_refs": ["sample://tt99-vnd-realistic-2026-v1/accounting-owner/n10"]
+    }
+  }
+}

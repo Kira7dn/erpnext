@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ReportPackageListResponse.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "items",
+    "total"
+  ],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "ReportPackageResponse.json"
+      }
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

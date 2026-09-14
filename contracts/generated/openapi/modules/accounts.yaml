@@ -1016,13 +1016,13 @@ paths:
       x-test-evidence:
         suite: accounts-reconciliation
         test: tests/integration/test_accounts_reconciliation.py
-  /api/v1/accounts/cost-centers:
+  /api/v1/accounts/journal-entries:
     get:
       tags:
       - 'Module: Accounts'
-      summary: List Cost Center records
-      description: List typed Cost Center documents.
-      operationId: listCostCenter
+      summary: List Journal Entry records
+      description: List typed Journal Entry documents.
+      operationId: listJournalEntry
       parameters:
       - *id002
       - *id015
@@ -1041,7 +1041,7 @@ paths:
                   data:
                     type: array
                     items: &id030
-                      $ref: '#/components/schemas/CostCenterResponse'
+                      $ref: '#/components/schemas/JournalEntryResponse'
                   message: {}
                 required:
                 - data
@@ -1062,20 +1062,22 @@ paths:
     post:
       tags:
       - 'Module: Accounts'
-      summary: Create Cost Center
-      description: Create a Cost Center using the runtime DocType schema.
-      operationId: createCostCenter
+      summary: Create Journal Entry
+      description: Create a Journal Entry using the runtime DocType schema.
+      operationId: createJournalEntry
       parameters: *id020
       requestBody:
         required: true
         content:
           application/json:
             schema: &id031
-              $ref: '#/components/schemas/CostCenterWrite'
+              $ref: '#/components/schemas/JournalEntryWrite'
             example:
-              cost_center_name: ''
-              parent_cost_center: ''
+              voucher_type: ''
+              naming_series: ''
+              posting_date: ''
               company: ''
+              accounts: []
       responses:
         '200':
           description: Created typed resource
@@ -1101,11 +1103,11 @@ paths:
       x-test-evidence:
         suite: extended-api
         test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
-  /api/v1/accounts/cost-centers/{name}:
+  /api/v1/accounts/journal-entries/{name}:
     get:
       tags:
       - 'Module: Accounts'
-      operationId: getCostCenter
+      operationId: getJournalEntry
       parameters:
       - name: name
         in: path
@@ -1141,7 +1143,7 @@ paths:
     put:
       tags:
       - 'Module: Accounts'
-      operationId: updateCostCenter
+      operationId: updateJournalEntry
       parameters: &id032
       - name: name
         in: path
@@ -1183,200 +1185,8 @@ paths:
     delete:
       tags:
       - 'Module: Accounts'
-      operationId: deleteCostCenter
-      parameters: *id032
-      responses:
-        '200':
-          description: Deleted typed resource
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FrappeResponse'
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-public-operation: delete
-      x-test-status: passed
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: extended-api
-        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
-  /api/v1/accounts/journal-entries:
-    get:
-      tags:
-      - 'Module: Accounts'
-      summary: List Journal Entry records
-      description: List typed Journal Entry documents.
-      operationId: listJournalEntry
-      parameters:
-      - *id002
-      - *id015
-      - *id016
-      - *id017
-      - *id018
-      - *id019
-      responses:
-        '200':
-          description: Typed resource list
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: &id033
-                      $ref: '#/components/schemas/JournalEntryResponse'
-                  message: {}
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-public-operation: list
-      x-test-status: passed
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: extended-api
-        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
-    post:
-      tags:
-      - 'Module: Accounts'
-      summary: Create Journal Entry
-      description: Create a Journal Entry using the runtime DocType schema.
-      operationId: createJournalEntry
-      parameters: *id020
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: &id034
-              $ref: '#/components/schemas/JournalEntryWrite'
-            example:
-              voucher_type: ''
-              naming_series: ''
-              posting_date: ''
-              company: ''
-              accounts: []
-      responses:
-        '200':
-          description: Created typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id033
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-public-operation: create
-      x-test-status: passed
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: extended-api
-        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
-  /api/v1/accounts/journal-entries/{name}:
-    get:
-      tags:
-      - 'Module: Accounts'
-      operationId: getJournalEntry
-      parameters:
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      - *id002
-      responses:
-        '200':
-          description: Typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id033
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-public-operation: read
-      x-test-status: passed
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: extended-api
-        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
-    put:
-      tags:
-      - 'Module: Accounts'
-      operationId: updateJournalEntry
-      parameters: &id035
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      - *id002
-      - *id012
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: *id034
-      responses:
-        '200':
-          description: Updated typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id033
-                required:
-                - data
-        '400': *id004
-        '401': *id005
-        '403': *id006
-        '404': *id007
-        '409': *id008
-        '417': *id009
-        '429': *id010
-        '500': *id011
-      x-public-operation: update
-      x-test-status: passed
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: extended-api
-        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
-    delete:
-      tags:
-      - 'Module: Accounts'
       operationId: deleteJournalEntry
-      parameters: *id035
+      parameters: *id032
       responses:
         '200':
           description: Deleted typed resource
@@ -1404,7 +1214,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: submitJournalEntry
-      parameters: *id035
+      parameters: *id032
       responses:
         '200':
           description: Submit document
@@ -1413,7 +1223,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id033
+                  message: *id030
                 required:
                 - message
         '400': *id004
@@ -1437,7 +1247,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: cancelJournalEntry
-      parameters: *id035
+      parameters: *id032
       responses:
         '200':
           description: Cancel document
@@ -1446,7 +1256,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id033
+                  message: *id030
                 required:
                 - message
         '400': *id004
@@ -1488,7 +1298,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id036
+                    items: &id033
                       $ref: '#/components/schemas/ModeofPaymentResponse'
                   message: {}
                 required:
@@ -1518,7 +1328,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id037
+            schema: &id034
               $ref: '#/components/schemas/ModeofPaymentWrite'
             example:
               mode_of_payment: ''
@@ -1530,7 +1340,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id036
+                  data: *id033
                 required:
                 - data
         '400': *id004
@@ -1567,7 +1377,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id036
+                  data: *id033
                 required:
                 - data
         '400': *id004
@@ -1588,7 +1398,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updateModeofPayment
-      parameters: &id038
+      parameters: &id035
       - name: name
         in: path
         required: true
@@ -1600,7 +1410,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id037
+            schema: *id034
       responses:
         '200':
           description: Updated typed resource
@@ -1609,7 +1419,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id036
+                  data: *id033
                 required:
                 - data
         '400': *id004
@@ -1630,7 +1440,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deleteModeofPayment
-      parameters: *id038
+      parameters: *id035
       responses:
         '200':
           description: Deleted typed resource
@@ -1676,7 +1486,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id039
+                    items: &id036
                       $ref: '#/components/schemas/PaymentEntryResponse'
                   message: {}
                 required:
@@ -1706,7 +1516,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id040
+            schema: &id037
               $ref: '#/components/schemas/PaymentEntryWrite'
             example:
               naming_series: ''
@@ -1727,7 +1537,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id039
+                  data: *id036
                 required:
                 - data
         '400': *id004
@@ -1764,7 +1574,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id039
+                  data: *id036
                 required:
                 - data
         '400': *id004
@@ -1785,7 +1595,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updatePaymentEntry
-      parameters: &id041
+      parameters: &id038
       - name: name
         in: path
         required: true
@@ -1797,7 +1607,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id040
+            schema: *id037
       responses:
         '200':
           description: Updated typed resource
@@ -1806,7 +1616,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id039
+                  data: *id036
                 required:
                 - data
         '400': *id004
@@ -1827,7 +1637,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deletePaymentEntry
-      parameters: *id041
+      parameters: *id038
       responses:
         '200':
           description: Deleted typed resource
@@ -1855,7 +1665,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: submitPaymentEntry
-      parameters: *id041
+      parameters: *id038
       responses:
         '200':
           description: Submit document
@@ -1864,7 +1674,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id039
+                  message: *id036
                 required:
                 - message
         '400': *id004
@@ -1888,7 +1698,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: cancelPaymentEntry
-      parameters: *id041
+      parameters: *id038
       responses:
         '200':
           description: Cancel document
@@ -1897,7 +1707,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id039
+                  message: *id036
                 required:
                 - message
         '400': *id004
@@ -1939,7 +1749,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id042
+                    items: &id039
                       $ref: '#/components/schemas/PaymentOrderResponse'
                   message: {}
                 required:
@@ -1969,7 +1779,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id043
+            schema: &id040
               $ref: '#/components/schemas/PaymentOrderWrite'
             example:
               naming_series: ''
@@ -1984,7 +1794,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id042
+                  data: *id039
                 required:
                 - data
         '400': *id004
@@ -2021,7 +1831,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id042
+                  data: *id039
                 required:
                 - data
         '400': *id004
@@ -2042,7 +1852,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updatePaymentOrder
-      parameters: &id044
+      parameters: &id041
       - name: name
         in: path
         required: true
@@ -2054,7 +1864,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id043
+            schema: *id040
       responses:
         '200':
           description: Updated typed resource
@@ -2063,7 +1873,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id042
+                  data: *id039
                 required:
                 - data
         '400': *id004
@@ -2084,7 +1894,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deletePaymentOrder
-      parameters: *id044
+      parameters: *id041
       responses:
         '200':
           description: Deleted typed resource
@@ -2112,7 +1922,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: submitPaymentOrder
-      parameters: *id044
+      parameters: *id041
       responses:
         '200':
           description: Submit document
@@ -2121,7 +1931,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id042
+                  message: *id039
                 required:
                 - message
         '400': *id004
@@ -2145,7 +1955,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: cancelPaymentOrder
-      parameters: *id044
+      parameters: *id041
       responses:
         '200':
           description: Cancel document
@@ -2154,7 +1964,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id042
+                  message: *id039
                 required:
                 - message
         '400': *id004
@@ -2196,7 +2006,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id045
+                    items: &id042
                       $ref: '#/components/schemas/PaymentRequestResponse'
                   message: {}
                 required:
@@ -2226,7 +2036,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id046
+            schema: &id043
               $ref: '#/components/schemas/PaymentRequestWrite'
             example:
               payment_request_type: ''
@@ -2240,7 +2050,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id045
+                  data: *id042
                 required:
                 - data
         '400': *id004
@@ -2277,7 +2087,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id045
+                  data: *id042
                 required:
                 - data
         '400': *id004
@@ -2298,7 +2108,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updatePaymentRequest
-      parameters: &id047
+      parameters: &id044
       - name: name
         in: path
         required: true
@@ -2310,7 +2120,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id046
+            schema: *id043
       responses:
         '200':
           description: Updated typed resource
@@ -2319,7 +2129,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id045
+                  data: *id042
                 required:
                 - data
         '400': *id004
@@ -2340,7 +2150,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deletePaymentRequest
-      parameters: *id047
+      parameters: *id044
       responses:
         '200':
           description: Deleted typed resource
@@ -2368,7 +2178,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: submitPaymentRequest
-      parameters: *id047
+      parameters: *id044
       responses:
         '200':
           description: Submit document
@@ -2377,7 +2187,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id045
+                  message: *id042
                 required:
                 - message
         '400': *id004
@@ -2401,7 +2211,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: cancelPaymentRequest
-      parameters: *id047
+      parameters: *id044
       responses:
         '200':
           description: Cancel document
@@ -2410,7 +2220,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id045
+                  message: *id042
                 required:
                 - message
         '400': *id004
@@ -2452,7 +2262,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id048
+                    items: &id045
                       $ref: '#/components/schemas/PurchaseInvoiceResponse'
                   message: {}
                 required:
@@ -2482,7 +2292,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id049
+            schema: &id046
               $ref: '#/components/schemas/PurchaseInvoiceWrite'
             example:
               naming_series: ''
@@ -2498,7 +2308,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id048
+                  data: *id045
                 required:
                 - data
         '400': *id004
@@ -2535,7 +2345,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id048
+                  data: *id045
                 required:
                 - data
         '400': *id004
@@ -2556,7 +2366,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updatePurchaseInvoice
-      parameters: &id050
+      parameters: &id047
       - name: name
         in: path
         required: true
@@ -2568,7 +2378,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id049
+            schema: *id046
       responses:
         '200':
           description: Updated typed resource
@@ -2577,7 +2387,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id048
+                  data: *id045
                 required:
                 - data
         '400': *id004
@@ -2598,7 +2408,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deletePurchaseInvoice
-      parameters: *id050
+      parameters: *id047
       responses:
         '200':
           description: Deleted typed resource
@@ -2626,7 +2436,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: submitPurchaseInvoice
-      parameters: *id050
+      parameters: *id047
       responses:
         '200':
           description: Submit document
@@ -2635,7 +2445,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id048
+                  message: *id045
                 required:
                 - message
         '400': *id004
@@ -2659,7 +2469,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: cancelPurchaseInvoice
-      parameters: *id050
+      parameters: *id047
       responses:
         '200':
           description: Cancel document
@@ -2668,7 +2478,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id048
+                  message: *id045
                 required:
                 - message
         '400': *id004
@@ -2710,7 +2520,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id051
+                    items: &id048
                       $ref: '#/components/schemas/SalesInvoiceResponse'
                   message: {}
                 required:
@@ -2740,7 +2550,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id052
+            schema: &id049
               $ref: '#/components/schemas/SalesInvoiceWrite'
             example:
               naming_series: ''
@@ -2761,7 +2571,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id051
+                  data: *id048
                 required:
                 - data
         '400': *id004
@@ -2798,7 +2608,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id051
+                  data: *id048
                 required:
                 - data
         '400': *id004
@@ -2819,7 +2629,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updateSalesInvoice
-      parameters: &id053
+      parameters: &id050
       - name: name
         in: path
         required: true
@@ -2831,7 +2641,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id052
+            schema: *id049
       responses:
         '200':
           description: Updated typed resource
@@ -2840,7 +2650,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id051
+                  data: *id048
                 required:
                 - data
         '400': *id004
@@ -2861,7 +2671,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deleteSalesInvoice
-      parameters: *id053
+      parameters: *id050
       responses:
         '200':
           description: Deleted typed resource
@@ -2889,7 +2699,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: submitSalesInvoice
-      parameters: *id053
+      parameters: *id050
       responses:
         '200':
           description: Submit document
@@ -2898,7 +2708,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id051
+                  message: *id048
                 required:
                 - message
         '400': *id004
@@ -2922,7 +2732,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: cancelSalesInvoice
-      parameters: *id053
+      parameters: *id050
       responses:
         '200':
           description: Cancel document
@@ -2931,7 +2741,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id051
+                  message: *id048
                 required:
                 - message
         '400': *id004
@@ -3823,6 +3633,864 @@ paths:
       x-test-evidence:
         suite: accounts-reconciliation
         test: tests/integration/test_accounts_reconciliation.py
+  /api/v1/accounts/report-packages:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listReportPackages
+      operationId: listReportPackages
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: form_code
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - B01-DN
+          - B02-DN
+          - B03-DN
+          - B09-DN
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from_date
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to_date
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageListResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.list_report_packages
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: createReportPackage
+      operationId: createReportPackage
+      parameters:
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.create_report_package
+      x-public-operation: create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportPackageCreateRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/report-packages/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getReportPackage
+      operationId: getReportPackage
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.get_report_package
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    put:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: updateReportPackage
+      operationId: updateReportPackage
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.update_report_package
+      x-public-operation: update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportPackageUpdateRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/report-packages/{name}/review:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: reviewReportPackage
+      operationId: reviewReportPackage
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.review_report_package
+      x-public-operation: update
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/report-packages/{name}/close:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: closeReportPackage
+      operationId: closeReportPackage
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.close_report_package
+      x-public-operation: update
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/report-packages/{name}/issue:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: issueReportPackage
+      operationId: issueReportPackage
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.issue_report_package
+      x-public-operation: update
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/report-packages/{name}/reject:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: rejectReportPackage
+      operationId: rejectReportPackage
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.reject_report_package
+      x-public-operation: update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportPackageRejectRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/companies:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listCompanies
+      operationId: listCompanies
+      parameters:
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.list_companies
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/companies/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getCompany
+      operationId: getCompany
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.get_company
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/accounts:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listAccounts
+      operationId: listAccounts
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.list_accounts
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/accounts/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getAccount
+      operationId: getAccount
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.get_account
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/finance-books:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listFinanceBooks
+      operationId: listFinanceBooks
+      parameters:
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.list_finance_books
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/finance-books/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getFinanceBook
+      operationId: getFinanceBook
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.get_finance_book
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/fiscal-years:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listFiscalYears
+      operationId: listFiscalYears
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.list_fiscal_years
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/fiscal-years/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getFiscalYear
+      operationId: getFiscalYear
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.get_fiscal_year
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/cost-centers:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listCostCenters
+      operationId: listCostCenters
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.list_cost_centers
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/cost-centers/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getCostCenter
+      operationId: getCostCenter
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.get_cost_center
+      x-public-operation: read
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
   /api/v1/accounts/settings:
     get:
       tags:
@@ -3838,7 +4506,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FrappeResponse'
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
         '400': *id004
         '401': *id005
         '403': *id006
@@ -3854,12 +4527,66 @@ paths:
       x-test-evidence:
         suite: accounts-reconciliation
         test: tests/integration/test_accounts_reconciliation.py
-    put:
+  /api/v1/accounts/shareholders:
+    get:
       tags:
       - 'Module: Accounts'
       - Business routes
-      summary: updateAccountsSettings
-      operationId: updateAccountsSettings
+      summary: listShareholders
+      operationId: listShareholders
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.list_shareholders
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: createShareholder
+      operationId: createShareholder
       parameters:
       - *id002
       - *id012
@@ -3869,7 +4596,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FrappeResponse'
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
         '400': *id004
         '401': *id005
         '403': *id006
@@ -3878,7 +4610,332 @@ paths:
         '417': *id009
         '429': *id010
         '500': *id011
-      x-frappe-handler: letron_api.finance.banking.accounts_settings_update
+      x-frappe-handler: letron_api.finance.tt99_api.create_shareholder
+      x-public-operation: create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareholderWriteRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/shareholders/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getShareholder
+      operationId: getShareholder
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.get_shareholder
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    put:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: updateShareholder
+      operationId: updateShareholder
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.update_shareholder
+      x-public-operation: update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareholderUpdateRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/period-closing-vouchers:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listPeriodClosingVouchers
+      operationId: listPeriodClosingVouchers
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: fiscal_year
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.list_period_closing_vouchers
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: createPeriodClosingVoucher
+      operationId: createPeriodClosingVoucher
+      parameters:
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.create_period_closing_voucher
+      x-public-operation: create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PeriodClosingVoucherWriteRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/period-closing-vouchers/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getPeriodClosingVoucher
+      operationId: getPeriodClosingVoucher
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.get_period_closing_voucher
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    put:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: updatePeriodClosingVoucher
+      operationId: updatePeriodClosingVoucher
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.update_period_closing_voucher
+      x-public-operation: update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PeriodClosingVoucherUpdateRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/period-closing-vouchers/{name}/submit:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: submitPeriodClosingVoucher
+      operationId: submitPeriodClosingVoucher
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.submit_period_closing_voucher
       x-public-operation: update
       requestBody:
         required: false
@@ -3890,8 +4947,57 @@ paths:
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
-        suite: accounts-reconciliation
-        test: tests/integration/test_accounts_reconciliation.py
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/period-closing-vouchers/{name}/cancel:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: cancelPeriodClosingVoucher
+      operationId: cancelPeriodClosingVoucher
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id002
+      - *id012
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id004
+        '401': *id005
+        '403': *id006
+        '404': *id007
+        '409': *id008
+        '417': *id009
+        '429': *id010
+        '500': *id011
+      x-frappe-handler: letron_api.finance.tt99_api.cancel_period_closing_voucher
+      x-public-operation: update
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
 components:
   securitySchemes:
     frappeToken:
@@ -4435,54 +5541,6 @@ components:
       - check
       - name
       - value
-      additionalProperties: true
-      x-module: Accounts
-    CostCenter:
-      type: object
-      properties:
-        name:
-          type: string
-        sb0:
-          type: string
-        cost_center_name:
-          type: string
-        cost_center_number:
-          type: string
-        parent_cost_center:
-          type: string
-          x-frappe-target-doctype: Cost Center
-        company:
-          type: string
-          x-frappe-target-doctype: Company
-        cb0:
-          type: string
-        is_group:
-          type:
-          - boolean
-          - integer
-          minimum: 0
-          maximum: 1
-        lft:
-          type: integer
-          writeOnly: true
-        rgt:
-          type: integer
-          writeOnly: true
-        old_parent:
-          type: string
-          x-frappe-target-doctype: Cost Center
-          writeOnly: true
-        disabled:
-          type:
-          - boolean
-          - integer
-          minimum: 0
-          maximum: 1
-      required:
-      - company
-      - cost_center_name
-      - name
-      - parent_cost_center
       additionalProperties: true
       x-module: Accounts
     ItemWiseTaxDetail:
@@ -9067,7 +10125,7 @@ components:
       required:
       - allocations
       additionalProperties: false
-    PurchaseOrchestrationRequest: &id054
+    PurchaseOrchestrationRequest: &id051
       type: object
       additionalProperties: false
       required:
@@ -9135,7 +10193,7 @@ components:
             minLength: 1
         justification:
           type: string
-    PurchaseOrchestrationResponse: &id055
+    PurchaseOrchestrationResponse: &id052
       type: object
       additionalProperties: true
       required:
@@ -9146,7 +10204,7 @@ components:
           type: string
         status:
           type: string
-    ConsolidationAdjustmentRequest: &id056
+    ConsolidationAdjustmentRequest: &id053
       type: object
       additionalProperties: false
       required:
@@ -9176,7 +10234,7 @@ components:
           minLength: 3
           maxLength: 80
           pattern: ^[A-Za-z0-9_.-]+$
-    ConsolidationAdjustmentCommandRequest: &id057
+    ConsolidationAdjustmentCommandRequest: &id054
       type: object
       additionalProperties: false
       required:
@@ -9185,7 +10243,7 @@ components:
         journal_entry:
           type: string
           minLength: 1
-    ConsolidationAdjustmentResponse: &id058
+    ConsolidationAdjustmentResponse: &id055
       type: object
       additionalProperties: true
       required:
@@ -9211,7 +10269,7 @@ components:
           items:
             type: object
             additionalProperties: true
-    ConsolidationPackageResponse: &id059
+    ConsolidationPackageResponse: &id056
       type: object
       additionalProperties: true
       required:
@@ -9282,6 +10340,254 @@ components:
           type: string
           enum:
           - native_journal_entry_on_holding_finance_book
+    MasterRecordResponse: &id057
+      type: object
+      additionalProperties: true
+    MasterListResponse: &id058
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - total
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        total:
+          type: integer
+          minimum: 0
+    ReportPackageCreateRequest: &id059
+      type: object
+      additionalProperties: false
+      required:
+      - company
+      - form_code
+      - from_date
+      - to_date
+      properties:
+        company:
+          type: string
+          minLength: 1
+        form_code:
+          type: string
+          enum:
+          - B01-DN
+          - B02-DN
+          - B03-DN
+          - B09-DN
+        from_date:
+          type: string
+          format: date
+        to_date:
+          type: string
+          format: date
+        comparative_from_date:
+          type: string
+          format: date
+        comparative_to_date:
+          type: string
+          format: date
+        finance_book:
+          type:
+          - string
+          - 'null'
+        consolidation_scope:
+          type:
+          - string
+          - object
+          - 'null'
+        accounting_inputs:
+          type: object
+          additionalProperties: true
+    ReportPackageUpdateRequest: &id060
+      type: object
+      additionalProperties: false
+      properties:
+        company:
+          type: string
+          minLength: 1
+        form_code:
+          type: string
+          enum:
+          - B01-DN
+          - B02-DN
+          - B03-DN
+          - B09-DN
+        from_date:
+          type: string
+          format: date
+        to_date:
+          type: string
+          format: date
+        comparative_from_date:
+          type: string
+          format: date
+        comparative_to_date:
+          type: string
+          format: date
+        finance_book:
+          type:
+          - string
+          - 'null'
+        consolidation_scope:
+          type:
+          - string
+          - object
+          - 'null'
+        accounting_inputs:
+          type: object
+          additionalProperties: true
+    ReportPackageRejectRequest: &id061
+      type: object
+      additionalProperties: false
+      required:
+      - reason
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+    ReportPackageResponse: &id062
+      type: object
+      additionalProperties: true
+      required:
+      - name
+      - company
+      - form_code
+      - status
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+        form_code:
+          type: string
+          enum:
+          - B01-DN
+          - B02-DN
+          - B03-DN
+          - B09-DN
+        status:
+          type: string
+          enum:
+          - Draft
+          - Review
+          - Closed
+          - Issued
+          - Rejected
+        validation:
+          type: object
+          additionalProperties: true
+        lines:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        sources:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    ReportPackageListResponse: &id063
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportPackageResponse'
+        total:
+          type: integer
+          minimum: 0
+    ShareholderWriteRequest: &id064
+      type: object
+      additionalProperties: false
+      required:
+      - title
+      - company
+      properties:
+        title:
+          type: string
+          minLength: 1
+        company:
+          type: string
+          minLength: 1
+        naming_series:
+          type: string
+    ShareholderUpdateRequest: &id065
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+          minLength: 1
+        company:
+          type: string
+          minLength: 1
+        naming_series:
+          type: string
+    PeriodClosingVoucherWriteRequest: &id066
+      type: object
+      additionalProperties: false
+      required:
+      - company
+      - fiscal_year
+      - period_start_date
+      - period_end_date
+      - closing_account_head
+      - remarks
+      properties:
+        transaction_date:
+          type: string
+          format: date
+        company:
+          type: string
+          minLength: 1
+        fiscal_year:
+          type: string
+          minLength: 1
+        period_start_date:
+          type: string
+          format: date
+        period_end_date:
+          type: string
+          format: date
+        closing_account_head:
+          type: string
+          minLength: 1
+        remarks:
+          type: string
+          minLength: 1
+    PeriodClosingVoucherUpdateRequest: &id067
+      type: object
+      additionalProperties: false
+      properties:
+        transaction_date:
+          type: string
+          format: date
+        company:
+          type: string
+          minLength: 1
+        fiscal_year:
+          type: string
+          minLength: 1
+        period_start_date:
+          type: string
+          format: date
+        period_end_date:
+          type: string
+          format: date
+        closing_account_head:
+          type: string
+          minLength: 1
+        remarks:
+          type: string
+          minLength: 1
     AdvanceTaxesandChargesWrite:
       type: object
       properties:
@@ -10527,124 +11833,6 @@ components:
           type:
           - string
           - 'null'
-      required:
-      - name
-      additionalProperties: true
-      x-module: Accounts
-    CostCenterWrite:
-      type: object
-      properties:
-        name:
-          type: string
-        sb0:
-          type: string
-        cost_center_name:
-          type: string
-        cost_center_number:
-          type: string
-        parent_cost_center:
-          type: string
-          x-frappe-target-doctype: Cost Center
-        company:
-          type: string
-          x-frappe-target-doctype: Company
-        cb0:
-          type: string
-        is_group:
-          type:
-          - boolean
-          - integer
-          minimum: 0
-          maximum: 1
-        lft:
-          type: integer
-          writeOnly: true
-        rgt:
-          type: integer
-          writeOnly: true
-        old_parent:
-          type: string
-          x-frappe-target-doctype: Cost Center
-          writeOnly: true
-        disabled:
-          type:
-          - boolean
-          - integer
-          minimum: 0
-          maximum: 1
-        custom_letron_orchestration_id:
-          type: string
-        custom_lark_approval_status:
-          type: string
-      required:
-      - company
-      - cost_center_name
-      - parent_cost_center
-      additionalProperties: false
-      x-module: Accounts
-    CostCenterResponse:
-      type: object
-      properties:
-        name:
-          type: string
-        sb0:
-          type:
-          - string
-          - 'null'
-        cost_center_name:
-          type:
-          - string
-          - 'null'
-        cost_center_number:
-          type:
-          - string
-          - 'null'
-        parent_cost_center:
-          type:
-          - string
-          - 'null'
-          x-frappe-target-doctype: Cost Center
-        company:
-          type:
-          - string
-          - 'null'
-          x-frappe-target-doctype: Company
-        cb0:
-          type:
-          - string
-          - 'null'
-        is_group:
-          anyOf:
-          - type:
-            - boolean
-            - integer
-            minimum: 0
-            maximum: 1
-          - type: 'null'
-        lft:
-          type:
-          - integer
-          - 'null'
-          writeOnly: true
-        rgt:
-          type:
-          - integer
-          - 'null'
-          writeOnly: true
-        old_parent:
-          type:
-          - string
-          - 'null'
-          x-frappe-target-doctype: Cost Center
-          writeOnly: true
-        disabled:
-          anyOf:
-          - type:
-            - boolean
-            - integer
-            minimum: 0
-            maximum: 1
-          - type: 'null'
       required:
       - name
       additionalProperties: true
@@ -20405,7 +21593,6 @@ x-contract:
     - Bank Transaction Rule
     - Bank Transaction Rule Accounts
     - Bank Transaction Rule Description Conditions
-    - Cost Center
     - Item Wise Tax Detail
     - Journal Entry
     - Journal Entry Account
@@ -20812,19 +21999,434 @@ x-contract:
       operation_id: setStatementImportHeaderIndex
       handler: letron_api.finance.banking.statement_set_header_index
     - module: Accounts
+      resource: report-packages
+      method: GET
+      path: /api/v1/accounts/report-packages
+      operation: list
+      operation_id: listReportPackages
+      handler: letron_api.finance.tt99_api.list_report_packages
+      query_parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: form_code
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - B01-DN
+          - B02-DN
+          - B03-DN
+          - B09-DN
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from_date
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to_date
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      response_schema: ReportPackageListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: GET
+      path: /api/v1/accounts/report-packages/{name}
+      operation: read
+      operation_id: getReportPackage
+      handler: letron_api.finance.tt99_api.get_report_package
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: POST
+      path: /api/v1/accounts/report-packages
+      operation: create
+      operation_id: createReportPackage
+      handler: letron_api.finance.tt99_api.create_report_package
+      request_schema: ReportPackageCreateRequest
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: PUT
+      path: /api/v1/accounts/report-packages/{name}
+      operation: update
+      operation_id: updateReportPackage
+      handler: letron_api.finance.tt99_api.update_report_package
+      request_schema: ReportPackageUpdateRequest
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: POST
+      path: /api/v1/accounts/report-packages/{name}/review
+      operation: update
+      operation_id: reviewReportPackage
+      handler: letron_api.finance.tt99_api.review_report_package
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: POST
+      path: /api/v1/accounts/report-packages/{name}/close
+      operation: update
+      operation_id: closeReportPackage
+      handler: letron_api.finance.tt99_api.close_report_package
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: POST
+      path: /api/v1/accounts/report-packages/{name}/issue
+      operation: update
+      operation_id: issueReportPackage
+      handler: letron_api.finance.tt99_api.issue_report_package
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: POST
+      path: /api/v1/accounts/report-packages/{name}/reject
+      operation: update
+      operation_id: rejectReportPackage
+      handler: letron_api.finance.tt99_api.reject_report_package
+      request_schema: ReportPackageRejectRequest
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: companies
+      method: GET
+      path: /api/v1/accounts/companies
+      operation: list
+      operation_id: listCompanies
+      handler: letron_api.finance.tt99_api.list_companies
+      query_parameters:
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: companies
+      method: GET
+      path: /api/v1/accounts/companies/{name}
+      operation: read
+      operation_id: getCompany
+      handler: letron_api.finance.tt99_api.get_company
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: accounts
+      method: GET
+      path: /api/v1/accounts/accounts
+      operation: list
+      operation_id: listAccounts
+      handler: letron_api.finance.tt99_api.list_accounts
+      query_parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: accounts
+      method: GET
+      path: /api/v1/accounts/accounts/{name}
+      operation: read
+      operation_id: getAccount
+      handler: letron_api.finance.tt99_api.get_account
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: finance-books
+      method: GET
+      path: /api/v1/accounts/finance-books
+      operation: list
+      operation_id: listFinanceBooks
+      handler: letron_api.finance.tt99_api.list_finance_books
+      query_parameters:
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: finance-books
+      method: GET
+      path: /api/v1/accounts/finance-books/{name}
+      operation: read
+      operation_id: getFinanceBook
+      handler: letron_api.finance.tt99_api.get_finance_book
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: fiscal-years
+      method: GET
+      path: /api/v1/accounts/fiscal-years
+      operation: list
+      operation_id: listFiscalYears
+      handler: letron_api.finance.tt99_api.list_fiscal_years
+      query_parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: fiscal-years
+      method: GET
+      path: /api/v1/accounts/fiscal-years/{name}
+      operation: read
+      operation_id: getFiscalYear
+      handler: letron_api.finance.tt99_api.get_fiscal_year
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: cost-centers
+      method: GET
+      path: /api/v1/accounts/cost-centers
+      operation: list
+      operation_id: listCostCenters
+      handler: letron_api.finance.tt99_api.list_cost_centers
+      query_parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: cost-centers
+      method: GET
+      path: /api/v1/accounts/cost-centers/{name}
+      operation: read
+      operation_id: getCostCenter
+      handler: letron_api.finance.tt99_api.get_cost_center
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
       resource: settings
       method: GET
       path: /api/v1/accounts/settings
       operation: read
       operation_id: getAccountsSettings
       handler: letron_api.finance.banking.accounts_settings
+      response_schema: MasterRecordResponse
+      response_envelope: message
     - module: Accounts
-      resource: settings
+      resource: shareholders
+      method: GET
+      path: /api/v1/accounts/shareholders
+      operation: list
+      operation_id: listShareholders
+      handler: letron_api.finance.tt99_api.list_shareholders
+      query_parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: shareholders
+      method: GET
+      path: /api/v1/accounts/shareholders/{name}
+      operation: read
+      operation_id: getShareholder
+      handler: letron_api.finance.tt99_api.get_shareholder
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: shareholders
+      method: POST
+      path: /api/v1/accounts/shareholders
+      operation: create
+      operation_id: createShareholder
+      handler: letron_api.finance.tt99_api.create_shareholder
+      request_schema: ShareholderWriteRequest
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: shareholders
       method: PUT
-      path: /api/v1/accounts/settings
+      path: /api/v1/accounts/shareholders/{name}
       operation: update
-      operation_id: updateAccountsSettings
-      handler: letron_api.finance.banking.accounts_settings_update
+      operation_id: updateShareholder
+      handler: letron_api.finance.tt99_api.update_shareholder
+      request_schema: ShareholderUpdateRequest
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: period-closing-vouchers
+      method: GET
+      path: /api/v1/accounts/period-closing-vouchers
+      operation: list
+      operation_id: listPeriodClosingVouchers
+      handler: letron_api.finance.tt99_api.list_period_closing_vouchers
+      query_parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: fiscal_year
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: period-closing-vouchers
+      method: GET
+      path: /api/v1/accounts/period-closing-vouchers/{name}
+      operation: read
+      operation_id: getPeriodClosingVoucher
+      handler: letron_api.finance.tt99_api.get_period_closing_voucher
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: period-closing-vouchers
+      method: POST
+      path: /api/v1/accounts/period-closing-vouchers
+      operation: create
+      operation_id: createPeriodClosingVoucher
+      handler: letron_api.finance.tt99_api.create_period_closing_voucher
+      request_schema: PeriodClosingVoucherWriteRequest
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: period-closing-vouchers
+      method: PUT
+      path: /api/v1/accounts/period-closing-vouchers/{name}
+      operation: update
+      operation_id: updatePeriodClosingVoucher
+      handler: letron_api.finance.tt99_api.update_period_closing_voucher
+      request_schema: PeriodClosingVoucherUpdateRequest
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: period-closing-vouchers
+      method: POST
+      path: /api/v1/accounts/period-closing-vouchers/{name}/submit
+      operation: update
+      operation_id: submitPeriodClosingVoucher
+      handler: letron_api.finance.tt99_api.submit_period_closing_voucher
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: period-closing-vouchers
+      method: POST
+      path: /api/v1/accounts/period-closing-vouchers/{name}/cancel
+      operation: update
+      operation_id: cancelPeriodClosingVoucher
+      handler: letron_api.finance.tt99_api.cancel_period_closing_voucher
+      response_schema: MasterRecordResponse
+      response_envelope: message
     - module: Assets
       resource: actions
       method: POST
@@ -20872,12 +22474,23 @@ x-contract:
         purchase_order_item:
           type: string
     generated_schemas:
-      PurchaseOrchestrationRequest: *id054
-      PurchaseOrchestrationResponse: *id055
-      ConsolidationAdjustmentRequest: *id056
-      ConsolidationAdjustmentCommandRequest: *id057
-      ConsolidationAdjustmentResponse: *id058
-      ConsolidationPackageResponse: *id059
+      PurchaseOrchestrationRequest: *id051
+      PurchaseOrchestrationResponse: *id052
+      ConsolidationAdjustmentRequest: *id053
+      ConsolidationAdjustmentCommandRequest: *id054
+      ConsolidationAdjustmentResponse: *id055
+      ConsolidationPackageResponse: *id056
+      MasterRecordResponse: *id057
+      MasterListResponse: *id058
+      ReportPackageCreateRequest: *id059
+      ReportPackageUpdateRequest: *id060
+      ReportPackageRejectRequest: *id061
+      ReportPackageResponse: *id062
+      ReportPackageListResponse: *id063
+      ShareholderWriteRequest: *id064
+      ShareholderUpdateRequest: *id065
+      PeriodClosingVoucherWriteRequest: *id066
+      PeriodClosingVoucherUpdateRequest: *id067
     include_methods:
     - letron_api.control.api.health
     - letron_api.control.api.runtime_info
@@ -20937,8 +22550,6 @@ x-contract:
       path: /api/v1/accounts/bank-accounts
     - doctype: Mode of Payment
       path: /api/v1/accounts/modes-of-payment
-    - doctype: Cost Center
-      path: /api/v1/accounts/cost-centers
     - doctype: Journal Entry
       path: /api/v1/accounts/journal-entries
     - doctype: Payment Request
@@ -21005,9 +22616,9 @@ x-capabilities:
     delivery: durable-outbox
     source_of_truth: false
 x-acceptance-summary:
-  passed: 71
+  passed: 67
   partial: 0
-  not-tested: 30
+  not-tested: 56
   blocked: 0
 x-module: Accounts
 x-module-index:
@@ -21021,7 +22632,6 @@ x-module-index:
   - Bank Transaction Rule
   - Bank Transaction Rule Accounts
   - Bank Transaction Rule Description Conditions
-  - Cost Center
   - Item Wise Tax Detail
   - Journal Entry
   - Journal Entry Account

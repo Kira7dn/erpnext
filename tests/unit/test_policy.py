@@ -563,10 +563,11 @@ def test_tt99_statutory_forms_have_official_codes_and_formulas() -> None:
     forms = policy.load_policy()["shared"]["coa_template"]["bctc_mapping"]["statutory_forms"]
 
     assert forms["version"] == 1
-    assert set(forms["forms"]) == {"B01-DN", "B02-DN", "B03-DN"}
+    assert set(forms["forms"]) == {"B01-DN", "B02-DN", "B03-DN", "B09-DN"}
     b01 = {line["code"]: line for line in forms["forms"]["B01-DN"]["lines"]}
     b02 = {line["code"]: line for line in forms["forms"]["B02-DN"]["lines"]}
     b03 = {line["code"]: line for line in forms["forms"]["B03-DN"]["lines"]}
+    b09 = {line["code"]: line for line in forms["forms"]["B09-DN"]["lines"]}
 
     assert b01["100"]["formula"] == "110+120+130+140+150+160"
     assert b01["200"]["formula"] == "210+220+230+240+250+260+270"
@@ -599,6 +600,9 @@ def test_tt99_statutory_forms_have_official_codes_and_formulas() -> None:
     assert b02["30"]["formula"] == "20+21+22-23-25-26"
     assert b02["60"]["formula"] == "50-51-52"
     assert forms["forms"]["B03-DN"]["statement"] == "cash_flow"
+    assert forms["forms"]["B09-DN"]["statement"] == "notes"
+    assert set(b09) == {f"N{index:02d}" for index in range(1, 11)}
+    assert all(line["line_type"] == "note" for line in b09.values())
     assert b03["08"]["formula"] == "01+02+03+04+05+06+07"
     assert b03["20"]["formula"] == "08+09+10+11+12+13+14+15+16+17"
     assert b03["70"]["formula"] == "50+60+61"

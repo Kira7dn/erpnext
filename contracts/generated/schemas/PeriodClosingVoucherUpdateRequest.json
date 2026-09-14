@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/PeriodClosingVoucherUpdateRequest.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "transaction_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "company": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fiscal_year": {
+      "type": "string",
+      "minLength": 1
+    },
+    "period_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "period_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "closing_account_head": {
+      "type": "string",
+      "minLength": 1
+    },
+    "remarks": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

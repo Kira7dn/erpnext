@@ -18,6 +18,7 @@ VAS_REPORTS = {
     "vas-b01-dn": "B01-DN",
     "vas-b02-dn": "B02-DN",
     "vas-b03-dn": "B03-DN",
+    "vas-b09-dn": "B09-DN",
     "vas-cash-flow": "cash_flow",
     "vas-notes": "notes",
     "vas-unmapped-accounts": "unmapped_accounts",
@@ -192,6 +193,7 @@ def report(report_key: str, filters: Any = None) -> dict[str, Any]:
             consolidation_package,
             native_cash_flow,
             notes,
+            b09_report,
             statutory_cash_flow,
             statutory_report,
             unmapped_accounts,
@@ -202,6 +204,13 @@ def report(report_key: str, filters: Any = None) -> dict[str, Any]:
             return native_cash_flow(**{field: arguments[field] for field in required}, finance_book=arguments.get("finance_book"))
         if VAS_REPORTS[report_key] == "B03-DN":
             return statutory_cash_flow(
+                **{field: arguments[field] for field in required},
+                finance_book=arguments.get("finance_book"),
+                comparative_from_date=arguments.get("comparative_from_date"),
+                comparative_to_date=arguments.get("comparative_to_date"),
+            )
+        if VAS_REPORTS[report_key] == "B09-DN":
+            return b09_report(
                 **{field: arguments[field] for field in required},
                 finance_book=arguments.get("finance_book"),
                 comparative_from_date=arguments.get("comparative_from_date"),

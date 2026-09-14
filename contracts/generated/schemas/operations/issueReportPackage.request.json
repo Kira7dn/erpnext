@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://letron.local/schemas/operations/updateAccountsSettings.request.json",
+  "$id": "https://letron.local/schemas/operations/issueReportPackage.request.json",
   "type": "object",
   "additionalProperties": true
 }

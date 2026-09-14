@@ -2273,53 +2273,6 @@ export type ContactWrite = {
   custom_lark_approval_status?: string;
 };
 
-export type CostCenter = {
-  name: string;
-  sb0?: string;
-  cost_center_name: string;
-  cost_center_number?: string;
-  parent_cost_center: string;
-  company: string;
-  cb0?: string;
-  is_group?: boolean | number;
-  lft?: number;
-  rgt?: number;
-  old_parent?: string;
-  disabled?: boolean | number;
-};
-
-export type CostCenterResponse = {
-  name: string;
-  sb0?: string | null;
-  cost_center_name?: string | null;
-  cost_center_number?: string | null;
-  parent_cost_center?: string | null;
-  company?: string | null;
-  cb0?: string | null;
-  is_group?: unknown;
-  lft?: number | null;
-  rgt?: number | null;
-  old_parent?: string | null;
-  disabled?: unknown;
-};
-
-export type CostCenterWrite = {
-  name?: string;
-  sb0?: string;
-  cost_center_name: string;
-  cost_center_number?: string;
-  parent_cost_center: string;
-  company: string;
-  cb0?: string;
-  is_group?: boolean | number;
-  lft?: number;
-  rgt?: number;
-  old_parent?: string;
-  disabled?: boolean | number;
-  custom_letron_orchestration_id?: string;
-  custom_lark_approval_status?: string;
-};
-
 export type Customer = {
   name: string;
   basic_info?: string;
@@ -5103,6 +5056,14 @@ export type MaintenanceTeamMemberWrite = {
   custom_lark_approval_status?: string;
 };
 
+export type MasterListResponse = {
+  items: Array<Record<string, unknown>>;
+  total: number;
+};
+
+export type MasterRecordResponse = {
+};
+
 export type MaterialRequest = {
   name: string;
   type_section?: string;
@@ -6651,6 +6612,26 @@ export type PaymentScheduleWrite = {
   base_payment_amount?: number;
   custom_letron_orchestration_id?: string;
   custom_lark_approval_status?: string;
+};
+
+export type PeriodClosingVoucherUpdateRequest = {
+  transaction_date?: string;
+  company?: string;
+  fiscal_year?: string;
+  period_start_date?: string;
+  period_end_date?: string;
+  closing_account_head?: string;
+  remarks?: string;
+};
+
+export type PeriodClosingVoucherWriteRequest = {
+  transaction_date?: string;
+  company: string;
+  fiscal_year: string;
+  period_start_date: string;
+  period_end_date: string;
+  closing_account_head: string;
+  remarks: string;
 };
 
 export type PickList = {
@@ -10339,6 +10320,49 @@ export type QuotationWrite = {
   custom_lark_approval_status?: string;
 };
 
+export type ReportPackageCreateRequest = {
+  company: string;
+  form_code: "B01-DN" | "B02-DN" | "B03-DN" | "B09-DN";
+  from_date: string;
+  to_date: string;
+  comparative_from_date?: string;
+  comparative_to_date?: string;
+  finance_book?: string | null;
+  consolidation_scope?: string | Record<string, unknown> | null;
+  accounting_inputs?: Record<string, unknown>;
+};
+
+export type ReportPackageListResponse = {
+  items: Array<ReportPackageResponse>;
+  total: number;
+};
+
+export type ReportPackageRejectRequest = {
+  reason: string;
+};
+
+export type ReportPackageResponse = {
+  name: string;
+  company: string;
+  form_code: "B01-DN" | "B02-DN" | "B03-DN" | "B09-DN";
+  status: "Draft" | "Review" | "Closed" | "Issued" | "Rejected";
+  validation?: Record<string, unknown>;
+  lines?: Array<Record<string, unknown>>;
+  sources?: Array<Record<string, unknown>>;
+};
+
+export type ReportPackageUpdateRequest = {
+  company?: string;
+  form_code?: "B01-DN" | "B02-DN" | "B03-DN" | "B09-DN";
+  from_date?: string;
+  to_date?: string;
+  comparative_from_date?: string;
+  comparative_to_date?: string;
+  finance_book?: string | null;
+  consolidation_scope?: string | Record<string, unknown> | null;
+  accounting_inputs?: Record<string, unknown>;
+};
+
 export type RequestforQuotation = {
   name: string;
   naming_series: "PUR-RFQ-.YYYY.-";
@@ -12788,6 +12812,18 @@ export type SerialandBatchEntryWrite = {
   column_break_eykr?: string;
   custom_letron_orchestration_id?: string;
   custom_lark_approval_status?: string;
+};
+
+export type ShareholderUpdateRequest = {
+  title?: string;
+  company?: string;
+  naming_series?: string;
+};
+
+export type ShareholderWriteRequest = {
+  title: string;
+  company: string;
+  naming_series?: string;
 };
 
 export type Shipment = {

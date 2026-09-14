@@ -1,7 +1,7 @@
 {
   "version": 1,
   "registry_version": 1,
-  "registry_sha256": "3f6c737c37a5ab061b5c35a5db790664d649b5bc4c322b4f52c0c54d93123299",
+  "registry_sha256": "9cc6529035471b025b56c81051b26b1ce767e14aa8e870e82d82173e91f42783",
   "doctypes": [
     {
       "name": "About Us Settings",
@@ -48958,6 +48958,390 @@
           "options": null,
           "reqd": 0,
           "read_only": 1,
+          "hidden": 0
+        }
+      ]
+    },
+    {
+      "name": "Letron VAS Report Note",
+      "module": "Letron API",
+      "source": "letron_api\\doctype\\letron_vas_report_note\\letron_vas_report_note.json",
+      "is_child_table": 1,
+      "fields": [
+        {
+          "fieldname": "code",
+          "fieldtype": "Data",
+          "label": "Code",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "title",
+          "fieldtype": "Data",
+          "label": "Title",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "source",
+          "fieldtype": "Data",
+          "label": "Source",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "data_json",
+          "fieldtype": "Long Text",
+          "label": "Data",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "status",
+          "fieldtype": "Select",
+          "label": "Status",
+          "options": "derived\nrequires_source\nrequires_accounting_input\nrequires_consolidation_package\nincomplete",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "accounting_input",
+          "fieldtype": "Long Text",
+          "label": "Accounting Input",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "source_refs",
+          "fieldtype": "Long Text",
+          "label": "Source References",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        }
+      ]
+    },
+    {
+      "name": "Letron VAS Report Package",
+      "module": "Letron API",
+      "source": "letron_api\\doctype\\letron_vas_report_package\\letron_vas_report_package.json",
+      "is_child_table": 0,
+      "fields": [
+        {
+          "fieldname": "company",
+          "fieldtype": "Link",
+          "label": "Company",
+          "options": "Company",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "consolidation_scope",
+          "fieldtype": "Long Text",
+          "label": "Consolidation Scope",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "form_code",
+          "fieldtype": "Select",
+          "label": "Form Code",
+          "options": "B01-DN\nB02-DN\nB03-DN\nB09-DN",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "from_date",
+          "fieldtype": "Date",
+          "label": "From Date",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "to_date",
+          "fieldtype": "Date",
+          "label": "To Date",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "comparative_from_date",
+          "fieldtype": "Date",
+          "label": "Comparative From Date",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "comparative_to_date",
+          "fieldtype": "Date",
+          "label": "Comparative To Date",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "accounting_currency",
+          "fieldtype": "Data",
+          "label": "Accounting Currency",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "reporting_currency",
+          "fieldtype": "Data",
+          "label": "Reporting Currency",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "policy_version",
+          "fieldtype": "Int",
+          "label": "Policy Version",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "policy_hash",
+          "fieldtype": "Data",
+          "label": "Policy Hash",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "source_cutoff",
+          "fieldtype": "Datetime",
+          "label": "Source Cutoff",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "status",
+          "fieldtype": "Select",
+          "label": "Status",
+          "options": "Draft\nReview\nClosed\nIssued\nRejected",
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "validation_json",
+          "fieldtype": "Long Text",
+          "label": "Validation",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "lines_json",
+          "fieldtype": "Long Text",
+          "label": "Report Lines",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "notes",
+          "fieldtype": "Table",
+          "label": "Notes",
+          "options": "Letron VAS Report Note",
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "sources",
+          "fieldtype": "Table",
+          "label": "Sources",
+          "options": "Letron VAS Report Source",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "reviewed_by",
+          "fieldtype": "Link",
+          "label": "Reviewed By",
+          "options": "User",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "reviewed_at",
+          "fieldtype": "Datetime",
+          "label": "Reviewed At",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "closed_by",
+          "fieldtype": "Link",
+          "label": "Closed By",
+          "options": "User",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "closed_at",
+          "fieldtype": "Datetime",
+          "label": "Closed At",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "rejection_reason",
+          "fieldtype": "Small Text",
+          "label": "Rejection Reason",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "rejected_by",
+          "fieldtype": "Link",
+          "label": "Rejected By",
+          "options": "User",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "rejected_at",
+          "fieldtype": "Datetime",
+          "label": "Rejected At",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "issued_by",
+          "fieldtype": "Link",
+          "label": "Issued By",
+          "options": "User",
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        },
+        {
+          "fieldname": "issued_at",
+          "fieldtype": "Datetime",
+          "label": "Issued At",
+          "options": null,
+          "reqd": 0,
+          "read_only": 1,
+          "hidden": 0
+        }
+      ]
+    },
+    {
+      "name": "Letron VAS Report Source",
+      "module": "Letron API",
+      "source": "letron_api\\doctype\\letron_vas_report_source\\letron_vas_report_source.json",
+      "is_child_table": 1,
+      "fields": [
+        {
+          "fieldname": "source_type",
+          "fieldtype": "Data",
+          "label": "Source Type",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "source_name",
+          "fieldtype": "Data",
+          "label": "Source Name",
+          "options": null,
+          "reqd": 1,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "voucher_type",
+          "fieldtype": "Data",
+          "label": "Voucher Type",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "voucher_no",
+          "fieldtype": "Data",
+          "label": "Voucher No",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "account",
+          "fieldtype": "Data",
+          "label": "Account",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "cost_center",
+          "fieldtype": "Data",
+          "label": "Cost Center",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
+          "hidden": 0
+        },
+        {
+          "fieldname": "detail_json",
+          "fieldtype": "Long Text",
+          "label": "Detail",
+          "options": null,
+          "reqd": 0,
+          "read_only": 0,
           "hidden": 0
         }
       ]
@@ -158781,7 +159165,10 @@
     "Letron API": [
       "Letron Event Outbox",
       "Letron SSO Audit Log",
-      "Letron SSO Identity"
+      "Letron SSO Identity",
+      "Letron VAS Report Note",
+      "Letron VAS Report Package",
+      "Letron VAS Report Source"
     ],
     "Maintenance": [
       "Maintenance Schedule",
@@ -159129,6 +159516,56 @@
     ]
   },
   "operations": [
+    {
+      "operation_id": "listAccounts",
+      "module": "accounts",
+      "resource": "accounts",
+      "method": "GET",
+      "path": "/api/v1/accounts/accounts",
+      "operation": "list",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.list_accounts"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterListResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "getAccount",
+      "module": "accounts",
+      "resource": "accounts",
+      "method": "GET",
+      "path": "/api/v1/accounts/accounts/{name}",
+      "operation": "read",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.get_account"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
     {
       "operation_id": "listBankAccount",
       "module": "accounts",
@@ -159882,6 +160319,56 @@
       }
     },
     {
+      "operation_id": "listCompanies",
+      "module": "accounts",
+      "resource": "companies",
+      "method": "GET",
+      "path": "/api/v1/accounts/companies",
+      "operation": "list",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.list_companies"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterListResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "getCompany",
+      "module": "accounts",
+      "resource": "companies",
+      "method": "GET",
+      "path": "/api/v1/accounts/companies/{name}",
+      "operation": "read",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.get_company"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
       "operation_id": "createConsolidationAdjustment",
       "module": "accounts",
       "resource": "consolidation",
@@ -159988,7 +160475,7 @@
       }
     },
     {
-      "operation_id": "listCostCenter",
+      "operation_id": "listCostCenters",
       "module": "accounts",
       "resource": "cost-centers",
       "method": "GET",
@@ -159996,68 +160483,20 @@
       "operation": "list",
       "risk": "low",
       "target": {
-        "doctype": "Cost Center"
+        "handler": "letron_api.finance.tt99_api.list_cost_centers"
       },
       "dependencies": [],
       "request_schema": null,
       "response_schema": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CostCenterResponse"
-            }
-          },
-          "message": {}
-        },
-        "required": [
-          "data"
-        ]
-      }
-    },
-    {
-      "operation_id": "createCostCenter",
-      "module": "accounts",
-      "resource": "cost-centers",
-      "method": "POST",
-      "path": "/api/v1/accounts/cost-centers",
-      "operation": "create",
-      "risk": "medium",
-      "target": {
-        "doctype": "Cost Center"
-      },
-      "dependencies": [],
-      "request_schema": {
-        "$ref": "#/components/schemas/CostCenterWrite"
-      },
-      "response_schema": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/CostCenterResponse"
+          "message": {
+            "$ref": "#/components/schemas/MasterListResponse"
           }
         },
         "required": [
-          "data"
+          "message"
         ]
-      }
-    },
-    {
-      "operation_id": "deleteCostCenter",
-      "module": "accounts",
-      "resource": "cost-centers",
-      "method": "DELETE",
-      "path": "/api/v1/accounts/cost-centers/{name}",
-      "operation": "delete",
-      "risk": "high",
-      "target": {
-        "doctype": "Cost Center"
-      },
-      "dependencies": [],
-      "request_schema": null,
-      "response_schema": {
-        "$ref": "#/components/schemas/FrappeResponse"
       }
     },
     {
@@ -160069,46 +160508,119 @@
       "operation": "read",
       "risk": "low",
       "target": {
-        "doctype": "Cost Center"
+        "handler": "letron_api.finance.tt99_api.get_cost_center"
       },
       "dependencies": [],
       "request_schema": null,
       "response_schema": {
         "type": "object",
         "properties": {
-          "data": {
-            "$ref": "#/components/schemas/CostCenterResponse"
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
           }
         },
         "required": [
-          "data"
+          "message"
         ]
       }
     },
     {
-      "operation_id": "updateCostCenter",
+      "operation_id": "listFinanceBooks",
       "module": "accounts",
-      "resource": "cost-centers",
-      "method": "PUT",
-      "path": "/api/v1/accounts/cost-centers/{name}",
-      "operation": "update",
-      "risk": "medium",
+      "resource": "finance-books",
+      "method": "GET",
+      "path": "/api/v1/accounts/finance-books",
+      "operation": "list",
+      "risk": "low",
       "target": {
-        "doctype": "Cost Center"
+        "handler": "letron_api.finance.tt99_api.list_finance_books"
       },
       "dependencies": [],
-      "request_schema": {
-        "$ref": "#/components/schemas/CostCenterWrite"
-      },
+      "request_schema": null,
       "response_schema": {
         "type": "object",
         "properties": {
-          "data": {
-            "$ref": "#/components/schemas/CostCenterResponse"
+          "message": {
+            "$ref": "#/components/schemas/MasterListResponse"
           }
         },
         "required": [
-          "data"
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "getFinanceBook",
+      "module": "accounts",
+      "resource": "finance-books",
+      "method": "GET",
+      "path": "/api/v1/accounts/finance-books/{name}",
+      "operation": "read",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.get_finance_book"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "listFiscalYears",
+      "module": "accounts",
+      "resource": "fiscal-years",
+      "method": "GET",
+      "path": "/api/v1/accounts/fiscal-years",
+      "operation": "list",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.list_fiscal_years"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterListResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "getFiscalYear",
+      "module": "accounts",
+      "resource": "fiscal-years",
+      "method": "GET",
+      "path": "/api/v1/accounts/fiscal-years/{name}",
+      "operation": "read",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.get_fiscal_year"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
         ]
       }
     },
@@ -160946,6 +161458,166 @@
       }
     },
     {
+      "operation_id": "listPeriodClosingVouchers",
+      "module": "accounts",
+      "resource": "period-closing-vouchers",
+      "method": "GET",
+      "path": "/api/v1/accounts/period-closing-vouchers",
+      "operation": "list",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.list_period_closing_vouchers"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterListResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "createPeriodClosingVoucher",
+      "module": "accounts",
+      "resource": "period-closing-vouchers",
+      "method": "POST",
+      "path": "/api/v1/accounts/period-closing-vouchers",
+      "operation": "create",
+      "risk": "medium",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.create_period_closing_voucher"
+      },
+      "dependencies": [],
+      "request_schema": {
+        "$ref": "#/components/schemas/PeriodClosingVoucherWriteRequest"
+      },
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "getPeriodClosingVoucher",
+      "module": "accounts",
+      "resource": "period-closing-vouchers",
+      "method": "GET",
+      "path": "/api/v1/accounts/period-closing-vouchers/{name}",
+      "operation": "read",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.get_period_closing_voucher"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "updatePeriodClosingVoucher",
+      "module": "accounts",
+      "resource": "period-closing-vouchers",
+      "method": "PUT",
+      "path": "/api/v1/accounts/period-closing-vouchers/{name}",
+      "operation": "update",
+      "risk": "medium",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.update_period_closing_voucher"
+      },
+      "dependencies": [],
+      "request_schema": {
+        "$ref": "#/components/schemas/PeriodClosingVoucherUpdateRequest"
+      },
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "cancelPeriodClosingVoucher",
+      "module": "accounts",
+      "resource": "period-closing-vouchers",
+      "method": "POST",
+      "path": "/api/v1/accounts/period-closing-vouchers/{name}/cancel",
+      "operation": "update",
+      "risk": "high",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.cancel_period_closing_voucher"
+      },
+      "dependencies": [],
+      "request_schema": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "submitPeriodClosingVoucher",
+      "module": "accounts",
+      "resource": "period-closing-vouchers",
+      "method": "POST",
+      "path": "/api/v1/accounts/period-closing-vouchers/{name}/submit",
+      "operation": "update",
+      "risk": "high",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.submit_period_closing_voucher"
+      },
+      "dependencies": [],
+      "request_schema": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
       "operation_id": "listPurchaseInvoice",
       "module": "accounts",
       "resource": "purchase-invoices",
@@ -161115,6 +161787,221 @@
         "properties": {
           "message": {
             "$ref": "#/components/schemas/PurchaseInvoiceResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "listReportPackages",
+      "module": "accounts",
+      "resource": "report-packages",
+      "method": "GET",
+      "path": "/api/v1/accounts/report-packages",
+      "operation": "list",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.list_report_packages"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ReportPackageListResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "createReportPackage",
+      "module": "accounts",
+      "resource": "report-packages",
+      "method": "POST",
+      "path": "/api/v1/accounts/report-packages",
+      "operation": "create",
+      "risk": "medium",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.create_report_package"
+      },
+      "dependencies": [],
+      "request_schema": {
+        "$ref": "#/components/schemas/ReportPackageCreateRequest"
+      },
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ReportPackageResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "getReportPackage",
+      "module": "accounts",
+      "resource": "report-packages",
+      "method": "GET",
+      "path": "/api/v1/accounts/report-packages/{name}",
+      "operation": "read",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.get_report_package"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ReportPackageResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "updateReportPackage",
+      "module": "accounts",
+      "resource": "report-packages",
+      "method": "PUT",
+      "path": "/api/v1/accounts/report-packages/{name}",
+      "operation": "update",
+      "risk": "medium",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.update_report_package"
+      },
+      "dependencies": [],
+      "request_schema": {
+        "$ref": "#/components/schemas/ReportPackageUpdateRequest"
+      },
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ReportPackageResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "closeReportPackage",
+      "module": "accounts",
+      "resource": "report-packages",
+      "method": "POST",
+      "path": "/api/v1/accounts/report-packages/{name}/close",
+      "operation": "update",
+      "risk": "medium",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.close_report_package"
+      },
+      "dependencies": [],
+      "request_schema": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ReportPackageResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "issueReportPackage",
+      "module": "accounts",
+      "resource": "report-packages",
+      "method": "POST",
+      "path": "/api/v1/accounts/report-packages/{name}/issue",
+      "operation": "update",
+      "risk": "medium",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.issue_report_package"
+      },
+      "dependencies": [],
+      "request_schema": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ReportPackageResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "rejectReportPackage",
+      "module": "accounts",
+      "resource": "report-packages",
+      "method": "POST",
+      "path": "/api/v1/accounts/report-packages/{name}/reject",
+      "operation": "update",
+      "risk": "medium",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.reject_report_package"
+      },
+      "dependencies": [],
+      "request_schema": {
+        "$ref": "#/components/schemas/ReportPackageRejectRequest"
+      },
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ReportPackageResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "reviewReportPackage",
+      "module": "accounts",
+      "resource": "report-packages",
+      "method": "POST",
+      "path": "/api/v1/accounts/report-packages/{name}/review",
+      "operation": "update",
+      "risk": "medium",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.review_report_package"
+      },
+      "dependencies": [],
+      "request_schema": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ReportPackageResponse"
           }
         },
         "required": [
@@ -161330,27 +162217,119 @@
       "dependencies": [],
       "request_schema": null,
       "response_schema": {
-        "$ref": "#/components/schemas/FrappeResponse"
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
       }
     },
     {
-      "operation_id": "updateAccountsSettings",
+      "operation_id": "listShareholders",
       "module": "accounts",
-      "resource": "settings",
-      "method": "PUT",
-      "path": "/api/v1/accounts/settings",
-      "operation": "update",
+      "resource": "shareholders",
+      "method": "GET",
+      "path": "/api/v1/accounts/shareholders",
+      "operation": "list",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.list_shareholders"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterListResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "createShareholder",
+      "module": "accounts",
+      "resource": "shareholders",
+      "method": "POST",
+      "path": "/api/v1/accounts/shareholders",
+      "operation": "create",
       "risk": "medium",
       "target": {
-        "handler": "letron_api.finance.banking.accounts_settings_update"
+        "handler": "letron_api.finance.tt99_api.create_shareholder"
       },
       "dependencies": [],
       "request_schema": {
-        "type": "object",
-        "additionalProperties": true
+        "$ref": "#/components/schemas/ShareholderWriteRequest"
       },
       "response_schema": {
-        "$ref": "#/components/schemas/FrappeResponse"
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "getShareholder",
+      "module": "accounts",
+      "resource": "shareholders",
+      "method": "GET",
+      "path": "/api/v1/accounts/shareholders/{name}",
+      "operation": "read",
+      "risk": "low",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.get_shareholder"
+      },
+      "dependencies": [],
+      "request_schema": null,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    {
+      "operation_id": "updateShareholder",
+      "module": "accounts",
+      "resource": "shareholders",
+      "method": "PUT",
+      "path": "/api/v1/accounts/shareholders/{name}",
+      "operation": "update",
+      "risk": "medium",
+      "target": {
+        "handler": "letron_api.finance.tt99_api.update_shareholder"
+      },
+      "dependencies": [],
+      "request_schema": {
+        "$ref": "#/components/schemas/ShareholderUpdateRequest"
+      },
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/MasterRecordResponse"
+          }
+        },
+        "required": [
+          "message"
+        ]
       }
     },
     {

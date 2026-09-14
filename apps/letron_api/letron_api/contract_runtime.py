@@ -50,6 +50,28 @@ def public_route_maps() -> tuple[dict[tuple[str, str], str], dict[tuple[str, str
     return resources, document_actions, custom_actions
 
 
+def public_custom_routes() -> tuple[dict[str, str], ...]:
+    """Return generated custom routes that are not native DocType aliases.
+
+    Route dispatch must use the same generated catalog as the gateway and
+    policy consumers. Keeping this lookup here prevents a new business route
+    from becoming reachable merely because a hand-maintained hook mapping was
+    forgotten.
+    """
+
+    routes: list[dict[str, str]] = []
+    for item in _load_contract()["registry"]:
+        target = item.get("target") or {}
+        handler = target.get("handler")
+        if isinstance(handler, str) and not target.get("doctype"):
+            routes.append({
+                "method": str(item.get("method") or "").upper(),
+                "path": str(item.get("path") or ""),
+                "handler": handler,
+            })
+    return tuple(routes)
+
+
 def contract_metadata() -> tuple[int, str]:
     contract = _load_contract()
     version = contract.get("registry_version", contract.get("version"))

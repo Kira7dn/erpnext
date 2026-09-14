@@ -2101,6 +2101,21 @@ shared:
             - {code: '60', name: Tiền và tương đương tiền đầu kỳ, line_type: metric, metric: opening_cash}
             - {code: '61', name: Ảnh hưởng của thay đổi tỷ giá hối đoái quy đổi ngoại tệ, line_type: metric, metric: translation_fx_effect}
             - {code: '70', name: Tiền và tương đương tiền cuối kỳ, line_type: subtotal, formula: 50+60+61}
+          B09-DN:
+            name: Bản thuyết minh báo cáo tài chính
+            statement: notes
+            columns: [section, content]
+            lines:
+            - {code: N01, name: Cơ sở lập và chính sách kế toán, line_type: note, source: policy, required: true}
+            - {code: N02, name: Tiền và tương đương tiền, line_type: note, source: balance_sheet.A1, required: true}
+            - {code: N03, name: 'Phải thu, phải trả và phân loại ngắn dài hạn', line_type: note, source: balance_sheet.A3/C1, required: true}
+            - {code: N04, name: Hàng tồn kho và dự phòng giảm giá, line_type: note, source: balance_sheet.A4, required: true}
+            - {code: N05, name: Tài sản cố định và khấu hao, line_type: note, source: balance_sheet.B1, required: true}
+            - {code: N06, name: 'Doanh thu, chi phí và thuế', line_type: note, source: profit_and_loss, required: true}
+            - {code: N07, name: 'Vốn chủ sở hữu, vay nợ và dự phòng', line_type: note, source: balance_sheet.D1/C5, required: true}
+            - {code: N08, name: Giao dịch với bên liên quan và nội bộ, line_type: note, source: consolidation, required: true}
+            - {code: N09, name: 'Cam kết, tài sản nợ tiềm tàng và sự kiện sau ngày khóa sổ', line_type: note, source: accounting_input, required: true}
+            - {code: N10, name: 'Ngoại tệ, tỷ giá, hợp nhất và ngoại lệ đối chiếu', line_type: note, source: accounting_input, required: true}
     company_defaults:
       accumulated_depreciation_account: '2141'
       capital_work_in_progress_account: '2412'
@@ -2231,32 +2246,50 @@ shared:
             - '419'
             - '421'
         metric_sources:
-          provisions: ['352']
-          fx_revaluation: ['413']
-          investing_financing_gain_loss: ['711', '811']
+          provisions: ['2291', '2292', '2293', '2294', '2295', '352']
+          fx_revaluation: ['515', '635']
+          investing_financing_gain_loss: ['511', '515', '632', '635', '711', '811']
           borrowing_cost: ['635']
-          other_operating_adjustments: ['6428']
-          payables_change_excluding_interest_and_tax: ['331']
+          other_operating_adjustments: ['356', '357']
+          payables_change_excluding_interest_and_tax: ['131', '331', '333', '334', '335', '336', '337', '338', '344']
           prepaid_expense_change: ['242']
           trading_securities_change: ['121']
           interest_paid: ['635']
-          income_tax_paid: ['333']
+          income_tax_paid: ['3334', '82111']
           other_operating_receipts: ['711']
           other_operating_payments: ['811']
-          fixed_asset_purchases: ['211']
-          fixed_asset_disposals: ['211']
-          loans_and_debt_instrument_purchases: ['1281']
-          loans_and_debt_instrument_collections: ['1281']
-          equity_investment_purchases: ['221']
-          equity_investment_proceeds: ['221']
+          fixed_asset_purchases: ['211', '213', '217', '241', '242']
+          fixed_asset_disposals: ['211', '213', '217', '241']
+          loans_and_debt_instrument_purchases: ['128', '171']
+          loans_and_debt_instrument_collections: ['128', '171']
+          equity_investment_purchases: ['221', '222', '228']
+          equity_investment_proceeds: ['221', '222', '228']
           interest_dividends_proceeds: ['515']
-          equity_issuance_proceeds: ['4111']
-          equity_return_and_share_repurchase: ['419']
-          borrowings_proceeds: ['341']
-          borrowings_principal_repayments: ['341']
+          equity_issuance_proceeds: ['411', '4111', '41112']
+          equity_return_and_share_repurchase: ['411', '419']
+          borrowings_proceeds: ['341', '3431', '171']
+          borrowings_principal_repayments: ['341', '3431', '171']
           finance_lease_principal_repayments: ['3431']
           dividends_and_profit_distributions: ['332']
-          translation_fx_effect: ['413']
+          translation_fx_effect: ['413', '515', '635']
+        event_rules:
+        - {metric: interest_paid, category: operating, counterpart_account_codes: ['335', '635'], direction: outflow}
+        - {metric: income_tax_paid, category: operating, counterpart_account_codes: ['333'], direction: outflow}
+        - {metric: fixed_asset_purchases, category: investing, counterpart_account_codes: ['211', '213', '217', '241', '242'], direction: outflow}
+        - {metric: fixed_asset_disposals, category: investing, counterpart_account_codes: ['211', '213', '217', '241'], direction: inflow}
+        - {metric: loans_and_debt_instrument_purchases, category: investing, counterpart_account_codes: ['128', '171'], direction: outflow}
+        - {metric: loans_and_debt_instrument_collections, category: investing, counterpart_account_codes: ['128', '171'], direction: inflow}
+        - {metric: equity_investment_purchases, category: investing, counterpart_account_codes: ['221', '222', '228'], direction: outflow}
+        - {metric: equity_investment_proceeds, category: investing, counterpart_account_codes: ['221', '222', '228'], direction: inflow}
+        - {metric: interest_dividends_proceeds, category: investing, counterpart_account_codes: ['515'], direction: inflow}
+        - {metric: equity_issuance_proceeds, category: financing, counterpart_account_codes: ['411'], direction: inflow}
+        - {metric: equity_return_and_share_repurchase, category: financing, counterpart_account_codes: ['411', '419'], direction: outflow}
+        - {metric: borrowings_proceeds, category: financing, counterpart_account_codes: ['341', '3431', '171'], direction: inflow}
+        - {metric: borrowings_principal_repayments, category: financing, counterpart_account_codes: ['341', '3431', '171'], direction: outflow}
+        - {metric: finance_lease_principal_repayments, category: financing, counterpart_account_codes: ['3431'], direction: outflow}
+        - {metric: dividends_and_profit_distributions, category: financing, counterpart_account_codes: ['332'], direction: outflow}
+        - {metric: other_operating_receipts, category: operating, counterpart_account_codes: ['511', '515', '711'], direction: inflow, include_in_indirect: false}
+        - {metric: other_operating_payments, category: operating, counterpart_account_codes: ['632', '635', '641', '642', '811'], direction: outflow, include_in_indirect: false}
       current_non_current: required_for_balance_sheet
       statement_classification:
         balance_sheet:

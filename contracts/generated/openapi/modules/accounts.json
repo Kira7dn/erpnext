@@ -3510,698 +3510,6 @@
         }
       }
     },
-    "/api/v1/accounts/cost-centers": {
-      "get": {
-        "tags": [
-          "Module: Accounts"
-        ],
-        "summary": "List Cost Center records",
-        "description": "List typed Cost Center documents.",
-        "operationId": "listCostCenter",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/RequestId"
-          },
-          {
-            "name": "fields",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "description": "JSON field-name array"
-          },
-          {
-            "name": "filters",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "description": "JSON Frappe filters"
-          },
-          {
-            "name": "order_by",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit_page_length",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 1000
-            }
-          },
-          {
-            "name": "limit_start",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 0
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Typed resource list",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/CostCenterResponse"
-                      }
-                    },
-                    "message": {}
-                  },
-                  "required": [
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Idempotency or optimistic concurrency conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "417": {
-            "description": "Native Frappe validation failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server or rollback failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          }
-        },
-        "x-public-operation": "list",
-        "x-test-status": "passed",
-        "x-test-level": "docker-runtime",
-        "x-test-evidence": {
-          "suite": "extended-api",
-          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
-        }
-      },
-      "post": {
-        "tags": [
-          "Module: Accounts"
-        ],
-        "summary": "Create Cost Center",
-        "description": "Create a Cost Center using the runtime DocType schema.",
-        "operationId": "createCostCenter",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/RequestId"
-          },
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CostCenterWrite"
-              },
-              "example": {
-                "cost_center_name": "",
-                "parent_cost_center": "",
-                "company": ""
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Created typed resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/CostCenterResponse"
-                    }
-                  },
-                  "required": [
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Idempotency or optimistic concurrency conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "417": {
-            "description": "Native Frappe validation failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server or rollback failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          }
-        },
-        "x-public-operation": "create",
-        "x-test-status": "passed",
-        "x-test-level": "docker-runtime",
-        "x-test-evidence": {
-          "suite": "extended-api",
-          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
-        }
-      }
-    },
-    "/api/v1/accounts/cost-centers/{name}": {
-      "get": {
-        "tags": [
-          "Module: Accounts"
-        ],
-        "operationId": "getCostCenter",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "$ref": "#/components/parameters/RequestId"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Typed resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/CostCenterResponse"
-                    }
-                  },
-                  "required": [
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Idempotency or optimistic concurrency conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "417": {
-            "description": "Native Frappe validation failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server or rollback failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          }
-        },
-        "x-public-operation": "read",
-        "x-test-status": "passed",
-        "x-test-level": "docker-runtime",
-        "x-test-evidence": {
-          "suite": "extended-api",
-          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
-        }
-      },
-      "put": {
-        "tags": [
-          "Module: Accounts"
-        ],
-        "operationId": "updateCostCenter",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "$ref": "#/components/parameters/RequestId"
-          },
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CostCenterWrite"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Updated typed resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/CostCenterResponse"
-                    }
-                  },
-                  "required": [
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Idempotency or optimistic concurrency conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "417": {
-            "description": "Native Frappe validation failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server or rollback failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          }
-        },
-        "x-public-operation": "update",
-        "x-test-status": "passed",
-        "x-test-level": "docker-runtime",
-        "x-test-evidence": {
-          "suite": "extended-api",
-          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
-        }
-      },
-      "delete": {
-        "tags": [
-          "Module: Accounts"
-        ],
-        "operationId": "deleteCostCenter",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "$ref": "#/components/parameters/RequestId"
-          },
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Deleted typed resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permission denied",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Idempotency or optimistic concurrency conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "417": {
-            "description": "Native Frappe validation failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server or rollback failure",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FrappeError"
-                }
-              }
-            }
-          }
-        },
-        "x-public-operation": "delete",
-        "x-test-status": "passed",
-        "x-test-level": "docker-runtime",
-        "x-test-evidence": {
-          "suite": "extended-api",
-          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
-        }
-      }
-    },
     "/api/v1/accounts/journal-entries": {
       "get": {
         "tags": [
@@ -13514,6 +12822,2552 @@
         }
       }
     },
+    "/api/v1/accounts/report-packages": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "listReportPackages",
+        "operationId": "listReportPackages",
+        "parameters": [
+          {
+            "name": "company",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "form_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "B01-DN",
+                "B02-DN",
+                "B03-DN",
+                "B09-DN"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/ReportPackageListResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.list_report_packages",
+        "x-public-operation": "list",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      },
+      "post": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "createReportPackage",
+        "operationId": "createReportPackage",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/ReportPackageResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.create_report_package",
+        "x-public-operation": "create",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportPackageCreateRequest"
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/report-packages/{name}": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "getReportPackage",
+        "operationId": "getReportPackage",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/ReportPackageResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.get_report_package",
+        "x-public-operation": "read",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      },
+      "put": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "updateReportPackage",
+        "operationId": "updateReportPackage",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/ReportPackageResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.update_report_package",
+        "x-public-operation": "update",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportPackageUpdateRequest"
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/report-packages/{name}/review": {
+      "post": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "reviewReportPackage",
+        "operationId": "reviewReportPackage",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/ReportPackageResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.review_report_package",
+        "x-public-operation": "update",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/report-packages/{name}/close": {
+      "post": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "closeReportPackage",
+        "operationId": "closeReportPackage",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/ReportPackageResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.close_report_package",
+        "x-public-operation": "update",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/report-packages/{name}/issue": {
+      "post": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "issueReportPackage",
+        "operationId": "issueReportPackage",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/ReportPackageResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.issue_report_package",
+        "x-public-operation": "update",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/report-packages/{name}/reject": {
+      "post": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "rejectReportPackage",
+        "operationId": "rejectReportPackage",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/ReportPackageResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.reject_report_package",
+        "x-public-operation": "update",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportPackageRejectRequest"
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/companies": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "listCompanies",
+        "operationId": "listCompanies",
+        "parameters": [
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterListResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.list_companies",
+        "x-public-operation": "list",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/companies/{name}": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "getCompany",
+        "operationId": "getCompany",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.get_company",
+        "x-public-operation": "read",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/accounts": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "listAccounts",
+        "operationId": "listAccounts",
+        "parameters": [
+          {
+            "name": "company",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterListResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.list_accounts",
+        "x-public-operation": "list",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/accounts/{name}": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "getAccount",
+        "operationId": "getAccount",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.get_account",
+        "x-public-operation": "read",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/finance-books": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "listFinanceBooks",
+        "operationId": "listFinanceBooks",
+        "parameters": [
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterListResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.list_finance_books",
+        "x-public-operation": "list",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/finance-books/{name}": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "getFinanceBook",
+        "operationId": "getFinanceBook",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.get_finance_book",
+        "x-public-operation": "read",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/fiscal-years": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "listFiscalYears",
+        "operationId": "listFiscalYears",
+        "parameters": [
+          {
+            "name": "company",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterListResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.list_fiscal_years",
+        "x-public-operation": "list",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/fiscal-years/{name}": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "getFiscalYear",
+        "operationId": "getFiscalYear",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.get_fiscal_year",
+        "x-public-operation": "read",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/cost-centers": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "listCostCenters",
+        "operationId": "listCostCenters",
+        "parameters": [
+          {
+            "name": "company",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterListResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.list_cost_centers",
+        "x-public-operation": "list",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/cost-centers/{name}": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "getCostCenter",
+        "operationId": "getCostCenter",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.get_cost_center",
+        "x-public-operation": "read",
+        "x-test-status": "passed",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "extended-api",
+          "test": "tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows"
+        }
+      }
+    },
     "/api/v1/accounts/settings": {
       "get": {
         "tags": [
@@ -13533,7 +15387,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FrappeResponse"
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
                 }
               }
             }
@@ -13627,20 +15489,46 @@
           "suite": "accounts-reconciliation",
           "test": "tests/integration/test_accounts_reconciliation.py"
         }
-      },
-      "put": {
+      }
+    },
+    "/api/v1/accounts/shareholders": {
+      "get": {
         "tags": [
           "Module: Accounts",
           "Business routes"
         ],
-        "summary": "updateAccountsSettings",
-        "operationId": "updateAccountsSettings",
+        "summary": "listShareholders",
+        "operationId": "listShareholders",
         "parameters": [
           {
-            "$ref": "#/components/parameters/RequestId"
+            "name": "company",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "$ref": "#/components/parameters/IdempotencyKey"
+            "name": "limit_page_length",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
           }
         ],
         "responses": {
@@ -13649,7 +15537,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FrappeResponse"
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterListResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
                 }
               }
             }
@@ -13735,7 +15631,1113 @@
             }
           }
         },
-        "x-frappe-handler": "letron_api.finance.banking.accounts_settings_update",
+        "x-frappe-handler": "letron_api.finance.tt99_api.list_shareholders",
+        "x-public-operation": "list",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      },
+      "post": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "createShareholder",
+        "operationId": "createShareholder",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.create_shareholder",
+        "x-public-operation": "create",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShareholderWriteRequest"
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/shareholders/{name}": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "getShareholder",
+        "operationId": "getShareholder",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.get_shareholder",
+        "x-public-operation": "read",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      },
+      "put": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "updateShareholder",
+        "operationId": "updateShareholder",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.update_shareholder",
+        "x-public-operation": "update",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShareholderUpdateRequest"
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/period-closing-vouchers": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "listPeriodClosingVouchers",
+        "operationId": "listPeriodClosingVouchers",
+        "parameters": [
+          {
+            "name": "company",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fiscal_year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterListResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.list_period_closing_vouchers",
+        "x-public-operation": "list",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      },
+      "post": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "createPeriodClosingVoucher",
+        "operationId": "createPeriodClosingVoucher",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.create_period_closing_voucher",
+        "x-public-operation": "create",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PeriodClosingVoucherWriteRequest"
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/period-closing-vouchers/{name}": {
+      "get": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "getPeriodClosingVoucher",
+        "operationId": "getPeriodClosingVoucher",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.get_period_closing_voucher",
+        "x-public-operation": "read",
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      },
+      "put": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "updatePeriodClosingVoucher",
+        "operationId": "updatePeriodClosingVoucher",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.update_period_closing_voucher",
+        "x-public-operation": "update",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PeriodClosingVoucherUpdateRequest"
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/period-closing-vouchers/{name}/submit": {
+      "post": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "submitPeriodClosingVoucher",
+        "operationId": "submitPeriodClosingVoucher",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.submit_period_closing_voucher",
         "x-public-operation": "update",
         "requestBody": {
           "required": false,
@@ -13751,8 +16753,153 @@
         "x-test-status": "not-tested",
         "x-test-level": "docker-runtime",
         "x-test-evidence": {
-          "suite": "accounts-reconciliation",
-          "test": "tests/integration/test_accounts_reconciliation.py"
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
+        }
+      }
+    },
+    "/api/v1/accounts/period-closing-vouchers/{name}/cancel": {
+      "post": {
+        "tags": [
+          "Module: Accounts",
+          "Business routes"
+        ],
+        "summary": "cancelPeriodClosingVoucher",
+        "operationId": "cancelPeriodClosingVoucher",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/MasterRecordResponse"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency or optimistic concurrency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "Native Frappe validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server or rollback failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrappeError"
+                }
+              }
+            }
+          }
+        },
+        "x-frappe-handler": "letron_api.finance.tt99_api.cancel_period_closing_voucher",
+        "x-public-operation": "update",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "x-test-status": "not-tested",
+        "x-test-level": "docker-runtime",
+        "x-test-evidence": {
+          "suite": "public-api",
+          "test": "tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle"
         }
       }
     }
@@ -14500,71 +17647,6 @@
           "check",
           "name",
           "value"
-        ],
-        "additionalProperties": true,
-        "x-module": "Accounts"
-      },
-      "CostCenter": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "sb0": {
-            "type": "string"
-          },
-          "cost_center_name": {
-            "type": "string"
-          },
-          "cost_center_number": {
-            "type": "string"
-          },
-          "parent_cost_center": {
-            "type": "string",
-            "x-frappe-target-doctype": "Cost Center"
-          },
-          "company": {
-            "type": "string",
-            "x-frappe-target-doctype": "Company"
-          },
-          "cb0": {
-            "type": "string"
-          },
-          "is_group": {
-            "type": [
-              "boolean",
-              "integer"
-            ],
-            "minimum": 0,
-            "maximum": 1
-          },
-          "lft": {
-            "type": "integer",
-            "writeOnly": true
-          },
-          "rgt": {
-            "type": "integer",
-            "writeOnly": true
-          },
-          "old_parent": {
-            "type": "string",
-            "x-frappe-target-doctype": "Cost Center",
-            "writeOnly": true
-          },
-          "disabled": {
-            "type": [
-              "boolean",
-              "integer"
-            ],
-            "minimum": 0,
-            "maximum": 1
-          }
-        },
-        "required": [
-          "company",
-          "cost_center_name",
-          "name",
-          "parent_cost_center"
         ],
         "additionalProperties": true,
         "x-module": "Accounts"
@@ -21003,6 +24085,344 @@
           }
         }
       },
+      "MasterRecordResponse": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "MasterListResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "ReportPackageCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "company",
+          "form_code",
+          "from_date",
+          "to_date"
+        ],
+        "properties": {
+          "company": {
+            "type": "string",
+            "minLength": 1
+          },
+          "form_code": {
+            "type": "string",
+            "enum": [
+              "B01-DN",
+              "B02-DN",
+              "B03-DN",
+              "B09-DN"
+            ]
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "comparative_from_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "comparative_to_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "finance_book": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "consolidation_scope": {
+            "type": [
+              "string",
+              "object",
+              "null"
+            ]
+          },
+          "accounting_inputs": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "ReportPackageUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "company": {
+            "type": "string",
+            "minLength": 1
+          },
+          "form_code": {
+            "type": "string",
+            "enum": [
+              "B01-DN",
+              "B02-DN",
+              "B03-DN",
+              "B09-DN"
+            ]
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "comparative_from_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "comparative_to_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "finance_book": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "consolidation_scope": {
+            "type": [
+              "string",
+              "object",
+              "null"
+            ]
+          },
+          "accounting_inputs": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "ReportPackageRejectRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      },
+      "ReportPackageResponse": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "name",
+          "company",
+          "form_code",
+          "status"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string"
+          },
+          "form_code": {
+            "type": "string",
+            "enum": [
+              "B01-DN",
+              "B02-DN",
+              "B03-DN",
+              "B09-DN"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Review",
+              "Closed",
+              "Issued",
+              "Rejected"
+            ]
+          },
+          "validation": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "ReportPackageListResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportPackageResponse"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "ShareholderWriteRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "company"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "company": {
+            "type": "string",
+            "minLength": 1
+          },
+          "naming_series": {
+            "type": "string"
+          }
+        }
+      },
+      "ShareholderUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "company": {
+            "type": "string",
+            "minLength": 1
+          },
+          "naming_series": {
+            "type": "string"
+          }
+        }
+      },
+      "PeriodClosingVoucherWriteRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "company",
+          "fiscal_year",
+          "period_start_date",
+          "period_end_date",
+          "closing_account_head",
+          "remarks"
+        ],
+        "properties": {
+          "transaction_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "company": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fiscal_year": {
+            "type": "string",
+            "minLength": 1
+          },
+          "period_start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_end_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "closing_account_head": {
+            "type": "string",
+            "minLength": 1
+          },
+          "remarks": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "PeriodClosingVoucherUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "transaction_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "company": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fiscal_year": {
+            "type": "string",
+            "minLength": 1
+          },
+          "period_start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_end_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "closing_account_head": {
+            "type": "string",
+            "minLength": 1
+          },
+          "remarks": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
       "AdvanceTaxesandChargesWrite": {
         "type": "object",
         "properties": {
@@ -22795,179 +26215,6 @@
             "type": [
               "string",
               "null"
-            ]
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "additionalProperties": true,
-        "x-module": "Accounts"
-      },
-      "CostCenterWrite": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "sb0": {
-            "type": "string"
-          },
-          "cost_center_name": {
-            "type": "string"
-          },
-          "cost_center_number": {
-            "type": "string"
-          },
-          "parent_cost_center": {
-            "type": "string",
-            "x-frappe-target-doctype": "Cost Center"
-          },
-          "company": {
-            "type": "string",
-            "x-frappe-target-doctype": "Company"
-          },
-          "cb0": {
-            "type": "string"
-          },
-          "is_group": {
-            "type": [
-              "boolean",
-              "integer"
-            ],
-            "minimum": 0,
-            "maximum": 1
-          },
-          "lft": {
-            "type": "integer",
-            "writeOnly": true
-          },
-          "rgt": {
-            "type": "integer",
-            "writeOnly": true
-          },
-          "old_parent": {
-            "type": "string",
-            "x-frappe-target-doctype": "Cost Center",
-            "writeOnly": true
-          },
-          "disabled": {
-            "type": [
-              "boolean",
-              "integer"
-            ],
-            "minimum": 0,
-            "maximum": 1
-          },
-          "custom_letron_orchestration_id": {
-            "type": "string"
-          },
-          "custom_lark_approval_status": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "company",
-          "cost_center_name",
-          "parent_cost_center"
-        ],
-        "additionalProperties": false,
-        "x-module": "Accounts"
-      },
-      "CostCenterResponse": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "sb0": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "cost_center_name": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "cost_center_number": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "parent_cost_center": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "x-frappe-target-doctype": "Cost Center"
-          },
-          "company": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "x-frappe-target-doctype": "Company"
-          },
-          "cb0": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "is_group": {
-            "anyOf": [
-              {
-                "type": [
-                  "boolean",
-                  "integer"
-                ],
-                "minimum": 0,
-                "maximum": 1
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "lft": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "writeOnly": true
-          },
-          "rgt": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "writeOnly": true
-          },
-          "old_parent": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "x-frappe-target-doctype": "Cost Center",
-            "writeOnly": true
-          },
-          "disabled": {
-            "anyOf": [
-              {
-                "type": [
-                  "boolean",
-                  "integer"
-                ],
-                "minimum": 0,
-                "maximum": 1
-              },
-              {
-                "type": "null"
-              }
             ]
           }
         },
@@ -36983,7 +40230,6 @@
         "Bank Transaction Rule",
         "Bank Transaction Rule Accounts",
         "Bank Transaction Rule Description Conditions",
-        "Cost Center",
         "Item Wise Tax Detail",
         "Journal Entry",
         "Journal Entry Account",
@@ -37522,21 +40768,574 @@
         },
         {
           "module": "Accounts",
+          "resource": "report-packages",
+          "method": "GET",
+          "path": "/api/v1/accounts/report-packages",
+          "operation": "list",
+          "operation_id": "listReportPackages",
+          "handler": "letron_api.finance.tt99_api.list_report_packages",
+          "query_parameters": [
+            {
+              "name": "company",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "form_code",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "B01-DN",
+                  "B02-DN",
+                  "B03-DN",
+                  "B09-DN"
+                ]
+              }
+            },
+            {
+              "name": "status",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "from_date",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "format": "date"
+              }
+            },
+            {
+              "name": "to_date",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          ],
+          "response_schema": "ReportPackageListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "GET",
+          "path": "/api/v1/accounts/report-packages/{name}",
+          "operation": "read",
+          "operation_id": "getReportPackage",
+          "handler": "letron_api.finance.tt99_api.get_report_package",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "POST",
+          "path": "/api/v1/accounts/report-packages",
+          "operation": "create",
+          "operation_id": "createReportPackage",
+          "handler": "letron_api.finance.tt99_api.create_report_package",
+          "request_schema": "ReportPackageCreateRequest",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "PUT",
+          "path": "/api/v1/accounts/report-packages/{name}",
+          "operation": "update",
+          "operation_id": "updateReportPackage",
+          "handler": "letron_api.finance.tt99_api.update_report_package",
+          "request_schema": "ReportPackageUpdateRequest",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "POST",
+          "path": "/api/v1/accounts/report-packages/{name}/review",
+          "operation": "update",
+          "operation_id": "reviewReportPackage",
+          "handler": "letron_api.finance.tt99_api.review_report_package",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "POST",
+          "path": "/api/v1/accounts/report-packages/{name}/close",
+          "operation": "update",
+          "operation_id": "closeReportPackage",
+          "handler": "letron_api.finance.tt99_api.close_report_package",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "POST",
+          "path": "/api/v1/accounts/report-packages/{name}/issue",
+          "operation": "update",
+          "operation_id": "issueReportPackage",
+          "handler": "letron_api.finance.tt99_api.issue_report_package",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "POST",
+          "path": "/api/v1/accounts/report-packages/{name}/reject",
+          "operation": "update",
+          "operation_id": "rejectReportPackage",
+          "handler": "letron_api.finance.tt99_api.reject_report_package",
+          "request_schema": "ReportPackageRejectRequest",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "companies",
+          "method": "GET",
+          "path": "/api/v1/accounts/companies",
+          "operation": "list",
+          "operation_id": "listCompanies",
+          "handler": "letron_api.finance.tt99_api.list_companies",
+          "query_parameters": [
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "companies",
+          "method": "GET",
+          "path": "/api/v1/accounts/companies/{name}",
+          "operation": "read",
+          "operation_id": "getCompany",
+          "handler": "letron_api.finance.tt99_api.get_company",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "accounts",
+          "method": "GET",
+          "path": "/api/v1/accounts/accounts",
+          "operation": "list",
+          "operation_id": "listAccounts",
+          "handler": "letron_api.finance.tt99_api.list_accounts",
+          "query_parameters": [
+            {
+              "name": "company",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "accounts",
+          "method": "GET",
+          "path": "/api/v1/accounts/accounts/{name}",
+          "operation": "read",
+          "operation_id": "getAccount",
+          "handler": "letron_api.finance.tt99_api.get_account",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "finance-books",
+          "method": "GET",
+          "path": "/api/v1/accounts/finance-books",
+          "operation": "list",
+          "operation_id": "listFinanceBooks",
+          "handler": "letron_api.finance.tt99_api.list_finance_books",
+          "query_parameters": [
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "finance-books",
+          "method": "GET",
+          "path": "/api/v1/accounts/finance-books/{name}",
+          "operation": "read",
+          "operation_id": "getFinanceBook",
+          "handler": "letron_api.finance.tt99_api.get_finance_book",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "fiscal-years",
+          "method": "GET",
+          "path": "/api/v1/accounts/fiscal-years",
+          "operation": "list",
+          "operation_id": "listFiscalYears",
+          "handler": "letron_api.finance.tt99_api.list_fiscal_years",
+          "query_parameters": [
+            {
+              "name": "company",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "fiscal-years",
+          "method": "GET",
+          "path": "/api/v1/accounts/fiscal-years/{name}",
+          "operation": "read",
+          "operation_id": "getFiscalYear",
+          "handler": "letron_api.finance.tt99_api.get_fiscal_year",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "cost-centers",
+          "method": "GET",
+          "path": "/api/v1/accounts/cost-centers",
+          "operation": "list",
+          "operation_id": "listCostCenters",
+          "handler": "letron_api.finance.tt99_api.list_cost_centers",
+          "query_parameters": [
+            {
+              "name": "company",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "cost-centers",
+          "method": "GET",
+          "path": "/api/v1/accounts/cost-centers/{name}",
+          "operation": "read",
+          "operation_id": "getCostCenter",
+          "handler": "letron_api.finance.tt99_api.get_cost_center",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
           "resource": "settings",
           "method": "GET",
           "path": "/api/v1/accounts/settings",
           "operation": "read",
           "operation_id": "getAccountsSettings",
-          "handler": "letron_api.finance.banking.accounts_settings"
+          "handler": "letron_api.finance.banking.accounts_settings",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
         },
         {
           "module": "Accounts",
-          "resource": "settings",
+          "resource": "shareholders",
+          "method": "GET",
+          "path": "/api/v1/accounts/shareholders",
+          "operation": "list",
+          "operation_id": "listShareholders",
+          "handler": "letron_api.finance.tt99_api.list_shareholders",
+          "query_parameters": [
+            {
+              "name": "company",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "shareholders",
+          "method": "GET",
+          "path": "/api/v1/accounts/shareholders/{name}",
+          "operation": "read",
+          "operation_id": "getShareholder",
+          "handler": "letron_api.finance.tt99_api.get_shareholder",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "shareholders",
+          "method": "POST",
+          "path": "/api/v1/accounts/shareholders",
+          "operation": "create",
+          "operation_id": "createShareholder",
+          "handler": "letron_api.finance.tt99_api.create_shareholder",
+          "request_schema": "ShareholderWriteRequest",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "shareholders",
           "method": "PUT",
-          "path": "/api/v1/accounts/settings",
+          "path": "/api/v1/accounts/shareholders/{name}",
           "operation": "update",
-          "operation_id": "updateAccountsSettings",
-          "handler": "letron_api.finance.banking.accounts_settings_update"
+          "operation_id": "updateShareholder",
+          "handler": "letron_api.finance.tt99_api.update_shareholder",
+          "request_schema": "ShareholderUpdateRequest",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "period-closing-vouchers",
+          "method": "GET",
+          "path": "/api/v1/accounts/period-closing-vouchers",
+          "operation": "list",
+          "operation_id": "listPeriodClosingVouchers",
+          "handler": "letron_api.finance.tt99_api.list_period_closing_vouchers",
+          "query_parameters": [
+            {
+              "name": "company",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "fiscal_year",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "period-closing-vouchers",
+          "method": "GET",
+          "path": "/api/v1/accounts/period-closing-vouchers/{name}",
+          "operation": "read",
+          "operation_id": "getPeriodClosingVoucher",
+          "handler": "letron_api.finance.tt99_api.get_period_closing_voucher",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "period-closing-vouchers",
+          "method": "POST",
+          "path": "/api/v1/accounts/period-closing-vouchers",
+          "operation": "create",
+          "operation_id": "createPeriodClosingVoucher",
+          "handler": "letron_api.finance.tt99_api.create_period_closing_voucher",
+          "request_schema": "PeriodClosingVoucherWriteRequest",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "period-closing-vouchers",
+          "method": "PUT",
+          "path": "/api/v1/accounts/period-closing-vouchers/{name}",
+          "operation": "update",
+          "operation_id": "updatePeriodClosingVoucher",
+          "handler": "letron_api.finance.tt99_api.update_period_closing_voucher",
+          "request_schema": "PeriodClosingVoucherUpdateRequest",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "period-closing-vouchers",
+          "method": "POST",
+          "path": "/api/v1/accounts/period-closing-vouchers/{name}/submit",
+          "operation": "update",
+          "operation_id": "submitPeriodClosingVoucher",
+          "handler": "letron_api.finance.tt99_api.submit_period_closing_voucher",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "period-closing-vouchers",
+          "method": "POST",
+          "path": "/api/v1/accounts/period-closing-vouchers/{name}/cancel",
+          "operation": "update",
+          "operation_id": "cancelPeriodClosingVoucher",
+          "handler": "letron_api.finance.tt99_api.cancel_period_closing_voucher",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
         },
         {
           "module": "Assets",
@@ -37904,6 +41703,344 @@
               ]
             }
           }
+        },
+        "MasterRecordResponse": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "MasterListResponse": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items",
+            "total"
+          ],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "ReportPackageCreateRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "company",
+            "form_code",
+            "from_date",
+            "to_date"
+          ],
+          "properties": {
+            "company": {
+              "type": "string",
+              "minLength": 1
+            },
+            "form_code": {
+              "type": "string",
+              "enum": [
+                "B01-DN",
+                "B02-DN",
+                "B03-DN",
+                "B09-DN"
+              ]
+            },
+            "from_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "to_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "comparative_from_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "comparative_to_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "finance_book": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "consolidation_scope": {
+              "type": [
+                "string",
+                "object",
+                "null"
+              ]
+            },
+            "accounting_inputs": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "ReportPackageUpdateRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "company": {
+              "type": "string",
+              "minLength": 1
+            },
+            "form_code": {
+              "type": "string",
+              "enum": [
+                "B01-DN",
+                "B02-DN",
+                "B03-DN",
+                "B09-DN"
+              ]
+            },
+            "from_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "to_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "comparative_from_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "comparative_to_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "finance_book": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "consolidation_scope": {
+              "type": [
+                "string",
+                "object",
+                "null"
+              ]
+            },
+            "accounting_inputs": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "ReportPackageRejectRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "reason"
+          ],
+          "properties": {
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          }
+        },
+        "ReportPackageResponse": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "name",
+            "company",
+            "form_code",
+            "status"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "company": {
+              "type": "string"
+            },
+            "form_code": {
+              "type": "string",
+              "enum": [
+                "B01-DN",
+                "B02-DN",
+                "B03-DN",
+                "B09-DN"
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "Draft",
+                "Review",
+                "Closed",
+                "Issued",
+                "Rejected"
+              ]
+            },
+            "validation": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "ReportPackageListResponse": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items",
+            "total"
+          ],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ReportPackageResponse"
+              }
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "ShareholderWriteRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "title",
+            "company"
+          ],
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "company": {
+              "type": "string",
+              "minLength": 1
+            },
+            "naming_series": {
+              "type": "string"
+            }
+          }
+        },
+        "ShareholderUpdateRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "company": {
+              "type": "string",
+              "minLength": 1
+            },
+            "naming_series": {
+              "type": "string"
+            }
+          }
+        },
+        "PeriodClosingVoucherWriteRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "company",
+            "fiscal_year",
+            "period_start_date",
+            "period_end_date",
+            "closing_account_head",
+            "remarks"
+          ],
+          "properties": {
+            "transaction_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "company": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fiscal_year": {
+              "type": "string",
+              "minLength": 1
+            },
+            "period_start_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "period_end_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "closing_account_head": {
+              "type": "string",
+              "minLength": 1
+            },
+            "remarks": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "PeriodClosingVoucherUpdateRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "transaction_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "company": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fiscal_year": {
+              "type": "string",
+              "minLength": 1
+            },
+            "period_start_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "period_end_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "closing_account_head": {
+              "type": "string",
+              "minLength": 1
+            },
+            "remarks": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
         }
       },
       "include_methods": [
@@ -38019,10 +42156,6 @@
         {
           "doctype": "Mode of Payment",
           "path": "/api/v1/accounts/modes-of-payment"
-        },
-        {
-          "doctype": "Cost Center",
-          "path": "/api/v1/accounts/cost-centers"
         },
         {
           "doctype": "Journal Entry",
@@ -38144,9 +42277,9 @@
     }
   },
   "x-acceptance-summary": {
-    "passed": 71,
+    "passed": 67,
     "partial": 0,
-    "not-tested": 30,
+    "not-tested": 56,
     "blocked": 0
   },
   "x-module": "Accounts",
@@ -38161,7 +42294,6 @@
       "Bank Transaction Rule",
       "Bank Transaction Rule Accounts",
       "Bank Transaction Rule Description Conditions",
-      "Cost Center",
       "Item Wise Tax Detail",
       "Journal Entry",
       "Journal Entry Account",

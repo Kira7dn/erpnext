@@ -39,8 +39,9 @@ Mã Account của Letron dùng trực tiếp mã tài khoản VAS theo Thông t�
 
 ### Trạng thái triển khai
 
-`[x]` = đã có trong code/config và đã được runtime verify. `[ ]` = chưa có trong
-code/config hoặc chưa có acceptance kỹ thuật.
+`[x]` = đã có trong code/config và đã được runtime verify. `[~]` = mới có một
+phần hoặc còn phụ thuộc acceptance vận hành bên ngoài. Thiết kế TT99 trong
+phạm vi báo cáo năm đã hoàn thành; capability ngoài scope được ghi riêng.
 
 ```text
 Frappe site = một Holding và các Company thuộc Holding
@@ -273,6 +274,156 @@ Mỗi Company phải khai báo đơn vị tiền tệ kế toán theo Luật K�
 chuyển đổi báo cáo theo chế độ kế toán Việt Nam. Không dùng `functional_currency`
 và `presentation_currency` như một yêu cầu IFRS độc lập.
 
+### 5.5. Bộ báo cáo pháp định TT99 — phạm vi và thiết kế đích
+
+Phạm vi phát hành giai đoạn 1 là BCTC năm, hoạt động liên tục, cho năm tài
+chính bắt đầu từ `2026-01-01`. Một bộ BCTC chỉ được coi là hoàn chỉnh khi có đủ:
+
+```text
+B01-DN  Bảng cân đối kế toán
+B02-DN  Báo cáo kết quả hoạt động kinh doanh
+B03-DN  Báo cáo lưu chuyển tiền tệ — phương pháp gián tiếp
+B09-DN  Bản thuyết minh báo cáo tài chính
+```
+
+Các mẫu không hoạt động liên tục (`B01-DNKLT`/`B02-DNKLT`/`B03-DNKLT`/
+`B09-DNKLT`) và mẫu giữa niên độ (`B01a`/`B02a`/`B03a`/`B09a`, `B01b`/
+`B02b`/`B03b`/`B09a`) là capability mở rộng; không được dùng trạng thái của bộ
+`-DN` để tuyên bố đã hỗ trợ các mẫu này.
+
+Mọi báo cáo pháp định phải có report package bất biến theo kỳ, gồm:
+
+```text
+package_id
+policy_version
+form_code
+company / consolidation_scope
+from_date / to_date / comparative_period
+accounting_currency / reporting_currency
+source_cutoff
+lines[]: code, amount, status, source_refs[]
+validation: ok, unresolved, unmapped, reconciliation_checks
+```
+
+`source_refs[]` phải truy ngược được tới GL Entry, voucher, Account, Cost Center
+và nguồn phân loại chi tiết nếu có. Report không được ghi thêm GL và không được
+impute số liệu thiếu. Khi thiếu nguồn bắt buộc, trạng thái là `requires_*` và
+package không đủ điều kiện phát hành.
+
+#### 5.5.1. B03-DN — nguồn tiền và phép đối chiếu
+
+B03 phải được tính từ dòng tiền thực tế, không phụ thuộc vào marker synthetic
+hoặc một Journal Entry dành riêng cho acceptance. Thiết kế native-first:
+
+```text
+Source voucher / Payment / Journal Entry
+        → native GL Entry
+        → cash-flow event classification
+        → B03 metric and line derivation
+        → source_refs + reconciliation checks
+```
+
+Quy tắc bắt buộc:
+
+- Dòng tiền phải bắt đầu từ biến động thực tế trên Account tiền `111`, `112`,
+  `113`; không suy ra tiền đã trả/thu chỉ bằng biến động số dư của Account chi
+  phí hoặc công nợ.
+- Các khoản điều chỉnh phương pháp gián tiếp phải đối chiếu được với Account,
+  voucher và chi tiết nghiệp vụ: khấu hao, dự phòng, tỷ giá, lãi/lỗ đầu tư,
+  chi phí đi vay, phải thu, tồn kho, phải trả, chi phí trả trước, lãi vay đã
+  trả và thuế TNDN đã nộp.
+- Dòng đầu tư và tài chính phải phân biệt thu/chi tiền thực tế với giao dịch
+  không dùng tiền; mua TSCĐ, cho vay/thu hồi, góp vốn/thu hồi, phát hành/mua
+  lại cổ phiếu, vay/trả nợ và cổ tức phải có source classification.
+- `metric_sources` chỉ là mapping candidate, không phải bằng chứng số tiền đã
+  thu/chi. Production không được sử dụng `_metric_marker` để hoàn thiện metric.
+- Bắt buộc kiểm tra: `50 + 60 + 61 = 70`, tiền cuối kỳ B03 khớp số dư
+  `111/112/113`, và tổng operating/investing/financing khớp dòng tiền thuần
+  trong kỳ.
+
+Nếu nghiệp vụ không đủ thông tin phân loại, hệ thống phải trả
+`requires_classification`/`requires_cash_source`, nêu rõ voucher và line còn
+thiếu; không mặc định bằng không.
+
+#### 5.5.2. B09-DN — mô hình thuyết minh có nguồn
+
+B09 không phải chỉ là danh sách template. Backend phải cung cấp một structured
+notes package với tối thiểu các nhóm sau:
+
+```text
+N01  Cơ sở lập và chính sách kế toán
+N02  Tiền và tương đương tiền
+N03  Phải thu, phải trả và phân loại ngắn/dài hạn
+N04  Hàng tồn kho và dự phòng giảm giá
+N05  TSCĐ, bất động sản đầu tư, XDCB dở dang và khấu hao
+N06  Doanh thu, chi phí, thuế và kết quả kinh doanh
+N07  Vốn chủ sở hữu, vay nợ và dự phòng
+N08  Giao dịch với bên liên quan và giao dịch nội bộ
+N09  Cam kết, tài sản/ nợ tiềm tàng và sự kiện sau ngày khóa sổ
+N10  Ngoại tệ, tỷ giá, hợp nhất và các ngoại lệ đối chiếu
+```
+
+Mỗi note section có `code`, `title`, `period`, `source`, `data`, `status` và
+`source_refs[]`. Số liệu định lượng phải lấy từ native GL/subledger/report;
+diễn giải chính sách và cam kết phải là nội dung được accounting owner nhập,
+review và khóa theo package. Không tự sinh diễn giải pháp lý hoặc giá trị chưa
+có trong sổ.
+
+`N07`–`N10` có thể trả `requires_accounting_input`, nhưng khi đó native package
+B09 phải là `incomplete` và trạng thái `Closed`/`Issued` bị chặn. `vas-notes`
+chỉ là adapter snapshot; việc phát hành dùng `Letron VAS Report Package`.
+
+#### 5.5.3. Khóa kỳ, sửa sai và audit trail
+
+Mỗi Company dùng native `Period Closing Voucher` theo chuỗi trạng thái:
+
+```text
+Open → Review → Closed → Issued
+```
+
+- `Review` kiểm tra unmapped account, B01/B02/B03/B09, số dư tiền, thuế,
+  intercompany và source exceptions.
+- `Closed` chặn posting/sửa/hủy trong kỳ theo quyền native; correction sau khóa
+  phải là chứng từ điều chỉnh hoặc reversal ở kỳ được phép, giữ liên kết tới
+  chứng từ gốc và lý do.
+- `Issued` đóng băng report package, policy hash, dữ liệu nguồn và người/thời
+  điểm phát hành. Không overwrite package đã phát hành.
+- Consolidation adjustment chỉ được tạo sau khi tất cả Company trong scope đã
+  `Closed`; sau adjustment phải chạy lại reconciliation và lưu package mới có
+  liên kết tới package trước adjustment.
+
+Close guard hiện có cho consolidation adjustment không đồng nghĩa với việc đã
+có đầy đủ close/review/issue lifecycle cho BCTC từng Company; hai phạm vi này
+phải được kiểm thử riêng.
+
+#### 5.5.4. Version hóa và chuyển đổi sang TT99
+
+Mỗi package ghi `policy_version`, `mapping_version`, `effective_from` và hash
+của policy. Số dư đầu kỳ 2026 phải có conversion snapshot từ kỳ trước, gồm
+mapping Account cũ → Account TT99, số tiền, Company, chứng từ/biên bản chuyển
+đổi và người thực hiện. Không sửa nghĩa Account hoặc số dư đã khóa bằng cách
+ghi đè policy; mọi thay đổi tạo version mới và chỉ có hiệu lực từ kỳ được chỉ
+định.
+
+#### 5.5.5. Tiêu chí readiness thiết kế và phát hành
+
+Các guard kỹ thuật để chuyển package sang `ready_to_issue` đã được thiết kế và
+triển khai đầy đủ:
+
+```text
+[x] B01-DN, B02-DN, B03-DN và B09-DN đều có package contract/native path
+[x] unresolved hoặc unmapped được fail-closed và trả thành exception có kiểm soát
+[x] B03 có cash reconciliation invariant và native closing-cash check
+[x] B09 kiểm tra note bắt buộc, nguồn/diễn giải và source_refs
+[x] package lưu policy/mapping hash; close/issue lifecycle được native guard
+[x] kỳ so sánh, consolidation và elimination có path/guard riêng khi áp dụng
+[x] test runtime dùng native Journal Entry/cash GL; marker chỉ còn rollback fixture
+```
+
+Acceptance synthetic vẫn hữu ích để kiểm tra lifecycle native, nhưng không
+được dùng thay cho việc nạp dữ liệu thật và review số liệu của từng kỳ. Đây là
+operational gate, không phải phần còn thiếu của thiết kế hệ thống.
+
 ## 6. Cost Center taxonomy — mã chốt
 
 ### 6.1. Bộ mã Company/segment
@@ -487,29 +638,35 @@ quản trị; intercompany là quan hệ giữa các pháp nhân.
 - [x] Shared COA template phải có version và không được thay đổi âm thầm các kỳ đã
   khóa.
 - [x] Policy có mapping core chỉ tiêu BCTC riêng theo Thông tư 99/2025/TT-BTC.
-- [x] Policy có catalog đầy đủ mã dòng statutory B01-DN/B02-DN/B03-DN theo Phụ lục IV
-  TT99, gồm mã chính thức, công thức subtotal và Account/metric nguồn; các dòng
-  cần tách ngắn hạn/dài hạn hoặc chi tiết sổ phụ vẫn fail-closed.
-- [x] Report endpoint có Balance Sheet, Profit and Loss, B01-DN, B02-DN, B03-DN
-  và native Cash Flow.
+- [x] Policy đã khai báo đầy đủ bộ BCTC năm TT99 gồm B01-DN/B02-DN/B03-DN và
+  B09-DN; B09 có 10 note line, source và required contract.
+- [x] Report endpoint expose B09-DN qua `vas-b09-dn`; package native lưu policy
+  hash, source cutoff, note data và trạng thái review/issue.
 - [x] Backend trả classification ngắn hạn/dài hạn/vốn chủ sở hữu, cash-flow
   categories, disclosure-note templates và unmapped-account exceptions từ policy.
-- [x] B01-DN/B02-DN/B03-DN đọc dữ liệu native theo đúng source của policy:
+- [~] B01-DN/B02-DN đã đọc dữ liệu native theo source của policy:
   B01 phân loại ngắn hạn/dài hạn bằng `GL Entry.due_date`, B01/B02 subledger
   bằng marker máy `LETRON-STAT` trong native Journal Entry, B02 basic EPS từ
   native Shareholder; diluted EPS không có nguồn native thì `not_applicable`.
-  Nếu nguồn bắt buộc có số dư nhưng thiếu chi tiết, report vẫn fail-closed.
-- [x] Cash Flow adapter giữ nguyên native ERPNext payload và bổ sung contract VAS 24
-  indirect method, ba nhóm operating/investing/financing và account-type policy.
+  B03 dùng thêm event classifier trên cash GL 111/112/113, counterpart account,
+  voucher và source refs; marker chỉ còn cho rollback-only acceptance fixture.
+- [~] Cash Flow adapter đã có contract VAS 24 indirect method, ba nhóm
+  operating/investing/financing, balance/P&L metrics và cash-event exceptions;
+  runtime acceptance với giao dịch nghiệp vụ thật vẫn là gate cuối.
 - [x] Native Cash Flow account-type adapter truyền đầy đủ `company` vào đúng
   signature ERPNext `get_account_type_based_gl_data`, tránh lỗi SQL runtime khi
   chạy package nhiều Company.
-- [x] Notes adapter tạo quantitative snapshot từ số liệu Balance Sheet/P&L native;
-  không tự sinh diễn giải hoặc số liệu không có trong sổ.
+- [~] B09 adapter tạo quantitative snapshot từ Balance Sheet/P&L native, giữ
+  accounting-owned input trong native `Letron VAS Report Package`, bắt buộc
+  resolve note trước `Closed`/`Issued` và không tự sinh diễn giải.
 - [x] Currency guard chỉ cho phép các đơn vị tiền tệ nằm trong allowlist của policy;
   translation đa tiền tệ là capability chưa thuộc phạm vi hiện tại.
-- [x] BCTC mẫu và nội dung thuyết minh được kiểm thử bằng synthetic fixture; report
-  không tự sinh số liệu hoặc diễn giải ngoài nguồn native.
+- [x] BCTC mẫu và nội dung thuyết minh hiện có được kiểm thử bằng synthetic fixture;
+  report không tự sinh số liệu hoặc diễn giải ngoài nguồn native.
+- [~] Đã có sample acceptance JSON và runner rollback-safe trên Docker stack để
+  chứng minh B03 cash reconciliation và lifecycle B09 bằng native Journal Entry;
+  acceptance bằng chứng từ kế toán thật và accounting sign-off vẫn còn là gate
+  nghiệp vụ cuối.
 
 Các native objects chính được sử dụng trong workflow hiện tại:
 
@@ -562,79 +719,118 @@ Trạng thái tích hợp hiện tại của codebase:
 [x] Mã Account VAS dùng trực tiếp giữa các Company
 [x] Matching/elimination engine nằm trong `letron_api`
 [x] Adjustment model dùng native Journal Entry + Finance Book, không tạo custom ledger
-
-API hợp nhất đã triển khai:
-
-```text
-GET  /api/v1/accounts/consolidation/package
-POST /api/v1/accounts/consolidation/adjustments
-POST /api/v1/accounts/consolidation/adjustments/submit
-POST /api/v1/accounts/consolidation/adjustments/cancel
 ```
 
-Package hợp nhất có thể nhận thêm `comparative_from_date` và
-`comparative_to_date`. Khi có đủ hai ngày, backend đọc thêm GL native của kỳ
-so sánh cho từng Company, lập `comparative_elimination_schedule` riêng và trả
-`consolidated_before_elimination_comparative` cùng
-`consolidated_after_elimination_comparative`; B03-DN cũng giữ đủ hai cột kỳ.
-Kỳ so sánh không bị trộn vào kỳ hiện hành.
+API report, consolidation và trạng thái từng route được quy định tập trung tại
+§9.1 bên dưới; không lặp lại danh sách endpoint ở phần này.
 
-Ví dụ:
+### 9.1. API contract cho TT99 và hợp nhất
 
-```text
-GET /api/v1/accounts/consolidation/package?filters={
-  "companies": ["Letron Holding", "LeSC", "LeSM", "LeDB", "LeSE", "LeSB", "LeGM"],
-  "from_date": "2026-01-01",
-  "to_date": "2026-12-31",
-  "comparative_from_date": "2025-01-01",
-  "comparative_to_date": "2025-12-31"
-}
-```
+API public đi qua Gateway với prefix `/api/v1`, yêu cầu session/authentication
+và được rewrite vào các handler Frappe của `letron_api`. Không mở API guest cho
+báo cáo hoặc adjustment kế toán.
 
-API báo cáo statutory dùng chung report handler:
+| # | Trạng thái | Method | Public route | Mục đích / tính năng / TT99 | Handler / loại triển khai | Yêu cầu / guard | Cần khi / không cần khi |
+|---:|---|---|---|---|---|---|---|
+| 1 | `[x]` | `GET` | `/api/v1/accounts/reports/report` | Một route đọc `report_key`: `vas-b01-dn` → B01-DN/`statutory_report`; `vas-b02-dn` → B02-DN/`statutory_report`; `vas-b03-dn` → B03-DN/`statutory_cash_flow`; `vas-b09-dn` → B09-DN/`b09_report`; ngoài ra có `vas-cash-flow`, `vas-notes`, `vas-unmapped-accounts`, `vas-consolidation-package` | `letron_api.finance.banking.report`; adapter native report/GL/Cash Flow/Notes | `report_key`, `company`, `from_date`, `to_date`; riêng consolidation cần `companies` trong `filters`; hỗ trợ `finance_book` và comparative dates | Cần khi frontend/integration đọc BCTC qua Gateway; không cần route riêng cho từng mẫu |
+| 2 | `[x]` | `GET` | `/api/v1/accounts/consolidation/package` | Package hợp nhất trước/sau elimination, kỳ hiện hành và comparative; preview không ghi GL | `letron_api.finance.banking.consolidation_package_report`; native financial-statement engine | `from_date`, `to_date`, `companies`; tùy chọn `finance_book`, comparative dates, `include_adjustments`; cần `GL Entry: read` | Cần khi cần package hợp nhất qua Gateway; không cần nếu chỉ đọc native report/Desk |
+| 3 | `[x]` | `POST` | `/api/v1/accounts/consolidation/adjustments` | Tạo draft consolidation adjustment tại `Letron Holding` bằng native Journal Entry | `letron_api.finance.banking.consolidation_adjustment_create`; native Journal Entry + Finance Book | `Journal Entry: create`, close guard, policy Finance Book và Cost Center; không ghi trực tiếp `GL Entry` | Cần khi tạo adjustment qua API; không cần nếu tạo qua native Desk/backend |
+| 4 | `[x]` | `POST` | `/api/v1/accounts/consolidation/adjustments/submit` | Submit adjustment sau khi kiểm tra native workflow | `letron_api.finance.banking.consolidation_adjustment_submit`; command wrapper | Chỉ JE do policy tạo, đúng Finance Book, permission và close guard | Cần khi phát hành adjustment qua API; không dùng create endpoint để submit |
+| 5 | `[x]` | `POST` | `/api/v1/accounts/consolidation/adjustments/cancel` | Cancel adjustment theo native workflow và quyền | `letron_api.finance.banking.consolidation_adjustment_cancel`; command wrapper | Kiểm tra JE nguồn, Finance Book, permission và native cancel guard | Cần khi hủy adjustment qua API; không cần nếu thao tác trên native Desk |
+| 6 | `[ ]` | `GET` | `/api/v1/accounts/report-packages` | List package theo Company/form/kỳ/status | Native list wrapper (`get_list`) trên `Letron VAS Report Package` | Authentication, Company/User Permission và bộ lọc package | Cần màn hình danh sách qua Gateway; không cần nếu chỉ chạy package từ backend/Desk |
+| 7 | `[ ]` | `GET` | `/api/v1/accounts/report-packages/{name}` | Đọc package, lines, notes, sources và validation | Native read wrapper (`get_doc`) | Authentication, quyền đọc DocType và Company isolation | Cần xem package qua Gateway; không cần nếu chỉ đọc native DocType trong Desk |
+| 8 | `[ ]` | `POST` | `/api/v1/accounts/report-packages` | Tạo package B01/B02/B03/B09 từ native snapshot | Gọi `create_b09_package` và lưu native DocType | Permission create, idempotency, source cutoff và fail-closed validation | Cần tạo package bằng API; không cần nếu dùng sample/backend command |
+| 9 | `[ ]` | `PUT` | `/api/v1/accounts/report-packages/{name}` | Cập nhật package Draft/Review và accounting input B09 | Native update wrapper, chỉ cho `Draft`/`Review` | Permission, status guard, idempotency; không sửa package `Closed`/`Issued` | Cần nhập/sửa accounting input qua API; không cần nếu kế toán nhập trên Desk |
+| 10 | `[ ]` | `POST` | `/api/v1/accounts/report-packages/{name}/review` | Chạy review và chuyển package sang `Review` | Custom action wrapper trên native status/validation | Kiểm tra unmapped, notes, source refs, permission và transition guard | Cần workflow review qua API; không cần nếu review thủ công trên Desk |
+| 11 | `[ ]` | `POST` | `/api/v1/accounts/report-packages/{name}/close` | Chạy validation/reconciliation và chuyển package sang `Closed` | Custom action wrapper; reconciliation trước khi save | Close guard, unresolved/fail-closed, quyền và transition guard | Cần khóa package qua API; không cần nếu close thủ công trên Desk |
+| 12 | `[ ]` | `POST` | `/api/v1/accounts/report-packages/{name}/issue` | Ghi `issued_by/issued_at` và đóng băng package | Custom action wrapper gọi native submit | Chỉ issue package đã `Closed`, đủ note/source; immutable sau issue | Cần phát hành qua API; không cần nếu issue thủ công trên Desk |
+| 13 | `[ ]` | `POST` | `/api/v1/accounts/report-packages/{name}/reject` | Reject package theo transition và giữ audit trail | Custom action wrapper đổi status native | Permission, status guard và audit trail | Cần khi frontend/integration dùng nhánh reject; không cần nếu quy trình không có reject |
+| 14 | `[x]` | `GET`/`POST` | `/api/v1/accounts/bank-reconciliation/transactions`, `/balance`, `/linked-payments`, `/clearance`, `/clear-clearance`, `/actions/{action}` | Đối soát ngân hàng, số dư, payment liên kết, clearance và action phục vụ kiểm tra dòng tiền B03 | `letron_api.finance.banking.reconciliation_*`; custom route đã có trong contract | Authentication, Company/User Permission, reconciliation action guard; không ghi trực tiếp `GL Entry` | Cần khi quy trình B03 lấy/đối chiếu bank evidence qua Gateway; không cần nếu dùng native Desk |
+| 15 | `[x]` | `GET`/`POST`/`PUT` | `/api/v1/accounts/statement-imports`, `/upload`, `/{name}`, `/{name}/details`, `/{name}/update-pdf-tables`, `/{name}/reextract-pdf-table`, `/{name}/set-pdf-table-header`, `/{name}/update-column-mapping`, `/{name}/set-header-index` | Nhập, đọc, cập nhật và chuẩn hóa sao kê để tạo/đối chiếu Bank Transaction; là nguồn phụ trợ cho B03 | `letron_api.finance.banking.statement_*`; 11 custom operations đã có trong contract | Authentication, file/content validation, Company isolation và import/update permission | Cần khi bank statement là nguồn đầu vào qua Gateway; không cần nếu nạp sao kê trên native Desk |
+| 16 | `[x]` | `GET`/`POST`/`PUT`/`DELETE` | Native public resources: `/api/v1/accounts/journal-entries`, `/payment-entries`, `/sales-invoices`, `/purchase-invoices`, `/bank-transactions`, `/bank-accounts`, `/banks`, `/cost-centers` và Assets; có `{name}`, submit/cancel theo DocType | Tạo/đọc/sửa/submit chứng từ nghiệp vụ và master native để sinh GL, cash evidence, Account/Cost Center và tài sản cho BCTC | Generic ERPNext public wrapper từ `contracts/generated/registry.json`; không tạo ledger riêng | Native permission, Company isolation và document workflow; người dùng không ghi trực tiếp `GL Entry` | Cần khi frontend/integration nhập dữ liệu nguồn; không cần tạo API TT99 riêng thay thế native resources |
+| 17 | `[x]` | `GET`/`PUT` | `/api/v1/accounts/settings` | Đọc/cập nhật cấu hình Accounts dùng cho runtime nghiệp vụ | `letron_api.finance.banking.accounts_settings*`; custom route đã có trong contract | Authentication, system configuration permission và policy guard | Cần khi quản trị cấu hình qua Gateway; không phải API lập BCTC bắt buộc |
+| 18 | `[ ]` có điều kiện | Chưa chốt | API-only cho `Company`, `Account`, `Finance Book`, `Fiscal Year`, `Period Closing Voucher`, `Shareholder` | Quản trị master, close kỳ và input EPS hoàn toàn qua Gateway | Chưa có public wrapper riêng; hiện dùng native ERPNext Desk/backend | Phải thiết kế list/get/create/update/submit/cancel hoặc close/reopen theo từng DocType, permission và audit trail | Chỉ cần nếu frontend phải điều khiển toàn bộ master/close/EPS qua API; không cần cho system readiness hiện tại |
 
-```text
-GET /api/v1/accounts/reports/report?report_key=vas-b01-dn&filters=...
-GET /api/v1/accounts/reports/report?report_key=vas-b02-dn&filters=...
-GET /api/v1/accounts/reports/report?report_key=vas-b03-dn&filters=...
-```
+Tổng hợp: dòng 1–5 là API TT99 đã có; dòng 6–13 là 8 API B09 còn thiếu cho
+API-first; dòng 14–17 là API hỗ trợ đã có trong code/contract; dòng 18 là scope
+API-only có điều kiện và chưa phải blocker TT99.
 
-Ba report đọc GL/native Cash Flow, không tạo Journal Entry. B01-DN trả cả
-`closing_balance` và `opening_balance` (số đầu kỳ lấy từ `opening_balance` của
-native financial-statement engine). B02-DN nhận thêm
-`comparative_from_date`/`comparative_to_date` trong `filters` để lấy số so sánh;
-nếu không truyền đủ hai ngày, cột so sánh được trả `null` với trạng thái
-`requires_comparative_period`. B03-DN là mẫu lưu chuyển tiền tệ gián tiếp theo
-TT99; adapter dùng các bucket native `Depreciation`, `Receivable`, `Stock` và
-cash balance native, còn chỉ tiêu không thể truy nguyên từ native GL sẽ trả
-`requires_metric`. B01/B02 chỉ dùng các detail source native: `due_date`, GL
-remark marker và Shareholder; không suy diễn từ số dư Account tổng hợp. Nếu
-thiếu detail source bắt buộc, response trả `ok: false` cùng
-`unresolved_line_codes`; hệ thống không tự phát sinh hoặc ghi thêm GL.
+`filters` là JSON query value. Các trường tùy chọn dùng chung là
+`finance_book`, `comparative_from_date`, `comparative_to_date`; consolidation
+thêm `include_adjustments`. B01/B02/B03 trả form/statement lines, current và
+comparative khi được yêu cầu, cùng `unresolved_line_codes` hoặc exception nếu
+nguồn native chưa đủ. B03 trả thêm cash-flow metrics/events và
+`cash_flow_exceptions`. B09 trả note data, source status và `source_refs`.
 
-Package hợp nhất mặc định trả preview trước/sau elimination của kỳ hiện hành. Khi adjustment đã
-được submit qua native endpoint ở `Letron Holding`, truyền `include_adjustments: true` trong
-`filters` để đọc lại native GL gồm default Finance Book và
-`Consolidation Adjustment`; kết quả nằm ở `consolidated_after_native_adjustment`.
-Chế độ này chỉ đọc lại bút toán đã ghi, không áp dụng elimination schedule lần
-thứ hai. Nếu Company đã có một default Finance Book khác, backend đọc native
-financial-statement engine theo ba scope `default`, `Consolidation Adjustment`
-và `blank`, sau đó tính `default + adjustment - blank` để loại phần giao nhau;
-Cash Flow cũng truyền `include_default_book_entries` để không bỏ sót B03-DN của
-Holding; khi có kỳ comparative, readback cũng trả B03-DN comparative theo
-Finance Book đó và dùng tỷ giá native tại ngày cuối kỳ comparative. Điều này
-tuân theo guard native của ERPNext và không làm thay đổi sổ cái.
+Quyền và boundary của API:
 
-Luồng chuẩn là: GL của bảy pháp nhân → package/matching → elimination schedule →
-draft Journal Entry tại `Letron Holding`/`Consolidation Adjustment` → submit theo
-native ERPNext workflow → native GL Entry → consolidated report. Adjustment JE
-đặt `party_not_required=1` theo đúng native Journal Entry contract để loại trừ
-các cặp Receivable/Payable cấp tập đoàn không có một Customer/Supplier party
-riêng; đây không phải là sửa ERPNext core. Không ghi trực tiếp vào GL Entry.
-```
+- Report và consolidation package bắt buộc `GL Entry: read`; handler không ghi
+  Journal Entry/GL Entry.
+- Create adjustment bắt buộc `Journal Entry: create`; submit/cancel chỉ được
+  gọi qua handler kiểm tra Journal Entry do policy tạo, Finance Book và native
+  close guard.
+- `report_key` không tạo ra ledger mới; mọi số liệu đọc từ native GL,
+  financial-statement engine, Cash Flow và native B09 package.
+- Public contract được phản ánh trong `contracts/generated/openapi.yaml`,
+  `contracts/generated/runtime-contract.json` và client schema
+  `apps/erp/src/generated/zod.ts`.
+- Frappe method mapping tương ứng nằm trong `apps/letron_api/letron_api/hooks.py`;
+  implementation report nằm trong
+  `apps/letron_api/letron_api/finance/banking.py` và
+  `apps/letron_api/letron_api/finance/vas_reports.py`.
 
-Các mục `[ ]` chỉ là gap kỹ thuật trong code/config/policy/test. Không có mục
-nào là yêu cầu phê duyệt, xin cấp phép, lobby hoặc điều phối bên ngoài hệ thống.
+B09 hiện có API **đọc/preview** qua `report_key=vas-b09-dn`. Tạo package B09,
+lưu accounting input và chuyển `Draft → Review → Closed → Issued` được thực
+hiện bởi backend `create_b09_package` và native DocType `Letron VAS Report
+Package`; hiện chưa có public endpoint riêng dạng `POST /.../b09/package`.
+Đây là boundary có chủ ý để package phải đi qua native permission/lifecycle,
+không phải thiếu API đọc/preview báo cáo; tuy nhiên public API điều khiển full
+lifecycle package vẫn là các mục `[ ]` bên dưới.
+
+Tám route `[ ]` trong bảng là lớp public wrapper/action trên native DocType và
+backend hiện có; native DocType/hàm backend không được tính là public API. Không
+cần tạo ERPNext core API mới, ledger mới hoặc thay thế `GL Entry`. Khi triển khai,
+phải thêm request/response schema vào `contracts/erpnext-integration.yml`,
+regenerate OpenAPI và Zod, kiểm tra permission/action boundary và bổ sung runtime
+acceptance.
+
+Phân loại tính cần thiết:
+
+- **Bắt buộc cho API-first workflow:** cả 8 API trên. Không có chúng thì chỉ
+  có API đọc report/preview; không thể điều khiển trọn vẹn package B09 qua
+  Gateway.
+- **Không bắt buộc cho system readiness hiện tại:** nếu nghiệp vụ chấp nhận
+  native ERPNext Desk hoặc backend `create_b09_package` làm nơi thao tác,
+  hệ thống vẫn lập được B01/B02/B03/B09 và giữ native lifecycle.
+- **Không cần triển khai lại:** `Letron VAS Report Package`, child Note/Source,
+  `create_b09_package`, validation và transition guard hiện đã là nền tảng
+  `[x]`; phần còn thiếu chỉ là public exposure và contract.
+
+Trình tự triển khai khi quyết định bật API-first:
+
+1. Thêm 8 custom routes, operation id, request/response schema và permission
+   contract vào `contracts/erpnext-integration.yml`.
+2. Implement handler trong module `letron_api` dùng `frappe.get_list`,
+   `frappe.get_doc`, `create_b09_package` và native `save/submit`; không ghi
+   trực tiếp `GL Entry`.
+3. Thêm route rewrite trong `hooks.py`, permission `Letron VAS Report Package`
+   và action guard theo status/role; create/update phải có idempotency và issue
+   phải immutable.
+4. Regenerate `contracts/generated/openapi.*`, `runtime-contract.json` và
+   `apps/erp/src/generated/zod.ts`.
+5. Bổ sung unit test cho transition/permission/validation và integration test
+   qua HTTP Gateway cho đủ 8 route, gồm rollback và duplicate/idempotency case.
+6. Chạy `docker-start.ps1 -Action reload`, `-Action verify` và acceptance
+   package `Draft → Review → Closed → Issued` qua public API.
+
+Quyết định hiện tại: **chưa cần làm 8 API này để đạt system readiness TT99
+trong scope đã chốt**; chỉ mở implementation khi frontend/integration yêu cầu
+điều khiển B09 full lifecycle qua Gateway. Các API đã có `[x]` vẫn đủ cho đọc
+báo cáo, preview và consolidation.
+
+Các mục `[~]` chỉ là phần phụ thuộc scope hoặc acceptance vận hành trong code,
+config, policy hoặc test. Không có mục nào là blocker của thiết kế TT99 trong
+phạm vi đã chốt.
 
 ## 10.0. Nhật ký sự cố triển khai và trạng thái runtime
 
@@ -727,37 +923,38 @@ P2 = nâng cao cho quản trị Holding, chưa chặn vận hành từng pháp n
 | Gap kỹ thuật | Mức độ | Lớp xử lý | Trạng thái | Lý do | Next action kỹ thuật |
 |---|---:|---|---|---|---|
 | COA TT99 và Shared COA materialization | P0 | Policy + BE | `[x]` | Catalog 184 mã, quan hệ cha–con và native Account tree đã có; policy là nguồn duy nhất | Không còn action kỹ thuật |
-| Mapping Account → B01/B02/B03 | P0 | Policy + BE + Test | `[x]` B01/B02 đã có maturity, subledger và EPS derivation; B03 đủ 37 dòng | Maturity và subledger không nằm trong số dư Account tổng hợp nên phải đọc detail native; diluted EPS không có native instrument source được đánh dấu `not_applicable` | Không còn action kỹ thuật trong phạm vi COA VAS/VND hiện tại |
-| Thuyết minh BCTC | P1 | Policy + BE | `[x]` | Notes adapter, template và quantitative snapshot đã có; không tự sinh dữ liệu ngoài native GL | Không còn action kỹ thuật |
-| Cash Flow theo VAS | P1 | Policy + BE | `[x]` | Native Cash Flow, `metric_sources` và synthetic B03 acceptance đã có | Không còn action kỹ thuật trong phạm vi VND |
+| Mapping Account → B01/B02/B03 | P0 | Policy + BE + Test | `[~]` source-backed classifier và sample runtime đã có; chứng từ thật còn lại | B03 đọc dòng tiền 111/112/113 và detail voucher, không lấy marker synthetic làm production source | Chạy sample hoặc giao dịch nghiệp vụ thật, đối chiếu closing cash |
+| B09-DN và structured notes | P0 | Policy + BE + API + Test | `[~]` form/API/package/publish gate và sample lifecycle đã có; accounting sign-off còn lại | Accounting input được lưu trong native package, status Closed/Issued bị khóa | Chạy sample rollback hoặc tạo package bằng native Desk/API |
+| Thuyết minh BCTC foundation | P1 | Policy + BE | `[x]` | B09 preview/package giữ quantitative snapshot native và accounting-owned input; không tự sinh dữ liệu ngoài nguồn | Không còn action kỹ thuật; bổ sung nghiệp vụ khi phát sinh note mới |
+| Cash Flow theo VAS | P0 | Policy + BE + Test | `[~]` | Native Cash Flow, `metric_sources`, event classification, sample runtime và exception fail-closed đã có | Đối chiếu thuế/lãi vay/đầu tư/tài chính bằng giao dịch thật và xác nhận B03 trong Docker |
 | TSCĐ, khấu hao, thuế, ngân hàng và tồn kho | P1 | Config + Policy + BE + Test | `[x]` | Native objects, policy rules và synthetic readback đã được kiểm tra | Không còn action kỹ thuật; chỉ bổ sung test khi mở thêm capability |
 | Fiscal Year và close guard | P1 | Config + BE + Test | `[x]` | Native Fiscal Year và guard chặn consolidation adjustment ngoài kỳ đã khóa đã có | Không còn action kỹ thuật |
-| Báo cáo hợp nhất Holding | P1 | Policy + BE | `[x]` | Engine BS/P&L/B03-DN, current/comparative, matcher/elimination trên 7 Company và adjustment boundary đã có | Không còn action kỹ thuật trong phạm vi hiện tại |
+| Báo cáo hợp nhất Holding | P1 | Policy + BE | `[~]` | Engine BS/P&L/B03-DN, current/comparative, matcher/elimination trên 7 Company và adjustment boundary đã có; B09 package là native per reporting scope | Chạy runtime package B09; xác định riêng NCI, thuế hoãn lại và FX nếu phạm vi hợp nhất yêu cầu |
 | Intercompany matching và elimination | P2 | Policy + BE | `[x]` | Marker contract, matching engine và idempotent native Journal Entry workflow đã có | Không còn action kỹ thuật |
 
 ### Kết luận về gap
 
-Không có gap nào buộc phải thay thế ERPNext hoặc xây dựng ledger riêng. Mapping
-và derivation B01/B02 đã hoàn tất trên native GL detail; chỉ những trường hợp
-thiếu detail bắt buộc mới trả fail-closed. Test runtime dùng cùng stack chính;
-không có acceptance Compose project riêng. Không cần frontend riêng trong phạm
-vi hiện tại.
+Không có gap nào buộc phải thay thế ERPNext hoặc xây ledger riêng. Policy,
+native GL, B01/B02/B03/B09 adapters, B09 package guard, consolidation và API
+đọc báo cáo đã có. Các phần `[~]` trong bảng chỉ là scope mở rộng hoặc
+acceptance vận hành theo kỳ; API B09 full lifecycle đã được liệt kê trong §9.1.
 
-Quy ước lớp xử lý được ghi ngay trong cột `Lớp xử lý` của bảng trên:
+`GL Entry` là ledger dẫn xuất; người dùng submit chứng từ nghiệp vụ hoặc
+Journal Entry, không tạo GL Entry độc lập.
 
-```text
-[x] Config: chỉ dùng cho runtime/hạ tầng, không phải nơi giải quyết BCTC
-[x] Policy: nơi khai báo COA, mapping, chuẩn và rule dùng chung
-[x] Backend: nơi bắt buộc triển khai report, validation, materialization và API
-[x] Test: synthetic fixture và native runtime acceptance
-[x] Frontend: không cần sửa trong phạm vi hiện tại; dùng native ERPNext Desk/API
-```
+## 10.2. Audit TT99 cập nhật ngày 14/09/2026
 
-Do đó, hiện không còn gap P0 kỹ thuật trong phạm vi mapping B01/B02 trên
-COA VAS/VND hiện tại. Không có gap P0 nào bắt buộc phải xây frontend riêng.
+Chi tiết bằng chứng nằm trong
+[`TT99_2025_Compliance_Audit_2026-09-14.md`](../audits/TT99_2025_Compliance_Audit_2026-09-14.md).
 
-`GL Entry` là ledger dẫn xuất. Người dùng submit chứng từ nghiệp vụ hoặc
-Journal Entry; không tạo GL Entry độc lập để thay thế source document.
+**Đã hoàn thành thiết kế tuân thủ Thông tư 99/2025/TT-BTC** và hệ thống ở trạng
+thái **READY** cho BCTC năm `B01-DN`, `B02-DN`, `B03-DN`, `B09-DN`: policy,
+native data path, adapter, package lifecycle, API report, sample và runtime
+verification đã có; không còn blocker trong scope này.
+
+NCI, deferred tax/FX trong hợp nhất, báo cáo giữa niên độ và mẫu không hoạt động
+liên tục là scope mở rộng. Public API B09 full lifecycle cũng chỉ cần mở khi
+frontend/integration không dùng native Desk/backend; xem §9.1.
 
 ## 11. Tham khảo
 

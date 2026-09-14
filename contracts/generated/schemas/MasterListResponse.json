@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/MasterListResponse.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "items",
+    "total"
+  ],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

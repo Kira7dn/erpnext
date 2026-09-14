@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/updateReportPackage.response.json",
+  "type": "object",
+  "properties": {
+    "message": {
+      "$ref": "ReportPackageResponse.json"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}

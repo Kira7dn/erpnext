@@ -17,6 +17,7 @@ from letron_api.finance.vas_reports import (
     _mapped_abs_amount,
     _mapped_amount,
     _note_snapshot,
+    _native_cash_flow_events,
     _parse_intercompany_marker,
     _render_intercompany_marker,
     elimination_schedule,
@@ -40,6 +41,36 @@ def test_vas_coa_uses_unique_direct_account_codes() -> None:
         "111", "112", "131", "1331", "211", "214", "241", "331", "3331",
         "411", "421", "511", "632", "642", "711", "811", "821", "911",
     }
+
+
+def test_native_cash_flow_events_use_cash_sign_and_direction_specific_rules(monkeypatch) -> None:
+    class FakeFrappe:
+        @staticmethod
+        def get_all(doctype, **kwargs):
+            if doctype == "Account":
+                return [
+                    {"name": "Cash - L", "account_number": "111"},
+                    {"name": "Interest - L", "account_number": "635"},
+                    {"name": "Fixed Asset - L", "account_number": "211"},
+                    {"name": "Unclassified - L", "account_number": "9999"},
+                ]
+            return [
+                {"name": "GL-1", "voucher_type": "Payment Entry", "voucher_no": "PE-1", "account": "Cash - L", "debit": 0, "credit": 100},
+                {"name": "GL-2", "voucher_type": "Payment Entry", "voucher_no": "PE-1", "account": "Interest - L", "debit": 100, "credit": 0},
+                {"name": "GL-3", "voucher_type": "Journal Entry", "voucher_no": "JV-1", "account": "Cash - L", "debit": 250, "credit": 0},
+                {"name": "GL-4", "voucher_type": "Journal Entry", "voucher_no": "JV-1", "account": "Fixed Asset - L", "debit": 0, "credit": 250},
+                {"name": "GL-5", "voucher_type": "Journal Entry", "voucher_no": "JV-2", "account": "Cash - L", "debit": 0, "credit": 10},
+                {"name": "GL-6", "voucher_type": "Journal Entry", "voucher_no": "JV-2", "account": "Unclassified - L", "debit": 10, "credit": 0},
+            ]
+
+    monkeypatch.setattr(vas_reports, "_frappe", lambda: FakeFrappe())
+
+    metrics, events = _native_cash_flow_events("LeSC", "2026-01-01", "2026-12-31")
+
+    assert metrics["interest_paid"] == -100
+    assert metrics["fixed_asset_disposals"] == 250
+    assert not metrics.get("fixed_asset_purchases")
+    assert any(event["status"] == "requires_classification" for event in events)
 
 
 def test_special_vas_accounts_use_native_erpnext_account_types() -> None:

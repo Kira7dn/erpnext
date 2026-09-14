@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 from collections import defaultdict
 from datetime import date, timedelta
@@ -164,6 +166,198 @@ def _native_metric_activities(
         )
         for metric, codes in metric_sources.items()
     }
+
+
+def _native_cash_flow_events(
+    company: str,
+    from_date: str,
+    to_date: str,
+    finance_book: str | None = None,
+    include_default_book_entries: bool = False,
+) -> tuple[dict[str, float], list[dict[str, Any]]]:
+    """Classify real cash GL movements using policy event rules.
+
+    The cash line is the source of truth.  Counterpart accounts are used only
+    to classify the voucher; a balance movement on an expense or liability
+    account is never treated as cash paid by itself.
+    """
+    cash_policy = _cash_flow_policy()
+    rules = cash_policy.get("event_rules", [])
+    metric_sources = cash_policy.get("metric_sources", {})
+    if not isinstance(rules, list) or not isinstance(metric_sources, dict):
+        return {}, []
+    frappe = _frappe()
+    get_all = getattr(frappe, "get_all", None)
+    if get_all is None:
+        return {}, []
+    account_rows = get_all(
+        "Account",
+        filters={"company": company, "is_group": 0},
+        fields=["name", "account_number"],
+        limit_page_length=0,
+    )
+    account_numbers = {
+        str(row["name"]): str(row.get("account_number") or "")
+        for row in account_rows
+        if row.get("name")
+    }
+    cash_accounts = {
+        name for name, code in account_numbers.items()
+        if any(code.startswith(prefix) for prefix in ("111", "112", "113"))
+    }
+    if not cash_accounts:
+        return {}, []
+    filters: dict[str, Any] = {
+        "company": company,
+        "posting_date": ["between", [from_date, to_date]],
+        "is_cancelled": 0,
+    }
+    if finance_book:
+        if include_default_book_entries:
+            default_book = str(
+                frappe.get_cached_value("Company", company, "default_finance_book") or ""
+            )
+            books = {str(finance_book), ""}
+            if default_book:
+                books.add(default_book)
+            filters["finance_book"] = ["in", sorted(books)]
+        else:
+            filters["finance_book"] = finance_book
+    rows = get_all(
+        "GL Entry",
+        filters=filters,
+        fields=[
+            "name", "voucher_type", "voucher_no", "account", "debit", "credit",
+            "cost_center", "posting_date",
+        ],
+        limit_page_length=0,
+    )
+    grouped: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        key = (str(row.get("voucher_type") or ""), str(row.get("voucher_no") or ""))
+        grouped[key].append(dict(row))
+    # Once the period's native cash ledger has been read, a metric with no
+    # matching cash voucher is a traceable zero.  Unknown cash vouchers remain
+    # exceptions and keep B03 fail-closed.
+    metrics: dict[str, float] = {str(metric): 0.0 for metric in metric_sources}
+    events: list[dict[str, Any]] = []
+    for (voucher_type, voucher_no), voucher_rows in grouped.items():
+        cash_rows = [row for row in voucher_rows if str(row.get("account")) in cash_accounts]
+        if not cash_rows:
+            continue
+        cash_delta = sum(
+            float(row.get("debit") or 0.0) - float(row.get("credit") or 0.0)
+            for row in cash_rows
+        )
+        if abs(cash_delta) <= 0.0005:
+            continue
+        counterpart_codes = {
+            account_numbers.get(str(row.get("account")), "")
+            for row in voucher_rows
+            if str(row.get("account")) not in cash_accounts
+        }
+        matched_rule: dict[str, Any] | None = None
+        expected_direction = "inflow" if cash_delta > 0 else "outflow"
+        for rule in rules:
+            if not isinstance(rule, dict):
+                continue
+            if rule.get("direction") != expected_direction:
+                continue
+            source_codes = [str(code) for code in rule.get("counterpart_account_codes", [])]
+            if any(
+                any(code.startswith(source_code) for source_code in source_codes)
+                for code in counterpart_codes
+            ):
+                matched_rule = rule
+                break
+        if matched_rule is None:
+            events.append({
+                "status": "requires_classification",
+                "voucher_type": voucher_type,
+                "voucher_no": voucher_no,
+                "cash_delta": round(cash_delta, 2),
+                "counterpart_account_codes": sorted(code for code in counterpart_codes if code),
+                "source_refs": [str(row.get("name")) for row in cash_rows if row.get("name")],
+            })
+            continue
+        metric = str(matched_rule["metric"])
+        amount = abs(cash_delta)
+        if matched_rule["direction"] == "outflow":
+            amount = -amount
+        included_in_indirect = bool(matched_rule.get("include_in_indirect", True))
+        if included_in_indirect:
+            metrics[metric] = metrics.get(metric, 0.0) + amount
+        events.append({
+            "status": "derived",
+            "metric": metric,
+            "category": str(matched_rule["category"]),
+            "amount": round(amount, 2),
+            "included_in_indirect": included_in_indirect,
+            "voucher_type": voucher_type,
+            "voucher_no": voucher_no,
+            "counterpart_account_codes": sorted(code for code in counterpart_codes if code),
+            "source_refs": [str(row.get("name")) for row in cash_rows if row.get("name")],
+        })
+    return metrics, events
+
+
+def _native_balance_metric(
+    company: str,
+    from_date: str,
+    to_date: str,
+    metric: str,
+    finance_book: str | None = None,
+    include_default_book_entries: bool = False,
+) -> float | None:
+    """Return a balance-sheet change for an indirect-method metric."""
+    source_codes = _cash_flow_policy().get("metric_sources", {}).get(metric)
+    if not isinstance(source_codes, list) or not source_codes:
+        return None
+    balances, metadata = _native_account_balances(
+        "balance_sheet",
+        company,
+        from_date,
+        to_date,
+        finance_book,
+        include_default_book_entries=include_default_book_entries,
+    )
+    opening = metadata.get("opening_balances") or {}
+    if not isinstance(opening, dict):
+        return None
+    if not any(
+        _mapped(str(code), {str(source_code) for source_code in source_codes})
+        for code in set(balances) | set(opening)
+    ):
+        return None
+    return _mapped_amount(balances, source_codes) - _mapped_amount(opening, source_codes)
+
+
+def _native_pnl_metric(
+    company: str,
+    from_date: str,
+    to_date: str,
+    metric: str,
+    finance_book: str | None = None,
+    include_default_book_entries: bool = False,
+) -> float | None:
+    """Return a P&L adjustment from the policy account sources."""
+    source_codes = _cash_flow_policy().get("metric_sources", {}).get(metric)
+    if not isinstance(source_codes, list) or not source_codes:
+        return None
+    balances, _metadata = _native_account_balances(
+        "profit_and_loss",
+        company,
+        from_date,
+        to_date,
+        finance_book,
+        include_default_book_entries=include_default_book_entries,
+    )
+    if not any(
+        _mapped(str(code), {str(source_code) for source_code in source_codes})
+        for code in balances
+    ):
+        return None
+    return _mapped_amount(balances, source_codes)
 
 
 def _currency_policy() -> dict[str, Any]:
@@ -877,6 +1071,38 @@ def _cash_flow_metrics(
             include_default_book_entries,
         ),
     }
+    for metric in (
+        "provisions",
+        "payables_change_excluding_interest_and_tax",
+        "prepaid_expense_change",
+        "trading_securities_change",
+    ):
+        value = _native_balance_metric(
+            company,
+            from_date,
+            to_date,
+            metric,
+            finance_book,
+            include_default_book_entries,
+        )
+        if value is not None:
+            metrics[metric] = value
+    for metric in (
+        "fx_revaluation",
+        "investing_financing_gain_loss",
+        "borrowing_cost",
+        "other_operating_adjustments",
+    ):
+        value = _native_pnl_metric(
+            company,
+            from_date,
+            to_date,
+            metric,
+            finance_book,
+            include_default_book_entries,
+        )
+        if value is not None:
+            metrics[metric] = value
     balances, balance_metadata = _native_account_balances(
         "balance_sheet",
         company,
@@ -888,16 +1114,32 @@ def _cash_flow_metrics(
     opening_balances = balance_metadata.get("opening_balances") or {}
     metrics["opening_cash"] = _mapped_amount(opening_balances, ["111", "112", "113"])
     metrics["closing_cash"] = _mapped_amount(balances, ["111", "112", "113"])
+    event_metrics, event_rows = _native_cash_flow_events(
+        company,
+        from_date,
+        to_date,
+        finance_book,
+        include_default_book_entries=include_default_book_entries,
+    )
+    metrics.update(event_metrics)
     for metric, activity in _native_metric_activities(
         company, from_date, to_date, finance_book, remark_like=_metric_marker
     ).items():
-        if metric not in metrics:
+        # The marker is retained only for rollback-only acceptance fixtures.
+        # Production derives these values from real cash GL events above.
+        if _metric_marker:
             metrics[metric] = activity
+    if "translation_fx_effect" not in metrics:
+        metrics["translation_fx_effect"] = 0.0
     return {
         "metrics": metrics,
         "native": native,
         "unmapped_account_codes": list(profit_and_loss.get("unmapped_account_codes", [])),
         "currency": balance_metadata["currency"],
+        "cash_flow_events": event_rows,
+        "cash_flow_exceptions": [
+            event for event in event_rows if event.get("status") != "derived"
+        ],
     }
 
 
@@ -941,6 +1183,193 @@ def notes(company: str, from_date: str, to_date: str, finance_book: str | None =
         "note_status": {note["code"]: note["status"] for note in note_rows},
         "statement_data": statements,
     }
+
+
+def b09_report(
+    company: str,
+    from_date: str,
+    to_date: str,
+    finance_book: str | None = None,
+    comparative_from_date: str | None = None,
+    comparative_to_date: str | None = None,
+) -> dict[str, Any]:
+    """Return a structured, source-backed B09-DN preview.
+
+    Accounting-owned narrative is intentionally not invented here.  It is
+    completed on a ``Letron VAS Report Package`` before the package can be
+    issued.
+    """
+    statements = {
+        statement: report(statement, company, from_date, to_date, finance_book)
+        for statement in ("balance_sheet", "profit_and_loss")
+    }
+    form = _statutory_form("B09-DN")
+    note_rows: list[dict[str, Any]] = []
+    for definition in form["lines"]:
+        source = str(definition.get("source") or "")
+        note = {"code": definition["code"], "name": definition["name"], "source": source}
+        snapshot = _note_snapshot(note, statements)
+        if snapshot:
+            status = str(snapshot["status"])
+            data = snapshot.get("data")
+            source_refs = [source]
+        elif source == "accounting_input":
+            status = "requires_accounting_input"
+            data = None
+            source_refs = []
+        else:
+            status = "requires_source"
+            data = None
+            source_refs = []
+        note_rows.append({
+            **note,
+            "required": bool(definition.get("required", True)),
+            "status": status,
+            "data": data,
+            "source_refs": source_refs,
+        })
+    existing_package: dict[str, Any] | None = None
+    frappe = _frappe()
+    if frappe.db.exists("DocType", "Letron VAS Report Package"):
+        rows = frappe.get_all(
+            "Letron VAS Report Package",
+            filters={
+                "company": company,
+                "form_code": "B09-DN",
+                "from_date": from_date,
+                "to_date": to_date,
+            },
+            fields=["name", "status", "policy_version", "policy_hash", "source_cutoff", "validation_json"],
+            order_by="modified desc",
+            limit_page_length=1,
+        )
+        if rows:
+            existing_package = dict(rows[0])
+            note_rows_from_package = frappe.get_all(
+                "Letron VAS Report Note",
+                filters={"parent": existing_package["name"]},
+                fields=["code", "status", "data_json", "source_refs"],
+                limit_page_length=0,
+            )
+            persisted_notes = {
+                str(row.get("code")): row for row in note_rows_from_package
+            }
+            for note in note_rows:
+                persisted = persisted_notes.get(str(note["code"]))
+                if not persisted:
+                    continue
+                if persisted.get("status"):
+                    note["status"] = str(persisted["status"])
+                if persisted.get("data_json"):
+                    try:
+                        note["data"] = json.loads(str(persisted["data_json"]))
+                    except json.JSONDecodeError:
+                        note["status"] = "requires_source"
+                if persisted.get("source_refs"):
+                    try:
+                        note["source_refs"] = json.loads(str(persisted["source_refs"]))
+                    except json.JSONDecodeError:
+                        note["source_refs"] = []
+    complete = all(
+        not row["required"] or row["status"] == "derived"
+        for row in note_rows
+    ) and all(value.get("ok") is True for value in statements.values())
+    return {
+        "ok": complete,
+        "publishable": complete
+        and existing_package is not None
+        and existing_package.get("status") == "Closed"
+        and json.loads(str(existing_package.get("validation_json") or "{}")).get("ok") is True,
+        "form_code": "B09-DN",
+        "form_name": form["name"],
+        "statement": "notes",
+        "company": company,
+        "from_date": from_date,
+        "to_date": to_date,
+        "finance_book": finance_book,
+        "comparative_period": {
+            "from_date": comparative_from_date,
+            "to_date": comparative_to_date,
+        } if comparative_from_date and comparative_to_date else None,
+        "currency": frappe.get_cached_value("Company", company, "default_currency"),
+        "mapping_version": _mapping_version(),
+        "columns": form["columns"],
+        "notes": note_rows,
+        "status": "derived" if complete else "incomplete",
+        "package": existing_package,
+        "source": "native_gl_and_accounting_input",
+        "statement_data": statements,
+    }
+
+
+def create_b09_package(
+    company: str,
+    from_date: str,
+    to_date: str,
+    finance_book: str | None = None,
+    accounting_inputs: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Persist a draft B09 package for accounting review in native ERPNext."""
+    frappe = _frappe()
+    frappe.has_permission("Letron VAS Report Package", "create", throw=True)
+    from letron_api.control.policy import load_policy
+
+    policy = load_policy()
+    canonical = json.dumps(policy, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    preview = b09_report(company, from_date, to_date, finance_book)
+    inputs = accounting_inputs or {}
+    notes_rows = []
+    for row in preview["notes"]:
+        supplied = inputs.get(str(row["code"]))
+        supplied_data = supplied
+        supplied_refs = row["source_refs"]
+        if isinstance(supplied, dict) and "data" in supplied:
+            supplied_data = supplied.get("data")
+            supplied_refs = supplied.get("source_refs") or row["source_refs"]
+        if supplied is not None:
+            row["data"] = supplied_data
+            row["status"] = "derived"
+            row["source_refs"] = [str(value) for value in supplied_refs]
+        notes_rows.append({
+            "code": row["code"],
+            "title": row["name"],
+            "source": row["source"],
+            "data_json": json.dumps(row["data"], ensure_ascii=False, sort_keys=True),
+            "status": row["status"],
+            "source_refs": json.dumps(row["source_refs"], ensure_ascii=False),
+        })
+    complete = all(
+        not row["required"] or row["status"] == "derived"
+        for row in preview["notes"]
+    )
+    validation = {
+        "ok": complete and all(
+            value.get("ok") is True for value in preview["statement_data"].values()
+        ),
+        "statement_ok": all(
+            value.get("ok") is True for value in preview["statement_data"].values()
+        ),
+        "unresolved": [row["code"] for row in preview["notes"] if row["status"] != "derived"],
+        "reconciliation_checks": [],
+    }
+    doc = frappe.get_doc({
+        "doctype": "Letron VAS Report Package",
+        "company": company,
+        "form_code": "B09-DN",
+        "from_date": from_date,
+        "to_date": to_date,
+        "accounting_currency": preview["currency"],
+        "reporting_currency": _currency_policy().get("reporting_currency"),
+        "policy_version": int(policy.get("version", 0)),
+        "policy_hash": hashlib.sha256(canonical.encode("utf-8")).hexdigest(),
+        "source_cutoff": frappe.utils.now_datetime(),
+        "status": "Draft",
+        "validation_json": json.dumps(validation, ensure_ascii=False, sort_keys=True),
+        "lines_json": json.dumps(preview["notes"], ensure_ascii=False, sort_keys=True),
+        "notes": notes_rows,
+    })
+    doc.insert()
+    return doc.as_dict()
 
 
 def _consolidation_settings() -> dict[str, Any]:
@@ -2118,8 +2547,11 @@ def statutory_cash_flow(
         set(current.get("unmapped_account_codes", []))
         | set(comparative.get("unmapped_account_codes", []) if comparative else [])
     )
+    cash_flow_exceptions = list(current.get("cash_flow_exceptions", []))
+    if comparative:
+        cash_flow_exceptions.extend(comparative.get("cash_flow_exceptions", []))
     return {
-        "ok": not unresolved and not unmapped,
+        "ok": not unresolved and not unmapped and not cash_flow_exceptions,
         "form_code": "B03-DN",
         "form_name": form["name"],
         "statement": form["statement"],
@@ -2138,6 +2570,8 @@ def statutory_cash_flow(
         "native_metrics": current["metrics"],
         "native_cash_flow": current["native"],
         "native_comparative_cash_flow": comparative["native"] if comparative else None,
+        "cash_flow_events": current.get("cash_flow_events", []),
+        "cash_flow_exceptions": cash_flow_exceptions,
     }
 
 
@@ -2157,6 +2591,15 @@ def statutory_report(
     if from_date > to_date:
         frappe.throw("from_date must not be after to_date", exc=frappe.ValidationError)
     form = _statutory_form(form_code)
+    if form_code == "B09-DN":
+        return b09_report(
+            company=company,
+            from_date=from_date,
+            to_date=to_date,
+            finance_book=finance_book,
+            comparative_from_date=comparative_from_date,
+            comparative_to_date=comparative_to_date,
+        )
     if form_code == "B03-DN":
         return statutory_cash_flow(
             company=company,

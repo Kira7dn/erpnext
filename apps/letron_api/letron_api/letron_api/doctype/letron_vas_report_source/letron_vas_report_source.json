@@ -1,0 +1,21 @@
+{
+  "actions": [],
+  "allow_rename": 0,
+  "creation": "2026-09-14 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": ["source_type", "source_name", "voucher_type", "voucher_no", "account", "cost_center", "detail_json"],
+  "fields": [
+    {"fieldname": "source_type", "fieldtype": "Data", "label": "Source Type", "reqd": 1},
+    {"fieldname": "source_name", "fieldtype": "Data", "label": "Source Name", "reqd": 1},
+    {"fieldname": "voucher_type", "fieldtype": "Data", "label": "Voucher Type"},
+    {"fieldname": "voucher_no", "fieldtype": "Data", "label": "Voucher No"},
+    {"fieldname": "account", "fieldtype": "Data", "label": "Account"},
+    {"fieldname": "cost_center", "fieldtype": "Data", "label": "Cost Center"},
+    {"fieldname": "detail_json", "fieldtype": "Long Text", "label": "Detail"}
+  ],
+  "istable": 1,
+  "module": "Letron API",
+  "name": "Letron VAS Report Source",
+  "permissions": []
+}

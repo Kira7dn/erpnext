@@ -109,6 +109,8 @@ class ApiClient:
         self.evidence: list[dict[str, Any]] = []
         self.authorization: str | None = None
         self.authenticated = False
+        self.app_session: str | None = None
+        self.app_key: str | None = None
 
     def write_evidence(self) -> None:
         path = ROOT / ".cache" / "integration-runtime-evidence.json"
@@ -149,6 +151,10 @@ class ApiClient:
         request_headers = {"Accept": "application/json", "X-Request-Id": request_id, **(headers or {})}
         if self.authorization:
             request_headers["Authorization"] = self.authorization
+        if transport == "gateway" and self.app_session:
+            request_headers["X-Letron-App-Session"] = self.app_session
+            if self.app_key:
+                request_headers["X-Letron-App"] = self.app_key
         if transport == "gateway" and self.authenticated:
             if "Authorization" not in request_headers:
                 secret = os.environ.get("LETRON_INTERNAL_API_SECRET", "").strip()
@@ -245,6 +251,40 @@ class ApiClient:
         if not os.environ.get("LETRON_INTERNAL_API_SECRET", "").strip():
             raise RuntimeUnavailable("Integration requires LETRON_INTERNAL_API_SECRET")
         self.authenticated = True
+
+    def start_app_session(self, app: str = "accounts") -> None:
+        """Create the same short-lived app session used by real gateway tests."""
+        if app not in {"assets", "purchase", "accounts"}:
+            raise RuntimeUnavailable(f"Unsupported app session: {app}")
+        response = self.request(
+            "POST",
+            "/api/internal/test-session",
+            {"app": app},
+            expected={200},
+            transport="gateway",
+        )
+        data = response.data.get("data") if isinstance(response.data, dict) else None
+        token = data.get("app_session") if isinstance(data, dict) else None
+        if not isinstance(token, str) or not token:
+            raise RuntimeUnavailable("Internal test-session did not return an app session")
+        self.app_session = token
+        self.app_key = app
+
+    def close_app_session(self) -> None:
+        """Revoke the temporary app session, without logging its token."""
+        if not self.app_session or not self.app_key:
+            return
+        try:
+            self.request(
+                "POST",
+                "/api/internal/app/logout",
+                {"app": self.app_key, "session": self.app_session},
+                expected={204},
+                transport="gateway",
+            )
+        finally:
+            self.app_session = None
+            self.app_key = None
 
     def login(self) -> None:
         """Create a native Frappe session for a deliberately restricted test user."""

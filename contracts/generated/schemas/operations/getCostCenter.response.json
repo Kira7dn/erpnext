@@ -3,11 +3,11 @@
   "$id": "https://letron.local/schemas/operations/getCostCenter.response.json",
   "type": "object",
   "properties": {
-    "data": {
-      "$ref": "CostCenterResponse.json"
+    "message": {
+      "$ref": "MasterRecordResponse.json"
     }
   },
   "required": [
-    "data"
+    "message"
   ]
 }

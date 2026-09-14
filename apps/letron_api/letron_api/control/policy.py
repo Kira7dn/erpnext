@@ -601,13 +601,14 @@ def _normalize_shared(value: Any) -> dict[str, Any]:
                         "shared.coa_template.bctc_mapping.statutory_forms must use TT99 version 1"
                     )
                 forms = statutory_forms["forms"]
-                if not isinstance(forms, Mapping) or set(forms) != {"B01-DN", "B02-DN", "B03-DN"}:
+                if not isinstance(forms, Mapping) or set(forms) != {"B01-DN", "B02-DN", "B03-DN", "B09-DN"}:
                     raise PolicyError(
-                        "shared.coa_template.bctc_mapping.statutory_forms must define B01-DN, B02-DN and B03-DN"
+                        "shared.coa_template.bctc_mapping.statutory_forms must define B01-DN, B02-DN, B03-DN and B09-DN"
                     )
                 formula_token = re.compile(r"[0-9]+[a-z]?")
                 form_code_pattern = re.compile(r"[0-9]{2,3}[a-z]?")
-                allowed_line_types = {"account", "subtotal", "metric"}
+                note_code_pattern = re.compile(r"N[0-9]{2}")
+                allowed_line_types = {"account", "subtotal", "metric", "note"}
                 allowed_sources = {
                     "consolidation_only",
                     "not_in_coa",
@@ -623,7 +624,7 @@ def _normalize_shared(value: Any) -> dict[str, Any]:
                         raise PolicyError(
                             f"statutory form {form_code} has an invalid shape"
                         )
-                    if form["statement"] not in {"balance_sheet", "profit_and_loss", "cash_flow"}:
+                    if form["statement"] not in {"balance_sheet", "profit_and_loss", "cash_flow", "notes"}:
                         raise PolicyError(f"statutory form {form_code} has an invalid statement")
                     if not isinstance(form["columns"], list) or len(form["columns"]) != 2 or any(
                         not isinstance(column, str) or not column.strip() for column in form["columns"]
@@ -642,7 +643,8 @@ def _normalize_shared(value: Any) -> dict[str, Any]:
                             raise PolicyError(f"statutory form {form_code}.lines[{index}] is invalid")
                         line_code = line["code"]
                         line_type = line["line_type"]
-                        if not isinstance(line_code, str) or not form_code_pattern.fullmatch(line_code):
+                        code_pattern = note_code_pattern if line_type == "note" else form_code_pattern
+                        if not isinstance(line_code, str) or not code_pattern.fullmatch(line_code):
                             raise PolicyError(f"statutory form {form_code}.lines[{index}].code is invalid")
                         if line_code in line_codes:
                             raise PolicyError(f"statutory form {form_code} line codes must be unique")
@@ -688,6 +690,19 @@ def _normalize_shared(value: Any) -> dict[str, Any]:
                         elif line_type == "metric":
                             if not isinstance(line.get("metric"), str) or not line["metric"].strip():
                                 raise PolicyError(f"statutory form {form_code}.lines[{index}].metric is invalid")
+                        elif line_type == "note":
+                            if set(line) - {"code", "name", "line_type", "source", "required"}:
+                                raise PolicyError(
+                                    f"statutory form {form_code}.lines[{index}] has unsupported note keys"
+                                )
+                            if not isinstance(line.get("source"), str) or not line["source"].strip():
+                                raise PolicyError(
+                                    f"statutory form {form_code}.lines[{index}].source is invalid"
+                                )
+                            if line.get("required") is not None and not isinstance(line["required"], bool):
+                                raise PolicyError(
+                                    f"statutory form {form_code}.lines[{index}].required is invalid"
+                                )
                     for line in lines:
                         if line["line_type"] == "subtotal" and set(formula_token.findall(line["formula"])) - line_codes:
                             raise PolicyError(
@@ -787,6 +802,56 @@ def _normalize_shared(value: Any) -> dict[str, Any]:
                                 "shared.coa_template.reporting.cash_flow.metric_sources references an unknown Account code"
                             )
 
+                event_rules = cash_flow.get("event_rules")
+                if event_rules is not None:
+                    if not isinstance(event_rules, list) or not event_rules:
+                        raise PolicyError(
+                            "shared.coa_template.reporting.cash_flow.event_rules must be a non-empty list"
+                        )
+                    for index, rule in enumerate(event_rules):
+                        if not isinstance(rule, Mapping):
+                            raise PolicyError(
+                                f"shared.coa_template.reporting.cash_flow.event_rules[{index}] is invalid"
+                            )
+                        required_rule_keys = {
+                            "metric",
+                            "category",
+                            "counterpart_account_codes",
+                            "direction",
+                        }
+                        if not required_rule_keys <= set(rule) or set(rule) - required_rule_keys - {"include_in_indirect"}:
+                            raise PolicyError(
+                                f"shared.coa_template.reporting.cash_flow.event_rules[{index}] is invalid"
+                            )
+                        if "include_in_indirect" in rule and not isinstance(rule["include_in_indirect"], bool):
+                            raise PolicyError(
+                                f"shared.coa_template.reporting.cash_flow.event_rules[{index}].include_in_indirect is invalid"
+                            )
+                        if not isinstance(rule["metric"], str) or not str(rule["metric"]).strip():
+                            raise PolicyError(
+                                f"shared.coa_template.reporting.cash_flow.event_rules[{index}].metric is invalid"
+                            )
+                        if rule["metric"] not in cash_flow["metric_sources"]:
+                            raise PolicyError(
+                                f"shared.coa_template.reporting.cash_flow.event_rules[{index}].metric is unknown"
+                            )
+                        if rule["category"] not in {"operating", "investing", "financing"}:
+                            raise PolicyError(
+                                f"shared.coa_template.reporting.cash_flow.event_rules[{index}].category is invalid"
+                            )
+                        account_codes = rule["counterpart_account_codes"]
+                        if not isinstance(account_codes, list) or not account_codes or any(
+                            not isinstance(item, str) or not re.fullmatch(r"[0-9]{3,6}", item)
+                            for item in account_codes
+                        ):
+                            raise PolicyError(
+                                f"shared.coa_template.reporting.cash_flow.event_rules[{index}].counterpart_account_codes is invalid"
+                            )
+                        if rule["direction"] not in {"inflow", "outflow"}:
+                            raise PolicyError(
+                                f"shared.coa_template.reporting.cash_flow.event_rules[{index}].direction is invalid"
+                            )
+
             currency = reporting.get("currency")
             if currency is not None:
                 if not isinstance(currency, Mapping) or set(currency) != {
@@ -877,11 +942,13 @@ def _normalize_shared(value: Any) -> dict[str, Any]:
             if disclosure_notes is not None:
                 if not isinstance(disclosure_notes, list) or any(
                     not isinstance(note, Mapping)
-                    or set(note) != {"code", "name", "source"}
+                    or not set(note) <= {"code", "name", "source", "required"}
+                    or not {"code", "name", "source"} <= set(note)
                     or not isinstance(note["code"], str)
                     or not re.fullmatch(r"N[0-9]{2}", note["code"])
                     or not isinstance(note["name"], str)
                     or not isinstance(note["source"], str)
+                    or ("required" in note and not isinstance(note["required"], bool))
                     for note in disclosure_notes
                 ):
                     raise PolicyError(

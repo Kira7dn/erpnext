@@ -13309,6 +13309,344 @@
           }
         }
       },
+      "MasterRecordResponse": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "MasterListResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "ReportPackageCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "company",
+          "form_code",
+          "from_date",
+          "to_date"
+        ],
+        "properties": {
+          "company": {
+            "type": "string",
+            "minLength": 1
+          },
+          "form_code": {
+            "type": "string",
+            "enum": [
+              "B01-DN",
+              "B02-DN",
+              "B03-DN",
+              "B09-DN"
+            ]
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "comparative_from_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "comparative_to_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "finance_book": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "consolidation_scope": {
+            "type": [
+              "string",
+              "object",
+              "null"
+            ]
+          },
+          "accounting_inputs": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "ReportPackageUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "company": {
+            "type": "string",
+            "minLength": 1
+          },
+          "form_code": {
+            "type": "string",
+            "enum": [
+              "B01-DN",
+              "B02-DN",
+              "B03-DN",
+              "B09-DN"
+            ]
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "comparative_from_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "comparative_to_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "finance_book": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "consolidation_scope": {
+            "type": [
+              "string",
+              "object",
+              "null"
+            ]
+          },
+          "accounting_inputs": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "ReportPackageRejectRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      },
+      "ReportPackageResponse": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "name",
+          "company",
+          "form_code",
+          "status"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string"
+          },
+          "form_code": {
+            "type": "string",
+            "enum": [
+              "B01-DN",
+              "B02-DN",
+              "B03-DN",
+              "B09-DN"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Review",
+              "Closed",
+              "Issued",
+              "Rejected"
+            ]
+          },
+          "validation": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "ReportPackageListResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportPackageResponse"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "ShareholderWriteRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "company"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "company": {
+            "type": "string",
+            "minLength": 1
+          },
+          "naming_series": {
+            "type": "string"
+          }
+        }
+      },
+      "ShareholderUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "company": {
+            "type": "string",
+            "minLength": 1
+          },
+          "naming_series": {
+            "type": "string"
+          }
+        }
+      },
+      "PeriodClosingVoucherWriteRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "company",
+          "fiscal_year",
+          "period_start_date",
+          "period_end_date",
+          "closing_account_head",
+          "remarks"
+        ],
+        "properties": {
+          "transaction_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "company": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fiscal_year": {
+            "type": "string",
+            "minLength": 1
+          },
+          "period_start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_end_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "closing_account_head": {
+            "type": "string",
+            "minLength": 1
+          },
+          "remarks": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "PeriodClosingVoucherUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "transaction_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "company": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fiscal_year": {
+            "type": "string",
+            "minLength": 1
+          },
+          "period_start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_end_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "closing_account_head": {
+            "type": "string",
+            "minLength": 1
+          },
+          "remarks": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
       "AssetWrite": {
         "type": "object",
         "properties": {
@@ -18927,21 +19265,574 @@
         },
         {
           "module": "Accounts",
+          "resource": "report-packages",
+          "method": "GET",
+          "path": "/api/v1/accounts/report-packages",
+          "operation": "list",
+          "operation_id": "listReportPackages",
+          "handler": "letron_api.finance.tt99_api.list_report_packages",
+          "query_parameters": [
+            {
+              "name": "company",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "form_code",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "B01-DN",
+                  "B02-DN",
+                  "B03-DN",
+                  "B09-DN"
+                ]
+              }
+            },
+            {
+              "name": "status",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "from_date",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "format": "date"
+              }
+            },
+            {
+              "name": "to_date",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          ],
+          "response_schema": "ReportPackageListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "GET",
+          "path": "/api/v1/accounts/report-packages/{name}",
+          "operation": "read",
+          "operation_id": "getReportPackage",
+          "handler": "letron_api.finance.tt99_api.get_report_package",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "POST",
+          "path": "/api/v1/accounts/report-packages",
+          "operation": "create",
+          "operation_id": "createReportPackage",
+          "handler": "letron_api.finance.tt99_api.create_report_package",
+          "request_schema": "ReportPackageCreateRequest",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "PUT",
+          "path": "/api/v1/accounts/report-packages/{name}",
+          "operation": "update",
+          "operation_id": "updateReportPackage",
+          "handler": "letron_api.finance.tt99_api.update_report_package",
+          "request_schema": "ReportPackageUpdateRequest",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "POST",
+          "path": "/api/v1/accounts/report-packages/{name}/review",
+          "operation": "update",
+          "operation_id": "reviewReportPackage",
+          "handler": "letron_api.finance.tt99_api.review_report_package",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "POST",
+          "path": "/api/v1/accounts/report-packages/{name}/close",
+          "operation": "update",
+          "operation_id": "closeReportPackage",
+          "handler": "letron_api.finance.tt99_api.close_report_package",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "POST",
+          "path": "/api/v1/accounts/report-packages/{name}/issue",
+          "operation": "update",
+          "operation_id": "issueReportPackage",
+          "handler": "letron_api.finance.tt99_api.issue_report_package",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "report-packages",
+          "method": "POST",
+          "path": "/api/v1/accounts/report-packages/{name}/reject",
+          "operation": "update",
+          "operation_id": "rejectReportPackage",
+          "handler": "letron_api.finance.tt99_api.reject_report_package",
+          "request_schema": "ReportPackageRejectRequest",
+          "response_schema": "ReportPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "companies",
+          "method": "GET",
+          "path": "/api/v1/accounts/companies",
+          "operation": "list",
+          "operation_id": "listCompanies",
+          "handler": "letron_api.finance.tt99_api.list_companies",
+          "query_parameters": [
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "companies",
+          "method": "GET",
+          "path": "/api/v1/accounts/companies/{name}",
+          "operation": "read",
+          "operation_id": "getCompany",
+          "handler": "letron_api.finance.tt99_api.get_company",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "accounts",
+          "method": "GET",
+          "path": "/api/v1/accounts/accounts",
+          "operation": "list",
+          "operation_id": "listAccounts",
+          "handler": "letron_api.finance.tt99_api.list_accounts",
+          "query_parameters": [
+            {
+              "name": "company",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "accounts",
+          "method": "GET",
+          "path": "/api/v1/accounts/accounts/{name}",
+          "operation": "read",
+          "operation_id": "getAccount",
+          "handler": "letron_api.finance.tt99_api.get_account",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "finance-books",
+          "method": "GET",
+          "path": "/api/v1/accounts/finance-books",
+          "operation": "list",
+          "operation_id": "listFinanceBooks",
+          "handler": "letron_api.finance.tt99_api.list_finance_books",
+          "query_parameters": [
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "finance-books",
+          "method": "GET",
+          "path": "/api/v1/accounts/finance-books/{name}",
+          "operation": "read",
+          "operation_id": "getFinanceBook",
+          "handler": "letron_api.finance.tt99_api.get_finance_book",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "fiscal-years",
+          "method": "GET",
+          "path": "/api/v1/accounts/fiscal-years",
+          "operation": "list",
+          "operation_id": "listFiscalYears",
+          "handler": "letron_api.finance.tt99_api.list_fiscal_years",
+          "query_parameters": [
+            {
+              "name": "company",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "fiscal-years",
+          "method": "GET",
+          "path": "/api/v1/accounts/fiscal-years/{name}",
+          "operation": "read",
+          "operation_id": "getFiscalYear",
+          "handler": "letron_api.finance.tt99_api.get_fiscal_year",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "cost-centers",
+          "method": "GET",
+          "path": "/api/v1/accounts/cost-centers",
+          "operation": "list",
+          "operation_id": "listCostCenters",
+          "handler": "letron_api.finance.tt99_api.list_cost_centers",
+          "query_parameters": [
+            {
+              "name": "company",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "cost-centers",
+          "method": "GET",
+          "path": "/api/v1/accounts/cost-centers/{name}",
+          "operation": "read",
+          "operation_id": "getCostCenter",
+          "handler": "letron_api.finance.tt99_api.get_cost_center",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
           "resource": "settings",
           "method": "GET",
           "path": "/api/v1/accounts/settings",
           "operation": "read",
           "operation_id": "getAccountsSettings",
-          "handler": "letron_api.finance.banking.accounts_settings"
+          "handler": "letron_api.finance.banking.accounts_settings",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
         },
         {
           "module": "Accounts",
-          "resource": "settings",
+          "resource": "shareholders",
+          "method": "GET",
+          "path": "/api/v1/accounts/shareholders",
+          "operation": "list",
+          "operation_id": "listShareholders",
+          "handler": "letron_api.finance.tt99_api.list_shareholders",
+          "query_parameters": [
+            {
+              "name": "company",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "shareholders",
+          "method": "GET",
+          "path": "/api/v1/accounts/shareholders/{name}",
+          "operation": "read",
+          "operation_id": "getShareholder",
+          "handler": "letron_api.finance.tt99_api.get_shareholder",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "shareholders",
+          "method": "POST",
+          "path": "/api/v1/accounts/shareholders",
+          "operation": "create",
+          "operation_id": "createShareholder",
+          "handler": "letron_api.finance.tt99_api.create_shareholder",
+          "request_schema": "ShareholderWriteRequest",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "shareholders",
           "method": "PUT",
-          "path": "/api/v1/accounts/settings",
+          "path": "/api/v1/accounts/shareholders/{name}",
           "operation": "update",
-          "operation_id": "updateAccountsSettings",
-          "handler": "letron_api.finance.banking.accounts_settings_update"
+          "operation_id": "updateShareholder",
+          "handler": "letron_api.finance.tt99_api.update_shareholder",
+          "request_schema": "ShareholderUpdateRequest",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "period-closing-vouchers",
+          "method": "GET",
+          "path": "/api/v1/accounts/period-closing-vouchers",
+          "operation": "list",
+          "operation_id": "listPeriodClosingVouchers",
+          "handler": "letron_api.finance.tt99_api.list_period_closing_vouchers",
+          "query_parameters": [
+            {
+              "name": "company",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "fiscal_year",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit_page_length",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            },
+            {
+              "name": "limit_start",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          ],
+          "response_schema": "MasterListResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "period-closing-vouchers",
+          "method": "GET",
+          "path": "/api/v1/accounts/period-closing-vouchers/{name}",
+          "operation": "read",
+          "operation_id": "getPeriodClosingVoucher",
+          "handler": "letron_api.finance.tt99_api.get_period_closing_voucher",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "period-closing-vouchers",
+          "method": "POST",
+          "path": "/api/v1/accounts/period-closing-vouchers",
+          "operation": "create",
+          "operation_id": "createPeriodClosingVoucher",
+          "handler": "letron_api.finance.tt99_api.create_period_closing_voucher",
+          "request_schema": "PeriodClosingVoucherWriteRequest",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "period-closing-vouchers",
+          "method": "PUT",
+          "path": "/api/v1/accounts/period-closing-vouchers/{name}",
+          "operation": "update",
+          "operation_id": "updatePeriodClosingVoucher",
+          "handler": "letron_api.finance.tt99_api.update_period_closing_voucher",
+          "request_schema": "PeriodClosingVoucherUpdateRequest",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "period-closing-vouchers",
+          "method": "POST",
+          "path": "/api/v1/accounts/period-closing-vouchers/{name}/submit",
+          "operation": "update",
+          "operation_id": "submitPeriodClosingVoucher",
+          "handler": "letron_api.finance.tt99_api.submit_period_closing_voucher",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "period-closing-vouchers",
+          "method": "POST",
+          "path": "/api/v1/accounts/period-closing-vouchers/{name}/cancel",
+          "operation": "update",
+          "operation_id": "cancelPeriodClosingVoucher",
+          "handler": "letron_api.finance.tt99_api.cancel_period_closing_voucher",
+          "response_schema": "MasterRecordResponse",
+          "response_envelope": "message"
         },
         {
           "module": "Assets",
@@ -19309,6 +20200,344 @@
               ]
             }
           }
+        },
+        "MasterRecordResponse": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "MasterListResponse": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items",
+            "total"
+          ],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "ReportPackageCreateRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "company",
+            "form_code",
+            "from_date",
+            "to_date"
+          ],
+          "properties": {
+            "company": {
+              "type": "string",
+              "minLength": 1
+            },
+            "form_code": {
+              "type": "string",
+              "enum": [
+                "B01-DN",
+                "B02-DN",
+                "B03-DN",
+                "B09-DN"
+              ]
+            },
+            "from_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "to_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "comparative_from_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "comparative_to_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "finance_book": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "consolidation_scope": {
+              "type": [
+                "string",
+                "object",
+                "null"
+              ]
+            },
+            "accounting_inputs": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "ReportPackageUpdateRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "company": {
+              "type": "string",
+              "minLength": 1
+            },
+            "form_code": {
+              "type": "string",
+              "enum": [
+                "B01-DN",
+                "B02-DN",
+                "B03-DN",
+                "B09-DN"
+              ]
+            },
+            "from_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "to_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "comparative_from_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "comparative_to_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "finance_book": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "consolidation_scope": {
+              "type": [
+                "string",
+                "object",
+                "null"
+              ]
+            },
+            "accounting_inputs": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "ReportPackageRejectRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "reason"
+          ],
+          "properties": {
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          }
+        },
+        "ReportPackageResponse": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "name",
+            "company",
+            "form_code",
+            "status"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "company": {
+              "type": "string"
+            },
+            "form_code": {
+              "type": "string",
+              "enum": [
+                "B01-DN",
+                "B02-DN",
+                "B03-DN",
+                "B09-DN"
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "Draft",
+                "Review",
+                "Closed",
+                "Issued",
+                "Rejected"
+              ]
+            },
+            "validation": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "ReportPackageListResponse": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items",
+            "total"
+          ],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ReportPackageResponse"
+              }
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "ShareholderWriteRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "title",
+            "company"
+          ],
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "company": {
+              "type": "string",
+              "minLength": 1
+            },
+            "naming_series": {
+              "type": "string"
+            }
+          }
+        },
+        "ShareholderUpdateRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "company": {
+              "type": "string",
+              "minLength": 1
+            },
+            "naming_series": {
+              "type": "string"
+            }
+          }
+        },
+        "PeriodClosingVoucherWriteRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "company",
+            "fiscal_year",
+            "period_start_date",
+            "period_end_date",
+            "closing_account_head",
+            "remarks"
+          ],
+          "properties": {
+            "transaction_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "company": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fiscal_year": {
+              "type": "string",
+              "minLength": 1
+            },
+            "period_start_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "period_end_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "closing_account_head": {
+              "type": "string",
+              "minLength": 1
+            },
+            "remarks": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "PeriodClosingVoucherUpdateRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "transaction_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "company": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fiscal_year": {
+              "type": "string",
+              "minLength": 1
+            },
+            "period_start_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "period_end_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "closing_account_head": {
+              "type": "string",
+              "minLength": 1
+            },
+            "remarks": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
         }
       },
       "include_methods": [
@@ -19424,10 +20653,6 @@
         {
           "doctype": "Mode of Payment",
           "path": "/api/v1/accounts/modes-of-payment"
-        },
-        {
-          "doctype": "Cost Center",
-          "path": "/api/v1/accounts/cost-centers"
         },
         {
           "doctype": "Journal Entry",

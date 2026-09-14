@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/listFiscalYears.response.json",
+  "type": "object",
+  "properties": {
+    "message": {
+      "$ref": "MasterListResponse.json"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}

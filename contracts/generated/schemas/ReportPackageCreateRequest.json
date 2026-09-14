@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ReportPackageCreateRequest.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "company",
+    "form_code",
+    "from_date",
+    "to_date"
+  ],
+  "properties": {
+    "company": {
+      "type": "string",
+      "minLength": 1
+    },
+    "form_code": {
+      "type": "string",
+      "enum": [
+        "B01-DN",
+        "B02-DN",
+        "B03-DN",
+        "B09-DN"
+      ]
+    },
+    "from_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "to_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "comparative_from_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "comparative_to_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "finance_book": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "consolidation_scope": {
+      "type": [
+        "string",
+        "object",
+        "null"
+      ]
+    },
+    "accounting_inputs": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

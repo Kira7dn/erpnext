@@ -1,0 +1,21 @@
+{
+  "actions": [],
+  "allow_rename": 0,
+  "creation": "2026-09-14 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": ["code", "title", "source", "data_json", "status", "accounting_input", "source_refs"],
+  "fields": [
+    {"fieldname": "code", "fieldtype": "Data", "label": "Code", "reqd": 1},
+    {"fieldname": "title", "fieldtype": "Data", "label": "Title", "reqd": 1},
+    {"fieldname": "source", "fieldtype": "Data", "label": "Source", "reqd": 1},
+    {"fieldname": "data_json", "fieldtype": "Long Text", "label": "Data"},
+    {"default": "requires_accounting_input", "fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "derived\nrequires_source\nrequires_accounting_input\nrequires_consolidation_package\nincomplete", "reqd": 1},
+    {"fieldname": "accounting_input", "fieldtype": "Long Text", "label": "Accounting Input"},
+    {"fieldname": "source_refs", "fieldtype": "Long Text", "label": "Source References", "read_only": 1}
+  ],
+  "istable": 1,
+  "module": "Letron API",
+  "name": "Letron VAS Report Note",
+  "permissions": []
+}

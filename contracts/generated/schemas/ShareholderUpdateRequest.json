@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ShareholderUpdateRequest.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "company": {
+      "type": "string",
+      "minLength": 1
+    },
+    "naming_series": {
+      "type": "string"
+    }
+  }
+}

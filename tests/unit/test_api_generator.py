@@ -83,6 +83,13 @@ def test_openapi_contains_frappe_contract_paths():
     }
     assert expected.issubset(spec["paths"])
     assert "/api/v1/accounts/purchase-invoices/{name}/cancel" in spec["paths"]
+    assert "/api/v1/accounts/report-packages/{name}/issue" in spec["paths"]
+    assert "/api/v1/accounts/companies" in spec["paths"]
+    assert "/api/v1/accounts/accounts/{name}" in spec["paths"]
+    assert "/api/v1/accounts/shareholders/{name}" in spec["paths"]
+    assert "/api/v1/accounts/period-closing-vouchers/{name}/submit" in spec["paths"]
+    assert set(spec["paths"]["/api/v1/accounts/cost-centers"]) == {"get"}
+    assert set(spec["paths"]["/api/v1/accounts/settings"]) == {"get"}
     consolidation_create = spec["paths"]["/api/v1/accounts/consolidation/adjustments"]["post"]
     assert consolidation_create["requestBody"]["content"]["application/json"]["schema"] == {
         "$ref": "#/components/schemas/ConsolidationAdjustmentRequest"
@@ -122,18 +129,18 @@ def test_openapi_contains_frappe_contract_paths():
         for verb, operation in path_item.items()
         if verb in {"get", "post", "put", "patch", "delete"}
     ]
-    assert len(contract["runtime"]["public_resources"]) == 51
+    assert len(contract["runtime"]["public_resources"]) == 50
     assert {
         item.module
         for item in doctypes
         if item.name in {resource["doctype"] for resource in contract["runtime"]["public_resources"]}
     } == {"Accounts", "Assets", "Buying", "Contacts", "Selling", "Stock", "CRM"}
-    assert len(operations) == 326
+    assert len(operations) == 348
     status_counts = {
         status: sum(operation["x-test-status"] == status for operation in operations)
         for status in ("passed", "partial", "not-tested", "blocked")
     }
-    assert status_counts == {"passed": 215, "partial": 0, "not-tested": 111, "blocked": 0}
+    assert status_counts == {"passed": 211, "partial": 0, "not-tested": 137, "blocked": 0}
     assert all(operation["x-test-level"] == "docker-runtime" for operation in operations)
     assert all(operation.get("x-test-evidence", {}).get("test") for operation in operations)
     assert spec["x-acceptance-summary"] == status_counts
@@ -214,5 +221,5 @@ def test_control_plane_is_typed_and_separate_from_business_operations():
 def test_committed_handoff_manifest_keeps_business_and_control_counts_separate():
     manifest = json.loads((ROOT / "contracts" / "openapi" / "manifest.json").read_text(encoding="utf-8"))
 
-    assert manifest["artifacts"]["public"]["operations"] == 326
+    assert manifest["artifacts"]["public"]["operations"] == 348
     assert manifest["artifacts"]["control-plane"]["operations"] == 2

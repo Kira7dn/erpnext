@@ -1,8 +1,11 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('up','build','reload','down','restart','ps','logs','config','init','migrate','bootstrap','inspect','verify','backup','backup-verify','config-validate','config-plan','config-apply','policy-validate','policy-export','policy-plan','policy-apply')]
+    [ValidateSet('up','build','reload','tt99-sample','down','restart','ps','logs','config','init','migrate','bootstrap','inspect','verify','backup','backup-verify','config-validate','config-plan','config-apply','policy-validate','policy-export','policy-plan','policy-apply')]
     [string]$Action = 'up',
-    [switch]$FollowLogs
+    [switch]$FollowLogs,
+    [string]$SamplePath = 'fixtures/tt99/tt99-vnd-realistic.json',
+    [switch]$CommitSample,
+    [switch]$IssueSampleB09
 )
 
 $ErrorActionPreference = 'Stop'
@@ -235,7 +238,7 @@ if ($Action -eq 'config') {
     Write-Host 'Compose, config and policy YAML are valid (secrets omitted)'
     return
 }
-if ($Action -in @('up','build','reload','restart','down','ps','logs','init','migrate','bootstrap','inspect','verify','backup','backup-verify','config-plan','config-apply','policy-export','policy-plan','policy-apply')) {
+if ($Action -in @('up','build','reload','tt99-sample','restart','down','ps','logs','init','migrate','bootstrap','inspect','verify','backup','backup-verify','config-plan','config-apply','policy-export','policy-plan','policy-apply')) {
     & docker info --format '{{.ServerVersion}}' *> $null
     if ($LASTEXITCODE -ne 0) { throw 'Docker daemon is not available. Start Docker Desktop and retry.' }
 }
@@ -260,6 +263,17 @@ switch ($Action) {
         Invoke-Compose @('up','-d','--no-build','--force-recreate','backend')
         Invoke-Compose @('up','-d','--no-build','--force-recreate','lark-bot','openclaw-lark')
         Invoke-ReloadReadiness | Out-Null
+    }
+    'tt99-sample' {
+        $sampleFile = Join-Path (Split-Path -Parent $configPath) $SamplePath
+        if (!(Test-Path -LiteralPath $sampleFile)) { throw "Missing TT99 sample: $sampleFile" }
+        $health = Invoke-ReloadReadiness
+        Invoke-DesiredStateSyncIfChanged $health
+        Invoke-Compose @('up','-d','--no-build','--force-recreate','backend')
+        Invoke-ReloadReadiness | Out-Null
+        $sampleMode = if ($CommitSample) { '1' } else { '0' }
+        $issueMode = if ($IssueSampleB09) { '1' } else { '0' }
+        Invoke-Compose @('exec','-T','-e',"LETRON_TT99_SAMPLE_PATH=$SamplePath",'-e',"LETRON_TT99_SAMPLE_COMMIT=$sampleMode",'-e',"LETRON_TT99_SAMPLE_ISSUE_B09=$issueMode",'backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.tt99_sample.apply')
     }
     'down' { Invoke-Compose @('down') }
     'restart' { Invoke-Compose @('down'); Invoke-Compose @('up','-d'); Invoke-Compose @('ps'); Invoke-Readiness }

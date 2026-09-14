@@ -4333,196 +4333,6 @@ paths:
       x-test-evidence:
         suite: extended-api
         test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
-  /api/v1/accounts/cost-centers:
-    get:
-      tags:
-      - 'Module: Accounts'
-      summary: List Cost Center records
-      description: List typed Cost Center documents.
-      operationId: listCostCenter
-      parameters:
-      - *id011
-      - *id016
-      - *id017
-      - *id018
-      - *id019
-      - *id020
-      responses:
-        '200':
-          description: Typed resource list
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: &id076
-                      $ref: '#/components/schemas/CostCenterResponse'
-                  message: {}
-                required:
-                - data
-        '400': *id003
-        '401': *id004
-        '403': *id005
-        '404': *id006
-        '409': *id007
-        '417': *id008
-        '429': *id009
-        '500': *id010
-      x-public-operation: list
-      x-test-status: passed
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: extended-api
-        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
-    post:
-      tags:
-      - 'Module: Accounts'
-      summary: Create Cost Center
-      description: Create a Cost Center using the runtime DocType schema.
-      operationId: createCostCenter
-      parameters: *id021
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: &id077
-              $ref: '#/components/schemas/CostCenterWrite'
-            example:
-              cost_center_name: ''
-              parent_cost_center: ''
-              company: ''
-      responses:
-        '200':
-          description: Created typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id076
-                required:
-                - data
-        '400': *id003
-        '401': *id004
-        '403': *id005
-        '404': *id006
-        '409': *id007
-        '417': *id008
-        '429': *id009
-        '500': *id010
-      x-public-operation: create
-      x-test-status: passed
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: extended-api
-        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
-  /api/v1/accounts/cost-centers/{name}:
-    get:
-      tags:
-      - 'Module: Accounts'
-      operationId: getCostCenter
-      parameters:
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      - *id011
-      responses:
-        '200':
-          description: Typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id076
-                required:
-                - data
-        '400': *id003
-        '401': *id004
-        '403': *id005
-        '404': *id006
-        '409': *id007
-        '417': *id008
-        '429': *id009
-        '500': *id010
-      x-public-operation: read
-      x-test-status: passed
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: extended-api
-        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
-    put:
-      tags:
-      - 'Module: Accounts'
-      operationId: updateCostCenter
-      parameters: &id078
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      - *id011
-      - *id013
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: *id077
-      responses:
-        '200':
-          description: Updated typed resource
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: *id076
-                required:
-                - data
-        '400': *id003
-        '401': *id004
-        '403': *id005
-        '404': *id006
-        '409': *id007
-        '417': *id008
-        '429': *id009
-        '500': *id010
-      x-public-operation: update
-      x-test-status: passed
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: extended-api
-        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
-    delete:
-      tags:
-      - 'Module: Accounts'
-      operationId: deleteCostCenter
-      parameters: *id078
-      responses:
-        '200':
-          description: Deleted typed resource
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FrappeResponse'
-        '400': *id003
-        '401': *id004
-        '403': *id005
-        '404': *id006
-        '409': *id007
-        '417': *id008
-        '429': *id009
-        '500': *id010
-      x-public-operation: delete
-      x-test-status: passed
-      x-test-level: docker-runtime
-      x-test-evidence:
-        suite: extended-api
-        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
   /api/v1/selling/customers:
     get:
       tags:
@@ -4547,7 +4357,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id079
+                    items: &id076
                       $ref: '#/components/schemas/CustomerResponse'
                   message: {}
                 required:
@@ -4577,7 +4387,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id080
+            schema: &id077
               $ref: '#/components/schemas/CustomerWrite'
             example:
               customer_name: ''
@@ -4590,7 +4400,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id079
+                  data: *id076
                 required:
                 - data
         '400': *id003
@@ -4627,7 +4437,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id079
+                  data: *id076
                 required:
                 - data
         '400': *id003
@@ -4648,7 +4458,7 @@ paths:
       tags:
       - 'Module: Selling'
       operationId: updateCustomer
-      parameters: &id081
+      parameters: &id078
       - name: name
         in: path
         required: true
@@ -4660,7 +4470,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id080
+            schema: *id077
       responses:
         '200':
           description: Updated typed resource
@@ -4669,7 +4479,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id079
+                  data: *id076
                 required:
                 - data
         '400': *id003
@@ -4690,7 +4500,7 @@ paths:
       tags:
       - 'Module: Selling'
       operationId: deleteCustomer
-      parameters: *id081
+      parameters: *id078
       responses:
         '200':
           description: Deleted typed resource
@@ -4736,7 +4546,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id082
+                    items: &id079
                       $ref: '#/components/schemas/DeliveryNoteResponse'
                   message: {}
                 required:
@@ -4766,7 +4576,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id083
+            schema: &id080
               $ref: '#/components/schemas/DeliveryNoteWrite'
             example:
               naming_series: ''
@@ -4787,7 +4597,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id082
+                  data: *id079
                 required:
                 - data
         '400': *id003
@@ -4824,7 +4634,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id082
+                  data: *id079
                 required:
                 - data
         '400': *id003
@@ -4845,7 +4655,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updateDeliveryNote
-      parameters: &id084
+      parameters: &id081
       - name: name
         in: path
         required: true
@@ -4857,7 +4667,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id083
+            schema: *id080
       responses:
         '200':
           description: Updated typed resource
@@ -4866,7 +4676,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id082
+                  data: *id079
                 required:
                 - data
         '400': *id003
@@ -4887,7 +4697,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deleteDeliveryNote
-      parameters: *id084
+      parameters: *id081
       responses:
         '200':
           description: Deleted typed resource
@@ -4933,7 +4743,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id085
+                    items: &id082
                       $ref: '#/components/schemas/ItemResponse'
                   message: {}
                 required:
@@ -4963,7 +4773,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id086
+            schema: &id083
               $ref: '#/components/schemas/ItemWrite'
             example:
               item_code: ''
@@ -4977,7 +4787,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id085
+                  data: *id082
                 required:
                 - data
         '400': *id003
@@ -5014,7 +4824,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id085
+                  data: *id082
                 required:
                 - data
         '400': *id003
@@ -5035,7 +4845,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updateItem
-      parameters: &id087
+      parameters: &id084
       - name: name
         in: path
         required: true
@@ -5047,7 +4857,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id086
+            schema: *id083
       responses:
         '200':
           description: Updated typed resource
@@ -5056,7 +4866,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id085
+                  data: *id082
                 required:
                 - data
         '400': *id003
@@ -5077,7 +4887,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deleteItem
-      parameters: *id087
+      parameters: *id084
       responses:
         '200':
           description: Deleted typed resource
@@ -5123,7 +4933,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id088
+                    items: &id085
                       $ref: '#/components/schemas/ItemPriceResponse'
                   message: {}
                 required:
@@ -5153,7 +4963,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id089
+            schema: &id086
               $ref: '#/components/schemas/ItemPriceWrite'
             example:
               item_code: ''
@@ -5168,7 +4978,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id088
+                  data: *id085
                 required:
                 - data
         '400': *id003
@@ -5205,7 +5015,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id088
+                  data: *id085
                 required:
                 - data
         '400': *id003
@@ -5226,7 +5036,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updateItemPrice
-      parameters: &id090
+      parameters: &id087
       - name: name
         in: path
         required: true
@@ -5238,7 +5048,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id089
+            schema: *id086
       responses:
         '200':
           description: Updated typed resource
@@ -5247,7 +5057,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id088
+                  data: *id085
                 required:
                 - data
         '400': *id003
@@ -5268,7 +5078,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deleteItemPrice
-      parameters: *id090
+      parameters: *id087
       responses:
         '200':
           description: Deleted typed resource
@@ -5314,7 +5124,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id091
+                    items: &id088
                       $ref: '#/components/schemas/JournalEntryResponse'
                   message: {}
                 required:
@@ -5344,7 +5154,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id092
+            schema: &id089
               $ref: '#/components/schemas/JournalEntryWrite'
             example:
               voucher_type: ''
@@ -5360,7 +5170,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id091
+                  data: *id088
                 required:
                 - data
         '400': *id003
@@ -5397,7 +5207,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id091
+                  data: *id088
                 required:
                 - data
         '400': *id003
@@ -5418,7 +5228,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updateJournalEntry
-      parameters: &id093
+      parameters: &id090
       - name: name
         in: path
         required: true
@@ -5430,7 +5240,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id092
+            schema: *id089
       responses:
         '200':
           description: Updated typed resource
@@ -5439,7 +5249,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id091
+                  data: *id088
                 required:
                 - data
         '400': *id003
@@ -5460,7 +5270,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deleteJournalEntry
-      parameters: *id093
+      parameters: *id090
       responses:
         '200':
           description: Deleted typed resource
@@ -5488,7 +5298,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: submitJournalEntry
-      parameters: *id093
+      parameters: *id090
       responses:
         '200':
           description: Submit document
@@ -5497,7 +5307,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id091
+                  message: *id088
                 required:
                 - message
         '400': *id003
@@ -5521,7 +5331,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: cancelJournalEntry
-      parameters: *id093
+      parameters: *id090
       responses:
         '200':
           description: Cancel document
@@ -5530,7 +5340,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id091
+                  message: *id088
                 required:
                 - message
         '400': *id003
@@ -5572,7 +5382,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id094
+                    items: &id091
                       $ref: '#/components/schemas/LandedCostVoucherResponse'
                   message: {}
                 required:
@@ -5602,7 +5412,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id095
+            schema: &id092
               $ref: '#/components/schemas/LandedCostVoucherWrite'
             example:
               naming_series: ''
@@ -5620,7 +5430,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id094
+                  data: *id091
                 required:
                 - data
         '400': *id003
@@ -5657,7 +5467,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id094
+                  data: *id091
                 required:
                 - data
         '400': *id003
@@ -5678,7 +5488,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updateLandedCostVoucher
-      parameters: &id096
+      parameters: &id093
       - name: name
         in: path
         required: true
@@ -5690,7 +5500,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id095
+            schema: *id092
       responses:
         '200':
           description: Updated typed resource
@@ -5699,7 +5509,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id094
+                  data: *id091
                 required:
                 - data
         '400': *id003
@@ -5720,7 +5530,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deleteLandedCostVoucher
-      parameters: *id096
+      parameters: *id093
       responses:
         '200':
           description: Deleted typed resource
@@ -5766,7 +5576,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id097
+                    items: &id094
                       $ref: '#/components/schemas/LeadResponse'
                   message: {}
                 required:
@@ -5796,7 +5606,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id098
+            schema: &id095
               $ref: '#/components/schemas/LeadWrite'
             example:
               status: ''
@@ -5808,7 +5618,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id097
+                  data: *id094
                 required:
                 - data
         '400': *id003
@@ -5845,7 +5655,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id097
+                  data: *id094
                 required:
                 - data
         '400': *id003
@@ -5866,7 +5676,7 @@ paths:
       tags:
       - 'Module: CRM'
       operationId: updateLead
-      parameters: &id099
+      parameters: &id096
       - name: name
         in: path
         required: true
@@ -5878,7 +5688,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id098
+            schema: *id095
       responses:
         '200':
           description: Updated typed resource
@@ -5887,7 +5697,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id097
+                  data: *id094
                 required:
                 - data
         '400': *id003
@@ -5908,7 +5718,7 @@ paths:
       tags:
       - 'Module: CRM'
       operationId: deleteLead
-      parameters: *id099
+      parameters: *id096
       responses:
         '200':
           description: Deleted typed resource
@@ -5954,7 +5764,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id100
+                    items: &id097
                       $ref: '#/components/schemas/LocationResponse'
                   message: {}
                 required:
@@ -5984,7 +5794,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id101
+            schema: &id098
               $ref: '#/components/schemas/LocationWrite'
             example:
               location_name: ''
@@ -5996,7 +5806,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id100
+                  data: *id097
                 required:
                 - data
         '400': *id003
@@ -6033,7 +5843,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id100
+                  data: *id097
                 required:
                 - data
         '400': *id003
@@ -6054,7 +5864,7 @@ paths:
       tags:
       - 'Module: Assets'
       operationId: updateLocation
-      parameters: &id102
+      parameters: &id099
       - name: name
         in: path
         required: true
@@ -6066,7 +5876,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id101
+            schema: *id098
       responses:
         '200':
           description: Updated typed resource
@@ -6075,7 +5885,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id100
+                  data: *id097
                 required:
                 - data
         '400': *id003
@@ -6096,7 +5906,7 @@ paths:
       tags:
       - 'Module: Assets'
       operationId: deleteLocation
-      parameters: *id102
+      parameters: *id099
       responses:
         '200':
           description: Deleted typed resource
@@ -6142,7 +5952,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id103
+                    items: &id100
                       $ref: '#/components/schemas/MaterialRequestResponse'
                   message: {}
                 required:
@@ -6172,7 +5982,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id104
+            schema: &id101
               $ref: '#/components/schemas/MaterialRequestWrite'
             example:
               naming_series: ''
@@ -6188,7 +5998,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id103
+                  data: *id100
                 required:
                 - data
         '400': *id003
@@ -6225,7 +6035,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id103
+                  data: *id100
                 required:
                 - data
         '400': *id003
@@ -6246,7 +6056,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updateMaterialRequest
-      parameters: &id105
+      parameters: &id102
       - name: name
         in: path
         required: true
@@ -6258,7 +6068,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id104
+            schema: *id101
       responses:
         '200':
           description: Updated typed resource
@@ -6267,7 +6077,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id103
+                  data: *id100
                 required:
                 - data
         '400': *id003
@@ -6288,7 +6098,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deleteMaterialRequest
-      parameters: *id105
+      parameters: *id102
       responses:
         '200':
           description: Deleted typed resource
@@ -6316,7 +6126,7 @@ paths:
       - 'Module: Stock'
       - Document actions
       operationId: submitMaterialRequest
-      parameters: *id105
+      parameters: *id102
       responses:
         '200':
           description: Submit document
@@ -6325,7 +6135,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id103
+                  message: *id100
                 required:
                 - message
         '400': *id003
@@ -6349,7 +6159,7 @@ paths:
       - 'Module: Stock'
       - Document actions
       operationId: cancelMaterialRequest
-      parameters: *id105
+      parameters: *id102
       responses:
         '200':
           description: Cancel document
@@ -6358,7 +6168,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id103
+                  message: *id100
                 required:
                 - message
         '400': *id003
@@ -6400,7 +6210,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id106
+                    items: &id103
                       $ref: '#/components/schemas/ModeofPaymentResponse'
                   message: {}
                 required:
@@ -6430,7 +6240,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id107
+            schema: &id104
               $ref: '#/components/schemas/ModeofPaymentWrite'
             example:
               mode_of_payment: ''
@@ -6442,7 +6252,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id106
+                  data: *id103
                 required:
                 - data
         '400': *id003
@@ -6479,7 +6289,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id106
+                  data: *id103
                 required:
                 - data
         '400': *id003
@@ -6500,7 +6310,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updateModeofPayment
-      parameters: &id108
+      parameters: &id105
       - name: name
         in: path
         required: true
@@ -6512,7 +6322,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id107
+            schema: *id104
       responses:
         '200':
           description: Updated typed resource
@@ -6521,7 +6331,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id106
+                  data: *id103
                 required:
                 - data
         '400': *id003
@@ -6542,7 +6352,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deleteModeofPayment
-      parameters: *id108
+      parameters: *id105
       responses:
         '200':
           description: Deleted typed resource
@@ -6588,7 +6398,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id109
+                    items: &id106
                       $ref: '#/components/schemas/OpportunityResponse'
                   message: {}
                 required:
@@ -6618,7 +6428,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id110
+            schema: &id107
               $ref: '#/components/schemas/OpportunityWrite'
             example:
               naming_series: ''
@@ -6635,7 +6445,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id109
+                  data: *id106
                 required:
                 - data
         '400': *id003
@@ -6672,7 +6482,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id109
+                  data: *id106
                 required:
                 - data
         '400': *id003
@@ -6693,7 +6503,7 @@ paths:
       tags:
       - 'Module: CRM'
       operationId: updateOpportunity
-      parameters: &id111
+      parameters: &id108
       - name: name
         in: path
         required: true
@@ -6705,7 +6515,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id110
+            schema: *id107
       responses:
         '200':
           description: Updated typed resource
@@ -6714,7 +6524,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id109
+                  data: *id106
                 required:
                 - data
         '400': *id003
@@ -6735,7 +6545,7 @@ paths:
       tags:
       - 'Module: CRM'
       operationId: deleteOpportunity
-      parameters: *id111
+      parameters: *id108
       responses:
         '200':
           description: Deleted typed resource
@@ -6781,7 +6591,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id112
+                    items: &id109
                       $ref: '#/components/schemas/PaymentEntryResponse'
                   message: {}
                 required:
@@ -6811,7 +6621,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id113
+            schema: &id110
               $ref: '#/components/schemas/PaymentEntryWrite'
             example:
               naming_series: ''
@@ -6832,7 +6642,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id112
+                  data: *id109
                 required:
                 - data
         '400': *id003
@@ -6869,7 +6679,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id112
+                  data: *id109
                 required:
                 - data
         '400': *id003
@@ -6890,7 +6700,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updatePaymentEntry
-      parameters: &id114
+      parameters: &id111
       - name: name
         in: path
         required: true
@@ -6902,7 +6712,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id113
+            schema: *id110
       responses:
         '200':
           description: Updated typed resource
@@ -6911,7 +6721,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id112
+                  data: *id109
                 required:
                 - data
         '400': *id003
@@ -6932,7 +6742,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deletePaymentEntry
-      parameters: *id114
+      parameters: *id111
       responses:
         '200':
           description: Deleted typed resource
@@ -6960,7 +6770,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: submitPaymentEntry
-      parameters: *id114
+      parameters: *id111
       responses:
         '200':
           description: Submit document
@@ -6969,7 +6779,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id112
+                  message: *id109
                 required:
                 - message
         '400': *id003
@@ -6993,7 +6803,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: cancelPaymentEntry
-      parameters: *id114
+      parameters: *id111
       responses:
         '200':
           description: Cancel document
@@ -7002,7 +6812,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id112
+                  message: *id109
                 required:
                 - message
         '400': *id003
@@ -7044,7 +6854,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id115
+                    items: &id112
                       $ref: '#/components/schemas/PaymentOrderResponse'
                   message: {}
                 required:
@@ -7074,7 +6884,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id116
+            schema: &id113
               $ref: '#/components/schemas/PaymentOrderWrite'
             example:
               naming_series: ''
@@ -7089,7 +6899,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id115
+                  data: *id112
                 required:
                 - data
         '400': *id003
@@ -7126,7 +6936,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id115
+                  data: *id112
                 required:
                 - data
         '400': *id003
@@ -7147,7 +6957,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updatePaymentOrder
-      parameters: &id117
+      parameters: &id114
       - name: name
         in: path
         required: true
@@ -7159,7 +6969,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id116
+            schema: *id113
       responses:
         '200':
           description: Updated typed resource
@@ -7168,7 +6978,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id115
+                  data: *id112
                 required:
                 - data
         '400': *id003
@@ -7189,7 +6999,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deletePaymentOrder
-      parameters: *id117
+      parameters: *id114
       responses:
         '200':
           description: Deleted typed resource
@@ -7217,7 +7027,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: submitPaymentOrder
-      parameters: *id117
+      parameters: *id114
       responses:
         '200':
           description: Submit document
@@ -7226,7 +7036,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id115
+                  message: *id112
                 required:
                 - message
         '400': *id003
@@ -7250,7 +7060,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: cancelPaymentOrder
-      parameters: *id117
+      parameters: *id114
       responses:
         '200':
           description: Cancel document
@@ -7259,7 +7069,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id115
+                  message: *id112
                 required:
                 - message
         '400': *id003
@@ -7301,7 +7111,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id118
+                    items: &id115
                       $ref: '#/components/schemas/PaymentRequestResponse'
                   message: {}
                 required:
@@ -7331,7 +7141,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id119
+            schema: &id116
               $ref: '#/components/schemas/PaymentRequestWrite'
             example:
               payment_request_type: ''
@@ -7345,7 +7155,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id118
+                  data: *id115
                 required:
                 - data
         '400': *id003
@@ -7382,7 +7192,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id118
+                  data: *id115
                 required:
                 - data
         '400': *id003
@@ -7403,7 +7213,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updatePaymentRequest
-      parameters: &id120
+      parameters: &id117
       - name: name
         in: path
         required: true
@@ -7415,7 +7225,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id119
+            schema: *id116
       responses:
         '200':
           description: Updated typed resource
@@ -7424,7 +7234,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id118
+                  data: *id115
                 required:
                 - data
         '400': *id003
@@ -7445,7 +7255,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deletePaymentRequest
-      parameters: *id120
+      parameters: *id117
       responses:
         '200':
           description: Deleted typed resource
@@ -7473,7 +7283,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: submitPaymentRequest
-      parameters: *id120
+      parameters: *id117
       responses:
         '200':
           description: Submit document
@@ -7482,7 +7292,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id118
+                  message: *id115
                 required:
                 - message
         '400': *id003
@@ -7506,7 +7316,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: cancelPaymentRequest
-      parameters: *id120
+      parameters: *id117
       responses:
         '200':
           description: Cancel document
@@ -7515,7 +7325,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id118
+                  message: *id115
                 required:
                 - message
         '400': *id003
@@ -7557,7 +7367,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id121
+                    items: &id118
                       $ref: '#/components/schemas/PickListResponse'
                   message: {}
                 required:
@@ -7587,7 +7397,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id122
+            schema: &id119
               $ref: '#/components/schemas/PickListWrite'
             example:
               company: ''
@@ -7600,7 +7410,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id121
+                  data: *id118
                 required:
                 - data
         '400': *id003
@@ -7637,7 +7447,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id121
+                  data: *id118
                 required:
                 - data
         '400': *id003
@@ -7658,7 +7468,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updatePickList
-      parameters: &id123
+      parameters: &id120
       - name: name
         in: path
         required: true
@@ -7670,7 +7480,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id122
+            schema: *id119
       responses:
         '200':
           description: Updated typed resource
@@ -7679,7 +7489,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id121
+                  data: *id118
                 required:
                 - data
         '400': *id003
@@ -7700,7 +7510,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deletePickList
-      parameters: *id123
+      parameters: *id120
       responses:
         '200':
           description: Deleted typed resource
@@ -7746,7 +7556,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id124
+                    items: &id121
                       $ref: '#/components/schemas/PurchaseInvoiceResponse'
                   message: {}
                 required:
@@ -7776,7 +7586,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id125
+            schema: &id122
               $ref: '#/components/schemas/PurchaseInvoiceWrite'
             example:
               naming_series: ''
@@ -7792,7 +7602,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id124
+                  data: *id121
                 required:
                 - data
         '400': *id003
@@ -7829,7 +7639,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id124
+                  data: *id121
                 required:
                 - data
         '400': *id003
@@ -7850,7 +7660,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updatePurchaseInvoice
-      parameters: &id126
+      parameters: &id123
       - name: name
         in: path
         required: true
@@ -7862,7 +7672,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id125
+            schema: *id122
       responses:
         '200':
           description: Updated typed resource
@@ -7871,7 +7681,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id124
+                  data: *id121
                 required:
                 - data
         '400': *id003
@@ -7892,7 +7702,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deletePurchaseInvoice
-      parameters: *id126
+      parameters: *id123
       responses:
         '200':
           description: Deleted typed resource
@@ -7920,7 +7730,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: submitPurchaseInvoice
-      parameters: *id126
+      parameters: *id123
       responses:
         '200':
           description: Submit document
@@ -7929,7 +7739,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id124
+                  message: *id121
                 required:
                 - message
         '400': *id003
@@ -7953,7 +7763,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: cancelPurchaseInvoice
-      parameters: *id126
+      parameters: *id123
       responses:
         '200':
           description: Cancel document
@@ -7962,7 +7772,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id124
+                  message: *id121
                 required:
                 - message
         '400': *id003
@@ -8004,7 +7814,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id127
+                    items: &id124
                       $ref: '#/components/schemas/PurchaseOrderResponse'
                   message: {}
                 required:
@@ -8034,7 +7844,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id128
+            schema: &id125
               $ref: '#/components/schemas/PurchaseOrderWrite'
             example:
               naming_series: ''
@@ -8052,7 +7862,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id127
+                  data: *id124
                 required:
                 - data
         '400': *id003
@@ -8089,7 +7899,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id127
+                  data: *id124
                 required:
                 - data
         '400': *id003
@@ -8110,7 +7920,7 @@ paths:
       tags:
       - 'Module: Buying'
       operationId: updatePurchaseOrder
-      parameters: &id129
+      parameters: &id126
       - name: name
         in: path
         required: true
@@ -8122,7 +7932,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id128
+            schema: *id125
       responses:
         '200':
           description: Updated typed resource
@@ -8131,7 +7941,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id127
+                  data: *id124
                 required:
                 - data
         '400': *id003
@@ -8152,7 +7962,7 @@ paths:
       tags:
       - 'Module: Buying'
       operationId: deletePurchaseOrder
-      parameters: *id129
+      parameters: *id126
       responses:
         '200':
           description: Deleted typed resource
@@ -8180,7 +7990,7 @@ paths:
       - 'Module: Buying'
       - Document actions
       operationId: submitPurchaseOrder
-      parameters: *id129
+      parameters: *id126
       responses:
         '200':
           description: Submit document
@@ -8189,7 +7999,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id127
+                  message: *id124
                 required:
                 - message
         '400': *id003
@@ -8213,7 +8023,7 @@ paths:
       - 'Module: Buying'
       - Document actions
       operationId: cancelPurchaseOrder
-      parameters: *id129
+      parameters: *id126
       responses:
         '200':
           description: Cancel document
@@ -8222,7 +8032,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id127
+                  message: *id124
                 required:
                 - message
         '400': *id003
@@ -8264,7 +8074,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id130
+                    items: &id127
                       $ref: '#/components/schemas/PurchaseReceiptResponse'
                   message: {}
                 required:
@@ -8294,7 +8104,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id131
+            schema: &id128
               $ref: '#/components/schemas/PurchaseReceiptWrite'
             example:
               naming_series: ''
@@ -8313,7 +8123,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id130
+                  data: *id127
                 required:
                 - data
         '400': *id003
@@ -8350,7 +8160,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id130
+                  data: *id127
                 required:
                 - data
         '400': *id003
@@ -8371,7 +8181,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updatePurchaseReceipt
-      parameters: &id132
+      parameters: &id129
       - name: name
         in: path
         required: true
@@ -8383,7 +8193,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id131
+            schema: *id128
       responses:
         '200':
           description: Updated typed resource
@@ -8392,7 +8202,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id130
+                  data: *id127
                 required:
                 - data
         '400': *id003
@@ -8413,7 +8223,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deletePurchaseReceipt
-      parameters: *id132
+      parameters: *id129
       responses:
         '200':
           description: Deleted typed resource
@@ -8441,7 +8251,7 @@ paths:
       - 'Module: Stock'
       - Document actions
       operationId: submitPurchaseReceipt
-      parameters: *id132
+      parameters: *id129
       responses:
         '200':
           description: Submit document
@@ -8450,7 +8260,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id130
+                  message: *id127
                 required:
                 - message
         '400': *id003
@@ -8474,7 +8284,7 @@ paths:
       - 'Module: Stock'
       - Document actions
       operationId: cancelPurchaseReceipt
-      parameters: *id132
+      parameters: *id129
       responses:
         '200':
           description: Cancel document
@@ -8483,7 +8293,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id130
+                  message: *id127
                 required:
                 - message
         '400': *id003
@@ -8525,7 +8335,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id133
+                    items: &id130
                       $ref: '#/components/schemas/QualityInspectionResponse'
                   message: {}
                 required:
@@ -8555,7 +8365,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id134
+            schema: &id131
               $ref: '#/components/schemas/QualityInspectionWrite'
             example:
               naming_series: ''
@@ -8575,7 +8385,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id133
+                  data: *id130
                 required:
                 - data
         '400': *id003
@@ -8612,7 +8422,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id133
+                  data: *id130
                 required:
                 - data
         '400': *id003
@@ -8633,7 +8443,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updateQualityInspection
-      parameters: &id135
+      parameters: &id132
       - name: name
         in: path
         required: true
@@ -8645,7 +8455,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id134
+            schema: *id131
       responses:
         '200':
           description: Updated typed resource
@@ -8654,7 +8464,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id133
+                  data: *id130
                 required:
                 - data
         '400': *id003
@@ -8675,7 +8485,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deleteQualityInspection
-      parameters: *id135
+      parameters: *id132
       responses:
         '200':
           description: Deleted typed resource
@@ -8721,7 +8531,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id136
+                    items: &id133
                       $ref: '#/components/schemas/QuotationResponse'
                   message: {}
                 required:
@@ -8751,7 +8561,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id137
+            schema: &id134
               $ref: '#/components/schemas/QuotationWrite'
             example:
               naming_series: ''
@@ -8772,7 +8582,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id136
+                  data: *id133
                 required:
                 - data
         '400': *id003
@@ -8809,7 +8619,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id136
+                  data: *id133
                 required:
                 - data
         '400': *id003
@@ -8830,7 +8640,7 @@ paths:
       tags:
       - 'Module: Selling'
       operationId: updateQuotation
-      parameters: &id138
+      parameters: &id135
       - name: name
         in: path
         required: true
@@ -8842,7 +8652,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id137
+            schema: *id134
       responses:
         '200':
           description: Updated typed resource
@@ -8851,7 +8661,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id136
+                  data: *id133
                 required:
                 - data
         '400': *id003
@@ -8872,7 +8682,7 @@ paths:
       tags:
       - 'Module: Selling'
       operationId: deleteQuotation
-      parameters: *id138
+      parameters: *id135
       responses:
         '200':
           description: Deleted typed resource
@@ -8918,7 +8728,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id139
+                    items: &id136
                       $ref: '#/components/schemas/RequestforQuotationResponse'
                   message: {}
                 required:
@@ -8948,7 +8758,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id140
+            schema: &id137
               $ref: '#/components/schemas/RequestforQuotationWrite'
             example:
               naming_series: ''
@@ -8965,7 +8775,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id139
+                  data: *id136
                 required:
                 - data
         '400': *id003
@@ -9002,7 +8812,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id139
+                  data: *id136
                 required:
                 - data
         '400': *id003
@@ -9023,7 +8833,7 @@ paths:
       tags:
       - 'Module: Buying'
       operationId: updateRequestforQuotation
-      parameters: &id141
+      parameters: &id138
       - name: name
         in: path
         required: true
@@ -9035,7 +8845,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id140
+            schema: *id137
       responses:
         '200':
           description: Updated typed resource
@@ -9044,7 +8854,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id139
+                  data: *id136
                 required:
                 - data
         '400': *id003
@@ -9065,7 +8875,7 @@ paths:
       tags:
       - 'Module: Buying'
       operationId: deleteRequestforQuotation
-      parameters: *id141
+      parameters: *id138
       responses:
         '200':
           description: Deleted typed resource
@@ -9111,7 +8921,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id142
+                    items: &id139
                       $ref: '#/components/schemas/SalesInvoiceResponse'
                   message: {}
                 required:
@@ -9141,7 +8951,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id143
+            schema: &id140
               $ref: '#/components/schemas/SalesInvoiceWrite'
             example:
               naming_series: ''
@@ -9162,7 +8972,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id142
+                  data: *id139
                 required:
                 - data
         '400': *id003
@@ -9199,7 +9009,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id142
+                  data: *id139
                 required:
                 - data
         '400': *id003
@@ -9220,7 +9030,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: updateSalesInvoice
-      parameters: &id144
+      parameters: &id141
       - name: name
         in: path
         required: true
@@ -9232,7 +9042,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id143
+            schema: *id140
       responses:
         '200':
           description: Updated typed resource
@@ -9241,7 +9051,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id142
+                  data: *id139
                 required:
                 - data
         '400': *id003
@@ -9262,7 +9072,7 @@ paths:
       tags:
       - 'Module: Accounts'
       operationId: deleteSalesInvoice
-      parameters: *id144
+      parameters: *id141
       responses:
         '200':
           description: Deleted typed resource
@@ -9290,7 +9100,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: submitSalesInvoice
-      parameters: *id144
+      parameters: *id141
       responses:
         '200':
           description: Submit document
@@ -9299,7 +9109,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id142
+                  message: *id139
                 required:
                 - message
         '400': *id003
@@ -9323,7 +9133,7 @@ paths:
       - 'Module: Accounts'
       - Document actions
       operationId: cancelSalesInvoice
-      parameters: *id144
+      parameters: *id141
       responses:
         '200':
           description: Cancel document
@@ -9332,7 +9142,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id142
+                  message: *id139
                 required:
                 - message
         '400': *id003
@@ -9374,7 +9184,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id145
+                    items: &id142
                       $ref: '#/components/schemas/SalesOrderResponse'
                   message: {}
                 required:
@@ -9404,7 +9214,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id146
+            schema: &id143
               $ref: '#/components/schemas/SalesOrderWrite'
             example:
               naming_series: ''
@@ -9425,7 +9235,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id145
+                  data: *id142
                 required:
                 - data
         '400': *id003
@@ -9462,7 +9272,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id145
+                  data: *id142
                 required:
                 - data
         '400': *id003
@@ -9483,7 +9293,7 @@ paths:
       tags:
       - 'Module: Selling'
       operationId: updateSalesOrder
-      parameters: &id147
+      parameters: &id144
       - name: name
         in: path
         required: true
@@ -9495,7 +9305,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id146
+            schema: *id143
       responses:
         '200':
           description: Updated typed resource
@@ -9504,7 +9314,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id145
+                  data: *id142
                 required:
                 - data
         '400': *id003
@@ -9525,7 +9335,7 @@ paths:
       tags:
       - 'Module: Selling'
       operationId: deleteSalesOrder
-      parameters: *id147
+      parameters: *id144
       responses:
         '200':
           description: Deleted typed resource
@@ -9553,7 +9363,7 @@ paths:
       - 'Module: Selling'
       - Document actions
       operationId: submitSalesOrder
-      parameters: *id147
+      parameters: *id144
       responses:
         '200':
           description: Submit document
@@ -9562,7 +9372,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id145
+                  message: *id142
                 required:
                 - message
         '400': *id003
@@ -9586,7 +9396,7 @@ paths:
       - 'Module: Selling'
       - Document actions
       operationId: cancelSalesOrder
-      parameters: *id147
+      parameters: *id144
       responses:
         '200':
           description: Cancel document
@@ -9595,7 +9405,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id145
+                  message: *id142
                 required:
                 - message
         '400': *id003
@@ -9637,7 +9447,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id148
+                    items: &id145
                       $ref: '#/components/schemas/SerialNoResponse'
                   message: {}
                 required:
@@ -9667,7 +9477,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id149
+            schema: &id146
               $ref: '#/components/schemas/SerialNoWrite'
             example:
               serial_no: ''
@@ -9681,7 +9491,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id148
+                  data: *id145
                 required:
                 - data
         '400': *id003
@@ -9718,7 +9528,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id148
+                  data: *id145
                 required:
                 - data
         '400': *id003
@@ -9739,7 +9549,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updateSerialNo
-      parameters: &id150
+      parameters: &id147
       - name: name
         in: path
         required: true
@@ -9751,7 +9561,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id149
+            schema: *id146
       responses:
         '200':
           description: Updated typed resource
@@ -9760,7 +9570,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id148
+                  data: *id145
                 required:
                 - data
         '400': *id003
@@ -9781,7 +9591,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deleteSerialNo
-      parameters: *id150
+      parameters: *id147
       responses:
         '200':
           description: Deleted typed resource
@@ -9827,7 +9637,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id151
+                    items: &id148
                       $ref: '#/components/schemas/ShipmentResponse'
                   message: {}
                 required:
@@ -9857,7 +9667,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id152
+            schema: &id149
               $ref: '#/components/schemas/ShipmentWrite'
             example:
               pickup_address_name: ''
@@ -9875,7 +9685,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id151
+                  data: *id148
                 required:
                 - data
         '400': *id003
@@ -9912,7 +9722,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id151
+                  data: *id148
                 required:
                 - data
         '400': *id003
@@ -9933,7 +9743,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updateShipment
-      parameters: &id153
+      parameters: &id150
       - name: name
         in: path
         required: true
@@ -9945,7 +9755,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id152
+            schema: *id149
       responses:
         '200':
           description: Updated typed resource
@@ -9954,7 +9764,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id151
+                  data: *id148
                 required:
                 - data
         '400': *id003
@@ -9975,7 +9785,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deleteShipment
-      parameters: *id153
+      parameters: *id150
       responses:
         '200':
           description: Deleted typed resource
@@ -10021,7 +9831,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id154
+                    items: &id151
                       $ref: '#/components/schemas/StockEntryResponse'
                   message: {}
                 required:
@@ -10051,7 +9861,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id155
+            schema: &id152
               $ref: '#/components/schemas/StockEntryWrite'
             example:
               naming_series: ''
@@ -10066,7 +9876,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id154
+                  data: *id151
                 required:
                 - data
         '400': *id003
@@ -10103,7 +9913,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id154
+                  data: *id151
                 required:
                 - data
         '400': *id003
@@ -10124,7 +9934,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updateStockEntry
-      parameters: &id156
+      parameters: &id153
       - name: name
         in: path
         required: true
@@ -10136,7 +9946,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id155
+            schema: *id152
       responses:
         '200':
           description: Updated typed resource
@@ -10145,7 +9955,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id154
+                  data: *id151
                 required:
                 - data
         '400': *id003
@@ -10166,7 +9976,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deleteStockEntry
-      parameters: *id156
+      parameters: *id153
       responses:
         '200':
           description: Deleted typed resource
@@ -10194,7 +10004,7 @@ paths:
       - 'Module: Stock'
       - Document actions
       operationId: submitStockEntry
-      parameters: *id156
+      parameters: *id153
       responses:
         '200':
           description: Submit document
@@ -10203,7 +10013,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id154
+                  message: *id151
                 required:
                 - message
         '400': *id003
@@ -10227,7 +10037,7 @@ paths:
       - 'Module: Stock'
       - Document actions
       operationId: cancelStockEntry
-      parameters: *id156
+      parameters: *id153
       responses:
         '200':
           description: Cancel document
@@ -10236,7 +10046,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id154
+                  message: *id151
                 required:
                 - message
         '400': *id003
@@ -10278,7 +10088,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id157
+                    items: &id154
                       $ref: '#/components/schemas/StockReconciliationResponse'
                   message: {}
                 required:
@@ -10308,7 +10118,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id158
+            schema: &id155
               $ref: '#/components/schemas/StockReconciliationWrite'
             example:
               naming_series: ''
@@ -10325,7 +10135,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id157
+                  data: *id154
                 required:
                 - data
         '400': *id003
@@ -10362,7 +10172,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id157
+                  data: *id154
                 required:
                 - data
         '400': *id003
@@ -10383,7 +10193,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updateStockReconciliation
-      parameters: &id159
+      parameters: &id156
       - name: name
         in: path
         required: true
@@ -10395,7 +10205,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id158
+            schema: *id155
       responses:
         '200':
           description: Updated typed resource
@@ -10404,7 +10214,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id157
+                  data: *id154
                 required:
                 - data
         '400': *id003
@@ -10425,7 +10235,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deleteStockReconciliation
-      parameters: *id159
+      parameters: *id156
       responses:
         '200':
           description: Deleted typed resource
@@ -10471,7 +10281,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id160
+                    items: &id157
                       $ref: '#/components/schemas/StockReservationEntryResponse'
                   message: {}
                 required:
@@ -10501,7 +10311,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id161
+            schema: &id158
               $ref: '#/components/schemas/StockReservationEntryWrite'
             example: {}
       responses:
@@ -10512,7 +10322,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id160
+                  data: *id157
                 required:
                 - data
         '400': *id003
@@ -10549,7 +10359,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id160
+                  data: *id157
                 required:
                 - data
         '400': *id003
@@ -10570,7 +10380,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updateStockReservationEntry
-      parameters: &id162
+      parameters: &id159
       - name: name
         in: path
         required: true
@@ -10582,7 +10392,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id161
+            schema: *id158
       responses:
         '200':
           description: Updated typed resource
@@ -10591,7 +10401,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id160
+                  data: *id157
                 required:
                 - data
         '400': *id003
@@ -10612,7 +10422,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deleteStockReservationEntry
-      parameters: *id162
+      parameters: *id159
       responses:
         '200':
           description: Deleted typed resource
@@ -10658,7 +10468,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id163
+                    items: &id160
                       $ref: '#/components/schemas/SupplierResponse'
                   message: {}
                 required:
@@ -10688,7 +10498,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id164
+            schema: &id161
               $ref: '#/components/schemas/SupplierWrite'
             example:
               supplier_name: ''
@@ -10701,7 +10511,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id163
+                  data: *id160
                 required:
                 - data
         '400': *id003
@@ -10738,7 +10548,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id163
+                  data: *id160
                 required:
                 - data
         '400': *id003
@@ -10759,7 +10569,7 @@ paths:
       tags:
       - 'Module: Buying'
       operationId: updateSupplier
-      parameters: &id165
+      parameters: &id162
       - name: name
         in: path
         required: true
@@ -10771,7 +10581,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id164
+            schema: *id161
       responses:
         '200':
           description: Updated typed resource
@@ -10780,7 +10590,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id163
+                  data: *id160
                 required:
                 - data
         '400': *id003
@@ -10801,7 +10611,7 @@ paths:
       tags:
       - 'Module: Buying'
       operationId: deleteSupplier
-      parameters: *id165
+      parameters: *id162
       responses:
         '200':
           description: Deleted typed resource
@@ -10847,7 +10657,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id166
+                    items: &id163
                       $ref: '#/components/schemas/SupplierQuotationResponse'
                   message: {}
                 required:
@@ -10877,7 +10687,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id167
+            schema: &id164
               $ref: '#/components/schemas/SupplierQuotationWrite'
             example:
               naming_series: ''
@@ -10895,7 +10705,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id166
+                  data: *id163
                 required:
                 - data
         '400': *id003
@@ -10932,7 +10742,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id166
+                  data: *id163
                 required:
                 - data
         '400': *id003
@@ -10953,7 +10763,7 @@ paths:
       tags:
       - 'Module: Buying'
       operationId: updateSupplierQuotation
-      parameters: &id168
+      parameters: &id165
       - name: name
         in: path
         required: true
@@ -10965,7 +10775,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id167
+            schema: *id164
       responses:
         '200':
           description: Updated typed resource
@@ -10974,7 +10784,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id166
+                  data: *id163
                 required:
                 - data
         '400': *id003
@@ -10995,7 +10805,7 @@ paths:
       tags:
       - 'Module: Buying'
       operationId: deleteSupplierQuotation
-      parameters: *id168
+      parameters: *id165
       responses:
         '200':
           description: Deleted typed resource
@@ -11023,7 +10833,7 @@ paths:
       - 'Module: Buying'
       - Document actions
       operationId: submitSupplierQuotation
-      parameters: *id168
+      parameters: *id165
       responses:
         '200':
           description: Submit document
@@ -11032,7 +10842,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id166
+                  message: *id163
                 required:
                 - message
         '400': *id003
@@ -11056,7 +10866,7 @@ paths:
       - 'Module: Buying'
       - Document actions
       operationId: cancelSupplierQuotation
-      parameters: *id168
+      parameters: *id165
       responses:
         '200':
           description: Cancel document
@@ -11065,7 +10875,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: *id166
+                  message: *id163
                 required:
                 - message
         '400': *id003
@@ -11090,7 +10900,7 @@ paths:
       - Business actions
       summary: Make-Purchase-Order Supplier Quotation
       operationId: makePurchaseOrderFromSupplierQuotation
-      parameters: *id168
+      parameters: *id165
       requestBody:
         required: true
         content:
@@ -11150,7 +10960,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: &id169
+                    items: &id166
                       $ref: '#/components/schemas/WarehouseResponse'
                   message: {}
                 required:
@@ -11180,7 +10990,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id170
+            schema: &id167
               $ref: '#/components/schemas/WarehouseWrite'
             example:
               warehouse_name: ''
@@ -11193,7 +11003,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id169
+                  data: *id166
                 required:
                 - data
         '400': *id003
@@ -11230,7 +11040,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id169
+                  data: *id166
                 required:
                 - data
         '400': *id003
@@ -11251,7 +11061,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: updateWarehouse
-      parameters: &id171
+      parameters: &id168
       - name: name
         in: path
         required: true
@@ -11263,7 +11073,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: *id170
+            schema: *id167
       responses:
         '200':
           description: Updated typed resource
@@ -11272,7 +11082,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id169
+                  data: *id166
                 required:
                 - data
         '400': *id003
@@ -11293,7 +11103,7 @@ paths:
       tags:
       - 'Module: Stock'
       operationId: deleteWarehouse
-      parameters: *id171
+      parameters: *id168
       responses:
         '200':
           description: Deleted typed resource
@@ -12241,6 +12051,864 @@ paths:
       x-test-evidence:
         suite: accounts-reconciliation
         test: tests/integration/test_accounts_reconciliation.py
+  /api/v1/accounts/report-packages:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listReportPackages
+      operationId: listReportPackages
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: form_code
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - B01-DN
+          - B02-DN
+          - B03-DN
+          - B09-DN
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from_date
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to_date
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageListResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.list_report_packages
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: createReportPackage
+      operationId: createReportPackage
+      parameters:
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.create_report_package
+      x-public-operation: create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportPackageCreateRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/report-packages/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getReportPackage
+      operationId: getReportPackage
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.get_report_package
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    put:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: updateReportPackage
+      operationId: updateReportPackage
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.update_report_package
+      x-public-operation: update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportPackageUpdateRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/report-packages/{name}/review:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: reviewReportPackage
+      operationId: reviewReportPackage
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.review_report_package
+      x-public-operation: update
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/report-packages/{name}/close:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: closeReportPackage
+      operationId: closeReportPackage
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.close_report_package
+      x-public-operation: update
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/report-packages/{name}/issue:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: issueReportPackage
+      operationId: issueReportPackage
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.issue_report_package
+      x-public-operation: update
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/report-packages/{name}/reject:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: rejectReportPackage
+      operationId: rejectReportPackage
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ReportPackageResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.reject_report_package
+      x-public-operation: update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportPackageRejectRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/companies:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listCompanies
+      operationId: listCompanies
+      parameters:
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.list_companies
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/companies/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getCompany
+      operationId: getCompany
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.get_company
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/accounts:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listAccounts
+      operationId: listAccounts
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.list_accounts
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/accounts/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getAccount
+      operationId: getAccount
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.get_account
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/finance-books:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listFinanceBooks
+      operationId: listFinanceBooks
+      parameters:
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.list_finance_books
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/finance-books/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getFinanceBook
+      operationId: getFinanceBook
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.get_finance_book
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/fiscal-years:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listFiscalYears
+      operationId: listFiscalYears
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.list_fiscal_years
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/fiscal-years/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getFiscalYear
+      operationId: getFiscalYear
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.get_fiscal_year
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/cost-centers:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listCostCenters
+      operationId: listCostCenters
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.list_cost_centers
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/cost-centers/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getCostCenter
+      operationId: getCostCenter
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.get_cost_center
+      x-public-operation: read
+      x-test-status: passed
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: extended-api
+        test: tests/integration/test_extended_api_runtime.py::test_extended_auth_system_resources_and_business_flows
   /api/v1/accounts/settings:
     get:
       tags:
@@ -12256,7 +12924,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FrappeResponse'
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
         '400': *id003
         '401': *id004
         '403': *id005
@@ -12272,12 +12945,66 @@ paths:
       x-test-evidence:
         suite: accounts-reconciliation
         test: tests/integration/test_accounts_reconciliation.py
-    put:
+  /api/v1/accounts/shareholders:
+    get:
       tags:
       - 'Module: Accounts'
       - Business routes
-      summary: updateAccountsSettings
-      operationId: updateAccountsSettings
+      summary: listShareholders
+      operationId: listShareholders
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.list_shareholders
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: createShareholder
+      operationId: createShareholder
       parameters:
       - *id011
       - *id013
@@ -12287,7 +13014,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FrappeResponse'
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
         '400': *id003
         '401': *id004
         '403': *id005
@@ -12296,7 +13028,332 @@ paths:
         '417': *id008
         '429': *id009
         '500': *id010
-      x-frappe-handler: letron_api.finance.banking.accounts_settings_update
+      x-frappe-handler: letron_api.finance.tt99_api.create_shareholder
+      x-public-operation: create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareholderWriteRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/shareholders/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getShareholder
+      operationId: getShareholder
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.get_shareholder
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    put:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: updateShareholder
+      operationId: updateShareholder
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.update_shareholder
+      x-public-operation: update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareholderUpdateRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/period-closing-vouchers:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: listPeriodClosingVouchers
+      operationId: listPeriodClosingVouchers
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: fiscal_year
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterListResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.list_period_closing_vouchers
+      x-public-operation: list
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: createPeriodClosingVoucher
+      operationId: createPeriodClosingVoucher
+      parameters:
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.create_period_closing_voucher
+      x-public-operation: create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PeriodClosingVoucherWriteRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/period-closing-vouchers/{name}:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getPeriodClosingVoucher
+      operationId: getPeriodClosingVoucher
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.get_period_closing_voucher
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+    put:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: updatePeriodClosingVoucher
+      operationId: updatePeriodClosingVoucher
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.update_period_closing_voucher
+      x-public-operation: update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PeriodClosingVoucherUpdateRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/period-closing-vouchers/{name}/submit:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: submitPeriodClosingVoucher
+      operationId: submitPeriodClosingVoucher
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.submit_period_closing_voucher
       x-public-operation: update
       requestBody:
         required: false
@@ -12308,8 +13365,57 @@ paths:
       x-test-status: not-tested
       x-test-level: docker-runtime
       x-test-evidence:
-        suite: accounts-reconciliation
-        test: tests/integration/test_accounts_reconciliation.py
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/period-closing-vouchers/{name}/cancel:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: cancelPeriodClosingVoucher
+      operationId: cancelPeriodClosingVoucher
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/MasterRecordResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.tt99_api.cancel_period_closing_voucher
+      x-public-operation: update
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
   /api/v1/assets/actions/{action}:
     post:
       tags:
@@ -14725,54 +15831,6 @@ components:
       - phone
       additionalProperties: true
       x-module: Contacts
-    CostCenter:
-      type: object
-      properties:
-        name:
-          type: string
-        sb0:
-          type: string
-        cost_center_name:
-          type: string
-        cost_center_number:
-          type: string
-        parent_cost_center:
-          type: string
-          x-frappe-target-doctype: Cost Center
-        company:
-          type: string
-          x-frappe-target-doctype: Company
-        cb0:
-          type: string
-        is_group:
-          type:
-          - boolean
-          - integer
-          minimum: 0
-          maximum: 1
-        lft:
-          type: integer
-          writeOnly: true
-        rgt:
-          type: integer
-          writeOnly: true
-        old_parent:
-          type: string
-          x-frappe-target-doctype: Cost Center
-          writeOnly: true
-        disabled:
-          type:
-          - boolean
-          - integer
-          minimum: 0
-          maximum: 1
-      required:
-      - company
-      - cost_center_name
-      - name
-      - parent_cost_center
-      additionalProperties: true
-      x-module: Accounts
     CRMNote:
       type: object
       properties:
@@ -29236,7 +30294,7 @@ components:
       required:
       - allocations
       additionalProperties: false
-    PurchaseOrchestrationRequest: &id172
+    PurchaseOrchestrationRequest: &id169
       type: object
       additionalProperties: false
       required:
@@ -29304,7 +30362,7 @@ components:
             minLength: 1
         justification:
           type: string
-    PurchaseOrchestrationResponse: &id173
+    PurchaseOrchestrationResponse: &id170
       type: object
       additionalProperties: true
       required:
@@ -29315,7 +30373,7 @@ components:
           type: string
         status:
           type: string
-    ConsolidationAdjustmentRequest: &id174
+    ConsolidationAdjustmentRequest: &id171
       type: object
       additionalProperties: false
       required:
@@ -29345,7 +30403,7 @@ components:
           minLength: 3
           maxLength: 80
           pattern: ^[A-Za-z0-9_.-]+$
-    ConsolidationAdjustmentCommandRequest: &id175
+    ConsolidationAdjustmentCommandRequest: &id172
       type: object
       additionalProperties: false
       required:
@@ -29354,7 +30412,7 @@ components:
         journal_entry:
           type: string
           minLength: 1
-    ConsolidationAdjustmentResponse: &id176
+    ConsolidationAdjustmentResponse: &id173
       type: object
       additionalProperties: true
       required:
@@ -29380,7 +30438,7 @@ components:
           items:
             type: object
             additionalProperties: true
-    ConsolidationPackageResponse: &id177
+    ConsolidationPackageResponse: &id174
       type: object
       additionalProperties: true
       required:
@@ -29451,6 +30509,254 @@ components:
           type: string
           enum:
           - native_journal_entry_on_holding_finance_book
+    MasterRecordResponse: &id175
+      type: object
+      additionalProperties: true
+    MasterListResponse: &id176
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - total
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        total:
+          type: integer
+          minimum: 0
+    ReportPackageCreateRequest: &id177
+      type: object
+      additionalProperties: false
+      required:
+      - company
+      - form_code
+      - from_date
+      - to_date
+      properties:
+        company:
+          type: string
+          minLength: 1
+        form_code:
+          type: string
+          enum:
+          - B01-DN
+          - B02-DN
+          - B03-DN
+          - B09-DN
+        from_date:
+          type: string
+          format: date
+        to_date:
+          type: string
+          format: date
+        comparative_from_date:
+          type: string
+          format: date
+        comparative_to_date:
+          type: string
+          format: date
+        finance_book:
+          type:
+          - string
+          - 'null'
+        consolidation_scope:
+          type:
+          - string
+          - object
+          - 'null'
+        accounting_inputs:
+          type: object
+          additionalProperties: true
+    ReportPackageUpdateRequest: &id178
+      type: object
+      additionalProperties: false
+      properties:
+        company:
+          type: string
+          minLength: 1
+        form_code:
+          type: string
+          enum:
+          - B01-DN
+          - B02-DN
+          - B03-DN
+          - B09-DN
+        from_date:
+          type: string
+          format: date
+        to_date:
+          type: string
+          format: date
+        comparative_from_date:
+          type: string
+          format: date
+        comparative_to_date:
+          type: string
+          format: date
+        finance_book:
+          type:
+          - string
+          - 'null'
+        consolidation_scope:
+          type:
+          - string
+          - object
+          - 'null'
+        accounting_inputs:
+          type: object
+          additionalProperties: true
+    ReportPackageRejectRequest: &id179
+      type: object
+      additionalProperties: false
+      required:
+      - reason
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+    ReportPackageResponse: &id180
+      type: object
+      additionalProperties: true
+      required:
+      - name
+      - company
+      - form_code
+      - status
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+        form_code:
+          type: string
+          enum:
+          - B01-DN
+          - B02-DN
+          - B03-DN
+          - B09-DN
+        status:
+          type: string
+          enum:
+          - Draft
+          - Review
+          - Closed
+          - Issued
+          - Rejected
+        validation:
+          type: object
+          additionalProperties: true
+        lines:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        sources:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    ReportPackageListResponse: &id181
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportPackageResponse'
+        total:
+          type: integer
+          minimum: 0
+    ShareholderWriteRequest: &id182
+      type: object
+      additionalProperties: false
+      required:
+      - title
+      - company
+      properties:
+        title:
+          type: string
+          minLength: 1
+        company:
+          type: string
+          minLength: 1
+        naming_series:
+          type: string
+    ShareholderUpdateRequest: &id183
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+          minLength: 1
+        company:
+          type: string
+          minLength: 1
+        naming_series:
+          type: string
+    PeriodClosingVoucherWriteRequest: &id184
+      type: object
+      additionalProperties: false
+      required:
+      - company
+      - fiscal_year
+      - period_start_date
+      - period_end_date
+      - closing_account_head
+      - remarks
+      properties:
+        transaction_date:
+          type: string
+          format: date
+        company:
+          type: string
+          minLength: 1
+        fiscal_year:
+          type: string
+          minLength: 1
+        period_start_date:
+          type: string
+          format: date
+        period_end_date:
+          type: string
+          format: date
+        closing_account_head:
+          type: string
+          minLength: 1
+        remarks:
+          type: string
+          minLength: 1
+    PeriodClosingVoucherUpdateRequest: &id185
+      type: object
+      additionalProperties: false
+      properties:
+        transaction_date:
+          type: string
+          format: date
+        company:
+          type: string
+          minLength: 1
+        fiscal_year:
+          type: string
+          minLength: 1
+        period_start_date:
+          type: string
+          format: date
+        period_end_date:
+          type: string
+          format: date
+        closing_account_head:
+          type: string
+          minLength: 1
+        remarks:
+          type: string
+          minLength: 1
     AddressWrite:
       type: object
       properties:
@@ -34794,124 +36100,6 @@ components:
       - name
       additionalProperties: true
       x-module: Contacts
-    CostCenterWrite:
-      type: object
-      properties:
-        name:
-          type: string
-        sb0:
-          type: string
-        cost_center_name:
-          type: string
-        cost_center_number:
-          type: string
-        parent_cost_center:
-          type: string
-          x-frappe-target-doctype: Cost Center
-        company:
-          type: string
-          x-frappe-target-doctype: Company
-        cb0:
-          type: string
-        is_group:
-          type:
-          - boolean
-          - integer
-          minimum: 0
-          maximum: 1
-        lft:
-          type: integer
-          writeOnly: true
-        rgt:
-          type: integer
-          writeOnly: true
-        old_parent:
-          type: string
-          x-frappe-target-doctype: Cost Center
-          writeOnly: true
-        disabled:
-          type:
-          - boolean
-          - integer
-          minimum: 0
-          maximum: 1
-        custom_letron_orchestration_id:
-          type: string
-        custom_lark_approval_status:
-          type: string
-      required:
-      - company
-      - cost_center_name
-      - parent_cost_center
-      additionalProperties: false
-      x-module: Accounts
-    CostCenterResponse:
-      type: object
-      properties:
-        name:
-          type: string
-        sb0:
-          type:
-          - string
-          - 'null'
-        cost_center_name:
-          type:
-          - string
-          - 'null'
-        cost_center_number:
-          type:
-          - string
-          - 'null'
-        parent_cost_center:
-          type:
-          - string
-          - 'null'
-          x-frappe-target-doctype: Cost Center
-        company:
-          type:
-          - string
-          - 'null'
-          x-frappe-target-doctype: Company
-        cb0:
-          type:
-          - string
-          - 'null'
-        is_group:
-          anyOf:
-          - type:
-            - boolean
-            - integer
-            minimum: 0
-            maximum: 1
-          - type: 'null'
-        lft:
-          type:
-          - integer
-          - 'null'
-          writeOnly: true
-        rgt:
-          type:
-          - integer
-          - 'null'
-          writeOnly: true
-        old_parent:
-          type:
-          - string
-          - 'null'
-          x-frappe-target-doctype: Cost Center
-          writeOnly: true
-        disabled:
-          anyOf:
-          - type:
-            - boolean
-            - integer
-            minimum: 0
-            maximum: 1
-          - type: 'null'
-      required:
-      - name
-      additionalProperties: true
-      x-module: Accounts
     CRMNoteWrite:
       type: object
       properties:
@@ -68057,19 +69245,434 @@ x-contract:
       operation_id: setStatementImportHeaderIndex
       handler: letron_api.finance.banking.statement_set_header_index
     - module: Accounts
+      resource: report-packages
+      method: GET
+      path: /api/v1/accounts/report-packages
+      operation: list
+      operation_id: listReportPackages
+      handler: letron_api.finance.tt99_api.list_report_packages
+      query_parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: form_code
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - B01-DN
+          - B02-DN
+          - B03-DN
+          - B09-DN
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from_date
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: to_date
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      response_schema: ReportPackageListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: GET
+      path: /api/v1/accounts/report-packages/{name}
+      operation: read
+      operation_id: getReportPackage
+      handler: letron_api.finance.tt99_api.get_report_package
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: POST
+      path: /api/v1/accounts/report-packages
+      operation: create
+      operation_id: createReportPackage
+      handler: letron_api.finance.tt99_api.create_report_package
+      request_schema: ReportPackageCreateRequest
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: PUT
+      path: /api/v1/accounts/report-packages/{name}
+      operation: update
+      operation_id: updateReportPackage
+      handler: letron_api.finance.tt99_api.update_report_package
+      request_schema: ReportPackageUpdateRequest
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: POST
+      path: /api/v1/accounts/report-packages/{name}/review
+      operation: update
+      operation_id: reviewReportPackage
+      handler: letron_api.finance.tt99_api.review_report_package
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: POST
+      path: /api/v1/accounts/report-packages/{name}/close
+      operation: update
+      operation_id: closeReportPackage
+      handler: letron_api.finance.tt99_api.close_report_package
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: POST
+      path: /api/v1/accounts/report-packages/{name}/issue
+      operation: update
+      operation_id: issueReportPackage
+      handler: letron_api.finance.tt99_api.issue_report_package
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: report-packages
+      method: POST
+      path: /api/v1/accounts/report-packages/{name}/reject
+      operation: update
+      operation_id: rejectReportPackage
+      handler: letron_api.finance.tt99_api.reject_report_package
+      request_schema: ReportPackageRejectRequest
+      response_schema: ReportPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: companies
+      method: GET
+      path: /api/v1/accounts/companies
+      operation: list
+      operation_id: listCompanies
+      handler: letron_api.finance.tt99_api.list_companies
+      query_parameters:
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: companies
+      method: GET
+      path: /api/v1/accounts/companies/{name}
+      operation: read
+      operation_id: getCompany
+      handler: letron_api.finance.tt99_api.get_company
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: accounts
+      method: GET
+      path: /api/v1/accounts/accounts
+      operation: list
+      operation_id: listAccounts
+      handler: letron_api.finance.tt99_api.list_accounts
+      query_parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: accounts
+      method: GET
+      path: /api/v1/accounts/accounts/{name}
+      operation: read
+      operation_id: getAccount
+      handler: letron_api.finance.tt99_api.get_account
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: finance-books
+      method: GET
+      path: /api/v1/accounts/finance-books
+      operation: list
+      operation_id: listFinanceBooks
+      handler: letron_api.finance.tt99_api.list_finance_books
+      query_parameters:
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: finance-books
+      method: GET
+      path: /api/v1/accounts/finance-books/{name}
+      operation: read
+      operation_id: getFinanceBook
+      handler: letron_api.finance.tt99_api.get_finance_book
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: fiscal-years
+      method: GET
+      path: /api/v1/accounts/fiscal-years
+      operation: list
+      operation_id: listFiscalYears
+      handler: letron_api.finance.tt99_api.list_fiscal_years
+      query_parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: fiscal-years
+      method: GET
+      path: /api/v1/accounts/fiscal-years/{name}
+      operation: read
+      operation_id: getFiscalYear
+      handler: letron_api.finance.tt99_api.get_fiscal_year
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: cost-centers
+      method: GET
+      path: /api/v1/accounts/cost-centers
+      operation: list
+      operation_id: listCostCenters
+      handler: letron_api.finance.tt99_api.list_cost_centers
+      query_parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: cost-centers
+      method: GET
+      path: /api/v1/accounts/cost-centers/{name}
+      operation: read
+      operation_id: getCostCenter
+      handler: letron_api.finance.tt99_api.get_cost_center
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
       resource: settings
       method: GET
       path: /api/v1/accounts/settings
       operation: read
       operation_id: getAccountsSettings
       handler: letron_api.finance.banking.accounts_settings
+      response_schema: MasterRecordResponse
+      response_envelope: message
     - module: Accounts
-      resource: settings
+      resource: shareholders
+      method: GET
+      path: /api/v1/accounts/shareholders
+      operation: list
+      operation_id: listShareholders
+      handler: letron_api.finance.tt99_api.list_shareholders
+      query_parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: shareholders
+      method: GET
+      path: /api/v1/accounts/shareholders/{name}
+      operation: read
+      operation_id: getShareholder
+      handler: letron_api.finance.tt99_api.get_shareholder
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: shareholders
+      method: POST
+      path: /api/v1/accounts/shareholders
+      operation: create
+      operation_id: createShareholder
+      handler: letron_api.finance.tt99_api.create_shareholder
+      request_schema: ShareholderWriteRequest
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: shareholders
       method: PUT
-      path: /api/v1/accounts/settings
+      path: /api/v1/accounts/shareholders/{name}
       operation: update
-      operation_id: updateAccountsSettings
-      handler: letron_api.finance.banking.accounts_settings_update
+      operation_id: updateShareholder
+      handler: letron_api.finance.tt99_api.update_shareholder
+      request_schema: ShareholderUpdateRequest
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: period-closing-vouchers
+      method: GET
+      path: /api/v1/accounts/period-closing-vouchers
+      operation: list
+      operation_id: listPeriodClosingVouchers
+      handler: letron_api.finance.tt99_api.list_period_closing_vouchers
+      query_parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: fiscal_year
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit_page_length
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      - name: limit_start
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      response_schema: MasterListResponse
+      response_envelope: message
+    - module: Accounts
+      resource: period-closing-vouchers
+      method: GET
+      path: /api/v1/accounts/period-closing-vouchers/{name}
+      operation: read
+      operation_id: getPeriodClosingVoucher
+      handler: letron_api.finance.tt99_api.get_period_closing_voucher
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: period-closing-vouchers
+      method: POST
+      path: /api/v1/accounts/period-closing-vouchers
+      operation: create
+      operation_id: createPeriodClosingVoucher
+      handler: letron_api.finance.tt99_api.create_period_closing_voucher
+      request_schema: PeriodClosingVoucherWriteRequest
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: period-closing-vouchers
+      method: PUT
+      path: /api/v1/accounts/period-closing-vouchers/{name}
+      operation: update
+      operation_id: updatePeriodClosingVoucher
+      handler: letron_api.finance.tt99_api.update_period_closing_voucher
+      request_schema: PeriodClosingVoucherUpdateRequest
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: period-closing-vouchers
+      method: POST
+      path: /api/v1/accounts/period-closing-vouchers/{name}/submit
+      operation: update
+      operation_id: submitPeriodClosingVoucher
+      handler: letron_api.finance.tt99_api.submit_period_closing_voucher
+      response_schema: MasterRecordResponse
+      response_envelope: message
+    - module: Accounts
+      resource: period-closing-vouchers
+      method: POST
+      path: /api/v1/accounts/period-closing-vouchers/{name}/cancel
+      operation: update
+      operation_id: cancelPeriodClosingVoucher
+      handler: letron_api.finance.tt99_api.cancel_period_closing_voucher
+      response_schema: MasterRecordResponse
+      response_envelope: message
     - module: Assets
       resource: actions
       method: POST
@@ -68117,12 +69720,23 @@ x-contract:
         purchase_order_item:
           type: string
     generated_schemas:
-      PurchaseOrchestrationRequest: *id172
-      PurchaseOrchestrationResponse: *id173
-      ConsolidationAdjustmentRequest: *id174
-      ConsolidationAdjustmentCommandRequest: *id175
-      ConsolidationAdjustmentResponse: *id176
-      ConsolidationPackageResponse: *id177
+      PurchaseOrchestrationRequest: *id169
+      PurchaseOrchestrationResponse: *id170
+      ConsolidationAdjustmentRequest: *id171
+      ConsolidationAdjustmentCommandRequest: *id172
+      ConsolidationAdjustmentResponse: *id173
+      ConsolidationPackageResponse: *id174
+      MasterRecordResponse: *id175
+      MasterListResponse: *id176
+      ReportPackageCreateRequest: *id177
+      ReportPackageUpdateRequest: *id178
+      ReportPackageRejectRequest: *id179
+      ReportPackageResponse: *id180
+      ReportPackageListResponse: *id181
+      ShareholderWriteRequest: *id182
+      ShareholderUpdateRequest: *id183
+      PeriodClosingVoucherWriteRequest: *id184
+      PeriodClosingVoucherUpdateRequest: *id185
     include_methods:
     - letron_api.control.api.health
     - letron_api.control.api.runtime_info
@@ -68182,8 +69796,6 @@ x-contract:
       path: /api/v1/accounts/bank-accounts
     - doctype: Mode of Payment
       path: /api/v1/accounts/modes-of-payment
-    - doctype: Cost Center
-      path: /api/v1/accounts/cost-centers
     - doctype: Journal Entry
       path: /api/v1/accounts/journal-entries
     - doctype: Payment Request
@@ -68250,9 +69862,9 @@ x-capabilities:
     delivery: durable-outbox
     source_of_truth: false
 x-acceptance-summary:
-  passed: 215
+  passed: 211
   partial: 0
-  not-tested: 111
+  not-tested: 137
   blocked: 0
 x-module: null
 x-module-index:
@@ -68777,6 +70389,9 @@ x-module-index:
   - Letron Event Outbox
   - Letron SSO Audit Log
   - Letron SSO Identity
+  - Letron VAS Report Note
+  - Letron VAS Report Package
+  - Letron VAS Report Source
   Maintenance:
   - Maintenance Schedule
   - Maintenance Schedule Detail

@@ -2,7 +2,13 @@ import json
 from pathlib import Path
 
 import pytest
-from letron_api.contract_runtime import contract_metadata, public_route_maps, validate_request, validate_response
+from letron_api.contract_runtime import (
+    contract_metadata,
+    public_custom_routes,
+    public_route_maps,
+    validate_request,
+    validate_response,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -50,6 +56,15 @@ def test_generated_registry_drives_supplier_quotation_actions():
     assert routes[("crm", "supplier-quotations")] == "Supplier Quotation"
     assert document_actions[("crm", "supplier-quotations")] == {"submit", "cancel"}
     assert custom_actions[("crm", "supplier-quotations", "make-purchase-order")] == "letron_api.control.api.make_purchase_order"
+
+
+def test_generated_registry_drives_tt99_custom_route_dispatch():
+    routes = public_custom_routes()
+    route_keys = {(item["method"], item["path"]) for item in routes}
+    assert ("POST", "/api/v1/accounts/report-packages/{name}/review") in route_keys
+    assert ("POST", "/api/v1/accounts/period-closing-vouchers/{name}/submit") in route_keys
+    assert ("GET", "/api/v1/accounts/companies") in route_keys
+    assert all("handler" in item for item in routes)
 
 
 def test_generated_contract_has_registry_metadata():

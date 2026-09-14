@@ -6,8 +6,8 @@ from typing import Any, cast
 
 import frappe
 
+from letron_api.contract_runtime import public_custom_routes, public_route_maps
 from letron_api.control.policy import POLICY_DOCTYPES
-from letron_api.contract_runtime import public_route_maps
 from letron_api.infrastructure.frappe_compat import install_scheduler_compatibility
 
 install_scheduler_compatibility()
@@ -31,6 +31,7 @@ required_apps = ["frappe", "erpnext"]
 _ROUTE_CACHE: dict[tuple[str, str], str] = {}
 _ROUTE_CACHE_LOCK = Lock()
 PUBLIC_RESOURCE_ROUTES, GENERATED_DOCUMENT_ACTIONS, GENERATED_CUSTOM_ACTIONS = public_route_maps()
+GENERATED_CUSTOM_ROUTES = public_custom_routes()
 # Shared by route authorization and policy materialization. Dependencies are
 # intentionally read-only and never imply create/write/delete permissions.
 PUBLIC_PERMISSION_DEPENDENCIES = {
@@ -73,8 +74,6 @@ def _virtual_banking_target(parts: list[str]) -> str | None:
         return method
     if len(parts) == 4 and parts[2:4] == ["accounts", "statement-imports"]:
         return "letron_api.finance.banking.statement_imports" if frappe.local.request.method == "GET" else "letron_api.finance.banking.statement_import_create"
-    if len(parts) == 4 and parts[2:4] == ["accounts", "settings"]:
-        return "letron_api.finance.banking.accounts_settings" if frappe.local.request.method == "GET" else "letron_api.finance.banking.accounts_settings_update"
     if len(parts) == 5:
         if parts[2:4] == ["accounts", "statement-imports"] and parts[4] == "upload":
             return "letron_api.finance.banking.statement_import_upload"
@@ -119,6 +118,30 @@ def _virtual_attachment_target(parts: list[str]) -> str | None:
     return None
 
 
+def _virtual_custom_route_target(parts: list[str]) -> str | None:
+    """Resolve a generated non-DocType route and expose its path arguments."""
+
+    actual = ["api", "v1", *parts[2:]]
+    for route in GENERATED_CUSTOM_ROUTES:
+        if route["method"] != frappe.local.request.method.upper():
+            continue
+        expected = route["path"].strip("/").split("/")
+        if len(expected) != len(actual):
+            continue
+        arguments: dict[str, str] = {}
+        matched = True
+        for expected_part, actual_part in zip(expected, actual, strict=True):
+            if expected_part.startswith("{") and expected_part.endswith("}"):
+                arguments[expected_part[1:-1]] = actual_part
+            elif expected_part != actual_part:
+                matched = False
+                break
+        if matched:
+            frappe.local.form_dict.update(arguments)
+            return route["handler"]
+    return None
+
+
 
 def rewrite_public_routes() -> None:
     """Rewrite public business aliases to native Frappe resource routes."""
@@ -146,6 +169,14 @@ def rewrite_public_routes() -> None:
             frappe.throw("Authentication required", exc=frappe.AuthenticationError)
         request.environ["PATH_INFO"] = f"/api/method/{target_method}"
         request.__dict__["path"] = f"/api/method/{target_method}"
+        return
+    target_method = _virtual_custom_route_target(parts)
+    if target_method:
+        if frappe.session.user in {"Guest", ""}:
+            frappe.throw("Authentication required", exc=frappe.AuthenticationError)
+        target = f"/api/method/{target_method}"
+        request.environ["PATH_INFO"] = target
+        request.__dict__["path"] = target
         return
     module_slug, doctype_slug = parts[2:4]
     if not module_slug or not doctype_slug:

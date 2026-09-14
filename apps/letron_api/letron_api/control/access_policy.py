@@ -7,8 +7,8 @@ from typing import Any
 
 import frappe
 
-from letron_api.hooks import PUBLIC_PERMISSION_DEPENDENCIES
 from letron_api.contract_runtime import contract_metadata, public_route_maps
+from letron_api.hooks import PUBLIC_PERMISSION_DEPENDENCIES
 
 RESOURCE_DOCTYPES = {
     "accounts/purchase-invoices": "Purchase Invoice",
@@ -29,10 +29,18 @@ POLICY_RESOURCE_DOCTYPES = {
     "accounts/bank-reconciliation": "Bank Transaction",
     "accounts/reports": "GL Entry",
     "accounts/statement-imports": "Bank Statement Import Log",
-    "accounts/settings": "Accounts Settings",
     "assets/actions": "Asset",
     "assets/dashboard": "Asset",
     "assets/reports": "Asset",
+    "accounts/report-packages": "Letron VAS Report Package",
+    "accounts/companies": "Company",
+    "accounts/accounts": "Account",
+    "accounts/finance-books": "Finance Book",
+    "accounts/fiscal-years": "Fiscal Year",
+    "accounts/cost-centers": "Cost Center",
+    "accounts/settings": "Accounts Settings",
+    "accounts/shareholders": "Shareholder",
+    "accounts/period-closing-vouchers": "Period Closing Voucher",
 }
 
 POLICY_REPORTS = {
@@ -89,9 +97,9 @@ def publish() -> dict[str, Any]:
     raw = frappe.local.request.get_data(as_text=True)
     try:
         payload = json.loads(raw)
-    except json.JSONDecodeError as exc:
+    except json.JSONDecodeError:
         frappe.throw("Invalid access policy JSON", exc=frappe.ValidationError)
-        raise exc
+        raise
     policy = payload.get("policy")
     if not isinstance(policy, dict) or policy.get("schemaVersion") != 1:
         frappe.throw("Unsupported access policy", exc=frappe.ValidationError)
