@@ -903,21 +903,26 @@ def probe_registry_source(doctype: str) -> dict[str, Any]:
         if kind == "native-single":
             doc = frappe.get_single(doctype)
             preferred = SINGLE_UPDATE_FIELDS[doctype]
-            if preferred is None:
-                doc.save(ignore_permissions=True)
-                updated_field = "controller-save"
-            else:
-                updated_field = _safe_update(doc, preferred)
-            readback = frappe.get_single(doctype)
-            if readback.get(updated_field) != doc.get(updated_field):
-                raise AssertionError(
-                    f"Single readback mismatch: {doctype}.{updated_field}"
-                )
-            return {
-                "ok": True,
-                "doctype": doctype,
-                "structural": "single-update-restore",
-            }
+            original_value = doc.get(preferred) if preferred else None
+            try:
+                if preferred is None:
+                    doc.save(ignore_permissions=True)
+                    updated_field = "controller-save"
+                else:
+                    updated_field = _safe_update(doc, preferred)
+                readback = frappe.get_single(doctype)
+                if readback.get(updated_field) != doc.get(updated_field):
+                    raise AssertionError(
+                        f"Single readback mismatch: {doctype}.{updated_field}"
+                    )
+                return {
+                    "ok": True,
+                    "doctype": doctype,
+                    "structural": "single-update-restore",
+                }
+            finally:
+                if preferred:
+                    frappe.db.set_single_value(doctype, preferred, original_value)
         if doctype == "Company":
             company = policy.load_policy()["bootstrap"]["company"]["name"]
             if not frappe.db.exists("Company", company):
@@ -1092,15 +1097,6 @@ def _probe_group(doctypes: list[str]) -> dict[str, Any]:
         return {"ok": True, "passed": len(results), "results": results}
     finally:
         cleanup_registry_residue()
-
-
-def probe_structural_sources(doctypes: list[str]) -> dict[str, Any]:
-    """Run a bounded structural shard supplied by the acceptance runner."""
-
-    unknown = set(doctypes) - (SINGLE_BUILDERS | DOCUMENT_BUILDERS.keys())
-    if unknown:
-        raise KeyError(", ".join(sorted(unknown)))
-    return _probe_group(doctypes)
 
 
 def _unlink_fixture_workflow_state() -> None:

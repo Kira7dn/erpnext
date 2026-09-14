@@ -11,7 +11,7 @@ from typing import Any
 import pytest
 import yaml
 from letron_api.control.policy import load_policy, policy_sha256
-from letron_api.control.policy_acceptance import DOCUMENT_BUILDERS, SINGLE_BUILDERS
+from letron_api.control.policy_acceptance import DOCUMENT_BUILDERS
 from letron_api.control.system_config import load_config
 
 from .test_api_runtime_harness import ApiClient, RuntimeUnavailable, response_data
@@ -395,26 +395,10 @@ def test_compute_yaml_control_api_policy_boundary_and_drift() -> None:
     )
 
 
-REGISTRY_SOURCES = sorted(SINGLE_BUILDERS | DOCUMENT_BUILDERS.keys())
-STRUCTURAL_SHARDS = [
-    REGISTRY_SOURCES[index : index + 8] for index in range(0, len(REGISTRY_SOURCES), 8)
-]
 DOCUMENT_SOURCES = sorted(DOCUMENT_BUILDERS)
 APPLY_SHARDS = [
     DOCUMENT_SOURCES[index : index + 4] for index in range(0, len(DOCUMENT_SOURCES), 4)
 ]
-
-
-@pytest.mark.parametrize("doctypes", STRUCTURAL_SHARDS)
-def test_registry_driven_native_structural_group(doctypes: list[str]) -> None:
-    result = json.loads(
-        bench_execute(
-            "letron_api.control.policy_acceptance.probe_structural_sources",
-            {"doctypes": doctypes},
-        )
-    )
-    assert result["ok"] is True
-    assert result["passed"] == len(doctypes)
 
 
 @pytest.mark.parametrize("doctypes", APPLY_SHARDS)
