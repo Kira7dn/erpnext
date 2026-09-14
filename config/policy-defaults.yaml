@@ -523,7 +523,7 @@ documents:
     cust_master_name: Customer Name
     customer_group: null
     deliver_secondary_items: 0
-    dn_required: Yes
+    dn_required: 'Yes'
     dont_reserve_sales_order_qty_on_sales_return: 0
     editable_bundle_item_rates: 0
     editable_price_list_rate: 0
@@ -539,7 +539,7 @@ documents:
     sales_update_frequency: Daily
     selling_price_list: null
     set_zero_rate_for_expired_batch: 0
-    so_required: Yes
+    so_required: 'Yes'
     territory: null
     use_legacy_js_reactivity: 0
     validate_selling_price: 0
