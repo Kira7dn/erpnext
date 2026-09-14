@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
+from typing import cast
 
 import yaml
 from letron_api.control.holding_finance import _expected_tax_account_code, _parent_code
@@ -16,8 +17,8 @@ from letron_api.finance.vas_reports import (
     _is_balanced_intercompany_match,
     _mapped_abs_amount,
     _mapped_amount,
-    _note_snapshot,
     _native_cash_flow_events,
+    _note_snapshot,
     _parse_intercompany_marker,
     _render_intercompany_marker,
     elimination_schedule,
@@ -455,7 +456,7 @@ def test_native_finance_book_readback_does_not_double_count_blank_book_rows(
             "Consolidation Adjustment": ({"111": 5.0, "112": 7.0}, {"111": 1.0}),
             "": ({"111": 2.0}, {"111": 0.5}),
         }
-        balances, opening = values[finance_book]
+        balances, opening = values[cast(str, finance_book)]
         return balances, {"currency": "VND", "opening_balances": opening}
 
     monkeypatch.setattr(vas_reports, "_frappe", lambda: FakeFrappe())
@@ -1096,8 +1097,9 @@ def test_consolidation_adjustment_allows_native_ar_ap_elimination_without_partie
     )
 
     assert result["journal_entry"] == "ACC-JV-TEST"
-    assert frappe.document.payload["party_not_required"] == 1
-    assert len(frappe.document.payload["accounts"]) == 2
+    document = cast(FakeDoc, frappe.document)
+    assert document.payload["party_not_required"] == 1
+    assert len(document.payload["accounts"]) == 2
 
 
 def test_vas_reporting_policy_declares_vas24_cash_flow_contract() -> None:
@@ -1132,15 +1134,15 @@ def test_native_cash_flow_account_type_query_receives_company_filter(monkeypatch
         _dict = FrappeDict
 
     native = ModuleType("erpnext.accounts.report.cash_flow.cash_flow")
-    native.get_period_list = lambda *args, **kwargs: [{"to_date": "2026-12-31"}]
-    native.get_start_date = lambda period, accumulated_values, company: "2026-01-01"
+    setattr(native, "get_period_list", lambda *args, **kwargs: [{"to_date": "2026-12-31"}])  # noqa: B010
+    setattr(native, "get_start_date", lambda period, accumulated_values, company: "2026-01-01")  # noqa: B010
 
     def fake_account_type_data(company, filters):
         captured["company_argument"] = company
         captured["filters"] = dict(filters)
         return 10
 
-    native.get_account_type_based_gl_data = fake_account_type_data
+    setattr(native, "get_account_type_based_gl_data", fake_account_type_data)  # noqa: B010
     monkeypatch.setitem(sys.modules, native.__name__, native)
     monkeypatch.setattr(vas_reports, "_frappe", lambda: FakeFrappe())
 
@@ -1150,7 +1152,8 @@ def test_native_cash_flow_account_type_query_receives_company_filter(monkeypatch
 
     assert result == -10
     assert captured["company_argument"] == "LeSC"
-    assert captured["filters"]["company"] == "LeSC"
+    filters = cast(dict[str, str], captured["filters"])
+    assert filters["company"] == "LeSC"
 
 
 def test_note_snapshot_resolves_native_statement_values_without_inventing_text() -> None:
