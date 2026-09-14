@@ -1,11 +1,7 @@
-import { call, data, prefix, assertName, today, type MaterialRequestWrite } from "./fe-gateway";
+import { call, data, prefix, assertName, policyPurchaseContext, today, type MaterialRequestWrite } from "./fe-gateway";
 
 async function main() {
-  const company = process.env.LETRON_TEST_COMPANY ?? "Letron Việt Nam";
-  const itemList = data(await call("listItem"));
-  const item = process.env.LETRON_TEST_ITEM ?? String((Array.isArray(itemList) ? itemList[0] : undefined)?.name ?? "");
-  if (!item) throw new Error("no Item available; set LETRON_TEST_ITEM");
-  const warehouse = process.env.LETRON_TEST_WAREHOUSE ?? "Cửa hàng - LTVN";
+  const { company, warehouse, item } = await policyPurchaseContext();
   const payload: MaterialRequestWrite = { naming_series: "MAT-REQ-.YYYY.-", material_request_type: "Purchase", company, transaction_date: today, items: [{ item_code: item, qty: 1, schedule_date: today, uom: "Nos", warehouse }] };
   const created = data(await call("createMaterialRequest", undefined, payload));
   const name = assertName(created);

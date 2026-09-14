@@ -371,9 +371,19 @@ def _master_list(doctype: str, company: str | None = None, extra: dict[str, Any]
     return _list(doctype, filters)
 
 
+def _policy_company_names() -> list[str]:
+    bootstrap = load_policy().get("bootstrap", {})
+    configured = bootstrap.get("companies", [bootstrap.get("company", {})])
+    return sorted(
+        str(item.get("name"))
+        for item in configured
+        if isinstance(item, dict) and item.get("name")
+    )
+
+
 @frappe.whitelist()
 def list_companies() -> dict[str, Any]:
-    return _master_list("Company")
+    return _master_list("Company", extra={"name": ["in", _policy_company_names()]})
 
 
 @frappe.whitelist()

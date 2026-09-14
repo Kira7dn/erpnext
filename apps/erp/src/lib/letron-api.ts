@@ -25,6 +25,10 @@ export type BankAccount = {
 type ApiResponse<T> = { data?: T; message?: unknown };
 
 export type AccountingResource =
+  | "companies"
+  | "accounts"
+  | "finance-books"
+  | "fiscal-years"
   | "banks"
   | "bank-accounts"
   | "bank-transactions"
@@ -64,6 +68,10 @@ export type AssetReportKey =
   | "asset-activity";
 
 export const ACCOUNTING_RESOURCES = [
+  "companies",
+  "accounts",
+  "finance-books",
+  "fiscal-years",
   "banks",
   "bank-accounts",
   "bank-transactions",

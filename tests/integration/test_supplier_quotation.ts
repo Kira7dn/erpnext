@@ -1,12 +1,8 @@
-import { call, data, prefix, assertName, today, type RequestforQuotationWrite, type SupplierQuotationWrite } from "./fe-gateway";
+import { call, data, prefix, assertName, policyPurchaseContext, today, type RequestforQuotationWrite, type SupplierQuotationWrite } from "./fe-gateway";
 
 async function main() {
-  const company = process.env.LETRON_TEST_COMPANY ?? "Letron Việt Nam";
+  const { company, warehouse, item } = await policyPurchaseContext();
   const supplier = process.env.LETRON_TEST_SUPPLIER ?? "Link Strategy";
-  const itemList = data(await call("listItem"));
-  const item = process.env.LETRON_TEST_ITEM ?? String((Array.isArray(itemList) ? itemList[0] : undefined)?.name ?? "");
-  if (!item) throw new Error("no Item available; set LETRON_TEST_ITEM");
-  const warehouse = process.env.LETRON_TEST_WAREHOUSE ?? "Cửa hàng - LTVN";
   const mr = data(await call("createMaterialRequest", undefined, { naming_series: "MAT-REQ-.YYYY.-", material_request_type: "Purchase", company, transaction_date: today, items: [{ item_code: item, qty: 1, schedule_date: today, uom: "Nos", warehouse }] }));
   const mrName = assertName(mr);
   const mrItemName = String((mr.items as Array<Record<string, unknown>> | undefined)?.[0]?.name ?? "");

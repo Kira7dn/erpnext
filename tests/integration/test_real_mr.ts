@@ -35,7 +35,15 @@ function object(value: Json): Record<string, unknown> {
 function apiData(value: Json): Json {
   const row = object(value);
   if ("data" in row) return row.data as Json;
+  if ("message" in row) return row.message as Json;
   throw new Error(`API response envelope is missing data: ${JSON.stringify(value).slice(0, 1000)}`);
+}
+
+function apiItems(value: Json): Record<string, unknown>[] {
+  const data = apiData(value);
+  if (Array.isArray(data)) return data.map((row) => object(row as Json));
+  const items = object(data).items;
+  return Array.isArray(items) ? items.map((row) => object(row as Json)) : [];
 }
 
 function text(value: unknown): string {
@@ -350,7 +358,7 @@ async function ensureTestItem(auth: { Cookie: string }): Promise<void> {
   step(`test item created ${item2}`);
 }
 
-async function createAppAuth(apiKey: string, app: "purchase"): Promise<{ Cookie: string }> {
+async function createAppAuth(apiKey: string, app: "accounts" | "purchase"): Promise<{ Cookie: string }> {
   const session = await request(`${portalBaseUrl}/api/internal/test-session`, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}` },
@@ -362,16 +370,25 @@ async function createAppAuth(apiKey: string, app: "purchase"): Promise<{ Cookie:
   return { Cookie: `__Host-letron_${app}_session=${appSession}` };
 }
 
-async function resolvePurchaseContext(purchaseAuth: { Cookie: string }, apiKey: string): Promise<{ company: string; warehouse: string }> {
+async function resolvePurchaseContext(purchaseAuth: { Cookie: string }, accountsAuth: { Cookie: string }): Promise<{ company: string; warehouse: string }> {
   step("resolve Company and Warehouse from current Gateway state");
+  const companies = await request(`${erpBaseUrl}/api/accounting/companies?limit_page_length=200`, { headers: accountsAuth });
+  if (companies.status !== 200) throw new Error(`company lookup failed (${companies.status}): ${companies.raw}`);
+  const companyRows = apiItems(companies.body);
+  const policyCompanies = new Set(
+    companyRows
+      .map((row) => text(row.name ?? row.company_name))
+      .filter(Boolean),
+  );
   const warehouseFields = encodeURIComponent(JSON.stringify(["name", "company", "is_group"]));
   const warehouses = await request(`${erpBaseUrl}/api/stock/warehouses?fields=${warehouseFields}&limit_page_length=100`, { headers: purchaseAuth });
   if (warehouses.status !== 200) throw new Error(`warehouse lookup failed (${warehouses.status}): ${warehouses.raw}`);
-  const warehouseRows = apiData(warehouses.body);
-  const warehouseRow = (Array.isArray(warehouseRows) ? warehouseRows : [warehouseRows]).map((row) => object(row as Json)).find((row) => text(row.company) && Number(row.is_group ?? 0) === 0);
+  const warehouseRows = apiItems(warehouses.body);
+  const warehouseRow = warehouseRows
+    .find((row) => policyCompanies.has(text(row.company)) && Number(row.is_group ?? 0) === 0);
   const company = text(warehouseRow?.company);
   const warehouse = text(warehouseRow?.name);
-  if (!company || !warehouse) throw new Error(`policy did not expose a transaction Company/Warehouse: ${warehouses.raw}`);
+  if (!company || !warehouse) throw new Error(`policy did not expose a transaction Company/Warehouse: companies=${JSON.stringify([...policyCompanies])} warehouses=${warehouses.raw}`);
   return { company, warehouse };
 }
 
@@ -381,12 +398,13 @@ const suppliers = [supplier1, ...(supplier2 && supplier2 !== supplier1 ? [suppli
 const apiKey = await env("LETRON_INTERNAL_API_SECRET");
 step("create authenticated purchase test session");
 const auth = await createAppAuth(apiKey, "purchase");
+const accountsAuth = await createAppAuth(apiKey, "accounts");
 step("purchase test session ready");
 
 for (const supplier of suppliers) await ensureSupplier(auth, supplier);
 await ensureTestItem(auth);
 
-const { company, warehouse } = await resolvePurchaseContext(auth, apiKey);
+const { company, warehouse } = await resolvePurchaseContext(auth, accountsAuth);
 step(`purchase context ready company=${company} warehouse=${warehouse}`);
 
 const today = new Date();

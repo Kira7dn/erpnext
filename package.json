@@ -8,6 +8,6 @@
     "type": "npm --prefix apps/auth-server run typecheck && npm --prefix apps/erp run typecheck && npm --prefix apps/auth-server exec -- tsc --noEmit -p tests/tsconfig.json && uv run ty check --exclude apps/frappe/ --exclude apps/erpnext/ --exclude apps/lark-bot-official/ --exclude apps/lark-bot/",
     "contracttest": "npm --prefix apps/auth-server exec -- tsx tests/unit/test_contract.ts",
     "test:purchase:dev": "npm --prefix apps/auth-server exec -- tsx --tsconfig apps/erp/tsconfig.json tests/integration/test_real_mr.ts",
-    "test:purchase": "npm --prefix apps/auth-server exec -- tsx tests/integration/test_real_production.ts"
+    "test:purchase": "npm --prefix apps/auth-server exec -- tsx --tsconfig apps/erp/tsconfig.json tests/integration/test_real_production.ts"
   }
 }

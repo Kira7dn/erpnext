@@ -31,7 +31,7 @@ function configured(name: string): string {
 }
 
 export const prefix = `FE-API-${randomUUID().slice(0, 8).toUpperCase()}`;
-export const today = new Date().toISOString().slice(0, 10);
+export const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" }).format(new Date());
 export const gatewayBaseUrl = `${configured("LETRON_AUTH_BASE_URL").replace(/\/$/, "")}/api/gateway`;
 
 function contract(operation: string): Contract {
@@ -77,6 +77,27 @@ export async function call<T extends Json = Json>(
 export function data<T extends Json = Json>(response: T): Json {
   const value = response.data ?? response.message;
   return (value && typeof value === "object" ? value : response) as Json;
+}
+
+export function rows(response: Json): Record<string, unknown>[] {
+  const value = data(response);
+  if (Array.isArray(value)) return value.filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object" && !Array.isArray(item)));
+  const items = value.items;
+  return Array.isArray(items) ? items.filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object" && !Array.isArray(item))) : [];
+}
+
+export async function policyPurchaseContext(): Promise<{ company: string; warehouse: string; item: string }> {
+  const companies = rows(await call("listCompanies", "?limit_page_length=200"));
+  const policyCompanies = new Set(companies.map((row) => String(row.name ?? row.company_name ?? "")).filter(Boolean));
+  const warehouses = rows(await call("listWarehouse", "?fields=%5B%22name%22%2C%22company%22%2C%22is_group%22%5D&limit_page_length=200"));
+  const warehouse = warehouses.find((row) => policyCompanies.has(String(row.company ?? "")) && Number(row.is_group ?? 0) === 0);
+  const company = String(warehouse?.company ?? "");
+  const warehouseName = String(warehouse?.name ?? "");
+  if (!company || !warehouseName) throw new Error(`policy did not expose a transaction Company/Warehouse: companies=${JSON.stringify([...policyCompanies])}`);
+  const items = rows(await call("listItem", "?limit_page_length=200"));
+  const item = String(items.find((row) => row.name)?.name ?? "");
+  if (!item) throw new Error(`policy company ${company} has no usable Item`);
+  return { company, warehouse: warehouseName, item };
 }
 
 export function assertName(response: Json, expected?: string): string {
