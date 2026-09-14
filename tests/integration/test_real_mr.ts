@@ -277,13 +277,29 @@ async function ensureSupplier(auth: { Cookie: string }, supplier: string): Promi
     return text(item.name) === supplier || text(item.supplier_name) === supplier;
   });
   if (exists) {
-    step(`supplier ${supplier}: already exists`);
+    const detail = await request(`${erpBaseUrl}/api/purchase/suppliers/${encodeURIComponent(supplier)}`, { headers: auth });
+    if (detail.status !== 200) throw new Error(`supplier ${supplier} read failed (${detail.status}): ${detail.raw}`);
+    const detailRow = object(apiData(detail.body));
+    if (!text(detailRow.email_id)) {
+      const updated = await request(`${erpBaseUrl}/api/purchase/suppliers/${encodeURIComponent(supplier)}`, {
+        method: "PUT",
+        headers: auth,
+        body: JSON.stringify({ supplier_name: supplier, supplier_type: text(detailRow.supplier_type) || "Company", email_id: supplierEmail }),
+      });
+      if (updated.status < 200 || updated.status >= 300) throw new Error(`supplier ${supplier} email update failed (${updated.status}): ${updated.raw}`);
+      step(`supplier ${supplier}: email configured`);
+    } else {
+      step(`supplier ${supplier}: already exists`);
+    }
     return;
   }
   const created = await request(`${erpBaseUrl}/api/purchase/suppliers`, {
     method: "POST",
     headers: auth,
-    body: JSON.stringify({ supplier_name: supplier, supplier_group: "All Supplier Groups", supplier_type: "Company" }),
+    // Supplier Group is optional in the public Supplier contract. Do not
+    // hard-code ERPNext's optional demo tree ("All Supplier Groups"); a clean
+    // tenant is valid and native Supplier accepts the omitted link.
+    body: JSON.stringify({ supplier_name: supplier, supplier_type: "Company", email_id: supplierEmail }),
   });
   if (created.status < 200 || created.status >= 300) throw new Error(`supplier creation failed (${created.status}): ${created.raw}`);
   step(`supplier ${supplier}: created`);
@@ -296,8 +312,26 @@ async function ensureTestItem(auth: { Cookie: string }): Promise<void> {
   }
   step(`create second test item from ${item1}`);
   const source = await request(`${erpBaseUrl}/api/purchase/items/${encodeURIComponent(item1)}`, { headers: auth });
-  if (source.status !== 200) throw new Error(`test item source read failed (${source.status}): ${source.raw}`);
-  const sourceRow = object(apiData(source.body));
+  let sourceRow: Record<string, unknown>;
+  if (source.status === 404) {
+    step(`seed item ${item1} is missing; create it`);
+    const seeded = await request(`${erpBaseUrl}/api/purchase/items`, {
+      method: "POST",
+      headers: auth,
+      body: JSON.stringify({
+        item_code: item1,
+        item_name: item1,
+        item_group: "All Item Groups",
+        stock_uom: "Nos",
+        is_stock_item: 1,
+      }),
+    });
+    if (seeded.status < 200 || seeded.status >= 300) throw new Error(`seed item creation failed (${seeded.status}): ${seeded.raw}`);
+    sourceRow = object(apiData(seeded.body));
+  } else {
+    if (source.status !== 200) throw new Error(`test item source read failed (${source.status}): ${source.raw}`);
+    sourceRow = object(apiData(source.body));
+  }
   const marker = Date.now().toString(16).slice(-8).padStart(8, "0");
   item2 = `ACCEPTANCE-LOCAL-${marker}-Purchase Flow Item`;
   const created = await request(`${erpBaseUrl}/api/purchase/items`, {
@@ -316,44 +350,44 @@ async function ensureTestItem(auth: { Cookie: string }): Promise<void> {
   step(`test item created ${item2}`);
 }
 
+async function createAppAuth(apiKey: string, app: "purchase"): Promise<{ Cookie: string }> {
+  const session = await request(`${portalBaseUrl}/api/internal/test-session`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ app }),
+  });
+  if (session.status !== 200) throw new Error(`${app} test-session failed (${session.status}): ${session.raw}`);
+  const appSession = text(object(apiData(session.body)).app_session);
+  if (!appSession) throw new Error(`${app} test-session did not return an app session`);
+  return { Cookie: `__Host-letron_${app}_session=${appSession}` };
+}
+
+async function resolvePurchaseContext(purchaseAuth: { Cookie: string }, apiKey: string): Promise<{ company: string; warehouse: string }> {
+  step("resolve Company and Warehouse from current Gateway state");
+  const warehouseFields = encodeURIComponent(JSON.stringify(["name", "company", "is_group"]));
+  const warehouses = await request(`${erpBaseUrl}/api/stock/warehouses?fields=${warehouseFields}&limit_page_length=100`, { headers: purchaseAuth });
+  if (warehouses.status !== 200) throw new Error(`warehouse lookup failed (${warehouses.status}): ${warehouses.raw}`);
+  const warehouseRows = apiData(warehouses.body);
+  const warehouseRow = (Array.isArray(warehouseRows) ? warehouseRows : [warehouseRows]).map((row) => object(row as Json)).find((row) => text(row.company) && Number(row.is_group ?? 0) === 0);
+  const company = text(warehouseRow?.company);
+  const warehouse = text(warehouseRow?.name);
+  if (!company || !warehouse) throw new Error(`policy did not expose a transaction Company/Warehouse: ${warehouses.raw}`);
+  return { company, warehouse };
+}
+
 async function main(): Promise<void> {
 step("start purchase real test");
 const suppliers = [supplier1, ...(supplier2 && supplier2 !== supplier1 ? [supplier2] : [])];
 const apiKey = await env("LETRON_INTERNAL_API_SECRET");
-const apiAuth = { Authorization: `Bearer ${apiKey}` };
-
 step("create authenticated purchase test session");
-const session = await request(`${portalBaseUrl}/api/internal/test-session`, {
-  method: "POST",
-  headers: apiAuth,
-  body: JSON.stringify({ app: "purchase" }),
-});
-if (session.status !== 200) throw new Error(`test-session failed (${session.status}): ${session.raw}`);
-const sessionData = object(apiData(session.body));
-const appSession = text(sessionData.app_session);
-if (!appSession) throw new Error("test-session did not return a purchase app session");
-const auth = { Cookie: `__Host-letron_purchase_session=${appSession}` };
+const auth = await createAppAuth(apiKey, "purchase");
 step("purchase test session ready");
 
 for (const supplier of suppliers) await ensureSupplier(auth, supplier);
 await ensureTestItem(auth);
 
-const seedList = await request(`${erpBaseUrl}/api/purchase/material-requests?limit_page_length=1&order_by=creation%20desc`, { headers: auth });
-if (seedList.status !== 200) throw new Error(`cannot read seed MR (${seedList.status}): ${seedList.raw}`);
-const seedValue = apiData(seedList.body);
-const seed = object(Array.isArray(seedValue) ? (seedValue[0] as Json) : seedValue);
-const seedName = text(seed.name);
-if (!seedName) throw new Error("no existing Material Request available");
-step(`seed Material Request found ${seedName}`);
-
-const seedDetail = await request(`${erpBaseUrl}/api/purchase/material-requests/${encodeURIComponent(seedName)}`, { headers: auth });
-if (seedDetail.status !== 200) throw new Error(`cannot read seed MR ${seedName} (${seedDetail.status}): ${seedDetail.raw}`);
-const seedRow = object(apiData(seedDetail.body));
-const company = text(seedRow.company);
-const items = Array.isArray(seedRow.items) ? seedRow.items : [];
-const warehouse = text(items.map((row) => object(row as Json).warehouse).find(Boolean));
-if (!company || !warehouse) throw new Error(`seed MR ${seedName} has no usable company/warehouse`);
-step(`seed context ready company=${company} warehouse=${warehouse}`);
+const { company, warehouse } = await resolvePurchaseContext(auth, apiKey);
+step(`purchase context ready company=${company} warehouse=${warehouse}`);
 
 const today = new Date();
 const emailAfter = new Date(today.getTime() - 2_000).toISOString();

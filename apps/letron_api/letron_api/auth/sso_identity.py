@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import hashlib
 import json
-import os
 from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -9,46 +9,11 @@ from typing import Any, cast
 
 import frappe
 
-from letron_api.auth.sso_protocol import FORBIDDEN_LARK_MANAGED_ROLES, POLICY_ROLE_PREFIX, RoleSyncConfiguration, desired_erp_roles, sha256_hex
-
 IDENTITY_DOCTYPE = "Letron SSO Identity"
 AUDIT_DOCTYPE = "Letron SSO Audit Log"
-IDENTITY_SYNC_FIELDS = (
-    "identity_key",
-    "provider",
-    "tenant_key",
-    "subject",
-    "subject_type",
-    "user",
-    "email",
-    "display_name",
-    "group_ids",
-    "last_sync_at",
-    "gateway_roles_fingerprint",
-    "gateway_policy_version",
-    "gateway_synced_at",
-    "sync_state",
-    "disabled_by_sync",
-    "local_blocked",
-    "last_error",
-    "break_glass_until",
-    "break_glass_reason",
-)
-MANAGED_NATIVE_ROLES = frozenset({
-    "Desk User", "Accounts User", "Accounts Manager", "Purchase User", "Purchase Manager",
-    "Stock User", "Stock Manager", "Sales User", "Sales Manager",
-})
-
-
-def _managed_policy_roles(roles: set[str]) -> set[str]:
-    return {role for role in roles if role.startswith(POLICY_ROLE_PREFIX)}
 
 
 class SsoIdentityError(ValueError):
-    pass
-
-
-class SsoAccessDenied(SsoIdentityError):
     pass
 
 
@@ -68,17 +33,11 @@ class IdentitySnapshot:
 
     @property
     def identity_key(self) -> str:
-        return sha256_hex(f"lark\0{self.tenant_key}\0{self.subject}")
+        return hashlib.sha256(f"lark\0{self.tenant_key}\0{self.subject}".encode()).hexdigest()
 
 
 def _frappe_datetime(value: datetime) -> datetime:
-    """Store an instant in Frappe's timezone-naive MariaDB Datetime columns."""
-
     return frappe.utils.convert_utc_to_system_timezone(value).replace(tzinfo=None)
-
-
-def _json_list(values: set[str] | frozenset[str]) -> str:
-    return json.dumps(sorted(values), ensure_ascii=False, separators=(",", ":"))
 
 
 def _audit(
@@ -88,8 +47,6 @@ def _audit(
     outcome: str,
     identity: str | None = None,
     user: str | None = None,
-    before_roles: set[str] | None = None,
-    after_roles: set[str] | None = None,
     detail: dict[str, Any] | None = None,
 ) -> None:
     document = frappe.get_doc(
@@ -101,8 +58,9 @@ def _audit(
             "user": user,
             "source": source,
             "outcome": outcome,
-            "before_roles": _json_list(before_roles or set()),
-            "after_roles": _json_list(after_roles or set()),
+            # Legacy columns remain empty: authorization is not an ERP role.
+            "before_roles": "[]",
+            "after_roles": "[]",
             "detail": json.dumps(detail or {}, ensure_ascii=False, separators=(",", ":")),
         }
     )
@@ -113,74 +71,19 @@ def _identity(name: str) -> Any | None:
     return cast(Any, frappe.get_doc(IDENTITY_DOCTYPE, name)) if frappe.db.exists(IDENTITY_DOCTYPE, name) else None
 
 
-def _save(document: Any) -> None:
-    if document.is_new():
-        document.insert(ignore_permissions=True)
-    else:
-        # SSO identity rows are refreshed by concurrent authenticated requests.
-        # Document.save() performs an optimistic modified-timestamp check and
-        # turns that expected race into MariaDB error 1020. These fields are
-        # server-maintained state with no document hooks, so update them in one
-        # direct statement and keep the in-memory document current.
-        values = {fieldname: document.get(fieldname) for fieldname in IDENTITY_SYNC_FIELDS}
-        for fieldname, value in values.items():
-            frappe.db.set_value(IDENTITY_DOCTYPE, document.name, fieldname, value, update_modified=True)
-        document.reload()
-
-
-def _clear_sessions(user_name: str) -> None:
-    from frappe.sessions import clear_sessions
-
-    clear_sessions(user=user_name, keep_current=False, force=True)
-
-
-def _break_glass_active(identity: Any) -> bool:
-    if not identity.break_glass_until:
-        return False
-    expiry = frappe.utils.get_datetime(identity.break_glass_until)
-    return expiry is not None and expiry > frappe.utils.now_datetime()
-
-
-def _sync_user(
-    user: Any,
-    *,
-    desired_roles: set[str],
-    managed_roles: frozenset[str],
-    enabled: bool,
-) -> tuple[set[str], set[str]]:
-    before = {row.role for row in user.roles}
-    after = (before - managed_roles) | desired_roles
-    target_enabled = 1 if enabled else 0
-    target_user_type = "System User" if enabled else "Website User"
-    if before == after and int(user.enabled) == target_enabled and user.user_type == target_user_type:
-        return before, after
-    user.flags.lark_sso_sync = True
-    user.enabled = target_enabled
-    user.user_type = target_user_type
-    user.set("roles", [])
-    for role in sorted(after):
-        user.append("roles", {"role": role})
-    user.save(ignore_permissions=True)
-    # Frappe derives user_type from desk-access roles during User.save().
-    # Policy roles are intentionally API roles and may not grant Desk access,
-    # but the public gateway still requires an active System User.
-    frappe.db.set_value("User", user.name, "user_type", target_user_type, update_modified=False)
-    frappe.clear_cache(user=user.name)
-    return before, after
-
-
-def _create_user(snapshot: IdentitySnapshot, desired_roles: set[str]) -> Any:
+def _create_user(snapshot: IdentitySnapshot) -> Any:
     if frappe.db.exists("User", snapshot.email):
         raise SsoIdentityConflict("Email already belongs to an unlinked ERP user")
+    # This is an identity anchor only. Auth Portal owns authorization.
     user = frappe.get_doc(
         {
             "doctype": "User",
             "email": snapshot.email,
             "first_name": snapshot.display_name,
             "enabled": 1,
+            "user_type": "Website User",
             "send_welcome_email": 0,
             "new_password": frappe.generate_hash(length=32),
-            "roles": [{"role": role} for role in sorted(desired_roles)],
         }
     )
     user.flags.lark_sso_sync = True
@@ -214,251 +117,92 @@ def _update_profile(identity: Any, user: Any, snapshot: IdentitySnapshot) -> Any
     return user
 
 
-def reconcile_identity(
-    snapshot: IdentitySnapshot,
-    role_sync: RoleSyncConfiguration,
-    *,
-    source: str,
-    allow_create: bool,
-) -> str:
-    identity = _identity(snapshot.identity_key)
-    has_access = role_sync.required_group_id in snapshot.groups
-    desired_roles = desired_erp_roles(set(snapshot.groups), role_sync) if has_access else set()
+@frappe.whitelist(allow_guest=True)
+def provision_identity() -> dict[str, Any]:
+    """JIT-provision only the ERP identity anchor after Auth authorization."""
 
+    if not getattr(frappe.local, "letron_jit_authorized", False):
+        frappe.throw("ERP identity provisioning authorization required", exc=frappe.AuthenticationError)
+    payload = frappe.local.request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        frappe.throw("Invalid identity payload", exc=frappe.ValidationError)
+    tenant_key = str(payload.get("tenant_key", "")).strip()
+    subject = str(payload.get("subject", "")).strip()
+    subject_type = str(payload.get("subject_type", "")).strip()
+    email = str(payload.get("email", "")).strip().lower()
+    display_name = str(payload.get("display_name", "")).strip() or email
+    if not tenant_key or not subject or subject_type != "union_id" or not email or "@" not in email:
+        frappe.throw("Invalid stable Lark identity", exc=frappe.ValidationError)
+    snapshot = IdentitySnapshot(
+        tenant_key=tenant_key,
+        subject=subject,
+        subject_type=subject_type,
+        email=email,
+        display_name=display_name,
+        groups=frozenset(),
+        synced_at=datetime.now(UTC),
+    )
+    identity = _identity(snapshot.identity_key)
+    created = identity is None
     if identity is None:
-        if not has_access:
-            raise SsoAccessDenied("Lark identity is not in the ERP access group")
-        if not allow_create:
-            raise SsoIdentityConflict("Lark identity is not linked to an ERP user")
-        user = _create_user(snapshot, desired_roles)
+        if frappe.db.exists("User", email):
+            linked = frappe.db.exists(IDENTITY_DOCTYPE, {"user": email})
+            if linked:
+                raise SsoIdentityConflict("Email already belongs to another stable Lark identity")
+            user = cast(Any, frappe.get_doc("User", email))
+            user.flags.lark_sso_sync = True
+            user.enabled = 1
+            user.user_type = "Website User"
+            user.save(ignore_permissions=True)
+        else:
+            user = _create_user(snapshot)
         identity = frappe.get_doc(
             {
                 "doctype": IDENTITY_DOCTYPE,
+                "name": snapshot.identity_key,
                 "identity_key": snapshot.identity_key,
                 "provider": "lark",
-                "tenant_key": snapshot.tenant_key,
-                "subject": snapshot.subject,
-                "subject_type": snapshot.subject_type,
+                "tenant_key": tenant_key,
+                "subject": subject,
+                "subject_type": subject_type,
                 "user": user.name,
-                "email": snapshot.email,
-                "display_name": snapshot.display_name,
-                "group_ids": _json_list(snapshot.groups),
+                "email": email,
+                "display_name": display_name,
+                "group_ids": "[]",
                 "last_sync_at": _frappe_datetime(snapshot.synced_at),
                 "sync_state": "Active",
             }
         )
-        _save(identity)
-        _audit(
-            "user.created",
-            source=source,
-            outcome="success",
-            identity=identity.name,
-            user=user.name,
-            after_roles=desired_roles,
-        )
-        return user.name
-
-    user = cast(Any, frappe.get_doc("User", identity.user))
-    try:
+        identity.insert(ignore_permissions=True)
+    else:
+        user = cast(Any, frappe.get_doc("User", identity.user))
         user = _update_profile(identity, user, snapshot)
-    except SsoIdentityConflict as error:
-        identity.sync_state = "Conflict"
-        identity.last_error = str(error)
-        _save(identity)
-        _audit("identity.conflict", source=source, outcome="error", identity=identity.name, user=user.name)
-        raise
-
-    identity.email = snapshot.email
-    identity.display_name = snapshot.display_name
-    identity.subject_type = snapshot.subject_type
-    identity.group_ids = _json_list(snapshot.groups)
-    identity.last_sync_at = _frappe_datetime(snapshot.synced_at)
-    identity.last_error = None
-
-    if not has_access:
-        was_enabled = bool(user.enabled)
-        previous_state = identity.sync_state
-        existing_roles = {row.role for row in user.roles}
-        before, after = _sync_user(
-            user,
-            desired_roles=set(),
-            managed_roles=MANAGED_NATIVE_ROLES | _managed_policy_roles(existing_roles),
-            enabled=False,
-        )
-        identity.disabled_by_sync = 1
-        identity.sync_state = "Access Removed"
-        identity.break_glass_until = None
-        identity.break_glass_reason = None
-        _save(identity)
-        if was_enabled or before != after or previous_state != "Access Removed":
-            _clear_sessions(user.name)
-            _audit(
-                "access.removed",
-                source=source,
-                outcome="success",
-                identity=identity.name,
-                user=user.name,
-                before_roles=before,
-                after_roles=after,
-            )
-        raise SsoAccessDenied("Lark identity is not in the ERP access group")
-
-    if identity.local_blocked or (not user.enabled and not identity.disabled_by_sync):
-        identity.local_blocked = 1
-        identity.sync_state = "Local Blocked"
-        _save(identity)
-        raise SsoAccessDenied("ERP user is locally blocked")
-
-    if _break_glass_active(identity):
-        identity.sync_state = "Active"
-        identity.last_error = None
-        _save(identity)
-        return user.name
-
-    was_enabled = bool(user.enabled)
-    existing_roles = {row.role for row in user.roles}
-    before, after = _sync_user(
-        user,
-        desired_roles=desired_roles,
-        managed_roles=MANAGED_NATIVE_ROLES | _managed_policy_roles(existing_roles),
-        enabled=True,
-    )
-    identity.user = user.name
-    identity.disabled_by_sync = 0
-    identity.sync_state = "Active"
-    identity.break_glass_until = None
-    identity.break_glass_reason = None
-    _save(identity)
-    if before != after or not was_enabled:
-        _audit(
-            "roles.reconciled",
-            source=source,
-            outcome="success",
-            identity=identity.name,
-            user=user.name,
-            before_roles=before,
-            after_roles=after,
-        )
-    return user.name
-
-
-def apply_break_glass(
-    user_name: str,
-    roles: set[str],
-    reason: str,
-    ttl_seconds: int,
-    role_sync: RoleSyncConfiguration,
-) -> dict[str, Any]:
-    if any(role in FORBIDDEN_LARK_MANAGED_ROLES or not role.startswith(POLICY_ROLE_PREFIX) for role in roles):
-        raise SsoIdentityError("Break-glass roles must be Global Portal policy roles")
-    if not 60 <= ttl_seconds <= role_sync.break_glass_max_seconds:
-        raise SsoIdentityError("Break-glass TTL is outside the configured range")
-    identity_name = frappe.db.get_value(IDENTITY_DOCTYPE, {"user": user_name}, "name")
-    if not identity_name:
-        raise SsoIdentityError("ERP user is not linked to Lark")
-    identity = cast(Any, frappe.get_doc(IDENTITY_DOCTYPE, identity_name))
-    groups = set(json.loads(identity.group_ids or "[]"))
-    if role_sync.required_group_id not in groups or identity.local_blocked:
-        raise SsoAccessDenied("Break-glass cannot bypass ERP access removal or a local block")
-    user = cast(Any, frappe.get_doc("User", user_name))
-    before = {row.role for row in user.roles}
-    before_managed = MANAGED_NATIVE_ROLES | _managed_policy_roles(before)
-    before, after = _sync_user(user, desired_roles=roles, managed_roles=before_managed, enabled=True)
-    identity.break_glass_until = frappe.utils.add_to_date(
-        frappe.utils.now_datetime(), seconds=ttl_seconds, as_datetime=True
-    )
-    identity.break_glass_reason = reason[:140]
-    identity.sync_state = "Active"
-    _save(identity)
+        if not int(user.enabled):
+            user.flags.lark_sso_sync = True
+            user.enabled = 1
+            user.user_type = "Website User"
+            user.save(ignore_permissions=True)
+        for field, value in {
+            "email": email,
+            "display_name": display_name,
+            "last_sync_at": _frappe_datetime(snapshot.synced_at),
+            "sync_state": "Active",
+            "last_error": None,
+        }.items():
+            frappe.db.set_value(IDENTITY_DOCTYPE, identity.name, field, value, update_modified=True)
     _audit(
-        "roles.break_glass",
-        source="break-glass",
+        "identity.jit_provisioned" if created else "identity.jit_refreshed",
+        source="request",
         outcome="success",
         identity=identity.name,
         user=user.name,
-        before_roles=before,
-        after_roles=after,
-        detail={"reason": reason, "ttl_seconds": ttl_seconds},
+        detail={"actor": "auth_portal", "roles_changed": False},
     )
-    return {"user": user.name, "roles": sorted(after), "break_glass_until": str(identity.break_glass_until)}
-
-
-def record_sync_error(
-    identity_key: str,
-    error_code: str,
-    role_sync: RoleSyncConfiguration,
-    *,
-    source: str = "request",
-) -> None:
-    identity = _identity(identity_key)
-    if identity is None:
-        return
-    identity.last_error = error_code[:140]
-    last_sync = frappe.utils.get_datetime(identity.last_sync_at) if identity.last_sync_at else None
-    stale = last_sync is None or (
-        frappe.utils.now_datetime() - last_sync
-    ).total_seconds() >= role_sync.stale_lock_seconds
-    if stale:
-        transitioned = identity.sync_state != "Stale Locked"
-        identity.sync_state = "Stale Locked"
-        identity.disabled_by_sync = 1
-        if transitioned:
-            user = cast(Any, frappe.get_doc("User", identity.user))
-            current_roles = {row.role for row in user.roles}
-            _sync_user(
-                user,
-                desired_roles=current_roles & _managed_policy_roles(current_roles),
-                managed_roles=MANAGED_NATIVE_ROLES | _managed_policy_roles(current_roles),
-                enabled=False,
-            )
-            _clear_sessions(identity.user)
-            _audit(
-                "snapshot.stale_locked",
-                source=source,
-                outcome="denied",
-                identity=identity.name,
-                user=identity.user,
-                detail={"error_code": error_code},
-            )
-    _save(identity)
-
-
-def protect_lark_managed_user(document: Any, _method: str | None = None) -> None:
-    if document.is_new() or getattr(document.flags, "lark_sso_sync", False):
-        return
-    identity_name = frappe.db.get_value(IDENTITY_DOCTYPE, {"user": document.name}, "name")
-    if not identity_name:
-        return
-    import os
-
-    from letron_api.auth.sso_protocol import load_configuration
-
-    role_sync = load_configuration(os.environ).role_sync
-    previous_roles = set(frappe.get_all("Has Role", filters={"parent": document.name}, pluck="role"))
-    next_roles = {row.role for row in document.roles}
-    managed_before = MANAGED_NATIVE_ROLES | _managed_policy_roles(previous_roles)
-    managed_after = MANAGED_NATIVE_ROLES | _managed_policy_roles(next_roles)
-    if (previous_roles & managed_before) != (next_roles & managed_after):
-        frappe.throw(
-            "Managed ERP roles are controlled by Lark. Use the SSO break-glass command for a temporary override.",
-            exc=frappe.PermissionError,
-        )
-    previous_enabled = bool(frappe.db.get_value("User", document.name, "enabled"))
-    if previous_enabled and not document.enabled:
-        frappe.db.set_value(IDENTITY_DOCTYPE, identity_name, "local_blocked", 1, update_modified=False)
-        frappe.db.set_value(IDENTITY_DOCTYPE, identity_name, "sync_state", "Local Blocked", update_modified=False)
-    elif not previous_enabled and document.enabled:
-        disabled_by_sync = bool(frappe.db.get_value(IDENTITY_DOCTYPE, identity_name, "disabled_by_sync"))
-        if disabled_by_sync:
-            frappe.throw("A Lark-managed access removal cannot be bypassed by enabling the ERP user.", exc=frappe.PermissionError)
-        frappe.db.set_value(IDENTITY_DOCTYPE, identity_name, "local_blocked", 0, update_modified=False)
-        frappe.db.set_value(IDENTITY_DOCTYPE, identity_name, "sync_state", "Active", update_modified=False)
+    frappe.db.commit()
+    return {"ok": True, "user": user.name, "identity": identity.name, "created": created}
 
 
 def status() -> dict[str, Any]:
-    enabled = True
-    if not enabled:
-        return {"enabled": False}
     if not frappe.db.table_exists(IDENTITY_DOCTYPE):
         return {"enabled": True, "installed": False}
     counts = dict(Counter(frappe.get_all(IDENTITY_DOCTYPE, pluck="sync_state")))

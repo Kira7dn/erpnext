@@ -25,3 +25,4 @@ backups/
 .playwright-mcp/
 .tmp
 .agent
+apps/lark-bot-official

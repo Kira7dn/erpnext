@@ -158,7 +158,10 @@ export function buildInvoiceRequestMail(access: SupplierPortalAccess, magicToken
     "Do not share this link or OTP with anyone.",
     `Open this link and request an OTP: ${portalUrl}`,
   ].join("\n");
-  return { to: access.email, subject: `Letron invoice request for ${purchaseReceipt}`, body_html: `<p>${plain.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>")}</p>`, body_plain_text: plain, idempotency_key: `supplier-invoice-request:${purchaseReceipt}:${access.supplier}` };
+  // Receipt names can repeat after a site restore/reset.  Scope delivery
+  // idempotency to the durable portal access record so a new process cannot
+  // receive an old mail-service replay for the same ERPNext name.
+  return { to: access.email, subject: `Letron invoice request for ${purchaseReceipt}`, body_html: `<p>${plain.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>")}</p>`, body_plain_text: plain, idempotency_key: `supplier-invoice-request:${access.access_id}:${purchaseReceipt}` };
 }
 
 export async function requestNextOtp(magicToken: string): Promise<{ access: SupplierPortalAccess; otp: string }> {

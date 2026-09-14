@@ -1,6 +1,7 @@
 import { getDb } from "./db";
 import { randomToken, sha256 } from "./crypto";
 import { getEnv } from "./env";
+import { ensureErpIdentity } from "./erp-jit";
 
 const HANDOFF_TTL_MS = 2 * 60 * 1000;
 export type AppKey = "assets" | "purchase" | "accounts";
@@ -31,6 +32,11 @@ export async function consumeErpHandoff(code: string, expectedAppKey?: AppKey): 
   const gatewayExpiresAt = new Date(
     Date.now() + getEnv().LETRON_ERP_SESSION_TTL_SECONDS * 1000,
   );
+  const candidate = await getDb().erpHandoff.findFirst({
+    where: { codeHash: sha256(code), ...(expectedAppKey ? { appKey: expectedAppKey } : {}), consumedAt: null, expiresAt: { gt: new Date() } },
+    include: { user: { include: { identities: { where: { provider: "lark", subjectType: "union_id" } } } } },
+  });
+  if (candidate && candidate.user.status === "ACTIVE") await ensureErpIdentity(candidate.user);
   return getDb().$transaction(async (tx) => {
     const row = await tx.erpHandoff.findFirst({
       where: {

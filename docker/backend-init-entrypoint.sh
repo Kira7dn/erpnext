@@ -35,7 +35,7 @@ else
   bench --site "$SITE_NAME" migrate
 fi
 
-bench --site "$SITE_NAME" execute letron_api.control.tenant_bootstrap.run
+bench --site "$SITE_NAME" execute letron_api.control.policy.sync
 bench --site "$SITE_NAME" execute letron_api.control.system_config.sync
 bench --site "$SITE_NAME" execute letron_api.control.policy.sync
 

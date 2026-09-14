@@ -29,6 +29,8 @@ const schema = z.object({
     .positive()
     .default(86400),
   LETRON_INTERNAL_API_SECRET: z.string().min(32).optional(),
+  LETRON_AUTH_GATEWAY_SECRET: z.string().min(32),
+  LETRON_AUTH_TO_ERP_JIT_SECRET: z.string().min(32),
   AUTH_DATA_ENCRYPTION_KEY: z.string().min(1),
   OIDC_COOKIE_KEYS: z.string().min(1),
   OIDC_JWKS: z.string().min(1),

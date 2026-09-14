@@ -221,12 +221,21 @@ def rewrite_public_routes() -> None:
         # update the parsed arguments when rewriting an already-open request.
         frappe.local.form_dict.update({"doctype": doctype, "name": name, "action": action})
     else:
-        target = f"/api/resource/{doctype}"
-        if len(parts) == 5:
-            # PATH_INFO follows WSGI's latin-1 transport convention. Preserve
-            # the original UTF-8 bytes so Frappe's router decodes the name once.
-            name = parts[4].encode("utf-8").decode("latin-1")
-            target += f"/{name}"
+        if len(parts) == 4 and request.method == "GET":
+            target = "/api/method/letron_api.control.api.public_resource_list"
+            frappe.local.form_dict.update({"doctype": doctype})
+        elif len(parts) == 5:
+            target = "/api/method/letron_api.control.api.public_resource_get" if request.method == "GET" else (
+                "/api/method/letron_api.control.api.public_resource_update"
+                if request.method in {"PUT", "PATCH"}
+                else "/api/method/letron_api.control.api.public_resource_delete"
+            )
+            frappe.local.form_dict.update({"doctype": doctype, "name": parts[4]})
+        elif len(parts) == 4 and request.method == "POST":
+            target = "/api/method/letron_api.control.api.public_resource_create"
+            frappe.local.form_dict.update({"doctype": doctype})
+        else:
+            frappe.throw("Unsupported public resource operation", exc=frappe.ValidationError)
     # Frappe builds form_dict before before_request hooks.  Keep the public
     # list controls explicit when the alias is rewritten to /api/resource;
     # otherwise some runtime versions fall back to the native default
@@ -320,9 +329,6 @@ for policy_doctype in POLICY_DOCTYPES:
 system_settings_handlers = doc_events.setdefault("System Settings", {})
 system_settings_handlers["validate"] = "letron_api.control.system_config.protect_system_settings"
 system_settings_handlers["on_trash"] = "letron_api.control.system_config.protect_system_settings"
-
-user_handlers = doc_events.setdefault("User", {})
-user_handlers["validate"] = "letron_api.auth.sso_identity.protect_lark_managed_user"
 
 scheduler_events = {
     "all": ["letron_api.delivery.delivery.process_pending_outbox"],

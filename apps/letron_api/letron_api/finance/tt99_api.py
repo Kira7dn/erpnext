@@ -91,7 +91,12 @@ def _audit(document: Any, action: str, changes: dict[str, Any] | None = None) ->
 
     comment = getattr(document, "add_comment", None)
     if callable(comment):
-        payload = {"action": action, "actor": frappe.session.user, "changes": changes or {}}
+        actor = getattr(frappe.local, "letron_gateway_actor", None)
+        payload = {
+            "action": action,
+            "actor": actor or frappe.session.user,
+            "changes": changes or {},
+        }
         comment("Info", json.dumps(payload, ensure_ascii=False, sort_keys=True))
 
 
@@ -246,6 +251,7 @@ def _apply_snapshot(document: Any, payload: dict[str, Any]) -> Any:
     return document
 
 
+@frappe.whitelist()
 def list_report_packages() -> dict[str, Any]:
     filters: dict[str, Any] = {}
     for field in ("company", "form_code", "status", "from_date", "to_date"):
@@ -255,10 +261,12 @@ def list_report_packages() -> dict[str, Any]:
     return _list(PACKAGE_DOCTYPE, filters)
 
 
+@frappe.whitelist()
 def get_report_package(name: str) -> dict[str, Any]:
     return _package_response(_package_doc(name))
 
 
+@frappe.whitelist()
 def create_report_package() -> dict[str, Any]:
     payload = _payload()
     required = ("company", "form_code", "from_date", "to_date")
@@ -272,6 +280,7 @@ def create_report_package() -> dict[str, Any]:
     return _package_response(document)
 
 
+@frappe.whitelist()
 def update_report_package(name: str) -> dict[str, Any]:
     document = _package_doc(name)
     if str(document.status) not in {"Draft", "Rejected"} or int(document.docstatus or 0):
@@ -320,14 +329,17 @@ def _transition(name: str, expected: str, target: str, action: str, reason: str 
     return _package_response(document)
 
 
+@frappe.whitelist()
 def review_report_package(name: str) -> dict[str, Any]:
     return _transition(name, "Draft", "Review", "review")
 
 
+@frappe.whitelist()
 def close_report_package(name: str) -> dict[str, Any]:
     return _transition(name, "Review", "Closed", "close")
 
 
+@frappe.whitelist()
 def issue_report_package(name: str) -> dict[str, Any]:
     document = _package_doc(name)
     if str(document.status) != "Closed" or int(document.docstatus or 0):
@@ -341,6 +353,7 @@ def issue_report_package(name: str) -> dict[str, Any]:
     return _package_response(document)
 
 
+@frappe.whitelist()
 def reject_report_package(name: str) -> dict[str, Any]:
     payload = _payload()
     return _transition(name, "Review", "Rejected", "reject", str(payload.get("reason") or ""))
@@ -356,32 +369,39 @@ def _master_list(doctype: str, company: str | None = None, extra: dict[str, Any]
     return _list(doctype, filters)
 
 
+@frappe.whitelist()
 def list_companies() -> dict[str, Any]:
     return _master_list("Company")
 
 
+@frappe.whitelist()
 def get_company(name: str) -> dict[str, Any]:
     return _master("Company", name)
 
 
+@frappe.whitelist()
 def list_accounts() -> dict[str, Any]:
     return _master_list("Account", str(_query("company") or "") or None)
 
 
+@frappe.whitelist()
 def get_account(name: str) -> dict[str, Any]:
     result = _master("Account", name)
     _company_of(frappe.get_doc("Account", name))
     return result
 
 
+@frappe.whitelist()
 def list_finance_books() -> dict[str, Any]:
     return _master_list("Finance Book")
 
 
+@frappe.whitelist()
 def get_finance_book(name: str) -> dict[str, Any]:
     return _master("Finance Book", name)
 
 
+@frappe.whitelist()
 def list_fiscal_years() -> dict[str, Any]:
     company = str(_query("company") or "") or None
     if not company:
@@ -391,14 +411,17 @@ def list_fiscal_years() -> dict[str, Any]:
     return _master_list("Fiscal Year", extra={"name": ["in", [row["parent"] for row in parents]]})
 
 
+@frappe.whitelist()
 def get_fiscal_year(name: str) -> dict[str, Any]:
     return _master("Fiscal Year", name)
 
 
+@frappe.whitelist()
 def list_cost_centers() -> dict[str, Any]:
     return _master_list("Cost Center", str(_query("company") or "") or None)
 
 
+@frappe.whitelist()
 def get_cost_center(name: str) -> dict[str, Any]:
     result = _master("Cost Center", name)
     _company_of(frappe.get_doc("Cost Center", name))
@@ -429,20 +452,24 @@ def _write_shareholder(payload: dict[str, Any], document: Any | None = None) -> 
     return document.as_dict()
 
 
+@frappe.whitelist()
 def list_shareholders() -> dict[str, Any]:
     return _master_list("Shareholder", str(_query("company") or "") or None)
 
 
+@frappe.whitelist()
 def get_shareholder(name: str) -> dict[str, Any]:
     document = frappe.get_doc("Shareholder", name)
     _permission("Shareholder", "read", document)
     return document.as_dict()
 
 
+@frappe.whitelist()
 def create_shareholder() -> dict[str, Any]:
     return _write_shareholder(_payload())
 
 
+@frappe.whitelist()
 def update_shareholder(name: str) -> dict[str, Any]:
     document = frappe.get_doc("Shareholder", name)
     _permission("Shareholder", "read", document)
@@ -469,6 +496,7 @@ def _validate_pcv_payload(payload: dict[str, Any], document: Any | None = None) 
         frappe.throw("A future period cannot be closed", exc=frappe.ValidationError)
 
 
+@frappe.whitelist()
 def list_period_closing_vouchers() -> dict[str, Any]:
     filters: dict[str, Any] = {}
     for field in ("company", "fiscal_year"):
@@ -478,10 +506,12 @@ def list_period_closing_vouchers() -> dict[str, Any]:
     return _list("Period Closing Voucher", filters)
 
 
+@frappe.whitelist()
 def get_period_closing_voucher(name: str) -> dict[str, Any]:
     return _master("Period Closing Voucher", name)
 
 
+@frappe.whitelist()
 def create_period_closing_voucher() -> dict[str, Any]:
     payload = _payload()
     _validate_pcv_payload(payload)
@@ -493,6 +523,7 @@ def create_period_closing_voucher() -> dict[str, Any]:
     return document.as_dict()
 
 
+@frappe.whitelist()
 def update_period_closing_voucher(name: str) -> dict[str, Any]:
     document = frappe.get_doc("Period Closing Voucher", name)
     _permission("Period Closing Voucher", "write", document)
@@ -509,6 +540,7 @@ def update_period_closing_voucher(name: str) -> dict[str, Any]:
     return document.as_dict()
 
 
+@frappe.whitelist()
 def submit_period_closing_voucher(name: str) -> dict[str, Any]:
     document = frappe.get_doc("Period Closing Voucher", name)
     _permission("Period Closing Voucher", "submit", document)
@@ -520,6 +552,7 @@ def submit_period_closing_voucher(name: str) -> dict[str, Any]:
     return document.as_dict()
 
 
+@frappe.whitelist()
 def cancel_period_closing_voucher(name: str) -> dict[str, Any]:
     document = frappe.get_doc("Period Closing Voucher", name)
     _permission("Period Closing Voucher", "cancel", document)

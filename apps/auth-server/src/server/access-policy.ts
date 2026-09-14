@@ -55,13 +55,6 @@ export function entitlementsForGroups(policy: AccessPolicy, groupIds: readonly s
     .map((entitlement) => entitlement.id);
 }
 
-export function policyRolesForGroups(policy: AccessPolicy, groupIds: readonly string[]): string[] {
-  const groups = new Set(groupIds);
-  return [...new Set(policy.entitlements
-    .filter((entitlement) => entitlement.larkGroupIds.some((groupId) => groups.has(groupId)))
-    .map((entitlement) => `Letron Policy - ${entitlement.id}`))].sort();
-}
-
 export function canAccessPolicy(
   policy: AccessPolicy,
   groupIds: readonly string[],

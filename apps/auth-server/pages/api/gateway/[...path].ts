@@ -11,7 +11,6 @@ import { getEnv } from "../../../src/server/env";
 import { getPublishedPolicy } from "../../../src/server/published-policy";
 import {
   canAccessPolicy,
-  policyRolesForGroups,
   routeOperation,
 } from "../../../src/server/access-policy";
 import { audit } from "../../../src/server/audit";
@@ -57,7 +56,6 @@ function forwardedHeaders(
   },
   version: number,
   path: string,
-  roles: string[],
   secret: string,
   query: string,
   bodyHash: string,
@@ -66,14 +64,11 @@ function forwardedHeaders(
   const expires = String(Number(timestamp) + 60);
   const method = req.method ?? "GET";
   const requestId = randomUUID();
-  const encodedRoles = Buffer.from(JSON.stringify(roles), "utf8").toString(
-    "base64url",
-  );
   // Keep this order identical to letron_api.auth.gateway._signature_payload.
   // Query/body claims were appended to the existing contract; inserting them
   // before the identity claims makes every downstream ERP request fail HMAC
   // verification with "Invalid gateway authorization".
-  const payload = `${timestamp}.${expires}.${method}.${path}.${user.id}.${user.email}.${user.tenantKey ?? ""}.${user.subject ?? ""}.${user.subjectType ?? ""}.${version}.${encodedRoles}.${requestId}.${query}.${bodyHash}`;
+  const payload = `${timestamp}.${expires}.${method}.${path}.${user.id}.${user.email}.${user.tenantKey ?? ""}.${user.subject ?? ""}.${user.subjectType ?? ""}.${version}.${requestId}.${query}.${bodyHash}`;
   const signature = createHmac("sha256", secret).update(payload).digest("hex");
   const headers: Record<string, string> = {
     "X-Letron-Gateway-Timestamp": timestamp,
@@ -85,7 +80,6 @@ function forwardedHeaders(
     "X-Letron-Gateway-Method": method,
     "X-Letron-Gateway-Path": path,
     "X-Letron-Gateway-Policy-Version": String(version),
-    "X-Letron-Gateway-Roles": encodedRoles,
     "X-Letron-Gateway-Issued-At": timestamp,
     "X-Letron-Gateway-Expires-At": expires,
     "X-Letron-Gateway-Request-Id": requestId,
@@ -161,7 +155,13 @@ export default async function handler(
       eventType: "gateway.authorization",
       outcome: "failure",
       userId: user.id,
-      detail: { path, reason: "policy_denied", policy_version: policy.version },
+      detail: {
+        path,
+        reason: "policy_denied",
+        policy_version: policy.version,
+        group_ids: user.groupIds,
+        operation,
+      },
     }).catch(() => undefined);
     finish();
     errorResponse(res, 403, "access_denied", "Access to this resource is denied.");
@@ -169,13 +169,12 @@ export default async function handler(
   }
   const env = getEnv();
   const baseUrl = env.FRAPPE_ERP_NEXT_URL;
-  const secret = env.LETRON_INTERNAL_API_SECRET;
+  const secret = env.LETRON_AUTH_GATEWAY_SECRET;
   if (!baseUrl || !secret) {
     finish();
     errorResponse(res, 503, "gateway_not_configured", "Gateway is not configured.");
     return;
   }
-  const roles = policyRolesForGroups(policy.policy, user.groupIds);
   const target = new URL(path, `${baseUrl}/`);
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(req.query)) {
@@ -191,7 +190,7 @@ export default async function handler(
   try {
     response = await fetch(target, {
       method: req.method,
-      headers: forwardedHeaders(req, user, policy.version, path, roles, secret, target.search, bodyHash),
+      headers: forwardedHeaders(req, user, policy.version, path, secret, target.search, bodyHash),
       body: requestBody as unknown as BodyInit,
       signal: AbortSignal.timeout(30_000),
     });

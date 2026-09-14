@@ -2523,6 +2523,138 @@ def _is_test_runtime() -> bool:
         return False
 
 
+def _ensure_policy_companies() -> None:
+    """Materialize the Company tree declared by policy before finance sync."""
+    frappe = _frappe()
+    desired = load_policy()
+    bootstrap = desired["bootstrap"]
+    primary = dict(bootstrap["company"])
+    group_config = dict(bootstrap.get("group") or {"name": primary["name"], "abbreviation": primary["abbreviation"]})
+
+    if not frappe.db.exists("Warehouse Type", "Transit"):
+        frappe.get_doc({"doctype": "Warehouse Type", "name": "Transit"}).insert(ignore_permissions=True)
+
+    group_name = str(group_config["name"])
+    if frappe.db.exists("Company", group_name):
+        group = frappe.get_doc("Company", group_name)
+        if not group.is_group or group.abbr != group_config["abbreviation"]:
+            raise PolicyError(f"Existing Company {group_name} is not the configured Holding group")
+    else:
+        frappe.get_doc({
+            "doctype": "Company",
+            "company_name": group_name,
+            "abbr": group_config["abbreviation"],
+            "country": primary["country"],
+            "default_currency": primary["currency"],
+            "domain": primary["domain"],
+            "is_group": 1,
+            "create_chart_of_accounts_based_on": "Standard Template",
+            "chart_of_accounts": primary["chart_of_accounts"],
+        }).insert(ignore_permissions=True)
+
+    for config in bootstrap.get("companies", [primary]):
+        name = str(config["name"])
+        if frappe.db.exists("Company", name):
+            company = frappe.get_doc("Company", name)
+            if company.is_group or company.abbr != config["abbreviation"] or company.parent_company != group_name:
+                raise PolicyError(f"Existing Company {name} does not match policy")
+            continue
+        frappe.get_doc({
+            "doctype": "Company",
+            "company_name": name,
+            "abbr": config["abbreviation"],
+            "country": config["country"],
+            "default_currency": config["currency"],
+            "domain": config["domain"],
+            "parent_company": group_name,
+            "create_chart_of_accounts_based_on": "Standard Template",
+            "chart_of_accounts": config["chart_of_accounts"],
+        }).insert(ignore_permissions=True)
+
+
+def _ensure_policy_shared_masters() -> None:
+    """Ensure the minimal native shared masters required by transactions.
+
+    These are ERPNext's shared operational defaults, not tenant data and not a
+    second bootstrap controller.  They converge only as part of the single
+    policy sync transaction so a clean site can execute the public APIs.
+    """
+    frappe = _frappe()
+    if not frappe.db.exists("Item Group", "All Item Groups"):
+        frappe.get_doc(
+            {
+                "doctype": "Item Group",
+                "item_group_name": "All Item Groups",
+                "name": "All Item Groups",
+                "is_group": 1,
+            }
+        ).insert(ignore_permissions=True)
+    if not frappe.db.exists("Item Group", "General"):
+        frappe.get_doc(
+            {
+                "doctype": "Item Group",
+                "item_group_name": "General",
+                "name": "General",
+                "parent_item_group": "All Item Groups",
+                "is_group": 0,
+            }
+        ).insert(ignore_permissions=True)
+    if not frappe.db.exists("UOM", "Nos"):
+        frappe.get_doc(
+            {
+                "doctype": "UOM",
+                "uom_name": "Nos",
+                "name": "Nos",
+                "must_be_whole_number": 1,
+            }
+        ).insert(ignore_permissions=True)
+
+
+def _complete_policy_setup() -> None:
+    """Complete native headless setup as part of policy convergence."""
+    frappe = _frappe()
+    import frappe.defaults as frappe_defaults
+
+    for app_name in ("frappe", "erpnext", "letron_api"):
+        installed = frappe.db.get_value("Installed Application", {"app_name": app_name}, "name")
+        if installed:
+            frappe.db.set_value("Installed Application", installed, "is_setup_complete", 1, update_modified=False)
+    frappe_defaults.set_global_default("desktop:home_page", "desk")
+    frappe_defaults.set_user_default("desktop:home_page", "desk", "Administrator")
+    frappe.clear_cache()
+
+
+def tenant_status() -> dict[str, object]:
+    """Report policy-owned tenant readiness without a parallel controller."""
+    desired = load_policy()
+    bootstrap = desired.get("bootstrap", {})
+    configured = bootstrap.get("company", {})
+    configured_companies = bootstrap.get("companies", [configured])
+    names = {str(item["name"]) for item in configured_companies}
+    companies = _frappe().get_all("Company", fields=["name", "is_group", "parent_company"], limit_page_length=0)
+    runtime = {str(item.name): item for item in companies}
+    group = bootstrap.get("group") or {}
+    group_matches = bool(group.get("name") in runtime and runtime[group["name"]].is_group)
+    company_matches = bool(names and names.issubset(runtime) and all(
+        not runtime[name].is_group and runtime[name].parent_company == group.get("name") for name in names
+    ))
+    import frappe.defaults as frappe_defaults
+
+    setup_complete = bool(_frappe().is_setup_complete())
+    return {
+        "ok": bool(group_matches and company_matches and setup_complete),
+        "company": configured.get("name"),
+        "group": group,
+        "companies": sorted(names),
+        "company_count": len(companies),
+        "transaction_company_count": len([item for item in companies if not item.is_group]),
+        "company_matches": company_matches,
+        "group_matches": group_matches,
+        "setup_complete": setup_complete,
+        "home_page": frappe_defaults.get_global_default("desktop:home_page"),
+    }
+
+
 def sync() -> dict[str, Any]:
     """Apply the complete policy, including declarative finance masters."""
     # Startup and an operator-triggered policy-apply share the same Account,
@@ -2533,15 +2665,19 @@ def sync() -> dict[str, Any]:
     with cache.lock("letron:business-policy:sync", timeout=600, blocking_timeout=30):
         from letron_api.control.holding_finance import apply as apply_finance
 
-        # Policy documents may contain Link values to finance masters (for
-        # example Item Tax Template -> Account 33311).  Create/converge those
-        # native masters before policy validation resolves the links.
-        # Finance bootstrap is part of the same protected policy transaction:
-        # its Fiscal Year/Account updates are managed documents and must pass
-        # the same lifecycle guard as the generic policy materializer.
         with _applying_policy():
+            # Company creation invokes ERPNext's native default Cost Center
+            # creation.  Keep that side effect inside the same policy-owned
+            # guard as the declarative finance materializer.
+            _ensure_policy_companies()
+            _ensure_policy_shared_masters()
+
+            # Policy documents may contain Link values to finance masters (for
+            # example Item Tax Template -> Account 33311).  Create/converge
+            # those native masters before policy validation resolves links.
             finance_result = apply_finance()
         policy_result = apply()
+        _complete_policy_setup()
         return {
             "ok": bool(policy_result.get("ok", True)) and bool(finance_result.get("ok", True)),
             "policy": policy_result,

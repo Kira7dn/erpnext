@@ -15,6 +15,7 @@ x-frappe-defaults: &frappe_defaults
     - sites:/home/frappe/frappe-bench/sites
     - logs:/home/frappe/frappe-bench/logs
     - backups:/home/frappe/backups
+    - ./apps/frappe:/home/frappe/frappe-bench/apps/frappe:ro
     - ./apps/erpnext:/home/frappe/frappe-bench/apps/erpnext:ro
     - ./apps/letron_api:/home/frappe/frappe-bench/apps/${INTEGRATION_APP}:ro
     - ./contracts:/home/frappe/frappe-bench/contracts:ro
@@ -42,6 +43,9 @@ x-frappe-defaults: &frappe_defaults
     LETRON_AUTH_BASE_URL: ${LETRON_AUTH_BASE_URL:-}
     LETRON_ERP_APP_BASE_URL: ${LETRON_ERP_APP_BASE_URL:-}
     LETRON_INTERNAL_API_SECRET: ${LETRON_INTERNAL_API_SECRET:-}
+    LETRON_INTERNAL_API_USER: ${LETRON_INTERNAL_API_USER:-leducanh@ledb.vn}
+    LETRON_AUTH_GATEWAY_SECRET: ${LETRON_AUTH_GATEWAY_SECRET:-}
+    LETRON_AUTH_TO_ERP_JIT_SECRET: ${LETRON_AUTH_TO_ERP_JIT_SECRET:-}
     SITE_NAME: ${SITE_NAME}
     DB_ROOT_USER: ${DB_ROOT_USER}
     LETRON_BOOTSTRAP_PASSWORD: ${LETRON_BOOTSTRAP_PASSWORD}

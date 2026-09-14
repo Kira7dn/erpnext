@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from typing import cast
 
@@ -24,11 +25,11 @@ def health() -> dict[str, object]:
 
     from letron_api.auth.sso_identity import status as sso_status
     from letron_api.control.policy import cached_status as policy_status
+    from letron_api.control.policy import tenant_status
     from letron_api.control.system_config import bundle_status
     from letron_api.control.system_config import cached_status as config_status
-    from letron_api.control.tenant_bootstrap import status as bootstrap_status
 
-    bootstrap = bootstrap_status()
+    bootstrap = tenant_status()
     policy = policy_status()
     config = config_status()
     bundle = bundle_status()
@@ -39,7 +40,7 @@ def health() -> dict[str, object]:
         "config": config,
         "policy": policy,
         "configuration_bundle": bundle,
-        "sso_role_sync": sso_status(),
+        "sso_identity": sso_status(),
         **_runtime_info(),
     }
 
@@ -57,18 +58,18 @@ def runtime_snapshot() -> dict[str, object]:
 
     from letron_api.auth.sso_identity import status as sso_status
     from letron_api.control.policy import status as policy_status
+    from letron_api.control.policy import tenant_status
     from letron_api.control.system_config import bundle_status
     from letron_api.control.system_config import status as config_status
-    from letron_api.control.tenant_bootstrap import status as bootstrap_status
 
     snapshot: dict[str, object] = {
         **_runtime_info(),
         "doctype_metadata": {},
-        "bootstrap": bootstrap_status(refresh=True),
+        "bootstrap": tenant_status(),
         "config": config_status(),
         "policy": policy_status(),
         "configuration_bundle": bundle_status(),
-        "sso_role_sync": sso_status(),
+        "sso_identity": sso_status(),
     }
     for doctype in ("Company", "Currency", "User"):
         try:
@@ -87,6 +88,86 @@ def runtime_snapshot() -> dict[str, object]:
         except Exception as error:  # noqa: BLE001 - snapshot must report metadata errors without masking runtime state
             snapshot["doctype_metadata"][doctype] = {"error": type(error).__name__}
     return snapshot
+
+
+def _require_gateway() -> None:
+    if not (
+        getattr(frappe.local, "letron_gateway_authorized", False)
+        or getattr(frappe.local, "letron_internal_authorized", False)
+    ):
+        frappe.throw("Global Portal gateway required", exc=frappe.AuthenticationError)
+
+
+def _json_argument(name: str, default: object) -> object:
+    value = frappe.local.form_dict.get(name)
+    if value in (None, ""):
+        return default
+    if isinstance(value, (list, dict)):
+        return value
+    try:
+        return json.loads(str(value))
+    except (TypeError, ValueError):
+        frappe.throw(f"Invalid {name}", exc=frappe.ValidationError)
+        raise
+
+
+def _public_document_payload() -> dict[str, object]:
+    payload = frappe.local.request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        frappe.throw("JSON object required", exc=frappe.ValidationError)
+    return payload
+
+
+@frappe.whitelist(methods=["GET"])
+def public_resource_list(doctype: str) -> None:
+    """Read a public resource after Auth Portal has authorized the route."""
+    _require_gateway()
+    rows = frappe.get_list(
+        doctype,
+        fields=_json_argument("fields", ["name"]),
+        filters=_json_argument("filters", None),
+        order_by=frappe.local.form_dict.get("order_by"),
+        limit_start=frappe.local.form_dict.get("limit_start"),
+        limit_page_length=frappe.local.form_dict.get("limit_page_length", 20),
+        as_list=False,
+        ignore_permissions=True,
+    )
+    frappe.local.response["data"] = rows
+
+
+@frappe.whitelist(methods=["GET"])
+def public_resource_get(doctype: str, name: str) -> None:
+    _require_gateway()
+    document = frappe.get_doc(doctype, name)
+    frappe.local.response["data"] = document.as_dict()
+
+
+@frappe.whitelist(methods=["POST"])
+def public_resource_create(doctype: str) -> None:
+    _require_gateway()
+    payload = _public_document_payload()
+    payload["doctype"] = doctype
+    document = frappe.get_doc(payload)
+    document.insert(ignore_permissions=True)
+    frappe.local.response["data"] = document.as_dict()
+
+
+@frappe.whitelist(methods=["PUT", "PATCH"])
+def public_resource_update(doctype: str, name: str) -> None:
+    _require_gateway()
+    document = frappe.get_doc(doctype, name)
+    for field, value in _public_document_payload().items():
+        if field not in {"doctype", "name", "owner", "creation", "modified", "modified_by"}:
+            document.set(field, value)
+    document.save(ignore_permissions=True)
+    frappe.local.response["data"] = document.as_dict()
+
+
+@frappe.whitelist(methods=["DELETE"])
+def public_resource_delete(doctype: str, name: str) -> None:
+    _require_gateway()
+    frappe.delete_doc(doctype, name, ignore_permissions=True)
+    frappe.local.response["message"] = "ok"
 
 
 @frappe.whitelist(methods=["POST"])

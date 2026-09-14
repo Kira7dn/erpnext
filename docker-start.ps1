@@ -279,7 +279,7 @@ switch ($Action) {
     'restart' { Invoke-Compose @('down'); Invoke-Compose @('up','-d'); Invoke-Compose @('ps'); Invoke-Readiness }
     'ps' { Invoke-Compose @('ps','-a') }
     'logs' { Invoke-Compose ($(if($FollowLogs){@('logs','-f')}else{@('logs','--tail=100')})) }
-    'bootstrap' { Invoke-ReloadReadiness; Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.tenant_bootstrap.run') }
+    'bootstrap' { Invoke-ReloadReadiness; Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.policy.sync') }
     'inspect' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.api.runtime_snapshot') }
     'config-plan' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.system_config.plan') }
     'config-apply' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.system_config.sync') }

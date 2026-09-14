@@ -1,15 +1,20 @@
 from __future__ import annotations
 
-import base64
-import binascii
 import hashlib
 import hmac
-import json
 import os
 import time
 from typing import Any, cast
 
 import frappe
+
+
+@frappe.whitelist(allow_guest=True, methods=["GET"])
+def csrf_token() -> str:
+    """Issue the native Frappe CSRF token for the private JIT handshake."""
+    from frappe.sessions import get_csrf_token
+
+    return get_csrf_token()
 
 
 def _signature_payload(headers: Any) -> str:
@@ -26,7 +31,6 @@ def _signature_payload(headers: Any) -> str:
             "X-Letron-Gateway-Subject",
             "X-Letron-Gateway-Subject-Type",
             "X-Letron-Gateway-Policy-Version",
-            "X-Letron-Gateway-Roles",
             "X-Letron-Gateway-Request-Id",
             "X-Letron-Gateway-Query",
             "X-Letron-Gateway-Body-Sha256",
@@ -36,7 +40,7 @@ def _signature_payload(headers: Any) -> str:
 
 def verify_gateway_request() -> str:
     headers = frappe.local.request.headers
-    secret = os.environ.get("LETRON_INTERNAL_API_SECRET", "")
+    secret = os.environ.get("LETRON_AUTH_GATEWAY_SECRET", "")
     timestamp = headers.get("X-Letron-Gateway-Issued-At", "") or headers.get("X-Letron-Gateway-Timestamp", "")
     expires_at = headers.get("X-Letron-Gateway-Expires-At", "")
     signature = headers.get("X-Letron-Gateway-Signature", "")
@@ -78,126 +82,132 @@ def verify_gateway_request() -> str:
         if cache.get_value(replay_key):
             frappe.throw("Gateway request replayed", exc=frappe.AuthenticationError)
         cache.set_value(replay_key, "1", expires_in_sec=60)
-    identity = cast(Any, frappe.db.get_value(
-        "Letron SSO Identity",
-        {"tenant_key": tenant, "subject": subject, "subject_type": subject_type},
-        ["name", "user", "email", "sync_state", "local_blocked"],
-        as_dict=True,
-    )) if frappe.db.table_exists("Letron SSO Identity") else None
-    if identity is None:
-        frappe.throw("Gateway identity is not an active ERP identity", exc=frappe.PermissionError)
-        raise frappe.PermissionError("Gateway identity is not an active ERP identity")
-    user = str(identity.user) if identity.user else ""
-    if not user or identity.email.lower() != email or identity.sync_state != "Active" or identity.local_blocked:
-        frappe.throw("Gateway identity is not an active ERP identity", exc=frappe.PermissionError)
-    active = frappe.db.get_value("User", {"name": user, "enabled": 1, "user_type": "System User"}, "name")
-    if not active:
-        frappe.throw("Gateway identity is not an active ERP user", exc=frappe.PermissionError)
-    frappe.set_user(user)
-    sync_gateway_roles_if_changed(user, identity.name, headers.get("X-Letron-Gateway-Roles", ""), headers.get("X-Letron-Gateway-Policy-Version", ""))
+    # Auth Portal is the sole authorization source. The JIT handshake creates
+    # this exact ERP User before a Gateway session is issued; never fall back to
+    # Administrator or another technical principal.
+    if not frappe.db.exists("User", email):
+        frappe.throw("Gateway identity is not provisioned in ERP", exc=frappe.AuthenticationError)
+    frappe.set_user(email)
+    frappe.flags.ignore_permissions = True
+    frappe.local.letron_gateway_actor = {
+        "id": headers.get("X-Letron-Gateway-User", "").strip(),
+        "email": email,
+        "tenant_key": tenant,
+        "subject": subject,
+        "subject_type": subject_type,
+    }
     frappe.local.letron_gateway_policy_version = headers.get("X-Letron-Gateway-Policy-Version", "")
-    frappe.local.letron_gateway_user = user
-    return user
+    frappe.local.letron_gateway_user = email
+    return email
 
 
-def verify_control_plane_request(expected_path: str | None = "/api/method/letron_api.control.access_policy.publish") -> None:
+def verify_internal_api_request() -> str:
+    """Authenticate the single private automation principal.
+
+    This lane is for server-side automation only.  It is deliberately
+    separate from the Portal gateway and never accepts an actor identity from
+    the request.
+    """
+
     headers = frappe.local.request.headers
     secret = os.environ.get("LETRON_INTERNAL_API_SECRET", "")
     timestamp = headers.get("X-Letron-Control-Timestamp", "")
     expires_at = headers.get("X-Letron-Control-Expires-At", "")
     request_id = headers.get("X-Letron-Control-Request-Id", "")
     signature = headers.get("X-Letron-Control-Signature", "")
-    path = expected_path or frappe.local.request.path
+    path = frappe.local.request.path
+    method = frappe.local.request.method
     if not secret or not timestamp or not expires_at or not request_id or not signature:
-        frappe.throw("Control-plane authorization required", exc=frappe.AuthenticationError)
+        frappe.throw("Internal API authorization required", exc=frappe.AuthenticationError)
     try:
         issued_at = int(timestamp)
         expiry = int(expires_at)
         age = abs(time.time() - issued_at)
     except ValueError:
-        frappe.throw("Invalid control-plane timestamp", exc=frappe.AuthenticationError)
+        frappe.throw("Invalid internal API timestamp", exc=frappe.AuthenticationError)
     if age > 60 or expiry < time.time() or expiry <= issued_at:
-        frappe.throw("Expired control-plane authorization", exc=frappe.AuthenticationError)
-    payload = f"{timestamp}.{expires_at}.{frappe.local.request.method}.{path}.{request_id}"
+        frappe.throw("Expired internal API authorization", exc=frappe.AuthenticationError)
+    payload = f"{timestamp}.{expires_at}.{method}.{path}.{request_id}"
     expected = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
     if not hmac.compare_digest(expected, signature):
-        frappe.throw("Invalid control-plane authorization", exc=frappe.AuthenticationError)
-    # A valid control-plane signature is the system-automation identity for
-    # native ERPNext resource calls. Do not leave the request as Guest after
-    # authenticating the caller, otherwise the signed automation cannot use
-    # the native document API.
-    frappe.set_user("Administrator")
+        frappe.throw("Invalid internal API authorization", exc=frappe.AuthenticationError)
+    cache = cast(Any, frappe.cache)()
+    replay_key = f"letron:internal-api:request:{request_id}"
+    with cache.lock(f"{replay_key}:lock", timeout=5, blocking_timeout=5):
+        if cache.get_value(replay_key):
+            frappe.throw("Internal API request replayed", exc=frappe.AuthenticationError)
+        cache.set_value(replay_key, "1", expires_in_sec=60)
+    user = os.environ.get("LETRON_INTERNAL_API_USER", "leducanh@ledb.vn").strip().lower()
+    if not user or not frappe.db.exists("User", {"name": user, "enabled": 1}):
+        frappe.throw("Internal API user is not provisioned in ERP", exc=frappe.AuthenticationError)
+    frappe.set_user(user)
+    frappe.flags.ignore_permissions = True
+    frappe.local.letron_internal_authorized = True
+    frappe.local.letron_authz_granted = True
+    frappe.local.letron_internal_user = user
+    return user
 
 
-def sync_gateway_roles_if_changed(user: str, identity_name: str, encoded_roles: str, policy_version: str) -> None:
-    """Project only policy-managed roles for this signed gateway identity."""
+def verify_jit_request() -> None:
+    headers = frappe.local.request.headers
+    secret = os.environ.get("LETRON_AUTH_TO_ERP_JIT_SECRET", "")
+    timestamp = headers.get("X-Letron-JIT-Timestamp", "")
+    expires_at = headers.get("X-Letron-JIT-Expires-At", "")
+    request_id = headers.get("X-Letron-JIT-Request-Id", "")
+    signature = headers.get("X-Letron-JIT-Signature", "")
+    path = "/api/method/letron_api.auth.sso_identity.provision_identity"
+    if not secret or not timestamp or not expires_at or not request_id or not signature:
+        frappe.throw("ERP identity provisioning authorization required", exc=frappe.AuthenticationError)
     try:
-        padded = encoded_roles + "=" * (-len(encoded_roles) % 4)
-        roles = json.loads(base64.urlsafe_b64decode(padded).decode("utf-8"))
-    except (ValueError, UnicodeDecodeError, json.JSONDecodeError, binascii.Error):
-        frappe.throw("Invalid gateway roles", exc=frappe.AuthenticationError)
-    if not isinstance(roles, list) or any(not isinstance(role, str) or not role.startswith("Letron Policy - ") for role in roles):
-        frappe.throw("Invalid gateway roles", exc=frappe.AuthenticationError)
-    desired = set(roles)
-    if not policy_version.isdigit() or int(policy_version) <= 0:
-        frappe.throw("Invalid gateway policy version", exc=frappe.AuthenticationError)
-    cache_factory: Any = getattr(frappe, "cache")
-    cache = cache_factory()
-    lock_key = f"letron:sso:gateway-role-sync:{identity_name}"
-    lock = cache.lock
-    with lock(lock_key, timeout=15, blocking_timeout=15):
-        _sync_gateway_roles_if_changed_locked(user, identity_name, desired, policy_version)
-
-
-def _sync_gateway_roles_if_changed_locked(user: str, identity_name: str, desired: set[str], policy_version: str) -> None:
-    fingerprint = hashlib.sha256(json.dumps(sorted(desired), separators=(",", ":")).encode("utf-8")).hexdigest()
-    stored = frappe.db.get_value("Letron SSO Identity", identity_name, ["gateway_roles_fingerprint", "gateway_policy_version"], as_dict=True)
-    if stored and stored.gateway_roles_fingerprint == fingerprint and str(stored.gateway_policy_version or "") == policy_version:
-        return
-    user_doc = cast(Any, frappe.get_doc("User", user))
-    current = {row.role for row in user_doc.roles}
-    retained = [row for row in user_doc.roles if not row.role.startswith("Letron Policy - ") or row.role in desired]
-    current_retained = {row.role for row in retained}
-    for role in sorted(desired - current_retained):
-        retained.append({"role": role})
-    if {row.role for row in user_doc.roles} != {row.role for row in retained}:
-        user_doc.flags.lark_sso_sync = True
-        user_doc.set("roles", retained)
-        user_doc.save(ignore_permissions=True)
-    for field, value in {
-        "gateway_roles_fingerprint": fingerprint,
-        "gateway_policy_version": int(policy_version),
-        "gateway_synced_at": frappe.utils.now_datetime(),
-    }.items():
-        frappe.db.set_value("Letron SSO Identity", identity_name, field, value, update_modified=False)
+        issued_at = int(timestamp)
+        expiry = int(expires_at)
+        age = abs(time.time() - issued_at)
+    except ValueError:
+        frappe.throw("Invalid identity provisioning timestamp", exc=frappe.AuthenticationError)
+    if age > 60 or expiry < time.time() or expiry <= issued_at:
+        frappe.throw("Expired identity provisioning authorization", exc=frappe.AuthenticationError)
+    payload = f"{timestamp}.{expires_at}.POST.{path}.{request_id}"
+    expected = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, signature):
+        frappe.throw("Invalid identity provisioning authorization", exc=frappe.AuthenticationError)
+    if frappe.local.request.method != "POST" or frappe.local.request.path != path:
+        frappe.throw("Invalid identity provisioning route", exc=frappe.AuthenticationError)
+    frappe.local.letron_jit_authorized = True
+    # JIT is a narrowly scoped Auth-to-ERP service operation. It is the only
+    # place allowed to use the native installation principal to create the
+    # identity; business Gateway requests never use this principal.
+    frappe.set_user("Administrator")
+    frappe.flags.ignore_permissions = True
+    # This is a private service-to-service endpoint authenticated by the
+    # expiring HMAC above; it is not a browser/session endpoint.
+    frappe.local.flags.ignore_csrf = True
 
 
 def enforce_gateway_ingress() -> None:
     path = frappe.local.request.path
     if path.startswith("/api/v1/"):
-        # System automation uses the same canonical public route contract as
-        # the portal, but authenticates with the control-plane HMAC. This
-        # keeps one resource/action route instead of a second method API.
         if frappe.local.request.headers.get("X-Letron-Control-Signature"):
-            verify_control_plane_request(path)
-            frappe.local.letron_control_plane_authorized = True
+            verify_internal_api_request()
             return
         verify_gateway_request()
         frappe.local.letron_gateway_authorized = True
+        frappe.local.letron_authz_granted = True
         return
 
     # Native business APIs are never an authorization path. Global Portal is
     # the only caller that may reach /api/v1/* with signed claims.
-    native_api = path.startswith("/api/resource/") or path.startswith("/api/method/")
+    native_api = path.startswith(("/api/resource/", "/api/method/"))
     if native_api and frappe.local.request.headers.get("X-Letron-Control-Signature"):
-        verify_control_plane_request(path)
-        frappe.local.letron_control_plane_authorized = True
+        verify_internal_api_request()
+        return
+    if path == "/api/method/letron_api.auth.sso_identity.provision_identity":
+        verify_jit_request()
         return
     native_exemptions = {
         "/api/method/letron_api.control.api.health",
         "/api/method/letron_api.control.api.runtime_info",
         "/api/method/letron_api.control.api.runtime_snapshot",
-        "/api/method/letron_api.control.access_policy.publish",
+        "/api/method/letron_api.auth.gateway.csrf_token",
     }
     if native_api and path not in native_exemptions:
         frappe.throw("Global Portal gateway required", exc=frappe.AuthenticationError)

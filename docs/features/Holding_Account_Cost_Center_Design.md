@@ -856,7 +856,7 @@ Biện pháp đã áp dụng:
     setup hoàn tất và đủ 184 Account template cho mỗi 8 Company (1.472 Account).
 [x] Tối ưu hot path: bundle validation được cache theo source signature; `reload`
     chỉ sync khi hash config/policy thay đổi và không gọi runtime snapshot sâu.
-[x] Sửa lifecycle `tenant_bootstrap`: không serialize lại `policy.yaml` khi 77
+[x] Sửa lifecycle policy sync: không serialize lại `policy.yaml` khi 77
     native documents đã được khai báo đầy đủ; source policy giữ nguyên UTF-8,
     comment, thứ tự và SHA-256 qua restart. Chỉ ghi lại khi native export thực sự
     bổ sung dữ liệu chưa có trong policy.
@@ -868,7 +868,7 @@ Biện pháp đã áp dụng:
     `holding_company`, Finance Book, `company_count=7`, không tạo native
     adjustment; `ok=false` chỉ vì database chưa có giao dịch để suy ra các
     metric B03-DN còn thiếu — đây không phải acceptance số liệu kế toán.
-[x] Acceptance lifecycle sau sửa: gọi lại `tenant_bootstrap` trên site cô lập,
+[x] Acceptance lifecycle sau sửa: gọi lại policy sync trên site cô lập,
     trả `created=false`, `policy_documents=77`, đủ 184 Account template cho mỗi
     Company và policy source không đổi byte/hash.
 [x] Synthetic VAS acceptance trên stack ERPNext chính: native Journal Entry tạo GL

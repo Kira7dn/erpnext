@@ -7,7 +7,6 @@ import { getDb } from "../../../../src/server/db";
 import { disableCaching } from "../../../../src/server/http";
 import { invalidatePolicyCache } from "../../../../src/server/cache";
 import { parseAccessPolicy, validatePolicy } from "../../../../src/server/access-policy";
-import { publishPolicyToErp } from "../../../../src/server/policy-publisher";
 import { fetchLarkGroupCatalog } from "../../../../src/server/lark";
 
 async function validateLiveLarkGroups(policy: ReturnType<typeof validatePolicy>["policy"]): Promise<void> {
@@ -50,8 +49,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           createdBy: actor.id,
         },
       });
-      await publishPolicyToErp({ policy: checked.policy, version: draft.version, sha256: checked.sha256 });
-
       await tx.accessPolicy.updateMany({ where: { status: "PUBLISHED" }, data: { status: "SUPERSEDED", supersededAt: new Date() } });
       return tx.accessPolicy.update({ where: { id: draft.id }, data: { status: "PUBLISHED", publishedAt: new Date() } });
     }, { maxWait: 10000, timeout: 30000 });

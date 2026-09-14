@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   canAccessPolicy,
-  policyRolesForGroups,
   parseAccessPolicy,
   policyHash,
   PUBLIC_OPERATIONS,
@@ -66,13 +65,6 @@ describe("access policy", () => {
 
   it("derives portal features from the published policy", () => {
     expect(visiblePolicyFeatures(policy, ["access", "finance"])).toEqual(["workspace", "finance"]);
-  });
-
-  it("projects the union of managed ERP roles for matching groups", () => {
-    expect(policyRolesForGroups(policy, ["access", "finance"])).toEqual([
-      "Letron Policy - group-access",
-      "Letron Policy - group-finance",
-    ]);
   });
 
   it("rejects roles that are not derived from a Lark group", () => {

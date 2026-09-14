@@ -73,7 +73,7 @@ case "$ACTION" in
     ;;
   ps) "${compose[@]}" ps -a ;;
   logs) "${compose[@]}" logs --tail=100 ;;
-  bootstrap) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.tenant_bootstrap.run ;;
+  bootstrap) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.policy.sync ;;
   inspect) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.api.runtime_snapshot ;;
   config-plan) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.system_config.plan ;;
   config-apply) "${compose[@]}" exec -T backend bench --site "$SITE_NAME" execute letron_api.control.system_config.sync ;;
