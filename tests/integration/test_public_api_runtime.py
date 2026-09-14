@@ -9,7 +9,7 @@ import pytest
 
 from .test_api_runtime_harness import (
     ApiClient,
-    RuntimeUnavailable,
+    HealthUnavailable,
     cleanup,
     cleanup_consumer_events,
     create_or_reuse,
@@ -19,12 +19,26 @@ from .test_api_runtime_harness import (
 pytestmark = pytest.mark.integration
 
 
+def test_health_contract() -> None:
+    client = ApiClient()
+    health = client.request("GET", "/api/method/letron_api.control.api.health", expected={200})
+    message = health.data.get("message") if isinstance(health.data, dict) else None
+    assert isinstance(message, dict), "health response must contain a message object"
+    assert message.get("app") == "letron_api"
+    components = {
+        name: message.get(name)
+        for name in ("bootstrap", "policy", "config", "configuration_bundle")
+    }
+    assert all(isinstance(value, dict) for value in components.values()), components
+    assert message.get("ok") is True, components
+
+
 def test_public_contract_and_lifecycle(request: pytest.FixtureRequest) -> None:
     client = ApiClient()
     try:
         client.health_and_login()
-    except RuntimeUnavailable as error:
-        pytest.fail(f"blocked runtime: {error}")
+    except HealthUnavailable as error:
+        pytest.skip(f"blocked runtime: {error}")
     snapshot = client.request("GET", "/api/method/letron_api.control.api.runtime_snapshot", expected={200})
     installed_apps = snapshot.data.get("message", {}).get("installed_apps", [])
     assert {"frappe", "erpnext", "letron_api"}.issubset(installed_apps)

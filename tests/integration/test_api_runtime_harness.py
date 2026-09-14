@@ -89,6 +89,10 @@ class RuntimeUnavailable(RuntimeError):
     """Raised when acceptance cannot safely run against a live site."""
 
 
+class HealthUnavailable(RuntimeUnavailable):
+    """Raised when the live site health contract is not ready."""
+
+
 def retryable_status(status: int) -> bool:
     """Only transient transport/server responses may be retried."""
     return status in {408, 429} or status >= 500
@@ -332,9 +336,22 @@ class ApiClient:
         }
 
     def health_and_login(self) -> None:
-        health = self.request("GET", "/api/method/letron_api.control.api.health", expected={200})
-        if not isinstance(health.data, dict) or health.data.get("message", {}).get("ok") is not True:
-            raise RuntimeUnavailable("health endpoint did not return ok=true")
+        try:
+            health = self.request("GET", "/api/method/letron_api.control.api.health", expected={200})
+        except RuntimeUnavailable as error:
+            raise HealthUnavailable(str(error)) from error
+        message = health.data.get("message") if isinstance(health.data, dict) else None
+        if not isinstance(message, dict) or message.get("ok") is not True:
+            failed_components = {
+                name: value.get("status", value.get("ok"))
+                for name in ("bootstrap", "policy", "config", "configuration_bundle")
+                if isinstance((value := message.get(name) if isinstance(message, dict) else None), dict)
+                and value.get("ok") is not True
+            }
+            raise HealthUnavailable(
+                "health endpoint did not return ok=true; "
+                f"failed_components={failed_components or ['malformed-response']}"
+            )
         self.authenticate()
 
     def request_with_retry(self, method: str, path: str, payload: dict[str, Any] | None = None, *, attempts: int = 3, **kwargs: Any) -> Response:

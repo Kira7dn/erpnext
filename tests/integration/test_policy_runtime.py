@@ -13,7 +13,11 @@ import yaml
 from letron_api.control.policy import load_policy, policy_sha256
 from letron_api.control.system_config import load_config
 
-from .test_api_runtime_harness import ApiClient, RuntimeUnavailable, response_data
+from .test_api_runtime_harness import (
+    ApiClient,
+    HealthUnavailable,
+    response_data,
+)
 
 pytestmark = pytest.mark.integration
 
@@ -64,8 +68,8 @@ def _logged_in_client() -> ApiClient:
     client = ApiClient()
     try:
         client.health_and_login()
-    except RuntimeUnavailable as error:
-        pytest.fail(f"blocked runtime: {error}")
+    except HealthUnavailable as error:
+        pytest.skip(f"blocked runtime: {error}")
     return client
 
 
@@ -195,8 +199,8 @@ def _control_client() -> ApiClient:
     client = ApiClient()
     try:
         client.health_and_login()
-    except RuntimeUnavailable as error:
-        pytest.fail(f"blocked runtime: {error}")
+    except HealthUnavailable as error:
+        pytest.skip(f"blocked runtime: {error}")
     return client
 
 

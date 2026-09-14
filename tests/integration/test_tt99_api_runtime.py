@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import pytest
 
-from .test_api_runtime_harness import ApiClient, RuntimeUnavailable
+from .test_api_runtime_harness import ApiClient, HealthUnavailable
 
 pytestmark = pytest.mark.integration
 
@@ -21,8 +21,8 @@ def _authenticated_client() -> ApiClient:
     try:
         client.health_and_login()
         client.start_app_session("accounts")
-    except RuntimeUnavailable as error:
-        pytest.fail(f"blocked Gateway runtime: {error}")
+    except HealthUnavailable as error:
+        pytest.skip(f"blocked Gateway runtime: {error}")
     return client
 
 
