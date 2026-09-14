@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ConsolidationPackageResponse.json",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "ok",
+    "holding_company",
+    "finance_book",
+    "companies",
+    "from_date",
+    "to_date",
+    "intercompany_matches",
+    "elimination_schedule",
+    "consolidated_before_elimination",
+    "consolidated_after_elimination",
+    "elimination_mode"
+  ],
+  "properties": {
+    "ok": {
+      "type": "boolean"
+    },
+    "holding_company": {
+      "type": "string"
+    },
+    "finance_book": {
+      "type": "string"
+    },
+    "companies": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "from_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "to_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "intercompany_matches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "elimination_schedule": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "consolidated_before_elimination": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "consolidated_after_elimination": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "comparative_from_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "comparative_to_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "comparative_elimination_schedule": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "consolidated_before_elimination_comparative": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "consolidated_after_elimination_comparative": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "consolidated_after_native_adjustment_comparative": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "elimination_mode": {
+      "type": "string",
+      "enum": [
+        "native_journal_entry_on_holding_finance_book"
+      ]
+    }
+  }
+}

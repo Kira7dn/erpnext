@@ -24,8 +24,8 @@ lý trong monorepo.
 
 Sản phẩm là headless: không cung cấp ERPNext Desk hoặc setup wizard cho người
 vận hành. Một deployment unit của Letron gồm đúng một Docker Compose project,
-một Frappe site, một tenant và một Company. Mọi bước khởi tạo Company, Chart of
-Accounts, tax, defaults và policy phải được `letron_api` điều phối bằng API hoặc
+một Frappe site, một tenant Holding, một Company Group và các Company pháp nhân.
+Mọi bước khởi tạo Company, Chart of Accounts, tax, defaults và policy phải được `letron_api` điều phối bằng API hoặc
 one-shot service; không có bước cấu hình thủ công qua UI.
 
 ERPNext và `letron_api` cùng nằm trong monorepo:
@@ -98,7 +98,8 @@ OpenAPI theo module và handbook có ví dụ sử dụng.
 
 - ERPNext/Frappe runtime trên Docker.
 - MariaDB, Redis, site initialization và config-driven launcher.
-- Ràng buộc một site bằng đúng một tenant và một Company.
+- Ràng buộc một site bằng đúng một tenant Holding, một Company Group và danh
+  sách Company pháp nhân đã khai báo trong policy.
 - Headless tenant bootstrap qua `letron_api`, dùng controller và country fixture
   native của ERPNext.
 - Policy control plane để đọc, validate, plan và apply `config/policy.yaml`.
@@ -149,15 +150,16 @@ POST /api/v1/accounts/sales-invoices/{name}/cancel
 7. API write phải đi qua native permission, validation và document controller.
 8. Capability chưa có delivery implementation phải được ghi rõ là chưa hoàn
    thành.
-9. Một Letron ERP instance không được tạo Company thứ hai dù ERPNext upstream
-   hỗ trợ multi-company.
+9. Một Letron ERP instance là một Holding site; được tạo Company Group và các
+   Company pháp nhân theo bootstrap policy, không có Company ngoài policy.
 10. Không có UI fallback: chức năng chỉ hoàn thành khi có API/bootstrap path và
     acceptance chạy được hoàn toàn headless.
 11. `config/config.yaml` quản lý system/runtime; `config/policy.yaml` quản lý
     Company bootstrap và business policy; entity/transaction nằm trong ERPNext
     DB; secret nằm trong `.env` hoặc secret store.
 12. Country và currency có owner duy nhất là `config/policy.yaml`. Launcher lấy
-    hai giá trị từ `policy.bootstrap.company`; `config/config.yaml` không còn là
+    các giá trị từ `policy.bootstrap.company` và `policy.bootstrap.companies`;
+    `config/config.yaml` không còn là
     owner hoặc mirror business của hai giá trị này. Boundary migration đã được
     kiểm tra trong Phase 8 acceptance.
 13. Policy completeness chỉ áp dụng cho module public và policy Frappe dùng
@@ -238,9 +240,9 @@ upload, response/error, retry và reconciliation examples.
 ### FR-09 — Headless tenant bootstrap
 
 Một site mới chỉ khởi động backend sau khi `letron_api` hoàn tất bootstrap.
-Input bootstrap nằm trong `config/policy.yaml`, gồm tên pháp nhân,
-abbreviation, country, currency, domain và lựa chọn Chart of Accounts; thao tác
-phải idempotent và từ chối tạo Company thứ hai.
+Input bootstrap nằm trong `config/policy.yaml`, gồm Company Group, danh sách
+pháp nhân, abbreviation, country, currency, domain và lựa chọn Chart of
+Accounts; thao tác phải idempotent và từ chối Company ngoài policy.
 
 Control plane hiện tại gồm:
 
@@ -339,10 +341,11 @@ monorepo.
 
 ### NFR-06 — Readiness fail-closed
 
-Business API chỉ được báo ready khi site có đúng một Company, bootstrap đã hoàn
-tất, policy compatibility khớp phiên bản ghim và policy drift bằng 0. Thiếu
-Company, có nhiều Company, thiếu prerequisite hoặc có config trong phạm vi chưa
-phân loại đều phải trả trạng thái không sẵn sàng với lỗi có thể audit.
+Business API chỉ được báo ready khi site có đúng Company Group và đầy đủ các
+Company pháp nhân đã khai báo, bootstrap hoàn tất, policy compatibility khớp
+phiên bản ghim và policy drift bằng 0. Thiếu hoặc thừa Company, sai parent,
+thiếu prerequisite hoặc có config trong phạm vi chưa phân loại đều phải trả
+trạng thái không sẵn sàng với lỗi có thể audit.
 
 ### NFR-07 — Tái lập tenant
 
@@ -406,10 +409,10 @@ không đánh dấu capability đó là production-complete.
 - Site sạch báo `bootstrap_required`; business API chưa ready.
 - Bootstrap hoàn thành hoàn toàn qua API/one-shot service, không dùng Desk hoặc
   thao tác bench thủ công.
-- Sau bootstrap có đúng một Company; request lặp lại idempotent và request tạo
-  Company thứ hai bị từ chối.
-- Company Việt Nam có VND, Chart of Accounts, default Accounts, Cost Center và
-  Warehouse native.
+- Sau bootstrap có đúng một Company Group và bảy Company pháp nhân; request lặp
+  lại idempotent và Company ngoài policy bị từ chối.
+- Mỗi Company Việt Nam có VND, Chart of Accounts, default Accounts, Cost Center
+  và Warehouse native.
 - Native Vietnam fixture tạo `Vietnam Tax` với rate `10` trong Sales, Purchase
   và Item Tax Template; thử nghiệm Sales/Purchase Invoice xác nhận calculation
   và GL qua lifecycle native.
@@ -591,9 +594,9 @@ không tự động chuyển sang revision tương lai.
 |---|---|---|
 | Business API Phase 1–7 | `COMPLETE` | 5 module, 23 resource, 137/137 operation `passed` |
 | Native controller/permission/lifecycle | `COMPLETE` trong allowlist | Docker acceptance và cleanup fail-closed |
-| Policy runtime foundation | `COMPLETE` | 25 document thật, zero drift, rollback và idempotent apply |
+| Policy runtime foundation | `COMPLETE` | Holding Company tree, native documents, zero drift, rollback và idempotent apply |
 | Full policy coverage | `COMPLETE` | 56 source registry-driven; native asset và full acceptance pass |
-| Config/policy ownership | `COMPLETE` cho boundary migration | Country/currency chỉ còn ở `policy.bootstrap.company` |
+| Config/policy ownership | `COMPLETE` cho boundary migration | Country/currency chỉ còn ở `policy.bootstrap.company` và `policy.bootstrap.companies` |
 | OpenAPI handoff | `COMPLETE` | Public 215 operation, control plane 2 operation, manifest checksum |
 | Windows/Docker production baseline | `COMPLETE` | No-flag readiness, backup và restore drill pass |
 | Phase 8 host signature | `WINDOWS_DOCKER` | Ubuntu không thuộc tiêu chí nghiệm thu Phase 8 |

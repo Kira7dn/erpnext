@@ -45,6 +45,8 @@ VIRTUAL_BANKING_ROUTES = {
     ("accounts", "bank-reconciliation", "clear-clearance"): "letron_api.finance.banking.reconciliation_clear_clearance",
     ("accounts", "bank-reconciliation", "actions"): "letron_api.finance.banking.reconciliation_action",
     ("accounts", "reports", "report"): "letron_api.finance.banking.report",
+    ("accounts", "consolidation", "package"): "letron_api.finance.banking.consolidation_package_report",
+    ("accounts", "consolidation", "adjustments"): "letron_api.finance.banking.consolidation_adjustment_create",
     ("accounts", "statement-imports", "details"): "letron_api.finance.banking.statement_details",
     ("accounts", "statement-imports", "update-pdf-tables"): "letron_api.finance.banking.statement_update_pdf_tables",
     ("accounts", "statement-imports", "reextract-pdf-table"): "letron_api.finance.banking.statement_reextract_pdf_table",
@@ -54,6 +56,21 @@ VIRTUAL_BANKING_ROUTES = {
 }
 
 def _virtual_banking_target(parts: list[str]) -> str | None:
+    if len(parts) == 5 and parts[2:5] == ["accounts", "consolidation", "package"]:
+        frappe.local.form_dict.update({"filters": frappe.local.request.args.get("filters")})
+        return "letron_api.finance.banking.consolidation_package_report"
+    if len(parts) == 5 and parts[2:5] == ["accounts", "reports", "report"]:
+        frappe.local.form_dict.update({
+            "report_key": frappe.local.request.args.get("report_key"),
+            "filters": frappe.local.request.args.get("filters"),
+        })
+        return "letron_api.finance.banking.report"
+    if len(parts) == 6 and parts[2:4] == ["accounts", "consolidation"]:
+        action = parts[5]
+        method = {"submit": "letron_api.finance.banking.consolidation_adjustment_submit", "cancel": "letron_api.finance.banking.consolidation_adjustment_cancel"}.get(action)
+        if method:
+            frappe.local.form_dict.update({"payload": frappe.request.get_data(as_text=True)})
+        return method
     if len(parts) == 4 and parts[2:4] == ["accounts", "statement-imports"]:
         return "letron_api.finance.banking.statement_imports" if frappe.local.request.method == "GET" else "letron_api.finance.banking.statement_import_create"
     if len(parts) == 4 and parts[2:4] == ["accounts", "settings"]:

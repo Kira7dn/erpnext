@@ -25,7 +25,7 @@ from typing import Any, cast
 import yaml
 from yaml.resolver import BaseResolver
 
-POLICY_VERSION = 2
+POLICY_VERSION = 3
 POLICY_SCOPE_VERSION = 1
 POLICY_STATUS_CACHE_KEY = "letron:business-policy:status"
 POLICY_ASSET_FOLDER = "Home/Letron Policy Assets"
@@ -69,6 +69,7 @@ POLICY_DOCTYPES = (
     "Workflow State",
     "Workflow Action Master",
     "Company",
+    "Finance Book",
     "Fiscal Year",
     "Accounting Dimension",
     "Accounting Dimension Filter",
@@ -84,6 +85,8 @@ POLICY_DOCTYPES = (
     "Stock Settings",
     "Stock Reposting Settings",
     "Global Defaults",
+    "Bank",
+    "Bank Account",
     "Bank Transaction Rule",
     "Supplier Scorecard",
     "Inventory Dimension",
@@ -323,6 +326,786 @@ def _plain(value: Any) -> Any:
     return value
 
 
+_COMPANY_FIELDS = ("name", "abbreviation", "country", "currency", "domain", "chart_of_accounts")
+
+
+def _validate_company_config(value: Any, label: str) -> dict[str, str]:
+    if not isinstance(value, Mapping) or set(value) != set(_COMPANY_FIELDS):
+        raise PolicyError(
+            f"{label} must contain name, abbreviation, country, currency, domain and chart_of_accounts"
+        )
+    normalized: dict[str, str] = {}
+    for fieldname in _COMPANY_FIELDS:
+        field_value = value[fieldname]
+        if not isinstance(field_value, str) or not field_value.strip():
+            raise PolicyError(f"{label}.{fieldname} must be a non-empty string")
+        normalized[fieldname] = field_value.strip()
+    return normalized
+
+
+def _normalize_bootstrap(value: Any) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise PolicyError("bootstrap must be a mapping")
+
+    # Keep the old shape readable for migration tooling and older candidate
+    # files. New Holding policies must include the group and company list.
+    if set(value) == {"company"}:
+        return {"company": _validate_company_config(value["company"], "bootstrap.company")}
+
+    if set(value) != {"company", "group", "companies"}:
+        raise PolicyError("bootstrap must contain company, group and companies")
+
+    primary = _validate_company_config(value["company"], "bootstrap.company")
+    group = value["group"]
+    if not isinstance(group, Mapping) or set(group) != {"name", "abbreviation"}:
+        raise PolicyError("bootstrap.group must contain name and abbreviation")
+    normalized_group: dict[str, str] = {}
+    for fieldname in ("name", "abbreviation"):
+        field_value = group[fieldname]
+        if not isinstance(field_value, str) or not field_value.strip():
+            raise PolicyError(f"bootstrap.group.{fieldname} must be a non-empty string")
+        normalized_group[fieldname] = field_value.strip()
+
+    companies = value["companies"]
+    if not isinstance(companies, list) or not companies:
+        raise PolicyError("bootstrap.companies must be a non-empty list")
+    normalized_companies = [_validate_company_config(item, f"bootstrap.companies[{index}]") for index, item in enumerate(companies)]
+    names = [item["name"] for item in normalized_companies]
+    abbreviations = [item["abbreviation"] for item in normalized_companies]
+    if len(set(names)) != len(names):
+        raise PolicyError("bootstrap.companies names must be unique")
+    if len(set(abbreviations)) != len(abbreviations):
+        raise PolicyError("bootstrap.companies abbreviations must be unique")
+    if primary["name"] not in names or primary["abbreviation"] not in abbreviations:
+        raise PolicyError("bootstrap.company must identify one entry in bootstrap.companies")
+    return {"company": primary, "group": normalized_group, "companies": normalized_companies}
+
+
+def _validate_fiscal_year_definition(value: Any, path: str) -> dict[str, Any]:
+    """Validate one native calendar Fiscal Year definition."""
+    if not isinstance(value, Mapping):
+        raise PolicyError(f"{path} must be a mapping")
+    required = {"name", "start_date", "end_date", "calendar_year", "companies"}
+    unknown = set(value) - required
+    if unknown:
+        raise PolicyError(f"{path} has unsupported keys: " + ", ".join(sorted(unknown)))
+    missing = required - set(value)
+    if missing:
+        raise PolicyError(f"{path} lacks required keys: " + ", ".join(sorted(missing)))
+    if not isinstance(value["name"], str) or not re.fullmatch(r"[0-9]{4}", value["name"]):
+        raise PolicyError(f"{path}.name must be a four-digit year")
+    if value["calendar_year"] is not True:
+        raise PolicyError(f"{path}.calendar_year must be true")
+    dates: dict[str, str] = {}
+    for fieldname in ("start_date", "end_date"):
+        fiscal_value = value[fieldname]
+        if not isinstance(fiscal_value, str) or not re.fullmatch(
+            r"[0-9]{4}-[0-9]{2}-[0-9]{2}", fiscal_value
+        ):
+            raise PolicyError(f"{path}.{fieldname} must use YYYY-MM-DD")
+        dates[fieldname] = fiscal_value
+    if dates["start_date"] >= dates["end_date"]:
+        raise PolicyError(f"{path}.start_date must be before end_date")
+    if (dates["start_date"], dates["end_date"]) != (
+        f"{value['name']}-01-01",
+        f"{value['name']}-12-31",
+    ):
+        raise PolicyError(f"{path} calendar_year must run from YYYY-01-01 to YYYY-12-31")
+    companies = value["companies"]
+    if (
+        not isinstance(companies, list)
+        or not companies
+        or any(not isinstance(company, str) or not company.strip() for company in companies)
+        or len(companies) != len(set(companies))
+    ):
+        raise PolicyError(f"{path}.companies must be a unique non-empty list")
+    return dict(value)
+
+
+def _normalize_shared(value: Any) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise PolicyError("shared must be a mapping")
+    allowed = {
+        "fiscal_year",
+        "comparative_fiscal_years",
+        "coa_template",
+        "function_codes",
+        "master_data_policy",
+        "cost_centers",
+        "consolidation",
+    }
+    unknown = set(value) - allowed
+    if unknown:
+        raise PolicyError("Unsupported shared keys: " + ", ".join(sorted(unknown)))
+
+    function_codes = value.get("function_codes", [])
+    if not isinstance(function_codes, list) or any(
+        not isinstance(code, str) or not re.fullmatch(r"[A-Z][A-Z0-9]{1,7}", code)
+        for code in function_codes
+    ):
+        raise PolicyError("shared.function_codes must be a list of uppercase codes")
+    if len(set(function_codes)) != len(function_codes):
+        raise PolicyError("shared.function_codes must be unique")
+
+    cost_centers = value.get("cost_centers", [])
+    if not isinstance(cost_centers, list):
+        raise PolicyError("shared.cost_centers must be a list")
+    normalized_cost_centers = []
+    for index, item in enumerate(cost_centers):
+        if not isinstance(item, Mapping) or set(item) != {"company", "code", "functions"}:
+            raise PolicyError(f"shared.cost_centers[{index}] must contain company, code and functions")
+        company = item["company"]
+        code = item["code"]
+        functions = item["functions"]
+        if not isinstance(company, str) or not company.strip() or not isinstance(code, str) or not re.fullmatch(r"[A-Z][A-Z0-9]{1,7}", code):
+            raise PolicyError(f"shared.cost_centers[{index}] has invalid company or code")
+        if not isinstance(functions, list) or any(function not in function_codes for function in functions):
+            raise PolicyError(f"shared.cost_centers[{index}].functions must reference shared.function_codes")
+        if len(set(functions)) != len(functions):
+            raise PolicyError(f"shared.cost_centers[{index}].functions must be unique")
+        normalized_cost_centers.append({"company": company.strip(), "code": code, "functions": list(functions)})
+
+    coa_template = _plain(value.get("coa_template", {}))
+    coa_codes: set[str] = set()
+    if coa_template:
+        accounts = coa_template.get("accounts", [])
+        if accounts:
+            if not isinstance(accounts, list):
+                raise PolicyError("shared.coa_template.accounts must be a list")
+            codes: list[str] = []
+            root_types = {"Asset", "Liability", "Equity", "Income", "Expense"}
+            for index, account in enumerate(accounts):
+                if not isinstance(account, Mapping):
+                    raise PolicyError(f"shared.coa_template.accounts[{index}] must be a mapping")
+                code = account.get("code")
+                name = account.get("name")
+                root_type = account.get("root_type")
+                if not isinstance(code, str) or not re.fullmatch(r"[0-9]{3,6}", code):
+                    raise PolicyError(f"shared.coa_template.accounts[{index}].code is invalid")
+                if not isinstance(name, str) or not name.strip() or root_type not in root_types:
+                    raise PolicyError(f"shared.coa_template.accounts[{index}] has invalid name or root_type")
+                codes.append(code)
+            if len(codes) != len(set(codes)):
+                raise PolicyError("shared.coa_template.accounts codes must be unique")
+            coa_codes = set(codes)
+            code_set = set(codes)
+            account_types = coa_template.get("account_types", {})
+            native_account_types = {
+                "Accumulated Depreciation",
+                "Asset Received But Not Billed",
+                "Bank",
+                "Cash",
+                "Chargeable",
+                "Capital Work in Progress",
+                "Cost of Goods Sold",
+                "Current Asset",
+                "Current Liability",
+                "Depreciation",
+                "Direct Expense",
+                "Direct Income",
+                "Equity",
+                "Expense Account",
+                "Expenses Included In Asset Valuation",
+                "Expenses Included In Valuation",
+                "Fixed Asset",
+                "Income Account",
+                "Indirect Expense",
+                "Indirect Income",
+                "Liability",
+                "Payable",
+                "Receivable",
+                "Round Off",
+                "Round Off for Opening",
+                "Stock",
+                "Stock Adjustment",
+                "Stock Received But Not Billed",
+                "Service Received But Not Billed",
+                "Tax",
+                "Temporary",
+            }
+            if not isinstance(account_types, Mapping):
+                raise PolicyError("shared.coa_template.account_types must be a mapping")
+            for account_code, account_type in account_types.items():
+                if str(account_code) not in coa_codes:
+                    raise PolicyError(
+                        "shared.coa_template.account_types references unknown Account code "
+                        + str(account_code)
+                    )
+                if account_type not in native_account_types:
+                    raise PolicyError(
+                        "shared.coa_template.account_types["
+                        + str(account_code)
+                        + "] is not a native ERPNext Account Type"
+                    )
+            for index, account in enumerate(accounts):
+                parent_code = account.get("parent_code")
+                if parent_code is not None and parent_code not in code_set:
+                    raise PolicyError(f"shared.coa_template.accounts[{index}].parent_code is unknown")
+        mapping = coa_template.get("bctc_mapping", {})
+        if mapping:
+            if not isinstance(mapping, Mapping):
+                raise PolicyError("shared.coa_template.bctc_mapping must be a mapping")
+            unknown_mapping = set(mapping) - {"version", "statements", "statutory_forms"}
+            if unknown_mapping:
+                raise PolicyError(
+                    "shared.coa_template.bctc_mapping has unsupported keys: "
+                    + ", ".join(sorted(unknown_mapping))
+                )
+            statements = mapping.get("statements", {})
+            if not isinstance(statements, Mapping):
+                raise PolicyError("shared.coa_template.bctc_mapping.statements must be a mapping")
+            for statement, lines in statements.items():
+                if not isinstance(lines, list) or any(
+                    not isinstance(line, Mapping)
+                    or not isinstance(line.get("code"), str)
+                    or not isinstance(line.get("name"), str)
+                    or not isinstance(line.get("account_codes"), list)
+                    for line in lines
+                ):
+                    raise PolicyError(f"shared.coa_template.bctc_mapping.statements.{statement} is invalid")
+                seen_codes: dict[str, str] = {}
+                for line in lines:
+                    line_code = str(line["code"])
+                    for account_code in line["account_codes"]:
+                        normalized_code = str(account_code)
+                        if coa_codes and normalized_code not in coa_codes:
+                            raise PolicyError(
+                                "shared.coa_template.bctc_mapping.statements."
+                                f"{statement}.{line_code} references unknown Account code {normalized_code}"
+                            )
+                        for previous_code, previous_line in seen_codes.items():
+                            if previous_line != line_code and (
+                                normalized_code.startswith(previous_code)
+                                or previous_code.startswith(normalized_code)
+                            ):
+                                raise PolicyError(
+                                    "shared.coa_template.bctc_mapping.statements."
+                                    f"{statement} has overlapping Account code ranges "
+                                    f"{previous_code} ({previous_line}) and "
+                                    f"{normalized_code} ({line_code})"
+                                )
+                        seen_codes[normalized_code] = line_code
+
+            statutory_forms = mapping.get("statutory_forms")
+            if statutory_forms is not None:
+                if not isinstance(statutory_forms, Mapping) or set(statutory_forms) != {
+                    "version",
+                    "regulation",
+                    "forms",
+                }:
+                    raise PolicyError(
+                        "shared.coa_template.bctc_mapping.statutory_forms has an invalid shape"
+                    )
+                if statutory_forms["version"] != 1 or statutory_forms["regulation"] != "Thông tư 99/2025/TT-BTC":
+                    raise PolicyError(
+                        "shared.coa_template.bctc_mapping.statutory_forms must use TT99 version 1"
+                    )
+                forms = statutory_forms["forms"]
+                if not isinstance(forms, Mapping) or set(forms) != {"B01-DN", "B02-DN", "B03-DN"}:
+                    raise PolicyError(
+                        "shared.coa_template.bctc_mapping.statutory_forms must define B01-DN, B02-DN and B03-DN"
+                    )
+                formula_token = re.compile(r"[0-9]+[a-z]?")
+                form_code_pattern = re.compile(r"[0-9]{2,3}[a-z]?")
+                allowed_line_types = {"account", "subtotal", "metric"}
+                allowed_sources = {
+                    "consolidation_only",
+                    "not_in_coa",
+                    "subledger_classification_required",
+                }
+                for form_code, form in forms.items():
+                    if not isinstance(form, Mapping) or set(form) != {
+                        "name",
+                        "statement",
+                        "columns",
+                        "lines",
+                    }:
+                        raise PolicyError(
+                            f"statutory form {form_code} has an invalid shape"
+                        )
+                    if form["statement"] not in {"balance_sheet", "profit_and_loss", "cash_flow"}:
+                        raise PolicyError(f"statutory form {form_code} has an invalid statement")
+                    if not isinstance(form["columns"], list) or len(form["columns"]) != 2 or any(
+                        not isinstance(column, str) or not column.strip() for column in form["columns"]
+                    ):
+                        raise PolicyError(f"statutory form {form_code}.columns is invalid")
+                    lines = form["lines"]
+                    if not isinstance(lines, list) or not lines:
+                        raise PolicyError(f"statutory form {form_code}.lines must be a non-empty list")
+                    line_codes: set[str] = set()
+                    for index, line in enumerate(lines):
+                        if not isinstance(line, Mapping) or not {
+                            "code",
+                            "name",
+                            "line_type",
+                        } <= set(line):
+                            raise PolicyError(f"statutory form {form_code}.lines[{index}] is invalid")
+                        line_code = line["code"]
+                        line_type = line["line_type"]
+                        if not isinstance(line_code, str) or not form_code_pattern.fullmatch(line_code):
+                            raise PolicyError(f"statutory form {form_code}.lines[{index}].code is invalid")
+                        if line_code in line_codes:
+                            raise PolicyError(f"statutory form {form_code} line codes must be unique")
+                        line_codes.add(line_code)
+                        if not isinstance(line["name"], str) or not line["name"].strip() or line_type not in allowed_line_types:
+                            raise PolicyError(f"statutory form {form_code}.lines[{index}] has invalid name or line_type")
+                        if line_type == "account":
+                            if set(line) - {
+                                "code",
+                                "name",
+                                "line_type",
+                                "source_account_codes",
+                                "maturity",
+                                "source",
+                            }:
+                                raise PolicyError(f"statutory form {form_code}.lines[{index}] has unsupported account keys")
+                            account_codes = line.get("source_account_codes")
+                            if not isinstance(account_codes, list) or any(
+                                not isinstance(account_code, str) or not re.fullmatch(r"[0-9]{3,6}", account_code)
+                                for account_code in account_codes
+                            ):
+                                raise PolicyError(f"statutory form {form_code}.lines[{index}].source_account_codes is invalid")
+                            if coa_codes and any(account_code not in coa_codes for account_code in account_codes):
+                                raise PolicyError(
+                                    f"statutory form {form_code}.lines[{index}] references an unknown Account code"
+                                )
+                            source = line.get("source")
+                            if source is not None and source not in allowed_sources:
+                                raise PolicyError(f"statutory form {form_code}.lines[{index}].source is invalid")
+                            if not account_codes and source not in {"consolidation_only", "not_in_coa"}:
+                                raise PolicyError(
+                                    f"statutory form {form_code}.lines[{index}] needs source_account_codes or an explicit source"
+                                )
+                            if line.get("maturity") not in {None, "current", "non_current"}:
+                                raise PolicyError(f"statutory form {form_code}.lines[{index}].maturity is invalid")
+                        elif line_type == "subtotal":
+                            formula = line.get("formula")
+                            if not isinstance(formula, str) or not re.fullmatch(r"[0-9a-z+\-]+", formula):
+                                raise PolicyError(f"statutory form {form_code}.lines[{index}].formula is invalid")
+                            if set(formula_token.findall(formula)) - line_codes:
+                                # Forward references are valid, so defer the complete check below.
+                                continue
+                        elif line_type == "metric":
+                            if not isinstance(line.get("metric"), str) or not line["metric"].strip():
+                                raise PolicyError(f"statutory form {form_code}.lines[{index}].metric is invalid")
+                    for line in lines:
+                        if line["line_type"] == "subtotal" and set(formula_token.findall(line["formula"])) - line_codes:
+                            raise PolicyError(
+                                f"statutory form {form_code}.lines[{line['code']}] formula references an unknown line"
+                            )
+        reporting = coa_template.get("reporting", {})
+        if reporting:
+            if not isinstance(reporting, Mapping):
+                raise PolicyError("shared.coa_template.reporting must be a mapping")
+            allowed_reporting = {
+                "cash_flow_categories",
+                "cash_flow",
+                "currency",
+                "assets",
+                "current_non_current",
+                "statement_classification",
+                "disclosure_notes",
+                "effective_from",
+                "effective_to",
+            }
+            unknown_reporting = set(reporting) - allowed_reporting
+            if unknown_reporting:
+                raise PolicyError(
+                    "shared.coa_template.reporting has unsupported keys: "
+                    + ", ".join(sorted(unknown_reporting))
+                )
+
+            categories = reporting.get("cash_flow_categories")
+            if categories is not None and (
+                not isinstance(categories, list)
+                or categories != ["operating", "investing", "financing"]
+            ):
+                raise PolicyError(
+                    "shared.coa_template.reporting.cash_flow_categories must be "
+                    "[operating, investing, financing]"
+                )
+
+            cash_flow = reporting.get("cash_flow")
+            if cash_flow is not None:
+                if not isinstance(cash_flow, Mapping):
+                    raise PolicyError("shared.coa_template.reporting.cash_flow must be a mapping")
+                if cash_flow.get("standard") != "VAS 24" or cash_flow.get("method") != "indirect":
+                    raise PolicyError(
+                        "shared.coa_template.reporting.cash_flow must use VAS 24 indirect method"
+                    )
+                flow_categories = cash_flow.get("categories")
+                expected_categories = {"operating", "investing", "financing"}
+                if not isinstance(flow_categories, Mapping) or set(flow_categories) != expected_categories:
+                    raise PolicyError(
+                        "shared.coa_template.reporting.cash_flow.categories must define operating, investing and financing"
+                    )
+                for category, definition in flow_categories.items():
+                    if not isinstance(definition, Mapping) or set(definition) != {
+                        "native_account_types",
+                        "account_codes",
+                    }:
+                        raise PolicyError(
+                            "shared.coa_template.reporting.cash_flow.categories."
+                            f"{category} must contain native_account_types and account_codes"
+                        )
+                    account_types = definition["native_account_types"]
+                    account_codes = definition["account_codes"]
+                    if not isinstance(account_types, list) or not account_types or any(
+                        not isinstance(item, str) or not item.strip() for item in account_types
+                    ):
+                        raise PolicyError(
+                            "shared.coa_template.reporting.cash_flow native_account_types is invalid"
+                        )
+                    if not isinstance(account_codes, list) or not account_codes or any(
+                        not isinstance(item, str) or not re.fullmatch(r"[0-9]{3,6}", item)
+                        for item in account_codes
+                    ):
+                        raise PolicyError(
+                            "shared.coa_template.reporting.cash_flow account_codes is invalid"
+                        )
+
+                metric_sources = cash_flow.get("metric_sources")
+                if metric_sources is not None:
+                    if not isinstance(metric_sources, Mapping) or not metric_sources:
+                        raise PolicyError(
+                            "shared.coa_template.reporting.cash_flow.metric_sources must be a non-empty mapping"
+                        )
+                    for metric, account_codes in metric_sources.items():
+                        if not isinstance(metric, str) or not metric.strip():
+                            raise PolicyError(
+                                "shared.coa_template.reporting.cash_flow.metric_sources has an invalid metric"
+                            )
+                        if not isinstance(account_codes, list) or not account_codes or any(
+                            not isinstance(item, str) or not re.fullmatch(r"[0-9]{3,6}", item)
+                            for item in account_codes
+                        ):
+                            raise PolicyError(
+                                "shared.coa_template.reporting.cash_flow.metric_sources account codes are invalid"
+                            )
+                        if coa_codes and any(item not in coa_codes for item in account_codes):
+                            raise PolicyError(
+                                "shared.coa_template.reporting.cash_flow.metric_sources references an unknown Account code"
+                            )
+
+            currency = reporting.get("currency")
+            if currency is not None:
+                if not isinstance(currency, Mapping) or set(currency) != {
+                    "reporting_currency",
+                    "allowed_accounting_currencies",
+                    "foreign_currency_transactions",
+                    "exchange_rate_source",
+                    "revaluation_required_at_close",
+                    "translation",
+                }:
+                    raise PolicyError(
+                        "shared.coa_template.reporting.currency has an invalid shape"
+                    )
+                if not isinstance(currency["reporting_currency"], str) or not re.fullmatch(
+                    r"[A-Z]{3}", currency["reporting_currency"]
+                ):
+                    raise PolicyError(
+                        "shared.coa_template.reporting.currency.reporting_currency is invalid"
+                    )
+                allowed_currencies = currency["allowed_accounting_currencies"]
+                if not isinstance(allowed_currencies, list) or not allowed_currencies or any(
+                    not isinstance(item, str) or not re.fullmatch(r"[A-Z]{3}", item)
+                    for item in allowed_currencies
+                ):
+                    raise PolicyError(
+                        "shared.coa_template.reporting.currency.allowed_accounting_currencies is invalid"
+                    )
+                if currency["foreign_currency_transactions"] not in {"enabled", "disabled"}:
+                    raise PolicyError(
+                        "shared.coa_template.reporting.currency.foreign_currency_transactions is invalid"
+                    )
+                if currency["exchange_rate_source"] != "native_exchange_rate":
+                    raise PolicyError(
+                        "shared.coa_template.reporting.currency.exchange_rate_source must be native_exchange_rate"
+                    )
+                if not isinstance(currency["revaluation_required_at_close"], bool):
+                    raise PolicyError(
+                        "shared.coa_template.reporting.currency.revaluation_required_at_close must be boolean"
+                    )
+                if currency["translation"] not in {"not_configured", "native_exchange_rate"}:
+                    raise PolicyError(
+                        "shared.coa_template.reporting.currency.translation is invalid"
+                    )
+
+            assets = reporting.get("assets")
+            if assets is not None:
+                if not isinstance(assets, Mapping) or set(assets) != {
+                    "default_depreciation_method",
+                    "default_frequency_months",
+                    "require_cost_center",
+                    "accounts",
+                }:
+                    raise PolicyError("shared.coa_template.reporting.assets has an invalid shape")
+                if assets["default_depreciation_method"] not in {
+                    "Straight Line",
+                    "Double Declining Balance",
+                    "Written Down Value",
+                    "Manual",
+                }:
+                    raise PolicyError(
+                        "shared.coa_template.reporting.assets.default_depreciation_method is invalid"
+                    )
+                if not isinstance(assets["default_frequency_months"], int) or assets[
+                    "default_frequency_months"
+                ] <= 0:
+                    raise PolicyError(
+                        "shared.coa_template.reporting.assets.default_frequency_months must be positive"
+                    )
+                if not isinstance(assets["require_cost_center"], bool):
+                    raise PolicyError(
+                        "shared.coa_template.reporting.assets.require_cost_center must be boolean"
+                    )
+                asset_accounts = assets["accounts"]
+                if not isinstance(asset_accounts, Mapping) or set(asset_accounts) != {
+                    "fixed_asset",
+                    "accumulated_depreciation",
+                    "depreciation_expense",
+                    "capital_work_in_progress",
+                } or any(
+                    not isinstance(item, str) or not re.fullmatch(r"[0-9]{3,6}", item)
+                    for item in asset_accounts.values()
+                ):
+                    raise PolicyError(
+                        "shared.coa_template.reporting.assets.accounts is invalid"
+                    )
+
+            disclosure_notes = reporting.get("disclosure_notes")
+            if disclosure_notes is not None:
+                if not isinstance(disclosure_notes, list) or any(
+                    not isinstance(note, Mapping)
+                    or set(note) != {"code", "name", "source"}
+                    or not isinstance(note["code"], str)
+                    or not re.fullmatch(r"N[0-9]{2}", note["code"])
+                    or not isinstance(note["name"], str)
+                    or not isinstance(note["source"], str)
+                    for note in disclosure_notes
+                ):
+                    raise PolicyError(
+                        "shared.coa_template.reporting.disclosure_notes is invalid"
+                    )
+                note_codes = [note["code"] for note in disclosure_notes]
+                if len(note_codes) != len(set(note_codes)):
+                    raise PolicyError(
+                        "shared.coa_template.reporting.disclosure_notes codes must be unique"
+                    )
+
+            for fieldname in ("effective_from", "effective_to"):
+                reporting_value = reporting.get(fieldname)
+                if reporting_value is not None and (
+                    not isinstance(reporting_value, str)
+                    or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", reporting_value)
+                ):
+                    raise PolicyError(
+                        f"shared.coa_template.reporting.{fieldname} must use YYYY-MM-DD or null"
+                    )
+            effective_from = reporting.get("effective_from")
+            effective_to = reporting.get("effective_to")
+            if effective_from and effective_to and effective_from >= effective_to:
+                raise PolicyError(
+                    "shared.coa_template.reporting.effective_from must be before effective_to"
+                )
+    fiscal_year = _plain(value.get("fiscal_year", {}))
+    if fiscal_year:
+        fiscal_year = _validate_fiscal_year_definition(fiscal_year, "shared.fiscal_year")
+    comparative_fiscal_years = _plain(value.get("comparative_fiscal_years", []))
+    if not isinstance(comparative_fiscal_years, list):
+        raise PolicyError("shared.comparative_fiscal_years must be a list")
+    normalized_comparative_fiscal_years = [
+        _validate_fiscal_year_definition(item, f"shared.comparative_fiscal_years[{index}]")
+        for index, item in enumerate(comparative_fiscal_years)
+    ]
+    fiscal_names = [str(item["name"]) for item in normalized_comparative_fiscal_years]
+    if len(set(fiscal_names)) != len(fiscal_names):
+        raise PolicyError("shared.comparative_fiscal_years names must be unique")
+    if fiscal_year:
+        if fiscal_year["name"] in fiscal_names:
+            raise PolicyError("shared.comparative_fiscal_years must not contain shared.fiscal_year")
+        expected_companies = set(fiscal_year["companies"])
+        if any(set(item["companies"]) != expected_companies for item in normalized_comparative_fiscal_years):
+            raise PolicyError(
+                "shared.comparative_fiscal_years.companies must match shared.fiscal_year.companies"
+            )
+    elif normalized_comparative_fiscal_years:
+        raise PolicyError("shared.fiscal_year is required when comparative years are configured")
+
+    consolidation = _plain(value.get("consolidation", {}))
+    if consolidation:
+        if not isinstance(consolidation, Mapping):
+            raise PolicyError("shared.consolidation must be a mapping")
+        allowed_consolidation = {"holding_company", "companies", "finance_book", "reporting_currency", "elimination_rules", "require_closed_period", "intercompany_marker"}
+        required = {"holding_company", "companies", "finance_book", "reporting_currency", "elimination_rules"}
+        if set(consolidation) - allowed_consolidation:
+            raise PolicyError("shared.consolidation has unsupported keys: " + ", ".join(sorted(set(consolidation) - allowed_consolidation)))
+        if not required <= set(consolidation):
+            raise PolicyError("shared.consolidation lacks required keys: " + ", ".join(sorted(required - set(consolidation))))
+        if not isinstance(consolidation.get("holding_company"), str) or not consolidation["holding_company"].strip():
+            raise PolicyError("shared.consolidation.holding_company must be a non-empty string")
+        companies = consolidation.get("companies")
+        if not isinstance(companies, list) or not companies or any(not isinstance(item, str) or not item.strip() for item in companies):
+            raise PolicyError("shared.consolidation.companies must be a non-empty list of Company names")
+        if consolidation["holding_company"] not in companies or len(companies) != len(set(companies)):
+            raise PolicyError("shared.consolidation.companies must uniquely include holding_company")
+        if not isinstance(consolidation.get("finance_book"), str) or not consolidation["finance_book"].strip():
+            raise PolicyError("shared.consolidation.finance_book must be a non-empty string")
+        if not isinstance(consolidation.get("reporting_currency"), str) or not consolidation["reporting_currency"].strip():
+            raise PolicyError("shared.consolidation.reporting_currency must be a non-empty string")
+        marker = consolidation.get("intercompany_marker")
+        if marker is not None:
+            if not isinstance(marker, str) or not marker.strip():
+                raise PolicyError("shared.consolidation.intercompany_marker must be a non-empty string")
+            marker_fields = {
+                "matching_id",
+                "source_company",
+                "counterparty_company",
+                "transaction_type",
+            }
+            placeholder_values = re.findall(r"\{([a-z][a-z0-9_]*)\}", marker)
+            placeholders = set(placeholder_values)
+            if placeholders != marker_fields or any(
+                placeholder_values.count(field) != 1 for field in marker_fields
+            ):
+                raise PolicyError(
+                    "shared.consolidation.intercompany_marker must contain exactly: "
+                    + ", ".join(sorted(marker_fields))
+                )
+        if "require_closed_period" in consolidation and not isinstance(
+            consolidation["require_closed_period"], bool
+        ):
+            raise PolicyError("shared.consolidation.require_closed_period must be boolean")
+        rules = consolidation.get("elimination_rules")
+        if not isinstance(rules, list):
+            raise PolicyError("shared.consolidation.elimination_rules must be a list")
+        for index, rule in enumerate(rules):
+            if not isinstance(rule, Mapping):
+                raise PolicyError(f"shared.consolidation.elimination_rules[{index}] must be a mapping")
+            allowed_rule = {
+                "code",
+                "label",
+                "source_account_codes",
+                "counterparty_account_codes",
+                "debit_account_code",
+                "credit_account_code",
+                "posting_mode",
+            }
+            unsupported_rule_keys = set(rule) - allowed_rule
+            if unsupported_rule_keys:
+                raise PolicyError(
+                    f"shared.consolidation.elimination_rules[{index}] has unsupported keys: "
+                    + ", ".join(sorted(unsupported_rule_keys))
+                )
+            required_rule = {"code", "source_account_codes", "counterparty_account_codes", "debit_account_code", "credit_account_code"}
+            if not required_rule <= set(rule):
+                raise PolicyError(f"shared.consolidation.elimination_rules[{index}] lacks required fields")
+            if not isinstance(rule["code"], str) or not re.fullmatch(r"[A-Z][A-Z0-9_-]{2,31}", rule["code"]):
+                raise PolicyError(f"shared.consolidation.elimination_rules[{index}].code is invalid")
+            for fieldname in ("source_account_codes", "counterparty_account_codes"):
+                codes = rule[fieldname]
+                if not isinstance(codes, list) or not codes or any(not isinstance(code, str) or not re.fullmatch(r"[0-9]{3,6}", code) for code in codes):
+                    raise PolicyError(f"shared.consolidation.elimination_rules[{index}].{fieldname} is invalid")
+            for fieldname in ("debit_account_code", "credit_account_code"):
+                if not isinstance(rule[fieldname], str) or not re.fullmatch(r"[0-9]{3,6}", rule[fieldname]):
+                    raise PolicyError(f"shared.consolidation.elimination_rules[{index}].{fieldname} is invalid")
+            posting_mode = rule.get("posting_mode", "policy_accounts")
+            if posting_mode not in {"policy_accounts", "mirror_actual_accounts"}:
+                raise PolicyError(
+                    f"shared.consolidation.elimination_rules[{index}].posting_mode is invalid"
+                )
+            if coa_codes:
+                referenced_codes = [
+                    *rule["source_account_codes"],
+                    *rule["counterparty_account_codes"],
+                    rule["debit_account_code"],
+                    rule["credit_account_code"],
+                ]
+                unknown_codes = sorted(
+                    {str(code) for code in referenced_codes if str(code) not in coa_codes}
+                )
+                if unknown_codes:
+                    raise PolicyError(
+                        f"shared.consolidation.elimination_rules[{index}] references "
+                        "unknown COA Account code(s): " + ", ".join(unknown_codes)
+                    )
+
+    return {
+        "fiscal_year": fiscal_year,
+        "comparative_fiscal_years": normalized_comparative_fiscal_years,
+        "coa_template": coa_template,
+        "function_codes": list(function_codes),
+        "master_data_policy": _plain(value.get("master_data_policy", {})),
+        "cost_centers": normalized_cost_centers,
+        "consolidation": consolidation,
+    }
+
+
+def _expand_shared_cost_centers(documents: list[dict[str, Any]], policy: Mapping[str, Any]) -> list[dict[str, Any]]:
+    shared = policy.get("shared", {})
+    bootstrap = policy.get("bootstrap", {})
+    configured_companies = bootstrap.get("companies") or ([bootstrap["company"]] if bootstrap.get("company") else [])
+    companies = {item["name"]: item for item in configured_companies}
+    generated_names: set[str] = set()
+    for item in shared.get("cost_centers", []):
+        company = companies.get(item["company"])
+        if not company:
+            raise PolicyError(f"shared.cost_centers references unknown Company: {item['company']}")
+        abbreviation = company["abbreviation"]
+        generated_names.add(f"{item['code']} - {abbreviation}")
+        generated_names.update(
+            f"{item['code']}-{function} - {abbreviation}"
+            for function in item["functions"]
+        )
+    # Regenerate this declared projection deterministically. This also repairs
+    # bundles produced by the earlier layout where a subsidiary's native root
+    # was duplicated as a second group.
+    expanded = [
+        entry
+        for entry in documents
+        if not (entry["doctype"] == "Cost Center" and entry["name"] in generated_names)
+    ]
+    existing = {(item["doctype"], item["name"]) for item in expanded}
+    for item in shared.get("cost_centers", []):
+        company = companies.get(item["company"])
+        if not company:
+            raise PolicyError(f"shared.cost_centers references unknown Company: {item['company']}")
+        abbreviation = company["abbreviation"]
+        # ERPNext creates each Company's native root Cost Center as
+        # ``<Company> - <abbr>``.  The database document name is that value,
+        # while ``cost_center_name`` remains the human label.
+        root_name = f"{company['name']} - {abbreviation}"
+        # For subsidiaries the native Company root already is the requested
+        # company cost-center group. HoldCo uses an additional HLD group below
+        # its native root so the legal-entity root remains intact.
+        uses_native_root = item["code"] == abbreviation
+        group_name = root_name if uses_native_root else f"{item['code']} - {abbreviation}"
+        group_label = company["name"] if uses_native_root else item["code"]
+        group_parent = None if uses_native_root else root_name
+        generated = [
+            (group_name, group_label, group_parent, 1),
+            *[(f"{item['code']}-{function} - {abbreviation}", f"{item['code']}-{function}", group_name, 0) for function in item["functions"]],
+        ]
+        for name, cost_center_name, parent, is_group in generated:
+            key = ("Cost Center", name)
+            if key in existing:
+                continue
+            expanded.append({
+                "doctype": "Cost Center",
+                "name": name,
+                "state": "present",
+                "fields": {
+                    "cost_center_name": cost_center_name,
+                    "company": company["name"],
+                    "parent_cost_center": parent,
+                    "is_group": is_group,
+                    "disabled": 0,
+                },
+            })
+            existing.add(key)
+    return expanded
+
+
 def _policy_path(path: str | Path | None = None) -> Path:
     if path:
         return Path(path).resolve()
@@ -419,63 +1202,87 @@ def _asset_source_path(policy_path: Path, source: str) -> Path:
 
 
 def _fill_missing(primary: Any, fallback: Any) -> Any:
-    """Fill only absent values while preserving every explicit primary value."""
+    """Merge a compact override onto defaults while preserving explicit values."""
 
     if isinstance(primary, Mapping) and isinstance(fallback, Mapping):
-        if not primary:
-            return copy.deepcopy(primary)
         result = copy.deepcopy(dict(fallback))
         for key, value in primary.items():
-            result[key] = _fill_missing(value, fallback[key]) if key in fallback else copy.deepcopy(value)
+            result[key] = (
+                _fill_missing(value, fallback[key])
+                if key in fallback
+                else copy.deepcopy(value)
+            )
         return result
-    if isinstance(primary, list) and isinstance(fallback, list):
-        result = copy.deepcopy(primary)
-        for index, value in enumerate(primary):
-            if index < len(fallback):
-                result[index] = _fill_missing(value, fallback[index])
-        return result
+    # Lists are declarative collections. An explicit list replaces the default
+    # list as a whole; positional merging makes child tables and company lists
+    # silently inherit unrelated rows.
     return copy.deepcopy(primary)
 
 
-def _load_full_defaults(source: Path) -> dict[str, Any] | None:
-    """Load the optional adjacent full policy used only as packaging fallback."""
+def _load_policy_defaults(source: Path) -> dict[str, Any] | None:
+    """Load the adjacent parent policy used to expand compact overrides."""
 
-    if source.name == "policy-full.yaml":
+    if source.name == "policy-defaults.yaml":
         return None
-    full_source = source.with_name("policy-full.yaml")
-    if not full_source.is_file():
+    defaults_source = source.with_name("policy-defaults.yaml")
+    if not defaults_source.is_file():
         return None
     try:
-        full = yaml.load(full_source.read_text(encoding="utf-8"), Loader=_UniqueKeyLoader)
+        defaults = yaml.load(
+            defaults_source.read_text(encoding="utf-8"), Loader=_UniqueKeyLoader
+        )
     except yaml.YAMLError as error:
-        raise PolicyError(f"Invalid full policy YAML: {error}") from error
-    if not isinstance(full, dict) or not isinstance(full.get("documents"), list):
-        raise PolicyError("policy-full.yaml must contain a documents list")
-    return full
+        raise PolicyError(f"Invalid policy defaults YAML: {error}") from error
+    if not isinstance(defaults, dict) or not isinstance(defaults.get("documents"), list):
+        raise PolicyError("policy-defaults.yaml must contain a documents list")
+    return defaults
 
 
-def _merge_full_defaults(raw: dict[str, Any], source: Path) -> dict[str, Any]:
-    """Build the effective policy without expanding its declared DocType scope."""
+def _merge_policy_defaults(raw: dict[str, Any], source: Path) -> dict[str, Any]:
+    """Build the effective policy from a compact child and complete parent.
 
-    full = _load_full_defaults(source)
-    if full is None:
+    ``policy.yaml`` is a strict subset of ``policy-defaults.yaml`` at document
+    identity level. A child document may override fields, or use ``state:
+    absent`` to suppress a default document. New document identities must be
+    added to the parent first so a compact policy cannot silently introduce an
+    unmanaged configuration object.
+    """
+
+    defaults = _load_policy_defaults(source)
+    if defaults is None:
         return raw
-    full_documents = {
+    merged = copy.deepcopy(defaults)
+    for key, value in raw.items():
+        if key == "documents":
+            continue
+        if key in defaults and isinstance(value, Mapping) and isinstance(defaults[key], Mapping):
+            merged[key] = _fill_missing(value, defaults[key])
+        else:
+            merged[key] = copy.deepcopy(value)
+
+    default_documents = {
         (item.get("doctype"), item.get("name")): item
-        for item in full["documents"]
+        for item in defaults["documents"]
         if isinstance(item, Mapping)
     }
-    merged = copy.deepcopy(raw)
-    effective_documents: list[Any] = []
+    effective_documents = copy.deepcopy(defaults["documents"])
+    default_indexes = {
+        key: index for index, key in enumerate(default_documents)
+    }
     for item in raw.get("documents", []):
         if not isinstance(item, Mapping):
-            effective_documents.append(copy.deepcopy(item))
-            continue
-        fallback = full_documents.get((item.get("doctype"), item.get("name")))
-        if fallback is None or item.get("state") == "absent" or item.get("fields") == {}:
-            effective_documents.append(copy.deepcopy(item))
-            continue
-        effective_documents.append(_fill_missing(item, fallback))
+            raise PolicyError("policy.yaml documents must contain mappings")
+        key = (item.get("doctype"), item.get("name"))
+        if key not in default_indexes:
+            raise PolicyError(
+                "policy.yaml document is not declared in policy-defaults.yaml: "
+                + "/".join(str(value) for value in key)
+            )
+        index = default_indexes[key]
+        if item.get("state") == "absent":
+            effective_documents[index] = copy.deepcopy(item)
+        else:
+            effective_documents[index] = _fill_missing(item, default_documents[key])
     merged["documents"] = effective_documents
     return merged
 
@@ -644,8 +1451,8 @@ def load_policy(path: str | Path | None = None) -> dict[str, Any]:
         raise PolicyError(f"Invalid policy YAML: {error}") from error
     if not isinstance(raw, dict):
         raise PolicyError("Policy YAML root must be a mapping")
-    raw = _merge_full_defaults(raw, source)
-    unknown_top_level = set(raw) - {"version", "scope_version", "erpnext_version", "bootstrap", "assets", "documents"}
+    raw = _merge_policy_defaults(raw, source)
+    unknown_top_level = set(raw) - {"version", "scope_version", "erpnext_version", "bootstrap", "shared", "assets", "documents"}
     if unknown_top_level:
         raise PolicyError("Unsupported top-level policy keys: " + ", ".join(sorted(unknown_top_level)))
     if raw.get("version") != POLICY_VERSION:
@@ -673,27 +1480,31 @@ def load_policy(path: str | Path | None = None) -> dict[str, Any]:
 
     bootstrap = raw.get("bootstrap")
     if bootstrap is not None:
-        if not isinstance(bootstrap, dict) or set(bootstrap) != {"company"}:
-            raise PolicyError("bootstrap must contain exactly one company mapping")
-        company = bootstrap["company"]
-        required_company_fields = (
-            "name",
-            "abbreviation",
-            "country",
-            "currency",
-            "domain",
-            "chart_of_accounts",
-        )
-        if not isinstance(company, dict) or set(company) != set(required_company_fields):
+        bootstrap = _normalize_bootstrap(bootstrap)
+
+    has_shared = "shared" in raw
+    shared = _normalize_shared(raw.get("shared", {}))
+    if bootstrap and has_shared:
+        configured_companies = {
+            str(item["name"])
+            for item in bootstrap.get("companies", [])
+            if isinstance(item, Mapping) and item.get("name")
+        }
+        fiscal_year = shared.get("fiscal_year", {})
+        if fiscal_year and set(fiscal_year.get("companies", [])) != configured_companies:
             raise PolicyError(
-                "bootstrap.company must contain name, abbreviation, country, currency, "
-                "domain and chart_of_accounts"
+                "shared.fiscal_year.companies must match bootstrap.companies"
             )
-        for fieldname in required_company_fields:
-            value = company[fieldname]
-            if not isinstance(value, str) or not value.strip():
-                raise PolicyError(f"bootstrap.company.{fieldname} must be a non-empty string")
-        bootstrap = {"company": {key: company[key].strip() for key in required_company_fields}}
+        for index, comparative in enumerate(shared.get("comparative_fiscal_years", [])):
+            if set(comparative.get("companies", [])) != configured_companies:
+                raise PolicyError(
+                    f"shared.comparative_fiscal_years[{index}].companies must match bootstrap.companies"
+                )
+        consolidation = shared.get("consolidation", {})
+        if consolidation and set(consolidation.get("companies", [])) != configured_companies:
+            raise PolicyError(
+                "shared.consolidation.companies must match bootstrap.companies"
+            )
 
     seen: set[tuple[str, str]] = set()
     normalized: list[dict[str, Any]] = []
@@ -732,6 +1543,51 @@ def load_policy(path: str | Path | None = None) -> dict[str, Any]:
             {"doctype": doctype, "name": name, "state": state, "fields": _plain(fields)}
         )
 
+    fiscal_year = shared.get("fiscal_year", {})
+    fiscal_definitions = ([fiscal_year] if fiscal_year else []) + list(
+        shared.get("comparative_fiscal_years", [])
+    )
+    if fiscal_definitions:
+        fiscal_documents = [
+            entry
+            for entry in normalized
+            if entry["doctype"] == "Fiscal Year" and entry["state"] == "present"
+        ]
+        expected_names = {str(item["name"]) for item in fiscal_definitions}
+        actual_names = {str(item["name"]) for item in fiscal_documents}
+        if actual_names != expected_names or len(fiscal_documents) != len(expected_names):
+            raise PolicyError(
+                "shared.fiscal_year definitions must have exactly matching present Fiscal Year documents"
+            )
+        for definition in fiscal_definitions:
+            fiscal_document = next(
+                entry for entry in fiscal_documents if entry["name"] == definition["name"]
+            )
+            fiscal_fields = fiscal_document["fields"]
+            if (
+                fiscal_fields.get("year") != definition["name"]
+                or fiscal_fields.get("year_start_date") != definition["start_date"]
+                or fiscal_fields.get("year_end_date") != definition["end_date"]
+            ):
+                path = (
+                    "shared.fiscal_year"
+                    if definition["name"] == fiscal_year.get("name")
+                    else "shared.comparative_fiscal_years"
+                )
+                raise PolicyError(f"Fiscal Year document must match {path} name and dates")
+            fiscal_document_companies = {
+                str(row.get("company"))
+                for row in fiscal_fields.get("companies", [])
+                if isinstance(row, Mapping) and row.get("company")
+            }
+            if fiscal_document_companies != set(definition["companies"]):
+                path = (
+                    "shared.fiscal_year"
+                    if definition["name"] == fiscal_year.get("name")
+                    else "shared.comparative_fiscal_years"
+                )
+                raise PolicyError(f"Fiscal Year document companies must match {path}.companies")
+
     normalized_policy = {
         "version": POLICY_VERSION,
         "scope_version": POLICY_SCOPE_VERSION,
@@ -739,8 +1595,13 @@ def load_policy(path: str | Path | None = None) -> dict[str, Any]:
         "assets": _plain(assets),
         "documents": normalized,
     }
+    if has_shared:
+        normalized_policy["shared"] = shared
     if bootstrap is not None:
         normalized_policy["bootstrap"] = bootstrap
+    normalized_policy["documents"] = _expand_shared_cost_centers(
+        normalized_policy["documents"], normalized_policy
+    )
     return normalized_policy
 
 
@@ -780,6 +1641,11 @@ def validate_file(path: str | Path | None = None) -> dict[str, Any]:
     }
     if "bootstrap" in policy:
         result["bootstrap_company"] = policy["bootstrap"]["company"]["name"]
+        result["bootstrap_companies"] = [
+            company["name"]
+            for company in policy["bootstrap"].get("companies", [policy["bootstrap"]["company"]])
+        ]
+        result["bootstrap_group"] = policy["bootstrap"].get("group")
     return result
 
 
@@ -812,6 +1678,31 @@ def _is_global_portal_rbac_record(doctype: str, name: str) -> bool:
     return isinstance(role, str) and role.startswith("Letron Policy - ")
 
 
+def _is_holding_native_default(doctype: str, name: str) -> bool:
+    """Allow tax templates generated by ERPNext for configured Holding entities."""
+
+    if doctype not in {
+        "Item Tax Template",
+        "Purchase Taxes and Charges Template",
+        "Sales Taxes and Charges Template",
+    }:
+        return False
+    frappe = _frappe()
+    company = frappe.db.get_value(doctype, name, "company")
+    if not isinstance(company, str):
+        return False
+    bootstrap = load_policy().get("bootstrap", {})
+    companies = {
+        str(item["name"])
+        for item in bootstrap.get("companies", [bootstrap.get("company", {})])
+        if isinstance(item, Mapping) and item.get("name")
+    }
+    group = bootstrap.get("group") or {}
+    if isinstance(group, Mapping) and group.get("name"):
+        companies.add(str(group["name"]))
+    return company in companies and name.startswith("Vietnam ")
+
+
 def _frappe() -> Any:
     import frappe
 
@@ -826,6 +1717,62 @@ def _runtime_erpnext_version() -> str:
 
 def _field_map(meta: Any) -> dict[str, Any]:
     return {field.fieldname: field for field in meta.fields if field.fieldname}
+
+
+def _account_reference(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    if value.startswith("account://"):
+        code = value.removeprefix("account://")
+        return code if re.fullmatch(r"[0-9]{3,6}", code) else None
+    match = re.match(r"^([0-9]{3,6})(?:\s+-|\s)", value)
+    return match.group(1) if match else None
+
+
+def _resolve_policy_link(target: str, value: Any, context: Mapping[str, Any]) -> Any:
+    """Resolve stable finance references to the native per-Company name."""
+    if target != "Account" or value in (None, ""):
+        return value
+    code = _account_reference(value)
+    if not code:
+        return value
+    company = context.get("company")
+    if not isinstance(company, str) or not company:
+        raise PolicyError(f"Account reference {value} requires a Company context")
+    account_name = _frappe().db.get_value(
+        "Account", {"company": company, "account_number": code}, "name"
+    )
+    if not account_name:
+        raise PolicyError(f"Account reference {value} is not materialized for Company {company}")
+    return account_name
+
+
+def _resolve_policy_fields(doctype: str, fields: Mapping[str, Any]) -> dict[str, Any]:
+    """Convert stable policy links before native validation/apply/readback."""
+    frappe = _frappe()
+    meta_fields = _field_map(frappe.get_meta(doctype))
+    resolved = dict(fields)
+    context = dict(fields)
+    for fieldname, value in fields.items():
+        field = meta_fields.get(fieldname)
+        if field is None:
+            continue
+        if field.fieldtype == "Link":
+            resolved[fieldname] = _resolve_policy_link(str(field.options), value, context)
+        elif field.fieldtype in TABLE_FIELD_TYPES and isinstance(value, list):
+            child_fields = _field_map(frappe.get_meta(field.options))
+            rows = []
+            for row in value:
+                child = dict(row)
+                for child_name, child_value in row.items():
+                    child_field = child_fields.get(child_name)
+                    if child_field and child_field.fieldtype == "Link":
+                        child[child_name] = _resolve_policy_link(
+                            str(child_field.options), child_value, context
+                        )
+                rows.append(child)
+            resolved[fieldname] = rows
+    return resolved
 
 
 def _validate_native_value(doctype: str, field: Any, value: Any) -> None:
@@ -899,7 +1846,8 @@ def _validate_runtime(policy: Mapping[str, Any], path: str | Path | None = None)
             continue
         _validate_public_selector(policy_path, doctype, entry["fields"])
         fields = _field_map(meta)
-        for fieldname, value in entry["fields"].items():
+        resolved_values = _resolve_policy_fields(doctype, entry["fields"])
+        for fieldname, value in resolved_values.items():
             if fieldname in SYSTEM_FIELDS and not (
                 doctype == "Custom DocPerm" and fieldname == "parent"
             ):
@@ -991,9 +1939,10 @@ def plan(path: str | Path | None = None) -> dict[str, Any]:
         if current is None:
             changes.append({"document": key, "operation": "create", "fields": sorted(entry["fields"])})
             continue
+        desired_fields = _resolve_policy_fields(str(entry["doctype"]), entry["fields"])
         field_changes = {
             fieldname: {"current": current.get(fieldname), "desired": desired}
-            for fieldname, desired in entry["fields"].items()
+            for fieldname, desired in desired_fields.items()
             if _plain(current.get(fieldname)) != _plain(desired)
         }
         if field_changes:
@@ -1011,6 +1960,7 @@ def plan(path: str | Path | None = None) -> dict[str, Any]:
                 _is_acceptance_fixture(name)
                 or _is_standard_policy_record(_policy_path(path), doctype, name)
                 or _is_global_portal_rbac_record(doctype, name)
+                or _is_holding_native_default(doctype, name)
             ):
                 continue
             changes.append(
@@ -1138,7 +2088,7 @@ def apply(
                 else:
                     doc = frappe.get_doc({"doctype": doctype, "name": name})
                     creating = True
-                doc.update(entry["fields"])
+                doc.update(_resolve_policy_fields(str(entry["doctype"]), entry["fields"]))
                 doc.flags.ignore_permissions = True
                 if creating or doc.is_new():
                     # Policy names are fixed identifiers. Native autoname and
@@ -1311,6 +2261,8 @@ def export_current_bundle(path: str | Path | None = None) -> dict[str, Any]:
     }
     if "bootstrap" in source_policy:
         bundle["bootstrap"] = source_policy["bootstrap"]
+    if "shared" in source_policy:
+        bundle["shared"] = source_policy["shared"]
     bundle["documents"] = documents
     return bundle
 
@@ -1322,7 +2274,16 @@ def export_current() -> str:
 
 
 def materialize_native_defaults() -> dict[str, Any]:
-    """Merge native bootstrap output into YAML without replacing declared policy."""
+    """Merge native bootstrap output only when it adds real policy data.
+
+    Tenant bootstrap runs before the generic policy sync.  Rewriting the source
+    YAML on every bootstrap used to be harmless-looking, but it reordered every
+    declared document and stripped its comments even when the native state was
+    already fully declared.  That made the policy hash change across a restart
+    and turned the source file into a runtime-generated artifact.  Keep the
+    declarative source byte-stable unless the native export actually contains a
+    document or field that is not already represented by the policy.
+    """
 
     source = _policy_path()
     desired = load_policy(source)
@@ -1341,7 +2302,22 @@ def materialize_native_defaults() -> dict[str, Any]:
     }
     if "bootstrap" in desired:
         merged["bootstrap"] = desired["bootstrap"]
+    if "shared" in desired:
+        merged["shared"] = desired["shared"]
     merged["documents"] = _sorted_entries(documents.values())
+    desired_documents = {
+        (entry["doctype"], entry["name"]): entry for entry in desired["documents"]
+    }
+    merged_documents = {
+        (entry["doctype"], entry["name"]): entry for entry in merged["documents"]
+    }
+    if merged_documents == desired_documents:
+        return {
+            "ok": True,
+            "documents": len(desired["documents"]),
+            "sha256": policy_sha256(desired),
+            "changed": False,
+        }
     content = dump_policy(merged)
     temporary = source.with_name(f".{source.name}.{os.getpid()}.bootstrap")
     try:
@@ -1355,6 +2331,7 @@ def materialize_native_defaults() -> dict[str, Any]:
         "ok": True,
         "documents": len(merged["documents"]),
         "sha256": policy_sha256(merged),
+        "changed": True,
     }
 
 
@@ -1480,9 +2457,29 @@ def _is_test_runtime() -> bool:
 
 
 def sync() -> dict[str, Any]:
-    """Bench/Compose entrypoint."""
+    """Apply the complete policy, including declarative finance masters."""
+    # Startup and an operator-triggered policy-apply share the same Account,
+    # Company and tax-template tables.  Serialize the whole sync so a second
+    # bench execute cannot hold row locks while the first one is converging.
+    frappe = _frappe()
+    cache = frappe.cache()
+    with cache.lock("letron:business-policy:sync", timeout=600, blocking_timeout=30):
+        from letron_api.control.holding_finance import apply as apply_finance
 
-    return apply()
+        # Policy documents may contain Link values to finance masters (for
+        # example Item Tax Template -> Account 33311).  Create/converge those
+        # native masters before policy validation resolves the links.
+        # Finance bootstrap is part of the same protected policy transaction:
+        # its Fiscal Year/Account updates are managed documents and must pass
+        # the same lifecycle guard as the generic policy materializer.
+        with _applying_policy():
+            finance_result = apply_finance()
+        policy_result = apply()
+        return {
+            "ok": bool(policy_result.get("ok", True)) and bool(finance_result.get("ok", True)),
+            "policy": policy_result,
+            "holding_finance": finance_result,
+        }
 
 
 def audit() -> None:

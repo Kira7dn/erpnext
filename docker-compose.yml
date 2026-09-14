@@ -19,6 +19,7 @@ x-frappe-defaults: &frappe_defaults
     - ./apps/letron_api:/home/frappe/frappe-bench/apps/${INTEGRATION_APP}:ro
     - ./contracts:/home/frappe/frappe-bench/contracts:ro
     - ./docker/backend-entrypoint.sh:/usr/local/bin/backend-entrypoint.sh:ro
+    - ./docker/backend-init-entrypoint.sh:/usr/local/bin/backend-init-entrypoint.sh:ro
     - type: bind
       source: ${LETRON_CONFIG_HOST_DIR:-./config}
       target: /etc/letron/config
@@ -146,6 +147,15 @@ services:
       db: {condition: service_healthy}
       redis: {condition: service_started}
     ports: ["${HTTP_PORT}:8000"]
+
+  backend-init:
+    <<: *frappe_defaults
+    profiles: [init]
+    command: [bash, /usr/local/bin/backend-init-entrypoint.sh]
+    restart: "no"
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_started}
 
   cloudflared:
     image: cloudflare/cloudflared:2026.6.0

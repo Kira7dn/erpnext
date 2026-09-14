@@ -187,6 +187,15 @@ def _json_body(schema: dict[str, Any], required: bool = True) -> dict[str, Any]:
     return {"required": required, "content": {"application/json": {"schema": schema}}}
 
 
+def _configured_schema(spec: Any, default: dict[str, Any]) -> dict[str, Any]:
+    """Resolve an inline schema or generated component reference."""
+    if isinstance(spec, str):
+        return {"$ref": f"#/components/schemas/{spec}"}
+    if isinstance(spec, dict):
+        return copy.deepcopy(spec)
+    return copy.deepcopy(default)
+
+
 def _example(dt: DocType, write_schema: dict[str, Any]) -> dict[str, Any]:
     values: dict[str, Any] = {}
     for field in dt.fields:
@@ -430,13 +439,21 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
         parameters = []
         for name in re.findall(r"\{([^}]+)\}", custom["path"]):
             parameters.append({"name": name, "in": "path", "required": True, "schema": {"type": "string"}})
+        parameters.extend(copy.deepcopy(custom.get("query_parameters", [])))
         parameters.extend(write_headers if method not in {"get", "head"} else request_headers)
+        response_spec = custom.get("response_schema")
+        response_schema = (
+            _configured_schema(response_spec, {"$ref": "#/components/schemas/FrappeResponse"})
+            if response_spec is not None
+            else {"$ref": "#/components/schemas/FrappeResponse"}
+        )
+        response_envelope = custom.get("response_envelope", "data" if response_spec is None else "message")
         operation: dict[str, Any] = {
             "tags": [f"Module: {custom['module']}", "Business routes"],
             "summary": custom.get("summary", custom["operation_id"]),
             "operationId": custom["operation_id"],
             "parameters": parameters,
-            "responses": {**_response(custom.get("response_description", "Business route response"), {"$ref": "#/components/schemas/FrappeResponse"}), **error},
+            "responses": {**_response(custom.get("response_description", "Business route response"), _document_response(response_schema, response_envelope) if response_spec is not None else response_schema), **error},
             "x-frappe-handler": custom["handler"],
             "x-public-operation": custom["operation"],
         }
@@ -447,7 +464,12 @@ def build_openapi(contract: dict[str, Any], doctypes: list[DocType], methods: li
                     properties[field] = {"type": "string"}
                 operation["requestBody"] = {"required": True, "content": {"multipart/form-data": {"schema": {"type": "object", "required": ["file", *custom.get("required_multipart_fields", [])], "properties": properties}}}}
             else:
-                operation["requestBody"] = _json_body({"type": "object", "additionalProperties": True}, required=False)
+                request_spec = custom.get("request_schema")
+                request_schema = _configured_schema(
+                    request_spec,
+                    {"type": "object", "additionalProperties": True},
+                )
+                operation["requestBody"] = _json_body(request_schema, required=bool(request_spec))
         paths.setdefault(custom["path"], {})[method] = operation
     server = os.environ.get("ERPNEXT_API_URL") or runtime["server_url"]
     if server.startswith("${"):

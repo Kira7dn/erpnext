@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/operations/submitConsolidationAdjustment.response.json",
+  "type": "object",
+  "properties": {
+    "message": {
+      "$ref": "ConsolidationAdjustmentResponse.json"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}

@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('up','build','reload','down','restart','ps','logs','config','bootstrap','inspect','verify','backup','backup-verify','config-validate','config-plan','config-apply','policy-validate','policy-export','policy-plan','policy-apply')]
+    [ValidateSet('up','build','reload','down','restart','ps','logs','config','init','migrate','bootstrap','inspect','verify','backup','backup-verify','config-validate','config-plan','config-apply','policy-validate','policy-export','policy-plan','policy-apply')]
     [string]$Action = 'up',
     [switch]$FollowLogs
 )
@@ -10,11 +10,6 @@ $root = $PSScriptRoot
 $compose = Join-Path $root 'docker-compose.yml'
 $configPath = Join-Path $root 'config/config.yaml'
 $policyPath = Join-Path $root 'config/policy.yaml'
-if ($env:LETRON_ACCEPTANCE -eq '1') {
-    if (-not $env:LETRON_ACCEPTANCE_CONFIG_DIR) { throw 'LETRON_ACCEPTANCE_CONFIG_DIR is required in acceptance mode' }
-    $configPath = Join-Path $env:LETRON_ACCEPTANCE_CONFIG_DIR 'config.yaml'
-    $policyPath = Join-Path $env:LETRON_ACCEPTANCE_CONFIG_DIR 'policy.yaml'
-}
 if (!(Test-Path -LiteralPath $compose)) { throw "Missing Docker Compose file: $compose" }
 
 $env:PYTHONPATH = (Join-Path $root 'apps/letron_api')
@@ -42,6 +37,10 @@ if (!(Test-Path -LiteralPath $policyPath)) { throw "Missing policy YAML: $policy
 $configValidation = Invoke-UvPython @('-m','letron_api.control.system_config','validate','--path',$configPath)
 $policyValidation = Invoke-UvPython @('-m','letron_api.control.policy','validate','--path',$policyPath)
 $bundleValidation = Invoke-UvPython @('-m','letron_api.control.system_config','bundle-validate','--config',$configPath,'--policy',$policyPath)
+$expectedConfig = ($configValidation -join "`n") | ConvertFrom-Json
+$expectedPolicy = ($policyValidation -join "`n") | ConvertFrom-Json
+$expectedConfigHash = [string]$expectedConfig.sha256
+$expectedPolicyHash = [string]$expectedPolicy.sha256
 $environmentJson = Invoke-UvPython @('-m','letron_api.control.system_config','env','--path',$configPath,'--format','json')
 $environment = $environmentJson | ConvertFrom-Json
 foreach ($property in $environment.PSObject.Properties) {
@@ -78,6 +77,38 @@ function Invoke-Compose([string[]]$extra) {
     if ($LASTEXITCODE -ne 0) { throw "Docker Compose failed with exit code $LASTEXITCODE" }
 }
 
+function Test-InitComplete {
+    $previousErrorAction = $ErrorActionPreference
+    try {
+        # Compose writes progress diagnostics to stderr even for a successful
+        # probe.  Capture the process exit code without turning that progress
+        # stream into a terminating PowerShell error.
+        $ErrorActionPreference = 'Continue'
+        & docker @composeArgs run --rm --no-deps --entrypoint bash backend-init -lc "test -f sites/$env:SITE_NAME/.letron-init-complete" 1>$null 2>$null
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorAction
+    }
+    return $exitCode -eq 0
+}
+
+function Invoke-Init([switch]$Force) {
+    if (-not $Force -and (Test-InitComplete)) {
+        Write-Host "ERP site initialization already complete; skipping backend-init."
+        return
+    }
+    $mutex = [Threading.Mutex]::new($false, 'Local\LetronERPBackendInit')
+    $acquired = $false
+    try {
+        if (-not $mutex.WaitOne(0)) { throw 'Another ERP init/migration process is already running.' }
+        $acquired = $true
+        Invoke-Compose @('run','--rm','--no-deps','backend-init')
+    } finally {
+        if ($acquired) { try { $mutex.ReleaseMutex() } catch { } }
+        $mutex.Dispose()
+    }
+}
+
 function Invoke-Readiness {
     $uri = "http://localhost:$env:HTTP_PORT/api/method/letron_api.control.api.health"
     $deadline = [DateTime]::UtcNow.AddSeconds(180)
@@ -100,24 +131,103 @@ function Invoke-Readiness {
     throw "Runtime did not reach zero-drift HTTP readiness within 180 seconds: $uri"
 }
 
-function Invoke-ReloadReadiness {
-    # frappe.ping is protected by the gateway ingress policy. Use the public
-    # integration health endpoint for a real unauthenticated readiness check.
+function Get-HealthState {
+    param([int]$TimeoutSeconds = 3)
+
     $uri = "http://localhost:$env:HTTP_PORT/api/method/letron_api.control.api.health"
-    $deadline = [DateTime]::UtcNow.AddSeconds(20)
+    $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+    $requestTimeout = [Math]::Min(30, [Math]::Max(3, $TimeoutSeconds))
     do {
         try {
-            $response = Invoke-WebRequest -UseBasicParsing -TimeoutSec 3 -Uri $uri -Method Get
-            if ($response.StatusCode -eq 200 -and $response.Content -match '"ok"\s*:\s*true') {
-                Write-Host "Fast reload verified: $uri"
-                return
+            $response = Invoke-WebRequest -UseBasicParsing -TimeoutSec $requestTimeout -Uri $uri -Method Get
+            if ($response.StatusCode -eq 200) {
+                $payload = $response.Content | ConvertFrom-Json
+                $message = if ($null -ne $payload.message) { $payload.message } else { $payload }
+                if ($message.ok -eq $true) { return $message }
             }
         } catch { }
         Start-Sleep -Milliseconds 500
     } while ([DateTime]::UtcNow -lt $deadline)
+    return $null
+}
+
+function Get-BackendProcessState {
+    param([int]$TimeoutSeconds = 3)
+
+    # Health is intentionally zero-drift and can return HTTP 500 while a
+    # policy/config apply is still required.  Runtime info is the independent
+    # process/readiness boundary needed before that apply can run.  The health
+    # route is used here because the gateway explicitly permits it while
+    # runtime_info remains protected.
+    $uri = "http://localhost:$env:HTTP_PORT/api/method/letron_api.control.api.health"
+    $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+    $requestTimeout = [Math]::Min(30, [Math]::Max(3, $TimeoutSeconds)) * 1000
+    do {
+        $response = $null
+        try {
+            $request = [System.Net.HttpWebRequest]::Create($uri)
+            $request.Method = 'GET'
+            $request.Timeout = $requestTimeout
+            $response = $request.GetResponse()
+        } catch [System.Net.WebException] {
+            # HTTP 4xx/5xx still proves that Gunicorn and the gateway handled
+            # the request.  Only a missing response means process-not-ready.
+            $response = $_.Exception.Response
+        } catch { }
+        if ($null -ne $response) {
+            $statusCode = [int]$response.StatusCode
+            $response.Close()
+            return @{ http_status = $statusCode }
+        }
+        Start-Sleep -Milliseconds 500
+    } while ([DateTime]::UtcNow -lt $deadline)
+    return $null
+}
+
+function Invoke-ReloadReadiness {
+    # frappe.ping is protected by the gateway ingress policy. Use the public
+    # integration health endpoint for a real unauthenticated readiness check.
+    # This is deliberately health-only. Full drift and metadata verification
+    # belongs to Invoke-Readiness, used by up/verify, not every hot reload.
+    $uri = "http://localhost:$env:HTTP_PORT/api/method/letron_api.control.api.health"
+    $processState = Get-BackendProcessState -TimeoutSeconds 180
+    if ($null -ne $processState) {
+        $state = Get-HealthState -TimeoutSeconds 3
+        if ($null -eq $state) {
+            # A non-zero-drift health failure is expected while a changed
+            # policy/config is waiting to be applied.  The caller must still
+            # be able to reach the sync command.
+            $state = @{ ok = $false; config = $null; policy = $null }
+            Write-Host "HTTP backend process ready; zero-drift health is pending policy/config apply: $uri"
+        } else {
+            Write-Host "HTTP health verified for hot operation: $uri"
+        }
+        return $state
+    }
     Invoke-Compose @('ps','-a')
     Invoke-Compose @('logs','--tail=40','backend')
-    throw "Fast reload did not become ready within 20 seconds: $uri"
+    throw "Backend process did not become ready for hot operation within 180 seconds: $uri"
+}
+
+function Invoke-DesiredStateSyncIfChanged($health) {
+    $configState = $health.config
+    $policyState = $health.policy
+    $configChanged = ($null -eq $configState) -or ($configState.sha256 -ne $expectedConfigHash) -or ($configState.status -ne 'in-sync')
+    $policyChanged = ($null -eq $policyState) -or ($policyState.sha256 -ne $expectedPolicyHash) -or ($policyState.status -ne 'in-sync')
+
+    if ($configChanged) {
+        Write-Host 'Configuration source/runtime state differs; applying system config.'
+        Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.system_config.sync')
+    } else {
+        Write-Host 'System config hash is current; skipping config sync.'
+    }
+
+    if ($policyChanged) {
+        Write-Host 'Policy source/runtime state differs; applying business policy.'
+        Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.policy.sync')
+    } else {
+        Write-Host 'Policy hash is current; skipping policy sync.'
+    }
 }
 
 if ($Action -eq 'config') {
@@ -125,7 +235,7 @@ if ($Action -eq 'config') {
     Write-Host 'Compose, config and policy YAML are valid (secrets omitted)'
     return
 }
-if ($Action -in @('up','build','reload','restart','down','ps','logs','bootstrap','inspect','verify','backup','backup-verify','config-plan','config-apply','policy-export','policy-plan','policy-apply')) {
+if ($Action -in @('up','build','reload','restart','down','ps','logs','init','migrate','bootstrap','inspect','verify','backup','backup-verify','config-plan','config-apply','policy-export','policy-plan','policy-apply')) {
     & docker info --format '{{.ServerVersion}}' *> $null
     if ($LASTEXITCODE -ne 0) { throw 'Docker daemon is not available. Start Docker Desktop and retry.' }
 }
@@ -136,20 +246,26 @@ switch ($Action) {
     }
     'up' {
         Invoke-Compose @('config','--quiet')
+        Invoke-Compose @('up','-d','db','redis')
+        Invoke-Init
         Invoke-Compose @('up','-d','--remove-orphans')
         Invoke-Compose @('ps')
         Invoke-Readiness
     }
+    'init' { Invoke-Init -Force }
+    'migrate' { Invoke-Init -Force }
     'reload' {
-        Invoke-Compose @('restart','backend')
+        $health = Invoke-ReloadReadiness
+        Invoke-DesiredStateSyncIfChanged $health
+        Invoke-Compose @('up','-d','--no-build','--force-recreate','backend')
         Invoke-Compose @('up','-d','--no-build','--force-recreate','lark-bot','openclaw-lark')
-        Invoke-Readiness
+        Invoke-ReloadReadiness | Out-Null
     }
     'down' { Invoke-Compose @('down') }
     'restart' { Invoke-Compose @('down'); Invoke-Compose @('up','-d'); Invoke-Compose @('ps'); Invoke-Readiness }
     'ps' { Invoke-Compose @('ps','-a') }
     'logs' { Invoke-Compose ($(if($FollowLogs){@('logs','-f')}else{@('logs','--tail=100')})) }
-    'bootstrap' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.tenant_bootstrap.run') }
+    'bootstrap' { Invoke-ReloadReadiness; Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.tenant_bootstrap.run') }
     'inspect' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.api.runtime_snapshot') }
     'config-plan' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.system_config.plan') }
     'config-apply' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.system_config.sync') }
@@ -171,8 +287,10 @@ switch ($Action) {
         }
         Write-Host "Exported native ERPNext business policy to $policyPath"
     }
-    'policy-plan' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.policy.plan') }
-    'policy-apply' { Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.policy.sync') }
+    # Policy operations need a long enough health wait after a recreate, but
+    # do not need the expensive metadata/zero-drift snapshot before Bench.
+    'policy-plan' { Invoke-ReloadReadiness | Out-Null; Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.policy.plan') }
+    'policy-apply' { Invoke-ReloadReadiness | Out-Null; Invoke-Compose @('exec','-T','backend','bench','--site',$env:SITE_NAME,'execute','letron_api.control.policy.sync') }
     # Run the one-shot backup independently of the long-lived scheduled
     # service.  The scheduled service intentionally sleeps forever when
     # backup.enabled is false; waiting on that dependency here made the

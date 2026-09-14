@@ -11590,6 +11590,16 @@ paths:
       summary: runAccountsReport
       operationId: runAccountsReport
       parameters:
+      - name: report_key
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: filters
+        in: query
+        required: true
+        schema:
+          type: string
       - *id011
       responses:
         '200':
@@ -11613,6 +11623,176 @@ paths:
       x-test-evidence:
         suite: accounts-reconciliation
         test: tests/integration/test_accounts_reconciliation.py
+  /api/v1/accounts/consolidation/package:
+    get:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: getConsolidationPackage
+      operationId: getConsolidationPackage
+      parameters:
+      - name: filters
+        in: query
+        required: true
+        schema:
+          type: string
+      - *id011
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ConsolidationPackageResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.banking.consolidation_package_report
+      x-public-operation: read
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/consolidation/adjustments:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: createConsolidationAdjustment
+      operationId: createConsolidationAdjustment
+      parameters:
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ConsolidationAdjustmentResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.banking.consolidation_adjustment_create
+      x-public-operation: create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsolidationAdjustmentRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/consolidation/adjustments/submit:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: submitConsolidationAdjustment
+      operationId: submitConsolidationAdjustment
+      parameters:
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ConsolidationAdjustmentResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.banking.consolidation_adjustment_submit
+      x-public-operation: update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsolidationAdjustmentCommandRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
+  /api/v1/accounts/consolidation/adjustments/cancel:
+    post:
+      tags:
+      - 'Module: Accounts'
+      - Business routes
+      summary: cancelConsolidationAdjustment
+      operationId: cancelConsolidationAdjustment
+      parameters:
+      - *id011
+      - *id013
+      responses:
+        '200':
+          description: Business route response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ConsolidationAdjustmentResponse'
+                required:
+                - message
+        '400': *id003
+        '401': *id004
+        '403': *id005
+        '404': *id006
+        '409': *id007
+        '417': *id008
+        '429': *id009
+        '500': *id010
+      x-frappe-handler: letron_api.finance.banking.consolidation_adjustment_cancel
+      x-public-operation: update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsolidationAdjustmentCommandRequest'
+      x-test-status: not-tested
+      x-test-level: docker-runtime
+      x-test-evidence:
+        suite: public-api
+        test: tests/integration/test_public_api_runtime.py::test_public_contract_and_lifecycle
   /api/v1/accounts/statement-imports:
     get:
       tags:
@@ -29135,6 +29315,142 @@ components:
           type: string
         status:
           type: string
+    ConsolidationAdjustmentRequest: &id174
+      type: object
+      additionalProperties: false
+      required:
+      - companies
+      - from_date
+      - to_date
+      - posting_date
+      - run_id
+      properties:
+        companies:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
+        from_date:
+          type: string
+          format: date
+        to_date:
+          type: string
+          format: date
+        posting_date:
+          type: string
+          format: date
+        run_id:
+          type: string
+          minLength: 3
+          maxLength: 80
+          pattern: ^[A-Za-z0-9_.-]+$
+    ConsolidationAdjustmentCommandRequest: &id175
+      type: object
+      additionalProperties: false
+      required:
+      - journal_entry
+      properties:
+        journal_entry:
+          type: string
+          minLength: 1
+    ConsolidationAdjustmentResponse: &id176
+      type: object
+      additionalProperties: true
+      required:
+      - ok
+      - status
+      properties:
+        ok:
+          type: boolean
+        idempotent:
+          type: boolean
+        journal_entry:
+          type:
+          - string
+          - 'null'
+        status:
+          type:
+          - string
+          - integer
+        finance_book:
+          type: string
+        elimination_schedule:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    ConsolidationPackageResponse: &id177
+      type: object
+      additionalProperties: true
+      required:
+      - ok
+      - holding_company
+      - finance_book
+      - companies
+      - from_date
+      - to_date
+      - intercompany_matches
+      - elimination_schedule
+      - consolidated_before_elimination
+      - consolidated_after_elimination
+      - elimination_mode
+      properties:
+        ok:
+          type: boolean
+        holding_company:
+          type: string
+        finance_book:
+          type: string
+        companies:
+          type: object
+          additionalProperties: true
+        from_date:
+          type: string
+          format: date
+        to_date:
+          type: string
+          format: date
+        intercompany_matches:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        elimination_schedule:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        consolidated_before_elimination:
+          type: object
+          additionalProperties: true
+        consolidated_after_elimination:
+          type: object
+          additionalProperties: true
+        comparative_from_date:
+          type: string
+          format: date
+        comparative_to_date:
+          type: string
+          format: date
+        comparative_elimination_schedule:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        consolidated_before_elimination_comparative:
+          type: object
+          additionalProperties: true
+        consolidated_after_elimination_comparative:
+          type: object
+          additionalProperties: true
+        consolidated_after_native_adjustment_comparative:
+          type: object
+          additionalProperties: true
+        elimination_mode:
+          type: string
+          enum:
+          - native_journal_entry_on_holding_finance_book
     AddressWrite:
       type: object
       properties:
@@ -67606,6 +67922,62 @@ x-contract:
       operation: read
       operation_id: runAccountsReport
       handler: letron_api.finance.banking.report
+      query_parameters:
+      - name: report_key
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: filters
+        in: query
+        required: true
+        schema:
+          type: string
+    - module: Accounts
+      resource: consolidation
+      method: GET
+      path: /api/v1/accounts/consolidation/package
+      operation: read
+      operation_id: getConsolidationPackage
+      handler: letron_api.finance.banking.consolidation_package_report
+      query_parameters:
+      - name: filters
+        in: query
+        required: true
+        schema:
+          type: string
+      response_schema: ConsolidationPackageResponse
+      response_envelope: message
+    - module: Accounts
+      resource: consolidation
+      method: POST
+      path: /api/v1/accounts/consolidation/adjustments
+      operation: create
+      operation_id: createConsolidationAdjustment
+      handler: letron_api.finance.banking.consolidation_adjustment_create
+      request_schema: ConsolidationAdjustmentRequest
+      response_schema: ConsolidationAdjustmentResponse
+      response_envelope: message
+    - module: Accounts
+      resource: consolidation
+      method: POST
+      path: /api/v1/accounts/consolidation/adjustments/submit
+      operation: update
+      operation_id: submitConsolidationAdjustment
+      handler: letron_api.finance.banking.consolidation_adjustment_submit
+      request_schema: ConsolidationAdjustmentCommandRequest
+      response_schema: ConsolidationAdjustmentResponse
+      response_envelope: message
+    - module: Accounts
+      resource: consolidation
+      method: POST
+      path: /api/v1/accounts/consolidation/adjustments/cancel
+      operation: update
+      operation_id: cancelConsolidationAdjustment
+      handler: letron_api.finance.banking.consolidation_adjustment_cancel
+      request_schema: ConsolidationAdjustmentCommandRequest
+      response_schema: ConsolidationAdjustmentResponse
+      response_envelope: message
     - module: Accounts
       resource: statement-imports
       method: GET
@@ -67747,6 +68119,10 @@ x-contract:
     generated_schemas:
       PurchaseOrchestrationRequest: *id172
       PurchaseOrchestrationResponse: *id173
+      ConsolidationAdjustmentRequest: *id174
+      ConsolidationAdjustmentCommandRequest: *id175
+      ConsolidationAdjustmentResponse: *id176
+      ConsolidationPackageResponse: *id177
     include_methods:
     - letron_api.control.api.health
     - letron_api.control.api.runtime_info
@@ -67876,7 +68252,7 @@ x-capabilities:
 x-acceptance-summary:
   passed: 215
   partial: 0
-  not-tested: 107
+  not-tested: 111
   blocked: 0
 x-module: null
 x-module-index:

@@ -99,6 +99,17 @@ def validate_contract(data: dict[str, Any], doctypes: list[Any] | None = None, m
             raise ValueError(f"runtime.custom_routes path collision: {route_key}")
         if item["operation_id"] in route_operation_ids:
             raise ValueError(f"runtime.custom_routes operation collision: {item['operation_id']}")
+        for schema_key in ("request_schema", "response_schema"):
+            schema_value = item.get(schema_key)
+            if schema_value is not None and not isinstance(schema_value, (str, dict)):
+                raise ValueError(f"runtime.custom_routes {schema_key} must be a schema name or object")
+            if isinstance(schema_value, str) and not schema_value.strip():
+                raise ValueError(f"runtime.custom_routes {schema_key} cannot be empty")
+        query_parameters = item.get("query_parameters", [])
+        if not isinstance(query_parameters, list) or any(not isinstance(parameter, dict) for parameter in query_parameters):
+            raise ValueError("runtime.custom_routes query_parameters must be a list of mappings")
+        if item.get("response_envelope") not in {None, "data", "message"}:
+            raise ValueError("runtime.custom_routes response_envelope must be data or message")
         route_paths.add(route_key)
         route_operation_ids.add(item["operation_id"])
     for key in ("include_doctype_metadata",):

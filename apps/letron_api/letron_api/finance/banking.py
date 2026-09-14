@@ -2,16 +2,26 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 import frappe
-
 
 REPORTS = {
     "bank-reconciliation-statement": "Bank Reconciliation Statement",
     "bank-clearance-summary": "Bank Clearance Summary",
     "incorrectly-cleared": "Cheques and Deposits Incorrectly cleared",
+}
+
+VAS_REPORTS = {
+    "vas-balance-sheet": "balance_sheet",
+    "vas-profit-and-loss": "profit_and_loss",
+    "vas-b01-dn": "B01-DN",
+    "vas-b02-dn": "B02-DN",
+    "vas-b03-dn": "B03-DN",
+    "vas-cash-flow": "cash_flow",
+    "vas-notes": "notes",
+    "vas-unmapped-accounts": "unmapped_accounts",
+    "vas-consolidation-package": "consolidation_package",
 }
 
 RECONCILIATION_ACTIONS = {
@@ -44,7 +54,9 @@ def _arg(name: str, default: Any = None) -> Any:
 
 
 def _details(statement_import_id: str) -> dict[str, Any]:
-    from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import get_statement_details
+    from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import (
+        get_statement_details,
+    )
 
     return get_statement_details(statement_import_id)
 
@@ -99,7 +111,9 @@ def statement_import_update(statement_import_id: str, **kwargs: Any) -> dict[str
 
 @frappe.whitelist(methods=["GET"])
 def reconciliation_transactions(bank_account: str, from_date: str | None = None, to_date: str | None = None, all_transactions: Any = False) -> list[dict[str, Any]]:
-    from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import get_bank_transactions
+    from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
+        get_bank_transactions,
+    )
 
     frappe.has_permission("Bank Account", "read", bank_account, throw=True)
     return get_bank_transactions(bank_account, from_date, to_date, bool(_json(all_transactions, False)))
@@ -107,14 +121,18 @@ def reconciliation_transactions(bank_account: str, from_date: str | None = None,
 
 @frappe.whitelist(methods=["GET"])
 def reconciliation_balance(bank_account: str, till_date: str, company: str) -> Any:
-    from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import get_account_balance
+    from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
+        get_account_balance,
+    )
 
     return get_account_balance(bank_account, till_date, company)
 
 
 @frappe.whitelist(methods=["GET"])
 def reconciliation_linked_payments(bank_transaction_name: str, document_types: Any = None, from_date: str | None = None, to_date: str | None = None, filter_by_reference_date: Any = False, from_reference_date: str | None = None, to_reference_date: str | None = None) -> list[dict[str, Any]]:
-    from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import get_linked_payments
+    from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
+        get_linked_payments,
+    )
 
     frappe.get_doc("Bank Transaction", bank_transaction_name).check_permission("read")
     return get_linked_payments(bank_transaction_name, _json(document_types), from_date, to_date, _json(filter_by_reference_date, False), from_reference_date, to_reference_date)
@@ -122,7 +140,9 @@ def reconciliation_linked_payments(bank_transaction_name: str, document_types: A
 
 @frappe.whitelist(methods=["POST"])
 def reconciliation_update_clearance(payment_document: str, payment_entry: str, account: str, clearance_date: str | None = None) -> dict[str, Any]:
-    from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import update_clearance_date
+    from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
+        update_clearance_date,
+    )
 
     update_clearance_date(payment_document, payment_entry, account, clearance_date)
     return {"payment_document": payment_document, "payment_entry": payment_entry, "clearance_date": clearance_date}
@@ -130,7 +150,9 @@ def reconciliation_update_clearance(payment_document: str, payment_entry: str, a
 
 @frappe.whitelist(methods=["POST"])
 def reconciliation_clear_clearance(voucher_type: str, voucher_name: str) -> dict[str, Any]:
-    from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import clear_clearing_date
+    from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
+        clear_clearing_date,
+    )
 
     clear_clearing_date(voucher_type, voucher_name)
     return {"voucher_type": voucher_type, "voucher_name": voucher_name, "clearance_date": None}
@@ -149,13 +171,67 @@ def reconciliation_action(action: str, payload: Any = None) -> Any:
 
 @frappe.whitelist(methods=["POST"])
 def run_rule_evaluation(force_evaluate: Any = False) -> dict[str, Any]:
-    from erpnext.accounts.doctype.bank_transaction_rule.bank_transaction_rule import run_rule_evaluation as native_run
+    from erpnext.accounts.doctype.bank_transaction_rule.bank_transaction_rule import (
+        run_rule_evaluation as native_run,
+    )
 
     return native_run(bool(_json(force_evaluate, False))) or {"ok": True}
 
 
 @frappe.whitelist(methods=["GET"])
 def report(report_key: str, filters: Any = None) -> dict[str, Any]:
+    if report_key in VAS_REPORTS:
+        arguments = _json(filters, {})
+        if not isinstance(arguments, dict):
+            frappe.throw("filters must be an object", exc=frappe.ValidationError)
+        frappe.has_permission("GL Entry", "read", throw=True)
+        required = ("from_date", "to_date") if VAS_REPORTS[report_key] == "consolidation_package" else ("company", "from_date", "to_date")
+        if any(not arguments.get(field) for field in required):
+            frappe.throw("company, from_date and to_date are required", exc=frappe.ValidationError)
+        from letron_api.finance.vas_reports import (
+            consolidation_package,
+            native_cash_flow,
+            notes,
+            statutory_cash_flow,
+            statutory_report,
+            unmapped_accounts,
+        )
+        from letron_api.finance.vas_reports import report as vas_report
+
+        if VAS_REPORTS[report_key] == "cash_flow":
+            return native_cash_flow(**{field: arguments[field] for field in required}, finance_book=arguments.get("finance_book"))
+        if VAS_REPORTS[report_key] == "B03-DN":
+            return statutory_cash_flow(
+                **{field: arguments[field] for field in required},
+                finance_book=arguments.get("finance_book"),
+                comparative_from_date=arguments.get("comparative_from_date"),
+                comparative_to_date=arguments.get("comparative_to_date"),
+            )
+        if VAS_REPORTS[report_key] == "consolidation_package":
+            companies = arguments.get("companies")
+            if not isinstance(companies, list) or not companies:
+                frappe.throw("companies is required for consolidation package", exc=frappe.ValidationError)
+            return consolidation_package(
+                companies,
+                arguments["from_date"],
+                arguments["to_date"],
+                include_adjustments=bool(arguments.get("include_adjustments", False)),
+                comparative_from_date=arguments.get("comparative_from_date"),
+                comparative_to_date=arguments.get("comparative_to_date"),
+            )
+        if VAS_REPORTS[report_key] == "notes":
+            return notes(**{field: arguments[field] for field in required}, finance_book=arguments.get("finance_book"))
+        if VAS_REPORTS[report_key] == "unmapped_accounts":
+            return unmapped_accounts(**{field: arguments[field] for field in required}, finance_book=arguments.get("finance_book"))
+        if VAS_REPORTS[report_key] in {"B01-DN", "B02-DN"}:
+            return statutory_report(
+                form_code=VAS_REPORTS[report_key],
+                **{field: arguments[field] for field in required},
+                finance_book=arguments.get("finance_book"),
+                comparative_from_date=arguments.get("comparative_from_date"),
+                comparative_to_date=arguments.get("comparative_to_date"),
+            )
+        return vas_report(statement=VAS_REPORTS[report_key], **{field: arguments[field] for field in required}, finance_book=arguments.get("finance_book"))
     report_name = REPORTS.get(report_key)
     if not report_name:
         frappe.throw("Unsupported banking report", exc=frappe.ValidationError)
@@ -165,41 +241,117 @@ def report(report_key: str, filters: Any = None) -> dict[str, Any]:
 
 
 @frappe.whitelist(methods=["GET"])
+def consolidation_package_report(filters: Any = None) -> dict[str, Any]:
+    arguments = _json(filters, {})
+    if not isinstance(arguments, dict):
+        frappe.throw("filters must be an object", exc=frappe.ValidationError)
+    companies = arguments.get("companies")
+    if not isinstance(companies, list) or not companies or not arguments.get("from_date") or not arguments.get("to_date"):
+        frappe.throw("companies, from_date and to_date are required", exc=frappe.ValidationError)
+    frappe.has_permission("GL Entry", "read", throw=True)
+    from letron_api.finance.vas_reports import consolidation_package
+
+    return consolidation_package(
+        companies,
+        arguments["from_date"],
+        arguments["to_date"],
+        include_adjustments=bool(arguments.get("include_adjustments", False)),
+        comparative_from_date=arguments.get("comparative_from_date"),
+        comparative_to_date=arguments.get("comparative_to_date"),
+    )
+
+
+def _consolidation_payload() -> dict[str, Any]:
+    payload = _json(frappe.request.get_data(as_text=True), {})
+    if not isinstance(payload, dict):
+        frappe.throw("Request body must be an object", exc=frappe.ValidationError)
+    return payload
+
+
+@frappe.whitelist(methods=["POST"])
+def consolidation_adjustment_create() -> dict[str, Any]:
+    payload = _consolidation_payload()
+    required = ("companies", "from_date", "to_date", "posting_date", "run_id")
+    if any(not payload.get(field) for field in required) or not isinstance(payload.get("companies"), list):
+        frappe.throw("companies, from_date, to_date, posting_date and run_id are required", exc=frappe.ValidationError)
+    frappe.has_permission("Journal Entry", "create", throw=True)
+    from letron_api.finance.vas_reports import create_consolidation_adjustment
+
+    return create_consolidation_adjustment(
+        companies=payload["companies"],
+        from_date=payload["from_date"],
+        to_date=payload["to_date"],
+        posting_date=payload["posting_date"],
+        run_id=str(payload["run_id"]),
+    )
+
+
+@frappe.whitelist(methods=["POST"])
+def consolidation_adjustment_submit() -> dict[str, Any]:
+    payload = _consolidation_payload()
+    if not payload.get("journal_entry"):
+        frappe.throw("journal_entry is required", exc=frappe.ValidationError)
+    from letron_api.finance.vas_reports import submit_consolidation_adjustment
+
+    return submit_consolidation_adjustment(str(payload["journal_entry"]))
+
+
+@frappe.whitelist(methods=["POST"])
+def consolidation_adjustment_cancel() -> dict[str, Any]:
+    payload = _consolidation_payload()
+    if not payload.get("journal_entry"):
+        frappe.throw("journal_entry is required", exc=frappe.ValidationError)
+    from letron_api.finance.vas_reports import cancel_consolidation_adjustment
+
+    return cancel_consolidation_adjustment(str(payload["journal_entry"]))
+
+
+@frappe.whitelist(methods=["GET"])
 def statement_details(statement_import_id: str) -> dict[str, Any]:
     return _details(statement_import_id)
 
 
 @frappe.whitelist(methods=["POST"])
 def statement_update_pdf_tables(statement_import_id: str, tables: Any) -> dict[str, Any]:
-    from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import update_pdf_tables
+    from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import (
+        update_pdf_tables,
+    )
 
     return update_pdf_tables(statement_import_id, _json(tables, []))
 
 
 @frappe.whitelist(methods=["POST"])
 def statement_reextract_pdf_table(statement_import_id: str, page: int, table_index: int, bbox: Any) -> dict[str, Any]:
-    from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import reextract_pdf_table
+    from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import (
+        reextract_pdf_table,
+    )
 
     return reextract_pdf_table(statement_import_id, int(page), int(table_index), _json(bbox, []))
 
 
 @frappe.whitelist(methods=["POST"])
 def statement_set_pdf_table_header(statement_import_id: str, page: int, table_index: int, header_index: int) -> dict[str, Any]:
-    from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import set_pdf_table_header
+    from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import (
+        set_pdf_table_header,
+    )
 
     return set_pdf_table_header(statement_import_id, int(page), int(table_index), int(header_index))
 
 
 @frappe.whitelist(methods=["POST"])
 def statement_update_column_mapping(statement_import_id: str, column_mapping: Any) -> dict[str, Any]:
-    from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import update_column_mapping
+    from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import (
+        update_column_mapping,
+    )
 
     return update_column_mapping(statement_import_id, _json(column_mapping, []))
 
 
 @frappe.whitelist(methods=["POST"])
 def statement_set_header_index(statement_import_id: str, header_index: int) -> dict[str, Any]:
-    from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import set_header_index
+    from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import (
+        set_header_index,
+    )
 
     return set_header_index(statement_import_id, int(header_index))
 

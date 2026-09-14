@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_generated_registry_covers_only_public_business_operations():
     catalog = json.loads((ROOT / "contracts/generated/catalog.json").read_text(encoding="utf-8"))
     registry = catalog["operations"]
-    assert len(registry) == 319
+    assert len(registry) == 323
     assert {item["operation"] for item in registry} == {"list", "read", "create", "update", "delete"}
     assert not any("/api/resource/" in item["path"] or "/api/method/" in item["path"] for item in registry)
     assert not any(item["resource"] in {"User", "Role", "Custom DocPerm"} for item in registry)

@@ -64,7 +64,7 @@ def runtime_snapshot() -> dict[str, object]:
     snapshot: dict[str, object] = {
         **_runtime_info(),
         "doctype_metadata": {},
-        "bootstrap": bootstrap_status(),
+        "bootstrap": bootstrap_status(refresh=True),
         "config": config_status(),
         "policy": policy_status(),
         "configuration_bundle": bundle_status(),

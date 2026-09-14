@@ -2085,6 +2085,47 @@ export type CRMNoteWrite = {
   custom_lark_approval_status?: string;
 };
 
+export type ConsolidationAdjustmentCommandRequest = {
+  journal_entry: string;
+};
+
+export type ConsolidationAdjustmentRequest = {
+  companies: Array<string>;
+  from_date: string;
+  to_date: string;
+  posting_date: string;
+  run_id: string;
+};
+
+export type ConsolidationAdjustmentResponse = {
+  ok: boolean;
+  idempotent?: boolean;
+  journal_entry?: string | null;
+  status: string | number;
+  finance_book?: string;
+  elimination_schedule?: Array<Record<string, unknown>>;
+};
+
+export type ConsolidationPackageResponse = {
+  ok: boolean;
+  holding_company: string;
+  finance_book: string;
+  companies: Record<string, unknown>;
+  from_date: string;
+  to_date: string;
+  intercompany_matches: Array<Record<string, unknown>>;
+  elimination_schedule: Array<Record<string, unknown>>;
+  consolidated_before_elimination: Record<string, unknown>;
+  consolidated_after_elimination: Record<string, unknown>;
+  comparative_from_date?: string;
+  comparative_to_date?: string;
+  comparative_elimination_schedule?: Array<Record<string, unknown>>;
+  consolidated_before_elimination_comparative?: Record<string, unknown>;
+  consolidated_after_elimination_comparative?: Record<string, unknown>;
+  consolidated_after_native_adjustment_comparative?: Record<string, unknown>;
+  elimination_mode: "native_journal_entry_on_holding_finance_book";
+};
+
 export type Contact = {
   name: string;
   contact_section?: string;

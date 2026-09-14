@@ -1,7 +1,7 @@
-# Tax Matrix — Letron Việt Nam
+# Tax Matrix — Letron Holding
 
 **Trạng thái:** DRAFT — chờ kế toán trưởng phê duyệt và chốt VAT Account  
-**Company:** Letron Việt Nam  
+**Company:** Letron Holding
 **Currency:** VND  
 **Nguồn cấu hình sau phê duyệt:** `config/policy.yaml`
 
@@ -21,23 +21,22 @@ VAT; Điều 9 khoản 3 quy định mức 10% cho hàng hóa, dịch vụ khôn
 0% hoặc 5%. Đây là căn cứ phân loại ban đầu, không thay thế việc đối chiếu
 hợp đồng và hồ sơ chứng minh sản phẩm/dịch vụ cụ thể.
 
-### Blocker được phát hiện khi audit
+### Trạng thái audit kỹ thuật
 
-Readback native cho thấy `VAT - LTVN` có `account_type: Tax`,
-`root_type: Liability`. Account này phù hợp để theo dõi VAT đầu ra, nhưng
-policy đang dùng cùng nó cho Purchase VAT đầu vào. Chưa tìm thấy một Input VAT
-Account thuộc nhóm Asset. Không được close F-03 hoặc coi Purchase Tax Template
-hiện tại là cấu hình kế toán hoàn chỉnh trước khi xử lý điểm này.
+Policy đã tách đúng tài khoản theo bản chất: VAT đầu vào dùng TK `1331`
+(`root_type: Asset`), còn VAT đầu ra dùng TK `33311`
+(`root_type: Liability`). Đây là trạng thái đã có trong policy và controller
+native; vẫn chưa phải là phê duyệt Tax Matrix hay nghiệm thu hóa đơn thực tế.
 
-Việc tạo/sửa Account là master-data operation ngoài phạm vi `policy.yaml`. Policy
-chỉ được tham chiếu Account đã tồn tại và đã được kế toán xác nhận; không được
-tự tạo hoặc migrate Account trong DB.
+COA Account được materialize từ shared policy bằng native Account controller.
+Tax templates chỉ được tham chiếu các Account đã có trong COA; controller không
+tự suy đoán hoặc tạo một tax account mới khi Tax Matrix chưa được phê duyệt.
 
 | Luồng | Template | Tax Category | Rate | Tax Account | Cost Center | Trạng thái |
 |---|---|---:|---:|---|---|---|
-| Sales | `Vietnam Tax - LTVN` | Không giới hạn (`null`) | 10% | `VAT - LTVN` | `Main - LTVN` | Đã có trong policy |
-| Purchase | `Vietnam Tax - LTVN` | Không giới hạn (`null`) | 10% | `VAT - LTVN` ⚠️ Liability | `Main - LTVN` | Có cấu hình kỹ thuật; chưa đạt accounting mapping |
-| Item | `Vietnam Tax - LTVN` | Không giới hạn (`null`) | 10% | `VAT - LTVN` | `Main - LTVN` | Đã có trong policy |
+| Sales | `Vietnam Tax - LTVN` | Không giới hạn (`null`) | 10% | `33311 - Thuế GTGT đầu ra` | `Main - LTVN` | Đã có trong policy |
+| Purchase | `Vietnam Tax - LTVN` | Không giới hạn (`null`) | 10% | `1331 - Thuế GTGT được khấu trừ của hàng hóa, dịch vụ` | `Main - LTVN` | Có cấu hình kỹ thuật; chưa đạt accounting acceptance |
+| Item (sales-oriented) | `Vietnam Tax - LTVN` | Không giới hạn (`null`) | 10% | `33311 - Thuế GTGT đầu ra` | `Main - LTVN` | Đã có trong policy |
 
 ## 3. Hoạt động kinh doanh đã xác định
 

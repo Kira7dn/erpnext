@@ -23,6 +23,7 @@ from yaml.resolver import BaseResolver
 CONFIG_VERSION = 3
 CONFIG_DIR_ENV = "LETRON_CONFIG_DIR"
 CONFIG_STATUS_CACHE_KEY = "letron:system-config:status"
+BUNDLE_STATUS_CACHE_KEY = "letron:system-config:bundle-status"
 SECRET_REFERENCE_FIELDS = {
     "database.root_password",
     "site.admin_password",
@@ -162,13 +163,6 @@ def _value_at(data: Mapping[str, Any], dotted: str) -> Any:
 
 def _dotenv_path(source: Path) -> Path:
     candidates = (".env.local", ".env")
-    if os.environ.get("LETRON_ACCEPTANCE") == "1":
-        root = workspace_root()
-        for name in candidates:
-            candidate = root / name
-            if candidate.is_file():
-                return candidate
-        return root / ".env"
     parent = source.parent
     root = parent.parent if parent.name == "config" else parent
     for name in candidates:
@@ -589,10 +583,34 @@ def status(path: str | Path | None = None) -> dict[str, Any]:
         return {"ok": False, "status": "invalid", "error": type(error).__name__, "message": str(error)}
 
 
+def _bundle_source_signature() -> str:
+    signatures: list[str] = []
+    defaults_path = policy_path().with_name("policy-defaults.yaml")
+    for source in (config_path(), policy_path(), defaults_path):
+        if not source.is_file():
+            signatures.append(f"missing:{source}")
+            continue
+        stat = source.stat()
+        signatures.append(f"{stat.st_mtime_ns}:{stat.st_size}")
+    return "|".join(signatures)
+
+
 def bundle_status() -> dict[str, Any]:
     try:
+        frappe = _frappe()
+        source_signature = _bundle_source_signature()
+        cached = frappe.cache().get_value(BUNDLE_STATUS_CACHE_KEY)
+        if isinstance(cached, dict) and cached.get("source_signature") == source_signature:
+            return {key: value for key, value in cached.items() if key != "source_signature"}
+
         result = validate_bundle()
-        return {**result, "status": "in-sync"}
+        response = {**result, "status": "in-sync"}
+        frappe.cache().set_value(
+            BUNDLE_STATUS_CACHE_KEY,
+            {**response, "source_signature": source_signature},
+            expires_in_sec=3600,
+        )
+        return response
     except Exception as error:  # noqa: BLE001 - health must fail closed
         return {"ok": False, "status": "invalid", "error": type(error).__name__, "message": str(error)}
 

@@ -5954,6 +5954,191 @@
           }
         }
       },
+      "ConsolidationAdjustmentRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "companies",
+          "from_date",
+          "to_date",
+          "posting_date",
+          "run_id"
+        ],
+        "properties": {
+          "companies": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "posting_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "run_id": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80,
+            "pattern": "^[A-Za-z0-9_.-]+$"
+          }
+        }
+      },
+      "ConsolidationAdjustmentCommandRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "journal_entry"
+        ],
+        "properties": {
+          "journal_entry": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "ConsolidationAdjustmentResponse": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "ok",
+          "status"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "idempotent": {
+            "type": "boolean"
+          },
+          "journal_entry": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "integer"
+            ]
+          },
+          "finance_book": {
+            "type": "string"
+          },
+          "elimination_schedule": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "ConsolidationPackageResponse": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "ok",
+          "holding_company",
+          "finance_book",
+          "companies",
+          "from_date",
+          "to_date",
+          "intercompany_matches",
+          "elimination_schedule",
+          "consolidated_before_elimination",
+          "consolidated_after_elimination",
+          "elimination_mode"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "holding_company": {
+            "type": "string"
+          },
+          "finance_book": {
+            "type": "string"
+          },
+          "companies": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "intercompany_matches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "elimination_schedule": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "consolidated_before_elimination": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "consolidated_after_elimination": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "comparative_from_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "comparative_to_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "comparative_elimination_schedule": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "consolidated_before_elimination_comparative": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "consolidated_after_elimination_comparative": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "consolidated_after_native_adjustment_comparative": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "elimination_mode": {
+            "type": "string",
+            "enum": [
+              "native_journal_entry_on_holding_finance_book"
+            ]
+          }
+        }
+      },
       "AllowedToTransactWithWrite": {
         "type": "object",
         "properties": {
@@ -13976,7 +14161,82 @@
           "path": "/api/v1/accounts/reports/report",
           "operation": "read",
           "operation_id": "runAccountsReport",
-          "handler": "letron_api.finance.banking.report"
+          "handler": "letron_api.finance.banking.report",
+          "query_parameters": [
+            {
+              "name": "report_key",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "filters",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        {
+          "module": "Accounts",
+          "resource": "consolidation",
+          "method": "GET",
+          "path": "/api/v1/accounts/consolidation/package",
+          "operation": "read",
+          "operation_id": "getConsolidationPackage",
+          "handler": "letron_api.finance.banking.consolidation_package_report",
+          "query_parameters": [
+            {
+              "name": "filters",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "response_schema": "ConsolidationPackageResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "consolidation",
+          "method": "POST",
+          "path": "/api/v1/accounts/consolidation/adjustments",
+          "operation": "create",
+          "operation_id": "createConsolidationAdjustment",
+          "handler": "letron_api.finance.banking.consolidation_adjustment_create",
+          "request_schema": "ConsolidationAdjustmentRequest",
+          "response_schema": "ConsolidationAdjustmentResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "consolidation",
+          "method": "POST",
+          "path": "/api/v1/accounts/consolidation/adjustments/submit",
+          "operation": "update",
+          "operation_id": "submitConsolidationAdjustment",
+          "handler": "letron_api.finance.banking.consolidation_adjustment_submit",
+          "request_schema": "ConsolidationAdjustmentCommandRequest",
+          "response_schema": "ConsolidationAdjustmentResponse",
+          "response_envelope": "message"
+        },
+        {
+          "module": "Accounts",
+          "resource": "consolidation",
+          "method": "POST",
+          "path": "/api/v1/accounts/consolidation/adjustments/cancel",
+          "operation": "update",
+          "operation_id": "cancelConsolidationAdjustment",
+          "handler": "letron_api.finance.banking.consolidation_adjustment_cancel",
+          "request_schema": "ConsolidationAdjustmentCommandRequest",
+          "response_schema": "ConsolidationAdjustmentResponse",
+          "response_envelope": "message"
         },
         {
           "module": "Accounts",
@@ -14275,6 +14535,191 @@
             },
             "status": {
               "type": "string"
+            }
+          }
+        },
+        "ConsolidationAdjustmentRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "companies",
+            "from_date",
+            "to_date",
+            "posting_date",
+            "run_id"
+          ],
+          "properties": {
+            "companies": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "from_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "to_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "posting_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "run_id": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 80,
+              "pattern": "^[A-Za-z0-9_.-]+$"
+            }
+          }
+        },
+        "ConsolidationAdjustmentCommandRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "journal_entry"
+          ],
+          "properties": {
+            "journal_entry": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "ConsolidationAdjustmentResponse": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "ok",
+            "status"
+          ],
+          "properties": {
+            "ok": {
+              "type": "boolean"
+            },
+            "idempotent": {
+              "type": "boolean"
+            },
+            "journal_entry": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "status": {
+              "type": [
+                "string",
+                "integer"
+              ]
+            },
+            "finance_book": {
+              "type": "string"
+            },
+            "elimination_schedule": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "ConsolidationPackageResponse": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "ok",
+            "holding_company",
+            "finance_book",
+            "companies",
+            "from_date",
+            "to_date",
+            "intercompany_matches",
+            "elimination_schedule",
+            "consolidated_before_elimination",
+            "consolidated_after_elimination",
+            "elimination_mode"
+          ],
+          "properties": {
+            "ok": {
+              "type": "boolean"
+            },
+            "holding_company": {
+              "type": "string"
+            },
+            "finance_book": {
+              "type": "string"
+            },
+            "companies": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "from_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "to_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "intercompany_matches": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "elimination_schedule": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "consolidated_before_elimination": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "consolidated_after_elimination": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "comparative_from_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "comparative_to_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "comparative_elimination_schedule": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "consolidated_before_elimination_comparative": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "consolidated_after_elimination_comparative": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "consolidated_after_native_adjustment_comparative": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "elimination_mode": {
+              "type": "string",
+              "enum": [
+                "native_journal_entry_on_holding_finance_book"
+              ]
             }
           }
         }

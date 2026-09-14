@@ -83,11 +83,11 @@ def _atomic_replace(source: Path, content: str, mode: int) -> None:
 
 
 def _assert_bootstrap_immutable(candidate: Path) -> None:
-    current_company = policy.load_policy()["bootstrap"]["company"]
-    candidate_company = policy.load_policy(candidate)["bootstrap"]["company"]
-    if current_company != candidate_company:
+    current_bootstrap = policy.load_policy().get("bootstrap")
+    candidate_bootstrap = policy.load_policy(candidate).get("bootstrap")
+    if current_bootstrap != candidate_bootstrap:
         _conflict(
-            "bootstrap.company is immutable after tenant initialization; use an explicit Company migration"
+            "bootstrap company tree is immutable after tenant initialization; use an explicit Company migration"
         )
 
 

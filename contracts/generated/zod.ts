@@ -105,6 +105,10 @@ export const BatchWriteSchema = z.object({name: z.string().optional(), disabled:
 export const CRMNoteSchema = z.object({name: z.string(), note: z.string().optional(), added_by: z.string().optional(), added_on: z.string().optional()}).passthrough();
 export const CRMNoteResponseSchema = z.object({name: z.string(), note: z.string().nullable().optional(), added_by: z.string().nullable().optional(), added_on: z.string().nullable().optional()}).passthrough();
 export const CRMNoteWriteSchema = z.object({name: z.string().optional(), note: z.string().optional(), added_by: z.string().optional(), added_on: z.string().optional(), custom_letron_orchestration_id: z.string().optional(), custom_lark_approval_status: z.string().optional()}).strict();
+export const ConsolidationAdjustmentCommandRequestSchema = z.object({journal_entry: z.string()}).strict();
+export const ConsolidationAdjustmentRequestSchema = z.object({companies: z.array(z.string()), from_date: z.string(), to_date: z.string(), posting_date: z.string(), run_id: z.string()}).strict();
+export const ConsolidationAdjustmentResponseSchema = z.object({ok: z.boolean(), idempotent: z.boolean().optional(), journal_entry: z.string().nullable().optional(), status: z.union([z.string(), z.number().int()]), finance_book: z.string().optional(), elimination_schedule: z.array(z.record(z.string(), z.unknown())).optional()}).passthrough();
+export const ConsolidationPackageResponseSchema = z.object({ok: z.boolean(), holding_company: z.string(), finance_book: z.string(), companies: z.record(z.string(), z.unknown()), from_date: z.string(), to_date: z.string(), intercompany_matches: z.array(z.record(z.string(), z.unknown())), elimination_schedule: z.array(z.record(z.string(), z.unknown())), consolidated_before_elimination: z.record(z.string(), z.unknown()), consolidated_after_elimination: z.record(z.string(), z.unknown()), comparative_from_date: z.string().optional(), comparative_to_date: z.string().optional(), comparative_elimination_schedule: z.array(z.record(z.string(), z.unknown())).optional(), consolidated_before_elimination_comparative: z.record(z.string(), z.unknown()).optional(), consolidated_after_elimination_comparative: z.record(z.string(), z.unknown()).optional(), consolidated_after_native_adjustment_comparative: z.record(z.string(), z.unknown()).optional(), elimination_mode: z.enum(["native_journal_entry_on_holding_finance_book"])}).passthrough();
 export const ContactSchema = z.object({name: z.string(), contact_section: z.string().optional(), first_name: z.string().optional(), last_name: z.string().optional(), email_id: z.string().optional(), user: z.string().optional(), cb00: z.string().optional(), status: z.enum(["Passive", "Open", "Replied"]).optional(), salutation: z.string().optional(), gender: z.string().optional(), phone: z.string().optional(), image: z.string().optional(), contact_details: z.string().optional(), is_primary_contact: z.union([z.boolean(), z.number().int()]).optional(), links: z.array(z.lazy(() => DynamicLinkSchema)).optional(), more_info: z.string().optional(), department: z.string().optional(), designation: z.string().optional(), unsubscribed: z.union([z.boolean(), z.number().int()]).optional(), middle_name: z.string().optional(), sb_00: z.string().optional(), email_ids: z.array(z.lazy(() => ContactEmailSchema)).optional(), address: z.string().optional(), phone_nos: z.array(z.lazy(() => ContactPhoneSchema)).optional(), mobile_no: z.string().optional(), pulled_from_google_contacts: z.union([z.boolean(), z.number().int()]).optional(), sync_with_google_contacts: z.union([z.boolean(), z.number().int()]).optional(), google_contacts: z.string().optional(), cb_00: z.string().optional(), sb_01: z.string().optional(), google_contacts_id: z.string().optional(), company_name: z.string().optional(), full_name: z.string().optional()}).passthrough();
 export const ContactEmailSchema = z.object({name: z.string(), email_id: z.string(), is_primary: z.union([z.boolean(), z.number().int()]).optional()}).passthrough();
 export const ContactEmailResponseSchema = z.object({name: z.string(), email_id: z.string().nullable().optional(), is_primary: z.unknown().optional()}).passthrough();
@@ -489,6 +493,20 @@ export const updateBankRequestSchema = z.lazy(() => BankWriteSchema);
 export type updateBankRequest = z.infer<typeof updateBankRequestSchema>;
 export const updateBankResponseSchema = z.object({data: z.lazy(() => BankResponseSchema)}).passthrough();
 export type updateBankResponse = z.infer<typeof updateBankResponseSchema>;
+export const createConsolidationAdjustmentRequestSchema = z.lazy(() => ConsolidationAdjustmentRequestSchema);
+export type createConsolidationAdjustmentRequest = z.infer<typeof createConsolidationAdjustmentRequestSchema>;
+export const createConsolidationAdjustmentResponseSchema = z.object({message: z.lazy(() => ConsolidationAdjustmentResponseSchema)}).passthrough();
+export type createConsolidationAdjustmentResponse = z.infer<typeof createConsolidationAdjustmentResponseSchema>;
+export const cancelConsolidationAdjustmentRequestSchema = z.lazy(() => ConsolidationAdjustmentCommandRequestSchema);
+export type cancelConsolidationAdjustmentRequest = z.infer<typeof cancelConsolidationAdjustmentRequestSchema>;
+export const cancelConsolidationAdjustmentResponseSchema = z.object({message: z.lazy(() => ConsolidationAdjustmentResponseSchema)}).passthrough();
+export type cancelConsolidationAdjustmentResponse = z.infer<typeof cancelConsolidationAdjustmentResponseSchema>;
+export const submitConsolidationAdjustmentRequestSchema = z.lazy(() => ConsolidationAdjustmentCommandRequestSchema);
+export type submitConsolidationAdjustmentRequest = z.infer<typeof submitConsolidationAdjustmentRequestSchema>;
+export const submitConsolidationAdjustmentResponseSchema = z.object({message: z.lazy(() => ConsolidationAdjustmentResponseSchema)}).passthrough();
+export type submitConsolidationAdjustmentResponse = z.infer<typeof submitConsolidationAdjustmentResponseSchema>;
+export const getConsolidationPackageResponseSchema = z.object({message: z.lazy(() => ConsolidationPackageResponseSchema)}).passthrough();
+export type getConsolidationPackageResponse = z.infer<typeof getConsolidationPackageResponseSchema>;
 export const listCostCenterResponseSchema = z.object({data: z.array(z.lazy(() => CostCenterResponseSchema)), message: z.unknown().optional()}).passthrough();
 export type listCostCenterResponse = z.infer<typeof listCostCenterResponseSchema>;
 export const createCostCenterRequestSchema = z.lazy(() => CostCenterWriteSchema);
@@ -1306,6 +1324,10 @@ export const GENERATED_OPERATION_CONTRACTS = {
   "deleteBank": { method: "DELETE", path: "/api/v1/accounts/banks/{name}", response: deleteBankResponseSchema },
   "getBank": { method: "GET", path: "/api/v1/accounts/banks/{name}", response: getBankResponseSchema },
   "updateBank": { method: "PUT", path: "/api/v1/accounts/banks/{name}", request: updateBankRequestSchema, response: updateBankResponseSchema },
+  "createConsolidationAdjustment": { method: "POST", path: "/api/v1/accounts/consolidation/adjustments", request: createConsolidationAdjustmentRequestSchema, response: createConsolidationAdjustmentResponseSchema },
+  "cancelConsolidationAdjustment": { method: "POST", path: "/api/v1/accounts/consolidation/adjustments/cancel", request: cancelConsolidationAdjustmentRequestSchema, response: cancelConsolidationAdjustmentResponseSchema },
+  "submitConsolidationAdjustment": { method: "POST", path: "/api/v1/accounts/consolidation/adjustments/submit", request: submitConsolidationAdjustmentRequestSchema, response: submitConsolidationAdjustmentResponseSchema },
+  "getConsolidationPackage": { method: "GET", path: "/api/v1/accounts/consolidation/package", response: getConsolidationPackageResponseSchema },
   "listCostCenter": { method: "GET", path: "/api/v1/accounts/cost-centers", response: listCostCenterResponseSchema },
   "createCostCenter": { method: "POST", path: "/api/v1/accounts/cost-centers", request: createCostCenterRequestSchema, response: createCostCenterResponseSchema },
   "deleteCostCenter": { method: "DELETE", path: "/api/v1/accounts/cost-centers/{name}", response: deleteCostCenterResponseSchema },

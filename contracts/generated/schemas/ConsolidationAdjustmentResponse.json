@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://letron.local/schemas/ConsolidationAdjustmentResponse.json",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "ok",
+    "status"
+  ],
+  "properties": {
+    "ok": {
+      "type": "boolean"
+    },
+    "idempotent": {
+      "type": "boolean"
+    },
+    "journal_entry": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "integer"
+      ]
+    },
+    "finance_book": {
+      "type": "string"
+    },
+    "elimination_schedule": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  }
+}

@@ -28,14 +28,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def _config() -> dict[str, Any]:
-    acceptance_dir = os.environ.get("LETRON_ACCEPTANCE_CONFIG_DIR")
-    if acceptance_dir:
-        acceptance_root = Path(acceptance_dir)
-        source = acceptance_root / "config.yaml"
-        if not source.is_file():
-            source = acceptance_root / "config.acceptance.yaml"
-    else:
-        source = ROOT / "config" / "config.yaml"
+    source = ROOT / "config" / "config.yaml"
     config = load_config(source, resolve_secrets=True)
     return config
 

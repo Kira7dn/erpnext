@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import base64
 import json
-import os
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -24,15 +23,26 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def bench_execute(method: str, kwargs: dict[str, object] | None = None) -> str:
     config = load_config(_runtime_config_path())
+    # Acceptance probes are rollback-only and guarded by _is_test_runtime.
+    # Enable that guard only in this short-lived bench process; do not change
+    # the persisted production-like config or the long-running containers.
+    kwargs_expression = repr(kwargs or {})
+    method_expression = (
+        "(lambda f: (setattr(f.conf, 'developer_mode', 1), "
+        "setattr(f.conf, 'allow_tests', 1), "
+        f"f.get_attr('{method}')(**{kwargs_expression}))[-1])(__import__('frappe'))"
+    )
     command = [
         "docker",
         "exec",
+        "-w",
+        "/home/frappe/frappe-bench",
         f"{config['project']['name']}-backend-1",
         "bench",
         "--site",
         config["site"]["name"],
         "execute",
-        method,
+        method_expression,
     ]
     if kwargs:
         command.extend(["--kwargs", json.dumps(kwargs)])
@@ -48,12 +58,7 @@ def bench_execute(method: str, kwargs: dict[str, object] | None = None) -> str:
 
 
 def _runtime_config_path() -> Path:
-    acceptance_dir = os.environ.get("LETRON_ACCEPTANCE_CONFIG_DIR")
-    return (
-        Path(acceptance_dir) / "config.yaml"
-        if acceptance_dir
-        else ROOT / "config" / "config.yaml"
-    )
+    return ROOT / "config" / "config.yaml"
 
 
 def _logged_in_client() -> ApiClient:
@@ -74,14 +79,26 @@ def test_policy_bundle_matches_native_configuration() -> None:
         base64.b64decode(bench_execute("letron_api.control.policy.export_current_base64"))
     )
     assert exported == bundle
-    assert len(bundle["documents"]) == 28
+    assert len(bundle["documents"]) == 69
     snapshot = client.request(
         "GET", "/api/method/letron_api.control.api.runtime_snapshot", expected={200}
     )
     bootstrap = snapshot.data["message"]["bootstrap"]
     assert bootstrap["ok"] is True
-    assert bootstrap["company_count"] == 1
+    assert bootstrap["company_count"] == 8
+    assert bootstrap["transaction_company_count"] == 7
     assert bootstrap["company_matches"] is True
+    assert bootstrap["group_matches"] is True
+    assert bootstrap["fiscal_year"] == {
+        "ok": True,
+        "configured": True,
+        "name": "2026",
+        "start_date": "2026-01-01",
+        "end_date": "2026-12-31",
+        "companies": ["LeDB", "LeGM", "LeSC", "LeSE", "LeSB", "LeSM", "Letron Holding"],
+        "expected_companies": ["LeDB", "LeGM", "LeSC", "LeSE", "LeSB", "LeSM", "Letron Holding"],
+        "native_exists": True,
+    }
     assert {key: value["rates"] for key, value in bootstrap["templates"].items()} == {
         "sales": [10.0],
         "purchase": [10.0],
@@ -90,8 +107,8 @@ def test_policy_bundle_matches_native_configuration() -> None:
     runtime_policy = snapshot.data["message"]["policy"]
     assert runtime_policy == {
         "ok": True,
-        "version": 2,
-        "schema_version": 2,
+        "version": 3,
+        "schema_version": 3,
         "scope_version": 1,
         "erpnext_version": bundle["erpnext_version"],
         "sha256": expected_hash,
@@ -106,6 +123,8 @@ def test_policy_bundle_matches_native_configuration() -> None:
             "roundtrip_diff": 0,
         },
         "status": "in-sync",
+        "bootstrap_companies": ["Letron Holding", "LeSC", "LeSM", "LeDB", "LeSE", "LeSB", "LeGM"],
+        "bootstrap_group": {"name": "LETRON GROUP", "abbreviation": "LTRG"},
     }
 
     accounts_entry = next(
@@ -347,7 +366,7 @@ def test_compute_yaml_control_api_policy_boundary_and_drift() -> None:
     client = _control_client()
     policy_source = _configuration_source(client, "policy")
     renamed_company = policy_source["content"].replace(
-        "name: Letron Việt Nam", "name: Letron Việt Nam Renamed", 1
+        "name: Letron Holding", "name: Letron Holding Renamed", 1
     )
     client.request(
         "PUT",
@@ -456,23 +475,77 @@ def test_policy_configured_tax_categories_and_rules_readback() -> None:
     }
 
 
-def test_policy_configured_accounting_period_readback() -> None:
-    result = json.loads(bench_execute("letron_api.control.policy_acceptance.probe_configured_accounting_period"))
+def test_policy_configured_fiscal_year_readback() -> None:
+    result = json.loads(bench_execute("letron_api.control.policy_acceptance.probe_configured_fiscal_year"))
     assert result["ok"] is True
-    assert result["period_name"] == "FY 2026 - LTVN"
-    assert result["closed_documents"] == {
-        "Sales Invoice": 0,
-        "Purchase Invoice": 0,
-        "Journal Entry": 0,
-        "Payment Entry": 0,
-        "Purchase Receipt": 0,
+    assert result["fiscal_year"] == "2026"
+    assert result["start_date"] == "2026-01-01"
+    assert result["end_date"] == "2026-12-31"
+    assert result["companies"] == [
+        "LeDB", "LeGM", "LeSB", "LeSC", "LeSE", "LeSM", "Letron Holding"
+    ]
+    assert result["comparative_fiscal_years"] == [{
+        "fiscal_year": "2025",
+        "start_date": "2025-01-01",
+        "end_date": "2025-12-31",
+        "companies": [
+            "LeDB", "LeGM", "LeSB", "LeSC", "LeSE", "LeSM", "Letron Holding"
+        ],
+    }]
+    assert result["accounting_period_placeholder"] == "absent"
+
+
+def test_holding_consolidation_uses_native_je_gl_and_guard() -> None:
+    result = json.loads(
+        bench_execute(
+            "letron_api.control.policy_acceptance.probe_holding_consolidation_effects"
+        )
+    )
+    assert result["ok"] is True
+    assert result["match_balanced"] is True
+    assert result["gl_entry_count"] >= 4
+    assert result["schedule_rule_codes"] == ["IC_AR_AP", "IC_REVENUE_COST"]
+    assert result["schedule_amounts"] == [1000.0]
+    assert result["adjustment_mode"] in {
+        "closed_period_guard",
+        "native_adjustment_and_idempotency",
     }
-    assert result["behavior"] == {
-        "in_period_open_allowed": True,
-        "outside_period_not_blocked_by_closing_hook": True,
-        "in_period_closed_sales_invoice_blocked": True,
-        "exempted_role": None,
+
+
+@pytest.mark.timeout(180)
+def test_holding_synthetic_vas_acceptance() -> None:
+    result = json.loads(
+        bench_execute(
+            "letron_api.control.policy_acceptance.probe_holding_synthetic_vas_acceptance"
+        )
+    )
+    assert result["ok"] is True
+    assert result["profile"] == "synthetic_vas"
+    assert result["scope"] == {
+        "companies": ["Letron Holding", "LeSC", "LeSM", "LeDB", "LeSE", "LeSB", "LeGM"],
+        "currency": "VND",
+        "coa": "generic_tt99",
+        "native_gl_only": True,
     }
+    assert result["periods"] == {
+        "current": ["2026-06-01", "2026-06-30"],
+        "comparative": ["2025-06-01", "2025-06-30"],
+    }
+    assert result["native"]["gl_entries"] > result["native"]["journal_entries"]
+    assert result["native"]["bank_account"] is True
+    assert result["native"]["asset_category"] is True
+    assert result["native"]["inventory_warehouse"] is True
+    assert result["reports"]["B03-DN"]["unresolved_line_codes"] == []
+    assert result["reports"]["B01-DN"]["unresolved_line_codes"] == []
+    assert result["reports"]["B02-DN"]["unresolved_line_codes"] == []
+    assert result["reports"]["B03-DN"]["comparative"]["status"] == "derived"
+    assert result["notes"]["note_count"] >= 7
+    assert result["consolidation"]["companies"] == 7
+    assert result["consolidation"]["comparative"] is True
+    assert result["consolidation"]["schedule_rule_codes"] == ["IC_AR_AP", "IC_REVENUE_COST"]
+    assert result["consolidation"]["adjustment_location"] == (
+        "Letron Holding/Consolidation Adjustment"
+    )
 
 
 def test_policy_configured_tax_invoice_effects() -> None:

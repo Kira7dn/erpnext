@@ -2,7 +2,7 @@
 
 The registry is importable without Frappe so unit tests can prove that every
 machine-readable scope mapping resolves to a concrete builder. Runtime helpers
-are deliberately kept behind functions and are only called on acceptance sites.
+are deliberately kept behind functions and are only called from test runtimes.
 """
 
 from __future__ import annotations
@@ -79,9 +79,12 @@ DOCUMENT_UPDATE_FIELDS: dict[str, str | None] = {
     "Notification": "enabled",
     "Workflow": "is_active",
     "Fiscal Year": "disabled",
+    "Finance Book": "finance_book_name",
     "Accounting Dimension": "disabled",
     "Accounting Dimension Filter": "disabled",
     "Accounting Period": None,
+    "Bank": "website",
+    "Bank Account": "disabled",
     "Bank Transaction Rule": "priority",
     "Cheque Print Template": None,
     "Cost Center Allocation": None,
@@ -130,11 +133,27 @@ DOCUMENT_BUILDERS: dict[str, dict[str, Any]] = {
         "workflow_action_name": _fixture_name("Workflow Action Master")
     },
     "Company": {},
+    "Finance Book": {
+        "finance_book_name": _fixture_name("Finance Book"),
+    },
     "Fiscal Year": {
         "year": "2042",
         "year_start_date": "2042-01-01",
         "year_end_date": "2042-12-31",
         "companies": [{"company": "$company"}],
+    },
+    "Bank": {
+        "bank_name": _fixture_name("Bank"),
+        "website": "https://example.invalid/phase8-bank",
+    },
+    "Bank Account": {
+        "account_name": _fixture_name("Bank Account"),
+        "account": "$bank_account",
+        "bank": "$bank",
+        "company": "$company",
+        "is_company_account": 1,
+        "is_default": 0,
+        "disabled": 0,
     },
     "Accounting Dimension": {
         "label": "Acceptance Dimension",
@@ -565,6 +584,7 @@ def _runtime_prerequisites() -> dict[str, str]:
         "warehouse": str(warehouse),
         "tax_account": account(account_type="Tax"),
         "bank_account": account(account_type="Bank"),
+        "bank": _fixture_name("Bank"),
         "income_account": account(root_type="Income", is_group=0),
         "expense_account": account(root_type="Expense", is_group=0),
         "sales_tax_template": "Vietnam Tax - LTVN",
@@ -606,6 +626,11 @@ def _ensure_probe_prerequisites(
     import frappe
 
     roots = [
+        {
+            "doctype": "Bank",
+            "name": values["bank"],
+            "bank_name": values["bank"],
+        },
         {"doctype": "UOM", "name": values["uom"], "uom_name": values["uom"]},
         {
             "doctype": "Item Group",
@@ -767,12 +792,15 @@ def _document_name(doctype: str, fields: Mapping[str, Any]) -> str:
     explicit = fields.get("name")
     if explicit:
         return str(explicit)
+    if doctype == "Bank Account":
+        return f"{fields['account_name']} - {fields['bank']}"
     names = {
         "Role": "role_name",
         "Role Profile": "role_profile",
         "Workflow State": "workflow_state_name",
         "Workflow Action Master": "workflow_action_name",
         "Fiscal Year": "year",
+        "Finance Book": "finance_book_name",
         "Accounting Dimension": "label",
         "Accounting Period": "period_name",
         "Bank Transaction Rule": "rule_name",
@@ -850,7 +878,7 @@ def probe_registry_source(doctype: str) -> dict[str, Any]:
 
     if not policy._is_test_runtime():
         raise RuntimeError(
-            "policy acceptance probes require a disposable acceptance site"
+            "policy acceptance probes require a test runtime"
         )
     scope = policy._load_scope(policy._policy_path())
     source = next(
@@ -945,7 +973,7 @@ def probe_policy_apply_registry(doctypes: list[str] | None = None) -> dict[str, 
 
     if not policy._is_test_runtime():
         raise RuntimeError(
-            "policy acceptance probes require a disposable acceptance site"
+            "policy acceptance probes require a test runtime"
         )
     prerequisites = _runtime_prerequisites()
     previous_in_test = frappe.in_test
@@ -1100,6 +1128,8 @@ def probe_accounts_and_commercial() -> dict[str, Any]:
             "Accounting Dimension",
             "Accounting Dimension Filter",
             "Accounting Period",
+            "Bank",
+            "Bank Account",
             "Bank Transaction Rule",
             "Cheque Print Template",
             "Cost Center Allocation",
@@ -1143,7 +1173,7 @@ def probe_frappe_cross_cutting() -> dict[str, Any]:
         [
             "Role",
             "Role Profile",
-            "Workflow State",
+        "Workflow State",
             "Workflow Action Master",
             "Custom DocPerm",
             "Assignment Rule",
@@ -1166,7 +1196,7 @@ def cleanup_registry_residue() -> dict[str, Any]:
 
     if not policy._is_test_runtime():
         raise RuntimeError(
-            "policy acceptance cleanup requires a disposable acceptance site"
+            "policy acceptance cleanup requires a test runtime"
         )
     previous_apply_flag = getattr(frappe.flags, "in_letron_policy_apply", False)
     frappe.flags.in_letron_policy_apply = True
@@ -1312,7 +1342,7 @@ def probe_asset_lifecycle() -> dict[str, Any]:
     from letron_api.control import policy
 
     if not policy._is_test_runtime():
-        raise RuntimeError("asset acceptance requires a disposable acceptance site")
+        raise RuntimeError("asset acceptance requires a test runtime")
     source = policy.load_policy()
     policy_dir = policy._policy_path().parent
     public_source = policy_dir / "assets" / "phase8-public.txt"
@@ -1509,7 +1539,7 @@ def probe_payment_terms_effect() -> dict[str, Any]:
     if not __import__(
         "letron_api.control.policy", fromlist=["_is_test_runtime"]
     )._is_test_runtime():
-        raise RuntimeError("controller-effect probes require an acceptance runtime")
+        raise RuntimeError("controller-effect probes require a test runtime")
     prerequisites = _runtime_prerequisites()
     previous_in_test = frappe.in_test
     try:
@@ -1571,7 +1601,7 @@ def probe_failure_rollback(step: str) -> dict[str, Any]:
     if step not in supported:
         raise ValueError(f"unsupported failure step: {step}")
     if not policy._is_test_runtime():
-        raise RuntimeError("failure rollback probe requires an acceptance runtime")
+        raise RuntimeError("failure rollback probe requires a test runtime")
 
     source_path = policy._policy_path()
     source_bytes = source_path.read_bytes()
@@ -2046,7 +2076,7 @@ def probe_configured_tax_policy() -> dict[str, Any]:
     from letron_api.control import policy
 
     if not policy._is_test_runtime():
-        raise RuntimeError("configured tax policy probe requires a disposable acceptance site")
+        raise RuntimeError("configured tax policy probe requires a test runtime")
 
     company = policy.load_policy()["bootstrap"]["company"]["name"]
     software_category = "Domestic Software - Non-VAT - LTVN"
@@ -2122,12 +2152,14 @@ def probe_configured_tax_invoice_effects() -> dict[str, Any]:
     """Submit policy-routed Sales/Purchase Invoices and verify VAT GL amounts."""
 
     import frappe
-    from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template  # type: ignore[unresolved-import]
+    from erpnext.accounts.doctype.tax_rule.tax_rule import (
+        get_tax_template,  # type: ignore[unresolved-import]
+    )
 
     from letron_api.control import policy
 
     if not policy._is_test_runtime():
-        raise RuntimeError("configured tax invoice probe requires a disposable acceptance site")
+        raise RuntimeError("configured tax invoice probe requires a test runtime")
 
     prerequisites = _runtime_prerequisites()
     company = prerequisites["company"]
@@ -2152,7 +2184,7 @@ def probe_configured_tax_invoice_effects() -> dict[str, Any]:
         frappe.db.set_single_value("Buying Settings", "po_required", "No")
         frappe.db.set_single_value("Buying Settings", "pr_required", "No")
         fiscal_year_name = f"Acceptance FY {today[:4]}-{frappe.generate_hash(length=6).upper()}"
-        fiscal_year = frappe.get_doc(
+        frappe.get_doc(
             {
                 "doctype": "Fiscal Year",
                 "year": fiscal_year_name,
@@ -2263,98 +2295,86 @@ def probe_configured_tax_invoice_effects() -> dict[str, Any]:
             frappe.db.set_single_value("Buying Settings", "pr_required", original_pr_required)
 
 
-def probe_configured_accounting_period() -> dict[str, Any]:
-    """Verify native Accounting Period behavior for the policy-owned period."""
+def probe_configured_fiscal_year() -> dict[str, Any]:
+    """Verify the native Fiscal Year, not an Accounting Period placeholder."""
 
     import frappe
+
     from letron_api.control import policy
 
     if not policy._is_test_runtime():
-        raise RuntimeError("accounting period probe requires a disposable acceptance site")
-    expected_name = "FY 2026 - LTVN"
-    if not frappe.db.exists("Accounting Period", expected_name):
-        raise AssertionError(f"configured accounting period missing: {expected_name}")
-    doc: Any = frappe.get_doc("Accounting Period", expected_name)
-    if {
-        "period_name": doc.period_name,
-        "start_date": str(doc.start_date),
-        "end_date": str(doc.end_date),
-        "company": doc.company,
-        "disabled": int(doc.disabled or 0),
-        "exempted_role": doc.exempted_role,
-    } != {
-        "period_name": expected_name,
-        "start_date": "2026-01-01",
-        "end_date": "2026-08-14",
-        "company": "Letron Việt Nam",
-        "disabled": 0,
-        "exempted_role": None,
-    }:
-        raise AssertionError("Accounting Period native fields differ from policy")
-    closed_documents = {
-        str(row.document_type): int(row.closed or 0) for row in (doc.closed_documents or [])
-    }
-    expected_documents = {
-        "Sales Invoice", "Purchase Invoice", "Journal Entry", "Payment Entry", "Purchase Receipt"
-    }
-    if set(closed_documents) != expected_documents or any(closed_documents.values()):
-        raise AssertionError("Accounting Period closed_documents differ from policy")
+        raise RuntimeError("fiscal year probe requires a test runtime")
 
-    from types import SimpleNamespace
+    shared = policy.load_policy()["shared"]
+    configured = shared["fiscal_year"]
+    fiscal_year_definitions = [configured, *shared.get("comparative_fiscal_years", [])]
+    readbacks: list[dict[str, Any]] = []
+    for definition in fiscal_year_definitions:
+        expected_name = str(definition["name"])
+        if not frappe.db.exists("Fiscal Year", expected_name):
+            raise AssertionError(f"configured Fiscal Year missing: {expected_name}")
 
-    from erpnext.accounts.doctype.accounting_period.accounting_period import (
-        ClosedAccountingPeriod,
-        validate_accounting_period_on_doc_save,
-    )
+        doc: Any = frappe.get_doc("Fiscal Year", expected_name)
+        actual_companies = {
+            str(row.company) for row in (doc.companies or []) if row.company
+        }
+        expected_companies = {str(company) for company in definition["companies"]}
+        if {
+            "year": str(doc.year),
+            "start_date": str(doc.year_start_date),
+            "end_date": str(doc.year_end_date),
+            "companies": actual_companies,
+            "disabled": int(doc.disabled or 0),
+            "is_short_year": int(doc.is_short_year or 0),
+        } != {
+            "year": expected_name,
+            "start_date": str(definition["start_date"]),
+            "end_date": str(definition["end_date"]),
+            "companies": expected_companies,
+            "disabled": 0,
+            "is_short_year": 0,
+        }:
+            raise AssertionError(f"native Fiscal Year fields differ from policy: {expected_name}")
+        readbacks.append(
+            {
+                "fiscal_year": expected_name,
+                "start_date": str(doc.year_start_date),
+                "end_date": str(doc.year_end_date),
+                "companies": sorted(actual_companies),
+            }
+        )
 
-    sales_invoice_row = next(
-        row for row in doc.closed_documents if row.document_type == "Sales Invoice"
-    )
-    in_period_doc = SimpleNamespace(
-        doctype="Sales Invoice",
-        company=doc.company,
-        posting_date="2026-08-14",
-    )
-    outside_period_doc = SimpleNamespace(
-        doctype="Sales Invoice",
-        company=doc.company,
-        posting_date="2025-12-31",
-    )
+    absent_periods = [
+        entry["name"]
+        for entry in policy.load_policy()["documents"]
+        if entry["doctype"] == "Accounting Period" and entry["state"] == "absent"
+    ]
+    present_placeholders = [
+        name for name in absent_periods if frappe.db.exists("Accounting Period", name)
+    ]
+    if present_placeholders:
+        raise AssertionError(
+            "legacy Accounting Period placeholders must be absent: "
+            + ", ".join(sorted(present_placeholders))
+        )
 
-    # Policy leaves the configured documents open: an in-period document must pass.
-    validate_accounting_period_on_doc_save(in_period_doc)
-
-    # Accounting Period is a closing control, not a global date-range validator:
-    # an outside-period document is not blocked by this hook.
-    validate_accounting_period_on_doc_save(outside_period_doc)
-
-    original_closed = int(sales_invoice_row.closed or 0)
-    try:
-        frappe.db.set_value("Closed Document", sales_invoice_row.name, "closed", 1)
-        try:
-            validate_accounting_period_on_doc_save(in_period_doc)
-        except ClosedAccountingPeriod:
-            pass
-        else:
-            raise AssertionError("closed Sales Invoice was not blocked inside the period")
-
-        # No exempted_role is configured, so there is no role-based bypass.
-        if doc.exempted_role is not None:
-            raise AssertionError("Accounting Period unexpectedly has an exempted_role")
-    finally:
-        frappe.db.set_value("Closed Document", sales_invoice_row.name, "closed", original_closed)
+    current = readbacks[0]
 
     return {
         "ok": True,
-        "period_name": expected_name,
-        "closed_documents": closed_documents,
-        "behavior": {
-            "in_period_open_allowed": True,
-            "outside_period_not_blocked_by_closing_hook": True,
-            "in_period_closed_sales_invoice_blocked": True,
-            "exempted_role": None,
-        },
+        "fiscal_year": current["fiscal_year"],
+        "start_date": current["start_date"],
+        "end_date": current["end_date"],
+        "companies": current["companies"],
+        "comparative_fiscal_years": readbacks[1:],
+        "accounting_period_placeholder": "absent",
     }
+
+
+def probe_configured_accounting_period() -> dict[str, Any]:
+    """Backward-compatible name; acceptance now verifies native Fiscal Year."""
+
+    return probe_configured_fiscal_year()
 
 
 def _make_effect_quotation(prerequisites: Mapping[str, str]) -> Any:
@@ -2717,6 +2737,594 @@ def probe_cross_cutting_effects(effect: str = "render") -> dict[str, Any]:
                 "state": approved_state,
             }
         raise ValueError(f"unknown cross-cutting effect: {effect}")
+    finally:
+        frappe.db.rollback()
+        frappe.clear_cache()
+        frappe.in_test = previous_in_test
+
+
+def probe_holding_consolidation_effects() -> dict[str, Any]:
+    """Exercise native JE/GL matching and the Holding adjustment boundary.
+
+    The probe deliberately uses two policy Companies and rolls back the whole
+    database transaction.  It proves that the marker survives native Journal
+    Entry submission into GL Entry, that only a balanced directed pair enters
+    the elimination schedule, and that adjustment creation is either executed
+    on the configured Holding Finance Book after close or rejected before any
+    adjustment mutation when the Companies are not closed.
+    """
+
+    import frappe
+
+    from letron_api.control import policy
+    from letron_api.finance import vas_reports
+
+    if not policy._is_test_runtime():
+        raise RuntimeError(
+            "holding consolidation acceptance requires a test runtime"
+        )
+
+    desired = policy.load_policy()
+    settings = desired["shared"]["consolidation"]
+    companies = [str(company) for company in settings["companies"]]
+    holding = str(settings["holding_company"])
+    source_company = next(company for company in companies if company != holding)
+    counterparty_company = next(
+        company for company in companies if company not in {holding, source_company}
+    )
+    from_date = "2026-06-01"
+    to_date = "2026-06-30"
+    posting_date = to_date
+    amount = 1000
+    matching_id = f"ACCEPTANCE-IC-{frappe.generate_hash(length=8).upper()}"
+    run_id = f"ACCEPTANCE-CONS-{frappe.generate_hash(length=8).upper()}"
+    previous_in_test = frappe.in_test
+
+    def account(company: str, code: str) -> str:
+        name = frappe.db.get_value(
+            "Account",
+            {"company": company, "account_number": code, "is_group": 0},
+            "name",
+        )
+        if not name:
+            raise RuntimeError(f"Missing native Account {code} for {company}")
+        return str(name)
+
+    def cost_center(company: str) -> str:
+        name = frappe.db.get_value(
+            "Cost Center", {"company": company, "is_group": 0}, "name"
+        )
+        if not name:
+            raise RuntimeError(f"Missing native Cost Center for {company}")
+        return str(name)
+
+    def submit_journal_entry(
+        company: str,
+        marker: str,
+        rows: list[tuple[str, str]],
+    ) -> Any:
+        accounts = []
+        for side, code in rows:
+            value = {
+                "account": account(company, code),
+                "cost_center": cost_center(company),
+                "debit": amount if side == "debit" else 0,
+                "credit": amount if side == "credit" else 0,
+                "debit_in_account_currency": amount if side == "debit" else 0,
+                "credit_in_account_currency": amount if side == "credit" else 0,
+            }
+            accounts.append(value)
+        document = frappe.get_doc(
+            {
+                "doctype": "Journal Entry",
+                "voucher_type": "Journal Entry",
+                "company": company,
+                "posting_date": posting_date,
+                "remark": marker,
+                "user_remark": marker,
+                "party_not_required": 1,
+                "accounts": accounts,
+            }
+        )
+        document.flags.ignore_permissions = True
+        document.insert(ignore_permissions=True)
+        document.submit()
+        return document
+
+    frappe.in_test = True  # ty: ignore[invalid-assignment]
+    try:
+        source_marker = vas_reports._render_intercompany_marker(
+            matching_id,
+            source_company,
+            counterparty_company,
+            "service",
+        )
+        counterparty_marker = vas_reports._render_intercompany_marker(
+            matching_id,
+            counterparty_company,
+            source_company,
+            "service",
+        )
+        source_je = submit_journal_entry(
+            source_company,
+            source_marker,
+            [("debit", "131"), ("credit", "511")],
+        )
+        counterparty_je = submit_journal_entry(
+            counterparty_company,
+            counterparty_marker,
+            [("debit", "632"), ("credit", "331")],
+        )
+
+        source_gl = frappe.get_all(
+            "GL Entry",
+            filters={"voucher_no": ["in", [source_je.name, counterparty_je.name]]},
+            fields=["name", "company", "account", "debit", "credit", "remarks", "voucher_no"],
+            limit_page_length=0,
+        )
+        if len(source_gl) < 4 or any(not row.remarks for row in source_gl):
+            raise AssertionError(
+                "native Journal Entry submission did not persist marker to GL Entry"
+            )
+
+        matches = vas_reports.intercompany_matches(companies, from_date, to_date)
+        matching = next(
+            (item for item in matches if item["matching_id"] == matching_id), None
+        )
+        if not matching or not matching["balanced"]:
+            raise AssertionError("native intercompany pair was not balanced/matched")
+        schedule = [
+            item
+            for item in vas_reports.elimination_schedule(companies, from_date, to_date)
+            if item["matching_id"] == matching_id
+        ]
+        if {item["rule_code"] for item in schedule} != {
+            "IC_AR_AP",
+            "IC_REVENUE_COST",
+        } or any(float(item["amount"]) != amount for item in schedule):
+            raise AssertionError("native intercompany elimination schedule is incorrect")
+
+        closed_through_date = all(
+            frappe.db.exists(
+                "Period Closing Voucher",
+                {
+                    "company": company,
+                    "docstatus": 1,
+                    "period_end_date": [">=", to_date],
+                },
+            )
+            for company in companies
+        )
+        adjustment_result: dict[str, Any]
+        if closed_through_date:
+            adjustment_result = vas_reports.create_consolidation_adjustment(
+                companies,
+                from_date,
+                to_date,
+                posting_date,
+                run_id,
+            )
+            adjustment = frappe.get_doc(
+                "Journal Entry", adjustment_result["journal_entry"]
+            )
+            adjustment_name = str(adjustment.name or "")
+            if not adjustment_name:
+                raise AssertionError("consolidation adjustment did not return a name")
+            if (
+                adjustment.get("company") != holding
+                or adjustment.get("finance_book") != settings["finance_book"]
+                or adjustment.docstatus != 0
+                or not str(adjustment.get("remark") or "").startswith("LETRON-CONSOLIDATION|")
+            ):
+                raise AssertionError("consolidation adjustment was not a native Holding draft JE")
+            vas_reports.submit_consolidation_adjustment(adjustment_name)
+            adjustment.reload()
+            if adjustment.docstatus != 1:
+                raise AssertionError("consolidation adjustment draft was not submitted explicitly")
+            idempotent = vas_reports.create_consolidation_adjustment(
+                companies,
+                from_date,
+                to_date,
+                posting_date,
+                run_id,
+            )
+            if not idempotent.get("idempotent"):
+                raise AssertionError("consolidation adjustment is not idempotent")
+            vas_reports.cancel_consolidation_adjustment(adjustment_name)
+            adjustment_mode = "native_adjustment_and_idempotency"
+        else:
+            try:
+                vas_reports.create_consolidation_adjustment(
+                    companies,
+                    from_date,
+                    to_date,
+                    posting_date,
+                    run_id,
+                )
+            except frappe.ValidationError:
+                adjustment_mode = "closed_period_guard"
+            else:
+                raise AssertionError(
+                    "consolidation adjustment bypassed the closed-period guard"
+                )
+            adjustment_result = {"journal_entry": None}
+
+        return {
+            "ok": True,
+            "companies": companies,
+            "source_company": source_company,
+            "counterparty_company": counterparty_company,
+            "journal_entries": [str(source_je.name), str(counterparty_je.name)],
+            "gl_entry_count": len(source_gl),
+            "matching_id": matching_id,
+            "match_balanced": bool(matching["balanced"]),
+            "schedule_rule_codes": sorted({item["rule_code"] for item in schedule}),
+            "schedule_amounts": sorted({float(item["amount"]) for item in schedule}),
+            "closed_through_date": closed_through_date,
+            "adjustment_mode": adjustment_mode,
+            "adjustment_journal_entry": adjustment_result.get("journal_entry"),
+        }
+    finally:
+        frappe.db.rollback()
+        frappe.clear_cache()
+        frappe.in_test = previous_in_test
+        cleanup_registry_residue()
+
+
+def probe_holding_synthetic_vas_acceptance() -> dict[str, Any]:
+    """Run a rollback-only VAS acceptance using native ERPNext documents.
+
+    This is deliberately synthetic technical evidence.  It creates native
+    Journal Entries and draft master/transaction documents, reads the native
+    GL and statutory adapters, and rolls the complete transaction back.  It is
+    not an accounting sign-off and never inserts GL Entry rows directly.
+    """
+
+    import frappe
+
+    from letron_api.control import policy
+    from letron_api.finance import vas_reports
+
+    if not policy._is_test_runtime():
+        raise RuntimeError("synthetic VAS acceptance requires a test runtime")
+
+    shared = policy.load_policy()["shared"]
+    consolidation = shared["consolidation"]
+    companies = [str(company) for company in consolidation["companies"]]
+    holding = str(consolidation["holding_company"])
+    current_from, current_to = "2026-06-01", "2026-06-30"
+    comparative_from, comparative_to = "2025-06-01", "2025-06-30"
+    metric_sources = shared["coa_template"]["reporting"]["cash_flow"].get(
+        "metric_sources", {}
+    )
+    run_id = f"ACCEPTANCE-VAS-{frappe.generate_hash(length=8).upper()}"
+    marker = f"ACCEPTANCE-VAS|run={run_id}"
+    statutory_marker = (
+        f"{marker}|LETRON-STAT|form=B01-DN|line=112"
+        "|LETRON-STAT|form=B01-DN|line=341"
+        "|LETRON-STAT|form=B02-DN|line=21"
+        "|LETRON-STAT|form=B02-DN|line=24"
+    )
+    previous_in_test = frappe.in_test
+
+    def account(company: str, code: str) -> str:
+        name = frappe.db.get_value(
+            "Account",
+            {
+                "company": company,
+                "account_number": ["like", f"{code}%"],
+                "is_group": 0,
+            },
+            "name",
+        )
+        if not name:
+            raise RuntimeError(f"Missing native Account {code} for {company}")
+        return str(name)
+
+    def cost_center(company: str) -> str:
+        name = frappe.db.get_value(
+            "Cost Center", {"company": company, "is_group": 0, "disabled": 0}, "name"
+        )
+        if not name:
+            raise RuntimeError(f"Missing native Cost Center for {company}")
+        return str(name)
+
+    def submit_je(company: str, posting_date: str, rows: list[dict[str, Any]]) -> Any:
+        document = frappe.get_doc(
+            {
+                "doctype": "Journal Entry",
+                "voucher_type": "Journal Entry",
+                "company": company,
+                "posting_date": posting_date,
+                "due_date": posting_date,
+                "remark": statutory_marker,
+                "user_remark": statutory_marker,
+                "party_not_required": 1,
+                "accounts": rows,
+            }
+        )
+        document.flags.ignore_permissions = True
+        document.insert(ignore_permissions=True)
+        document.submit()
+        return document
+
+    def metric_je(company: str, posting_date: str) -> Any:
+        codes = sorted(
+            {
+                str(code)
+                for source_codes in metric_sources.values()
+                for code in source_codes
+            }
+        )
+        amount = 1000.0
+        source_deltas: dict[str, float] = {}
+        cash_account = account(company, "111")
+        for index, code in enumerate(codes):
+            native_account = account(company, code)
+            if native_account == cash_account:
+                continue
+            root_type = str(frappe.db.get_value("Account", native_account, "root_type"))
+            value = amount + index * 10
+            source_deltas[native_account] = source_deltas.get(native_account, 0.0) + (
+                value if root_type in {"Asset", "Expense"} else -value
+            )
+        rows: list[dict[str, Any]] = []
+        net_cash_delta = 0.0
+        for native_account, delta in source_deltas.items():
+            debit = delta if delta > 0 else 0.0
+            credit = -delta if delta < 0 else 0.0
+            rows.append(
+                {
+                    "account": native_account,
+                    "cost_center": cost_center(company),
+                    "debit": debit,
+                    "credit": credit,
+                    "debit_in_account_currency": debit,
+                    "credit_in_account_currency": credit,
+                }
+            )
+            net_cash_delta += credit - debit
+        cash_debit = net_cash_delta if net_cash_delta > 0 else 0.0
+        cash_credit = -net_cash_delta if net_cash_delta < 0 else 0.0
+        rows.append(
+            {
+                "account": cash_account,
+                "cost_center": cost_center(company),
+                "debit": cash_debit,
+                "credit": cash_credit,
+                "debit_in_account_currency": cash_debit,
+                "credit_in_account_currency": cash_credit,
+            }
+        )
+        return submit_je(company, posting_date, rows)
+
+    def intercompany_jes() -> tuple[str, list[str]]:
+        source_company = next(company for company in companies if company != holding)
+        counterparty_company = next(
+            company for company in companies if company not in {holding, source_company}
+        )
+        matching_id = f"{run_id}-IC"
+        source_marker = vas_reports._render_intercompany_marker(
+            matching_id, source_company, counterparty_company, "service"
+        )
+        counterparty_marker = vas_reports._render_intercompany_marker(
+            matching_id, counterparty_company, source_company, "service"
+        )
+
+        def create(company: str, remark: str, rows: list[tuple[str, str]]) -> Any:
+            values = []
+            for side, code in rows:
+                debit = 1000.0 if side == "debit" else 0.0
+                credit = 1000.0 if side == "credit" else 0.0
+                values.append(
+                    {
+                        "account": account(company, code),
+                        "cost_center": cost_center(company),
+                        "debit": debit,
+                        "credit": credit,
+                        "debit_in_account_currency": debit,
+                        "credit_in_account_currency": credit,
+                    }
+                )
+            document = frappe.get_doc(
+                {
+                    "doctype": "Journal Entry",
+                    "voucher_type": "Journal Entry",
+                    "company": company,
+                    "posting_date": current_to,
+                    "remark": remark,
+                    "user_remark": remark,
+                    "party_not_required": 1,
+                    "accounts": values,
+                }
+            )
+            document.flags.ignore_permissions = True
+            document.insert(ignore_permissions=True)
+            document.submit()
+            return document
+
+        source = create(source_company, source_marker, [("debit", "131"), ("credit", "511")])
+        counterparty = create(
+            counterparty_company,
+            counterparty_marker,
+            [("debit", "632"), ("credit", "331")],
+        )
+        return matching_id, [str(source.name), str(counterparty.name)]
+
+    frappe.in_test = True  # ty: ignore[invalid-assignment]
+    try:
+        # Native company-specific master and transaction boundaries.
+        bank = frappe.db.get_value("Bank Account", {"company": holding}, "name")
+        if not bank:
+            bank_name = frappe.db.get_value("Bank", {}, "name")
+            if not bank_name:
+                bank_name = str(
+                    frappe.get_doc(
+                        {"doctype": "Bank", "bank_name": f"{run_id} Bank"}
+                    ).insert(ignore_permissions=True).name
+                )
+            bank = str(
+                frappe.get_doc(
+                    {
+                        "doctype": "Bank Account",
+                        "account_name": f"{run_id} Bank Account",
+                        "bank": bank_name,
+                        "account": account(holding, "112"),
+                        "company": holding,
+                        "is_company_account": 1,
+                    }
+                ).insert(ignore_permissions=True).name
+            )
+        bank_readback = frappe.db.exists("Bank Account", bank)
+
+        asset_category = f"{run_id} Asset Category"
+        asset_doc = frappe.get_doc(
+            {
+                "doctype": "Asset Category",
+                "asset_category_name": asset_category,
+                "accounts": [
+                    {
+                        "company_name": holding,
+                        "fixed_asset_account": account(holding, "211"),
+                        "accumulated_depreciation_account": account(holding, "2141"),
+                        "depreciation_expense_account": account(holding, "6424"),
+                        "capital_work_in_progress_account": account(holding, "2412"),
+                    }
+                ],
+            }
+        ).insert(ignore_permissions=True)
+        asset_readback = bool(frappe.db.exists("Asset Category", asset_doc.name))
+
+        warehouse = frappe.db.get_value(
+            "Warehouse", {"company": holding, "is_group": 0}, "name"
+        )
+        negative_stock = frappe.db.get_single_value(
+            "Stock Settings", "allow_negative_stock"
+        )
+        inventory_readback = bool(warehouse) and int(negative_stock or 0) == 0
+
+        journal_entries: list[str] = []
+        journal_entries.append(str(metric_je(holding, current_to).name))
+        journal_entries.append(str(metric_je(holding, comparative_to).name))
+        matching_id, intercompany_entries = intercompany_jes()
+        journal_entries.extend(intercompany_entries)
+
+        native_gl_count = frappe.db.count(
+            "GL Entry", {"remarks": ["like", f"{marker}%"], "is_cancelled": 0}
+        )
+        if native_gl_count <= len(journal_entries):
+            raise AssertionError("native Journal Entries did not create native GL activity")
+
+        holding_reports = {
+            "B01-DN": vas_reports.statutory_report(
+                "B01-DN", holding, current_from, current_to
+            ),
+            "B02-DN": vas_reports.statutory_report(
+                "B02-DN",
+                holding,
+                current_from,
+                current_to,
+                comparative_from_date=comparative_from,
+                comparative_to_date=comparative_to,
+            ),
+            "B03-DN": vas_reports.statutory_cash_flow(
+                holding,
+                current_from,
+                current_to,
+                comparative_from_date=comparative_from,
+                comparative_to_date=comparative_to,
+                _metric_marker=marker,
+            ),
+        }
+        b03 = holding_reports["B03-DN"]
+        b02 = holding_reports["B02-DN"]
+        if b03["unresolved_line_codes"]:
+            raise AssertionError(
+                "B03-DN still has unresolved lines: "
+                + ", ".join(b03["unresolved_line_codes"])
+            )
+        if b02["unresolved_line_codes"]:
+            raise AssertionError(
+                "B02-DN still has unresolved lines: "
+                + ", ".join(b02["unresolved_line_codes"])
+            )
+        b01 = holding_reports["B01-DN"]
+        if b01["unresolved_line_codes"]:
+            raise AssertionError(
+                "B01-DN still has unresolved lines: "
+                + ", ".join(b01["unresolved_line_codes"])
+            )
+        notes_result = vas_reports.notes(holding, current_from, current_to)
+        matches = [
+            item
+            for item in vas_reports.intercompany_matches(
+                companies, current_from, current_to
+            )
+            if item["matching_id"] == matching_id
+        ]
+        if not matches or not all(item["balanced"] for item in matches):
+            raise AssertionError("synthetic intercompany pair was not matched and balanced")
+        schedule = [
+            item
+            for item in vas_reports.elimination_schedule(
+                companies, current_from, current_to
+            )
+            if item["matching_id"] == matching_id
+        ]
+        if {item["rule_code"] for item in schedule} != {"IC_AR_AP", "IC_REVENUE_COST"}:
+            raise AssertionError("synthetic elimination schedule is incomplete")
+        adjustment_mode = "closed_period_guard"
+        try:
+            vas_reports.create_consolidation_adjustment(
+                companies, current_from, current_to, current_to, run_id
+            )
+        except frappe.ValidationError:
+            pass
+        else:
+            raise AssertionError("consolidation adjustment bypassed the native close guard")
+
+        return {
+            "ok": True,
+            "profile": "synthetic_vas",
+            "scope": {
+                "companies": companies,
+                "currency": "VND",
+                "coa": "generic_tt99",
+                "native_gl_only": True,
+            },
+            "periods": {
+                "current": [current_from, current_to],
+                "comparative": [comparative_from, comparative_to],
+            },
+            "native": {
+                "journal_entries": len(journal_entries),
+                "gl_entries": native_gl_count,
+                "bank_account": bool(bank_readback),
+                "asset_category": asset_readback,
+                "inventory_warehouse": inventory_readback,
+            },
+            "reports": {
+                code: {
+                    "ok": bool(value["ok"]),
+                    "line_count": len(value["lines"]),
+                    "unresolved_line_codes": value["unresolved_line_codes"],
+                    "comparative": value.get("periods", {}).get("comparative"),
+                }
+                for code, value in holding_reports.items()
+            },
+            "notes": {
+                "ok": bool(notes_result["ok"]),
+                "note_count": len(notes_result["notes"]),
+            },
+            "consolidation": {
+                "companies": len(companies),
+                "comparative": True,
+                "matching_id": matching_id,
+                "schedule_rule_codes": sorted({item["rule_code"] for item in schedule}),
+                "adjustment_mode": adjustment_mode,
+                "adjustment_location": f"{holding}/{consolidation['finance_book']}",
+            },
+        }
     finally:
         frappe.db.rollback()
         frappe.clear_cache()

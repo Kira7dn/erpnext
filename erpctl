@@ -7,12 +7,6 @@ POLICY="$ROOT/config/policy.yaml"
 COMPOSE="$ROOT/docker-compose.yml"
 ACTION="${1:-up}"
 
-if [[ "${LETRON_ACCEPTANCE:-0}" == "1" ]]; then
-  : "${LETRON_ACCEPTANCE_CONFIG_DIR:?LETRON_ACCEPTANCE_CONFIG_DIR is required in acceptance mode}"
-  CONFIG="$LETRON_ACCEPTANCE_CONFIG_DIR/config.yaml"
-  POLICY="$LETRON_ACCEPTANCE_CONFIG_DIR/policy.yaml"
-fi
-
 export PYTHONPATH="$ROOT/apps/letron_api"
 
 case "$ACTION" in

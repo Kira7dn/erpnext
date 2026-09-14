@@ -128,7 +128,7 @@ def test_bank_transaction_native_readback_and_reconcile(request: pytest.FixtureR
             client.public("DELETE", _path(route, name), expected={200, 202, 404, 417})
 
     request.addfinalizer(finalize)
-    company = "Letron Việt Nam"
+    company = "Letron Holding"
     account_query = urlencode(
         {
                 "filters": json.dumps([["company", "=", company]]),

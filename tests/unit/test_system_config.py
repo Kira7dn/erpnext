@@ -157,7 +157,7 @@ def test_repository_config_and_policy_invariants_match() -> None:
     result = system_config.validate_bundle()
 
     assert result["ok"] is True
-    assert result["company"] == "Letron Việt Nam"
+    assert result["company"] == "Letron Holding"
 
 
 def test_bootstrap_country_has_no_global_defaults_mirror(tmp_path: Path) -> None:

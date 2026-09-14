@@ -25,31 +25,8 @@ bench set-config -g lang "${LANGUAGE:-vi}"
 bench set-config -g currency "${CURRENCY:-VND}"
 bench set-config -g default_site "$SITE_NAME"
 
-# 3. Setup site / migrate
-if [ ! -f "sites/$SITE_NAME/site_config.json" ]; then
-  echo "Site $SITE_NAME does not exist. Initializing new site..."
-  bench new-site --mariadb-user-host-login-scope='%' \
-    --admin-password="$LETRON_BOOTSTRAP_PASSWORD" \
-    --db-root-username="$DB_ROOT_USER" \
-    --db-root-password="$LETRON_BOOTSTRAP_PASSWORD" \
-    --install-app erpnext \
-    --install-app "$INTEGRATION_APP" \
-    --set-default "$SITE_NAME"
-else
-  echo "Site $SITE_NAME exists. Running migration..."
-  if [ "$INTEGRATION_APP_ENABLED" = "True" ] && ! bench --site "$SITE_NAME" list-apps | grep -Fxq "$INTEGRATION_APP"; then
-    bench --site "$SITE_NAME" install-app "$INTEGRATION_APP"
-  fi
-  bench --site "$SITE_NAME" migrate
-fi
-
-# 4. Bootstrap tenant, system config và policy sync
-echo "Bootstrapping tenant and syncing policies..."
-bench --site "$SITE_NAME" execute letron_api.control.tenant_bootstrap.run
-bench --site "$SITE_NAME" execute letron_api.control.system_config.sync
-bench --site "$SITE_NAME" execute letron_api.control.policy.sync
-
-# 5. Cấu hình site mapping cho direct API access
+# 3. Cấu hình site mapping cho direct API access. Migration and policy
+# materialization are owned by the backend-init one-shot service.
 echo "Configuring site routing..."
 bench use "$SITE_NAME"
 ln -sfn "$SITE_NAME" "sites/localhost"

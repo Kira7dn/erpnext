@@ -1,0 +1,2519 @@
+assets: {}
+bootstrap:
+  companies:
+  - abbreviation: LTVN
+    chart_of_accounts: Standard
+    country: Vietnam
+    currency: VND
+    domain: Distribution
+    name: Letron Holding
+  - abbreviation: LESC
+    chart_of_accounts: Standard
+    country: Vietnam
+    currency: VND
+    domain: Services
+    name: LeSC
+  - abbreviation: LESM
+    chart_of_accounts: Standard
+    country: Vietnam
+    currency: VND
+    domain: Services
+    name: LeSM
+  - abbreviation: LEDB
+    chart_of_accounts: Standard
+    country: Vietnam
+    currency: VND
+    domain: Services
+    name: LeDB
+  - abbreviation: LESE
+    chart_of_accounts: Standard
+    country: Vietnam
+    currency: VND
+    domain: Manufacturing
+    name: LeSE
+  - abbreviation: LESB
+    chart_of_accounts: Standard
+    country: Vietnam
+    currency: VND
+    domain: Manufacturing
+    name: LeSB
+  - abbreviation: LEGM
+    chart_of_accounts: Standard
+    country: Vietnam
+    currency: VND
+    domain: Manufacturing
+    name: LeGM
+  company:
+    abbreviation: LTVN
+    chart_of_accounts: Standard
+    country: Vietnam
+    currency: VND
+    domain: Distribution
+    name: Letron Holding
+  group:
+    abbreviation: LTRG
+    name: LETRON GROUP
+documents:
+- doctype: Bank
+  fields:
+    bank_name: TP Bank
+    swift_number: null
+    website: null
+  name: TP Bank
+  state: present
+- doctype: Bank Account
+  fields:
+    account: account://112
+    account_name: TP Bank - LTVN
+    bank: TP Bank
+    bank_account_no: null
+    company: Letron Holding
+    disabled: 0
+    is_company_account: 1
+    is_default: 1
+  name: TP Bank - LTVN - TP Bank
+  state: present
+- doctype: Bank Account
+  fields:
+    account: account://112
+    account_name: TP Bank - LESC
+    bank: TP Bank
+    bank_account_no: null
+    company: LeSC
+    disabled: 0
+    is_company_account: 1
+    is_default: 1
+  name: TP Bank - LESC - TP Bank
+  state: present
+- doctype: Bank Account
+  fields:
+    account: account://112
+    account_name: TP Bank - LESM
+    bank: TP Bank
+    bank_account_no: null
+    company: LeSM
+    disabled: 0
+    is_company_account: 1
+    is_default: 1
+  name: TP Bank - LESM - TP Bank
+  state: present
+- doctype: Bank Account
+  fields:
+    account: account://112
+    account_name: TP Bank - LEDB
+    bank: TP Bank
+    bank_account_no: null
+    company: LeDB
+    disabled: 0
+    is_company_account: 1
+    is_default: 1
+  name: TP Bank - LEDB - TP Bank
+  state: present
+- doctype: Bank Account
+  fields:
+    account: account://112
+    account_name: TP Bank - LESE
+    bank: TP Bank
+    bank_account_no: null
+    company: LeSE
+    disabled: 0
+    is_company_account: 1
+    is_default: 1
+  name: TP Bank - LESE - TP Bank
+  state: present
+- doctype: Bank Account
+  fields:
+    account: account://112
+    account_name: TP Bank - LESB
+    bank: TP Bank
+    bank_account_no: null
+    company: LeSB
+    disabled: 0
+    is_company_account: 1
+    is_default: 1
+  name: TP Bank - LESB - TP Bank
+  state: present
+- doctype: Bank Account
+  fields:
+    account: account://112
+    account_name: TP Bank - LEGM
+    bank: TP Bank
+    bank_account_no: null
+    company: LeGM
+    disabled: 0
+    is_company_account: 1
+    is_default: 1
+  name: TP Bank - LEGM - TP Bank
+  state: present
+- doctype: Payment Term
+  fields:
+    credit_days: 0
+    credit_months: 0
+    description: Thanh toán ngay
+    discount: 0
+    discount_type: Percentage
+    discount_validity: 0
+    discount_validity_based_on: Day(s) after invoice date
+    due_date_based_on: Day(s) after invoice date
+    invoice_portion: 100
+    payment_term_name: PT-IMMEDIATE
+  name: PT-IMMEDIATE
+  state: present
+- doctype: Payment Term
+  fields:
+    credit_days: 30
+    credit_months: 0
+    description: Thanh toán sau 30 ngày
+    discount: 0
+    discount_type: Percentage
+    discount_validity: 0
+    discount_validity_based_on: Day(s) after invoice date
+    due_date_based_on: Day(s) after invoice date
+    invoice_portion: 100
+    payment_term_name: PT-NET-30
+  name: PT-NET-30
+  state: present
+- doctype: Payment Term
+  fields:
+    credit_days: 45
+    credit_months: 0
+    description: Thanh toán sau 45 ngày
+    discount: 0
+    discount_type: Percentage
+    discount_validity: 0
+    discount_validity_based_on: Day(s) after invoice date
+    due_date_based_on: Day(s) after invoice date
+    invoice_portion: 100
+    payment_term_name: PT-NET-45
+  name: PT-NET-45
+  state: present
+- doctype: Payment Term
+  fields:
+    credit_days: 60
+    credit_months: 0
+    description: Thanh toán sau 60 ngày
+    discount: 0
+    discount_type: Percentage
+    discount_validity: 0
+    discount_validity_based_on: Day(s) after invoice date
+    due_date_based_on: Day(s) after invoice date
+    invoice_portion: 100
+    payment_term_name: PT-NET-60
+  name: PT-NET-60
+  state: present
+- doctype: Payment Term
+  fields:
+    credit_days: 0
+    credit_months: 0
+    description: 50% ứng trước
+    discount: 0
+    discount_type: Percentage
+    discount_validity: 0
+    discount_validity_based_on: Day(s) after invoice date
+    due_date_based_on: Day(s) after invoice date
+    invoice_portion: 50
+    payment_term_name: PT-ADVANCE-50
+  name: PT-ADVANCE-50
+  state: present
+- doctype: Payment Term
+  fields:
+    credit_days: 30
+    credit_months: 0
+    description: 50% còn lại sau 30 ngày
+    discount: 0
+    discount_type: Percentage
+    discount_validity: 0
+    discount_validity_based_on: Day(s) after invoice date
+    due_date_based_on: Day(s) after invoice date
+    invoice_portion: 50
+    payment_term_name: PT-BALANCE-50-NET30
+  name: PT-BALANCE-50-NET30
+  state: present
+- doctype: Payment Terms Template
+  fields:
+    allocate_payment_based_on_payment_terms: 0
+    template_name: TPL-IMMEDIATE
+    terms:
+    - credit_days: 0
+      credit_months: 0
+      discount: 0
+      discount_type: Percentage
+      discount_validity: 0
+      discount_validity_based_on: Day(s) after invoice date
+      due_date_based_on: Day(s) after invoice date
+      invoice_portion: 100
+      payment_term: PT-IMMEDIATE
+  name: TPL-IMMEDIATE
+  state: present
+- doctype: Payment Terms Template
+  fields:
+    allocate_payment_based_on_payment_terms: 0
+    template_name: TPL-NET30
+    terms:
+    - credit_days: 30
+      credit_months: 0
+      discount: 0
+      discount_type: Percentage
+      discount_validity: 0
+      discount_validity_based_on: Day(s) after invoice date
+      due_date_based_on: Day(s) after invoice date
+      invoice_portion: 100
+      payment_term: PT-NET-30
+  name: TPL-NET30
+  state: present
+- doctype: Payment Terms Template
+  fields:
+    allocate_payment_based_on_payment_terms: 0
+    template_name: TPL-NET45
+    terms:
+    - credit_days: 45
+      credit_months: 0
+      discount: 0
+      discount_type: Percentage
+      discount_validity: 0
+      discount_validity_based_on: Day(s) after invoice date
+      due_date_based_on: Day(s) after invoice date
+      invoice_portion: 100
+      payment_term: PT-NET-45
+  name: TPL-NET45
+  state: present
+- doctype: Payment Terms Template
+  fields:
+    allocate_payment_based_on_payment_terms: 0
+    template_name: TPL-NET60
+    terms:
+    - credit_days: 60
+      credit_months: 0
+      discount: 0
+      discount_type: Percentage
+      discount_validity: 0
+      discount_validity_based_on: Day(s) after invoice date
+      due_date_based_on: Day(s) after invoice date
+      invoice_portion: 100
+      payment_term: PT-NET-60
+  name: TPL-NET60
+  state: present
+- doctype: Payment Terms Template
+  fields:
+    allocate_payment_based_on_payment_terms: 0
+    template_name: TPL-ADVANCE50-NET30
+    terms:
+    - credit_days: 0
+      credit_months: 0
+      discount: 0
+      discount_type: Percentage
+      discount_validity: 0
+      discount_validity_based_on: Day(s) after invoice date
+      due_date_based_on: Day(s) after invoice date
+      invoice_portion: 50
+      payment_term: PT-ADVANCE-50
+    - credit_days: 30
+      credit_months: 0
+      discount: 0
+      discount_type: Percentage
+      discount_validity: 0
+      discount_validity_based_on: Day(s) after invoice date
+      due_date_based_on: Day(s) after invoice date
+      invoice_portion: 50
+      payment_term: PT-BALANCE-50-NET30
+  name: TPL-ADVANCE50-NET30
+  state: present
+- doctype: Payment Terms Template
+  fields:
+    allocate_payment_based_on_payment_terms: 0
+    template_name: TPL-MILESTONE50-50
+    terms:
+    - credit_days: 0
+      credit_months: 0
+      discount: 0
+      discount_type: Percentage
+      discount_validity: 0
+      discount_validity_based_on: Day(s) after invoice date
+      due_date_based_on: Day(s) after invoice date
+      invoice_portion: 50
+      payment_term: PT-ADVANCE-50
+    - credit_days: 30
+      credit_months: 0
+      discount: 0
+      discount_type: Percentage
+      discount_validity: 0
+      discount_validity_based_on: Day(s) after invoice date
+      due_date_based_on: Day(s) after invoice date
+      invoice_portion: 50
+      payment_term: PT-BALANCE-50-NET30
+  name: TPL-MILESTONE50-50
+  state: present
+- doctype: Accounts Settings
+  fields:
+    add_taxes_from_item_tax_template: 1
+    add_taxes_from_taxes_and_charges_template: 0
+    allow_multi_currency_invoices_against_single_party_account: 0
+    allow_pegged_currencies_exchange_rates: 0
+    allow_stale: 0
+    auto_reconcile_payments: 0
+    auto_reconciliation_job_trigger: 15
+    automatically_fetch_payment_terms: 0
+    automatically_process_deferred_accounting_entry: 1
+    automatically_run_rules_on_unreconciled_transactions: 1
+    book_asset_depreciation_entry_automatically: 1
+    book_deferred_entries_based_on: Days
+    book_deferred_entries_via_journal_entry: 0
+    book_stock_expense_gl_entries: 0
+    book_tax_discount_loss: 0
+    calculate_depr_using_total_days: 0
+    check_supplier_invoice_uniqueness: 1
+    confirm_before_resetting_posting_date: 1
+    create_pr_in_draft_status: 1
+    credit_controller: null
+    default_ageing_range: 30, 60, 90, 120
+    delete_linked_ledger_entries: 0
+    determine_address_tax_category_from: Billing Address
+    enable_accounting_dimensions: 0
+    enable_common_party_accounting: 0
+    enable_discounts_and_margin: 0
+    enable_fuzzy_matching: 0
+    enable_immutable_ledger: 1
+    enable_loyalty_point_program: 0
+    enable_overdue_billing_threshold: 0
+    enable_party_matching: 0
+    enable_subscription: 1
+    exchange_gain_loss_posting_date: Payment
+    fetch_payment_schedule_in_payment_request: 1
+    fetch_valuation_rate_for_internal_transaction: 0
+    general_ledger_remarks_length: 0
+    ignore_account_closing_balance: 0
+    ignore_is_opening_check_for_reporting: 0
+    maintain_same_internal_transaction_rate: 0
+    maintain_same_rate_action: Stop
+    make_payment_via_journal_entry: 0
+    merge_similar_account_heads: 0
+    over_billing_allowance: 0.0
+    pcv_job_timeout: 3600
+    receivable_payable_fetch_method: Buffered Cursor
+    receivable_payable_remarks_length: 0
+    reconciliation_queue_size: 5
+    repost_allowed_types:
+    - document_type: Sales Invoice
+    - document_type: Purchase Invoice
+    - document_type: Journal Entry
+    - document_type: Payment Entry
+    - document_type: Purchase Receipt
+    role_allowed_to_bypass_overdue_billing: null
+    role_allowed_to_over_bill: null
+    role_to_notify_on_depreciation_failure: null
+    role_to_override_stop_action: null
+    round_row_wise_tax: 0
+    show_balance_in_coa: 1
+    show_inclusive_tax_in_print: 0
+    show_payment_schedule_in_print: 0
+    show_taxes_as_table_in_print: 0
+    stale_days: 1
+    submit_journal_entries: 0
+    transfer_match_days: 3
+    unlink_advance_payment_on_cancelation_of_order: 1
+    unlink_payment_on_cancellation_of_invoice: 1
+    use_legacy_budget_controller: 0
+    use_legacy_controller_for_pcv: 0
+  name: Accounts Settings
+  state: present
+- doctype: Buying Settings
+  fields:
+    allow_multiple_items: 0
+    allow_negative_rates_for_items: 0
+    allow_zero_qty_in_purchase_order: 0
+    allow_zero_qty_in_request_for_quotation: 0
+    allow_zero_qty_in_supplier_quotation: 0
+    auto_create_purchase_receipt: 0
+    auto_create_subcontracting_order: 0
+    backflush_raw_materials_of_subcontract_based_on: BOM
+    bill_for_rejected_quantity_in_purchase_invoice: 1
+    blanket_order_allowance: 0.0
+    buying_price_list: null
+    disable_last_purchase_rate: 0
+    fixed_email: null
+    maintain_same_rate: 0
+    maintain_same_rate_action: Stop
+    over_order_allowance: 0.0
+    over_transfer_allowance: 0.0
+    po_required: 'Yes'
+    pr_required: 'Yes'
+    project_update_frequency: Each Transaction
+    role_to_override_stop_action: null
+    set_landed_cost_based_on_purchase_invoice_rate: 0
+    set_valuation_rate_for_rejected_materials: 0
+    show_pay_button: 1
+    supp_master_name: Supplier Name
+    supplier_group: null
+    use_transaction_date_exchange_rate: 0
+    validate_consumed_qty: 0
+  name: Buying Settings
+  state: present
+- doctype: Currency Exchange Settings
+  fields:
+    api_endpoint: https://api.frankfurter.dev/v2/rate/{from_currency}/{to_currency}
+    disabled: 0
+    req_params:
+    - key: date
+      value: '{transaction_date}'
+    result_key:
+    - key: rate
+    service_provider: frankfurter.dev - v2
+    url: null
+    use_http: 0
+  name: Currency Exchange Settings
+  state: present
+- doctype: Delivery Settings
+  fields:
+    dispatch_attachment: null
+    dispatch_template: null
+    send_with_attachment: 0
+    stop_delay: 0
+  name: Delivery Settings
+  state: present
+- doctype: Item Variant Settings
+  fields:
+    allow_different_uom: 0
+    allow_rename_attribute_value: 0
+    do_not_update_variants: 0
+    fields: []
+  name: Item Variant Settings
+  state: present
+- doctype: Ledger Health Monitor
+  fields:
+    companies: []
+    debit_credit_mismatch: 0
+    enable_health_monitor: 0
+    general_and_payment_ledger_mismatch: 0
+    monitor_for_last_x_days: 60
+  name: Ledger Health Monitor
+  state: present
+- doctype: Pegged Currencies
+  fields:
+    pegged_currency_item:
+    - pegged_against: USD
+      pegged_exchange_rate: '3.6725'
+      source_currency: AED
+    - pegged_against: USD
+      pegged_exchange_rate: '0.376'
+      source_currency: BHD
+    - pegged_against: USD
+      pegged_exchange_rate: '0.709'
+      source_currency: JOD
+    - pegged_against: USD
+      pegged_exchange_rate: '0.3845'
+      source_currency: OMR
+    - pegged_against: USD
+      pegged_exchange_rate: '3.64'
+      source_currency: QAR
+    - pegged_against: USD
+      pegged_exchange_rate: '3.75'
+      source_currency: SAR
+  name: Pegged Currencies
+  state: present
+- doctype: Selling Settings
+  fields:
+    allow_against_multiple_purchase_orders: 0
+    allow_delivery_of_overproduced_qty: 0
+    allow_multiple_items: 0
+    allow_negative_rates_for_items: 0
+    allow_sales_order_creation_for_expired_quotation: 0
+    allow_zero_qty_in_quotation: 0
+    allow_zero_qty_in_sales_order: 0
+    blanket_order_allowance: 0.0
+    cust_master_name: Customer Name
+    customer_group: null
+    deliver_secondary_items: 0
+    dn_required: Yes
+    dont_reserve_sales_order_qty_on_sales_return: 0
+    editable_bundle_item_rates: 0
+    editable_price_list_rate: 0
+    enable_cutoff_date_on_bulk_delivery_note_creation: 0
+    enable_discount_accounting: 0
+    enable_tracking_sales_commissions: 0
+    enable_utm: 0
+    fallback_to_default_price_list: 0
+    hide_tax_id: 0
+    maintain_same_rate_action: Stop
+    maintain_same_sales_rate: 0
+    role_to_override_stop_action: null
+    sales_update_frequency: Daily
+    selling_price_list: null
+    set_zero_rate_for_expired_batch: 0
+    so_required: Yes
+    territory: null
+    use_legacy_js_reactivity: 0
+    validate_selling_price: 0
+  name: Selling Settings
+  state: present
+- doctype: Stock Reposting Settings
+  fields:
+    do_not_fetch_incoming_rate_from_serial_no: 0
+    enable_parallel_reposting: 0
+    enable_separate_reposting_for_gl: 0
+    end_time: null
+    item_based_reposting: 1
+    limit_reposting_timeslot: 0
+    limits_dont_apply_on: ''
+    no_of_parallel_reposting: 4
+    notify_reposting_error_to_role: null
+    repost_incorrect_valuation_entries: 0
+    start_time: null
+  name: Stock Reposting Settings
+  state: present
+- doctype: Stock Settings
+  fields:
+    action_if_quality_inspection_is_not_submitted: Stop
+    action_if_quality_inspection_is_rejected: Stop
+    allow_existing_serial_no: 0
+    allow_internal_transfer_at_arms_length_price: 0
+    allow_negative_stock: 0
+    allow_negative_stock_for_batch: 0
+    allow_partial_reservation: 1
+    allow_to_edit_stock_uom_qty_for_purchase: 0
+    allow_to_edit_stock_uom_qty_for_sales: 0
+    allow_to_edit_stock_uom_qty_for_stock_entry: 0
+    allow_to_make_quality_inspection_after_purchase_or_delivery: 0
+    allow_uom_with_conversion_rate_defined_in_item: 0
+    auto_create_serial_and_batch_bundle_for_outward: 1
+    auto_indent: 0
+    auto_insert_price_list_rate_if_missing: 0
+    auto_reserve_serial_and_batch: 1
+    auto_reserve_stock: 0
+    auto_reserve_stock_for_sales_order_on_purchase: 0
+    clean_description_html: 1
+    default_warehouse: null
+    disable_serial_no_and_batch_selector: 0
+    do_not_update_serial_batch_on_creation_of_auto_bundle: 1
+    do_not_use_batchwise_valuation: 0
+    enable_serial_and_batch_no_for_item: 0
+    enable_stock_reservation: 1
+    item_group: null
+    item_naming_by: Item Code
+    mr_qty_allowance: 0.0
+    naming_series_prefix: BATCH-
+    over_delivery_receipt_allowance: 0.0
+    over_picking_allowance: 0.0
+    pick_serial_and_batch_based_on: FIFO
+    reorder_email_notify: 0
+    role_allowed_to_create_edit_back_dated_transactions: null
+    role_allowed_to_over_deliver_receive: null
+    sample_retention_warehouse: null
+    set_serial_and_batch_bundle_naming_based_on_naming_series: 0
+    show_barcode_field: 1
+    stock_auth_role: null
+    stock_frozen_upto: null
+    stock_frozen_upto_days: 0
+    stock_uom: null
+    update_existing_price_list_rate: 0
+    update_price_list_based_on: Rate
+    use_naming_series: 0
+    use_serial_batch_fields: 1
+    validate_material_transfer_warehouses: 0
+    valuation_method: FIFO
+  name: Stock Settings
+  state: present
+- doctype: Tax Category
+  fields:
+    disabled: 0
+    title: Domestic Hosting - LTVN
+  name: Domestic Hosting - LTVN
+  state: present
+- doctype: Tax Category
+  fields:
+    disabled: 0
+    title: Domestic Software - Non-VAT - LTVN
+  name: Domestic Software - Non-VAT - LTVN
+  state: present
+- doctype: Tax Category
+  fields:
+    disabled: 0
+    title: Domestic Transport - LTVN
+  name: Domestic Transport - LTVN
+  state: present
+- doctype: Accounting Period
+  fields:
+    period_name: FY 2026 - LTVN
+    start_date: 2026-01-01
+    end_date: 2026-12-31
+    company: Letron Holding
+    disabled: 0
+    exempted_role: null
+    closed_documents:
+    - document_type: Sales Invoice
+      closed: 0
+    - document_type: Purchase Invoice
+      closed: 0
+    - document_type: Journal Entry
+      closed: 0
+    - document_type: Payment Entry
+      closed: 0
+    - document_type: Purchase Receipt
+      closed: 0
+  name: FY 2026 - LTVN
+  state: present
+# Native ERPNext Fiscal Year: lựa chọn mặc định theo VAS.
+# Ngày bắt đầu: 01/01; ngày kết thúc: 31/12; áp dụng cho toàn bộ 7 pháp nhân
+# giao dịch của Holding. Không dùng Accounting Period để định nghĩa năm tài chính.
+- doctype: Fiscal Year
+  fields:
+    companies:
+    - company: Letron Holding
+    - company: LeSC
+    - company: LeSM
+    - company: LeDB
+    - company: LeSE
+    - company: LeSB
+    - company: LeGM
+    disabled: 0
+    is_short_year: 0
+    year: '2026'
+    year_end_date: '2026-12-31'
+    year_start_date: '2026-01-01'
+  name: '2026'
+  state: present
+# Kỳ Fiscal Year so sánh cũng dùng năm dương lịch 01/01-31/12, phục vụ cột
+# comparative của BCTC; không phải một pháp nhân hay một kỳ ghi sổ riêng.
+- doctype: Fiscal Year
+  fields:
+    companies:
+    - company: Letron Holding
+    - company: LeSC
+    - company: LeSM
+    - company: LeDB
+    - company: LeSE
+    - company: LeSB
+    - company: LeGM
+    disabled: 0
+    is_short_year: 0
+    year: '2025'
+    year_end_date: '2025-12-31'
+    year_start_date: '2025-01-01'
+  name: '2025'
+  state: present
+- doctype: Finance Book
+  fields:
+    finance_book_name: Consolidation Adjustment
+  name: Consolidation Adjustment
+  state: present
+- doctype: Cost Center
+  fields:
+    company: Letron Holding
+    cost_center_name: HLD
+    disabled: 0
+    is_group: 1
+    parent_cost_center: Letron Holding - LTVN
+  name: HLD - LTVN
+  state: present
+- doctype: Cost Center
+  fields:
+    company: Letron Holding
+    cost_center_name: HLD-ADM
+    disabled: 0
+    is_group: 0
+    parent_cost_center: HLD - LTVN
+  name: HLD-ADM - LTVN
+  state: present
+- doctype: Cost Center
+  fields:
+    company: Letron Holding
+    cost_center_name: HLD-EXE
+    disabled: 0
+    is_group: 0
+    parent_cost_center: HLD - LTVN
+  name: HLD-EXE - LTVN
+  state: present
+- doctype: Cost Center
+  fields:
+    company: Letron Holding
+    cost_center_name: HLD-FIN
+    disabled: 0
+    is_group: 0
+    parent_cost_center: HLD - LTVN
+  name: HLD-FIN - LTVN
+  state: present
+- doctype: Cost Center
+  fields:
+    company: Letron Holding
+    cost_center_name: HLD-LEG
+    disabled: 0
+    is_group: 0
+    parent_cost_center: HLD - LTVN
+  name: HLD-LEG - LTVN
+  state: present
+- doctype: Cost Center
+  fields:
+    company: Letron Holding
+    cost_center_name: HLD-TRE
+    disabled: 0
+    is_group: 0
+    parent_cost_center: HLD - LTVN
+  name: HLD-TRE - LTVN
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeDB
+    cost_center_name: LEDB-ENG
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeDB - LEDB
+  name: LEDB-ENG - LEDB
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeDB
+    cost_center_name: LEDB-FIN
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeDB - LEDB
+  name: LEDB-FIN - LEDB
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeDB
+    cost_center_name: LEDB-OPS
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeDB - LEDB
+  name: LEDB-OPS - LEDB
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeDB
+    cost_center_name: LEDB-PRJ
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeDB - LEDB
+  name: LEDB-PRJ - LEDB
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeGM
+    cost_center_name: LEGM-FIN
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeGM - LEGM
+  name: LEGM-FIN - LEGM
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeGM
+    cost_center_name: LEGM-PRD
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeGM - LEGM
+  name: LEGM-PRD - LEGM
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeGM
+    cost_center_name: LEGM-QLT
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeGM - LEGM
+  name: LEGM-QLT - LEGM
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeGM
+    cost_center_name: LEGM-SAL
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeGM - LEGM
+  name: LEGM-SAL - LEGM
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeGM
+    cost_center_name: LEGM-SCM
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeGM - LEGM
+  name: LEGM-SCM - LEGM
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSB
+    cost_center_name: LESB-ENG
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSB - LESB
+  name: LESB-ENG - LESB
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSB
+    cost_center_name: LESB-FIN
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSB - LESB
+  name: LESB-FIN - LESB
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSB
+    cost_center_name: LESB-OPS
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSB - LESB
+  name: LESB-OPS - LESB
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSB
+    cost_center_name: LESB-PRJ
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSB - LESB
+  name: LESB-PRJ - LESB
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSC
+    cost_center_name: LESC-ENG
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSC - LESC
+  name: LESC-ENG - LESC
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSC
+    cost_center_name: LESC-FIN
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSC - LESC
+  name: LESC-FIN - LESC
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSC
+    cost_center_name: LESC-OPS
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSC - LESC
+  name: LESC-OPS - LESC
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSC
+    cost_center_name: LESC-PRJ
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSC - LESC
+  name: LESC-PRJ - LESC
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSC
+    cost_center_name: LESC-SAL
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSC - LESC
+  name: LESC-SAL - LESC
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSE
+    cost_center_name: LESE-ENG
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSE - LESE
+  name: LESE-ENG - LESE
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSE
+    cost_center_name: LESE-FIN
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSE - LESE
+  name: LESE-FIN - LESE
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSE
+    cost_center_name: LESE-OPS
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSE - LESE
+  name: LESE-OPS - LESE
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSE
+    cost_center_name: LESE-PRJ
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSE - LESE
+  name: LESE-PRJ - LESE
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSM
+    cost_center_name: LESM-FIN
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSM - LESM
+  name: LESM-FIN - LESM
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSM
+    cost_center_name: LESM-OPS
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSM - LESM
+  name: LESM-OPS - LESM
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSM
+    cost_center_name: LESM-PRJ
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSM - LESM
+  name: LESM-PRJ - LESM
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSM
+    cost_center_name: LESM-SAL
+    disabled: 0
+    is_group: 0
+    parent_cost_center: LeSM - LESM
+  name: LESM-SAL - LESM
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeDB
+    cost_center_name: LeDB
+    disabled: 0
+    is_group: 1
+    parent_cost_center: null
+  name: LeDB - LEDB
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeGM
+    cost_center_name: LeGM
+    disabled: 0
+    is_group: 1
+    parent_cost_center: null
+  name: LeGM - LEGM
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSB
+    cost_center_name: LeSB
+    disabled: 0
+    is_group: 1
+    parent_cost_center: null
+  name: LeSB - LESB
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSC
+    cost_center_name: LeSC
+    disabled: 0
+    is_group: 1
+    parent_cost_center: null
+  name: LeSC - LESC
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSE
+    cost_center_name: LeSE
+    disabled: 0
+    is_group: 1
+    parent_cost_center: null
+  name: LeSE - LESE
+  state: present
+- doctype: Cost Center
+  fields:
+    company: LeSM
+    cost_center_name: LeSM
+    disabled: 0
+    is_group: 1
+    parent_cost_center: null
+  name: LeSM - LESM
+  state: present
+- doctype: Cost Center
+  fields:
+    company: Letron Holding
+    cost_center_name: Letron Holding
+    disabled: 0
+    is_group: 1
+    parent_cost_center: null
+  name: Letron Holding - LTVN
+  state: present
+- doctype: Cost Center
+  fields:
+    company: Letron Holding
+    cost_center_name: Main
+    disabled: 0
+    is_group: 0
+    parent_cost_center: Letron Holding - LTVN
+  name: Main - LTVN
+  state: present
+- doctype: Item Tax Template
+  fields:
+    company: Letron Holding
+    disabled: 0
+    taxes:
+    - not_applicable: 1
+      tax_rate: 0.0
+      tax_type: VAT - LTVN
+    title: Vietnam Software Non-VAT
+  name: Vietnam Software Non-VAT - LTVN
+  state: present
+- doctype: Item Tax Template
+  fields:
+    company: Letron Holding
+    disabled: 0
+    taxes:
+    - not_applicable: 0
+      tax_rate: 10.0
+      tax_type: account://33311
+    title: Vietnam Tax
+  name: Vietnam Tax - LTVN
+  state: present
+- doctype: Purchase Taxes and Charges Template
+  fields:
+    company: Letron Holding
+    disabled: 0
+    is_default: 0
+    tax_category: Domestic Software - Non-VAT - LTVN
+    taxes: []
+    title: Vietnam Software Non-VAT
+  name: Vietnam Software Non-VAT - LTVN
+  state: present
+- doctype: Purchase Taxes and Charges Template
+  fields:
+    company: Letron Holding
+    disabled: 0
+    is_default: 0
+    tax_category: null
+    taxes:
+    - account_currency: VND
+      account_head: account://1331
+      add_deduct_tax: Add
+      allocate_full_amount_to_stock_items: 1
+      base_net_amount: 0.0
+      base_tax_amount: 0.0
+      base_tax_amount_after_discount_amount: 0.0
+      base_total: 0.0
+      category: Total
+      charge_type: On Net Total
+      cost_center: Main - LTVN
+      description: VAT @ 10.0
+      dont_recompute_tax: 0
+      included_in_paid_amount: 0
+      included_in_print_rate: 0
+      is_tax_withholding_account: 0
+      net_amount: 0.0
+      project: null
+      rate: 10.0
+      row_id: null
+      set_by_item_tax_template: 0
+      tax_amount: 0.0
+      tax_amount_after_discount_amount: 0.0
+      total: 0.0
+    title: Vietnam Tax
+  name: Vietnam Tax - LTVN
+  state: present
+- doctype: Sales Taxes and Charges Template
+  fields:
+    company: Letron Holding
+    disabled: 0
+    is_default: 0
+    tax_category: Domestic Software - Non-VAT - LTVN
+    taxes: []
+    title: Vietnam Software Non-VAT
+  name: Vietnam Software Non-VAT - LTVN
+  state: present
+- doctype: Sales Taxes and Charges Template
+  fields:
+    company: Letron Holding
+    disabled: 0
+    is_default: 0
+    tax_category: null
+    taxes:
+    - account_currency: VND
+      account_head: account://33311
+      base_net_amount: 0.0
+      base_tax_amount: 0.0
+      base_tax_amount_after_discount_amount: 0.0
+      base_total: 0.0
+      charge_type: On Net Total
+      cost_center: Main - LTVN
+      description: VAT @ 10.0
+      dont_recompute_tax: 0
+      included_in_paid_amount: 0
+      included_in_print_rate: 0
+      is_tax_withholding_account: 0
+      net_amount: 0.0
+      project: null
+      rate: 10.0
+      row_id: null
+      set_by_item_tax_template: 0
+      tax_amount: 0.0
+      tax_amount_after_discount_amount: 0.0
+      total: 0.0
+    title: Vietnam Tax
+  name: Vietnam Tax - LTVN
+  state: present
+- doctype: Tax Rule
+  fields:
+    company: Letron Holding
+    from_date: '2026-01-01'
+    purchase_tax_template: Vietnam Tax - LTVN
+    tax_category: Domestic Hosting - LTVN
+    tax_type: Purchase
+    to_date: null
+  name: Domestic Hosting Purchase - LTVN
+  state: present
+- doctype: Tax Rule
+  fields:
+    company: Letron Holding
+    from_date: '2026-01-01'
+    sales_tax_template: Vietnam Tax - LTVN
+    tax_category: Domestic Hosting - LTVN
+    tax_type: Sales
+    to_date: null
+  name: Domestic Hosting Sales - LTVN
+  state: present
+- doctype: Tax Rule
+  fields:
+    company: Letron Holding
+    from_date: '2026-01-01'
+    purchase_tax_template: Vietnam Software Non-VAT - LTVN
+    tax_category: Domestic Software - Non-VAT - LTVN
+    tax_type: Purchase
+    to_date: null
+  name: Domestic Software Purchase - LTVN
+  state: present
+- doctype: Tax Rule
+  fields:
+    company: Letron Holding
+    from_date: '2026-01-01'
+    sales_tax_template: Vietnam Software Non-VAT - LTVN
+    tax_category: Domestic Software - Non-VAT - LTVN
+    tax_type: Sales
+    to_date: null
+  name: Domestic Software Sales - LTVN
+  state: present
+- doctype: Tax Rule
+  fields:
+    company: Letron Holding
+    from_date: '2026-01-01'
+    purchase_tax_template: Vietnam Tax - LTVN
+    tax_category: Domestic Transport - LTVN
+    tax_type: Purchase
+    to_date: null
+  name: Domestic Transport Purchase - LTVN
+  state: present
+- doctype: Tax Rule
+  fields:
+    company: Letron Holding
+    from_date: '2026-01-01'
+    sales_tax_template: Vietnam Tax - LTVN
+    tax_category: Domestic Transport - LTVN
+    tax_type: Sales
+    to_date: null
+  name: Domestic Transport Sales - LTVN
+  state: present
+- doctype: Global Defaults
+  fields:
+    country: Vietnam
+    default_company: Letron Holding
+    default_currency: VND
+    default_distance_unit: null
+    demo_company: null
+    disable_in_words: 0
+    disable_rounded_total: 0
+    hide_currency_symbol: ''
+    use_posting_datetime_for_naming_documents: 0
+  name: Global Defaults
+  state: present
+erpnext_version: 16.31.1
+scope_version: 1
+shared:
+  # Fiscal Year native dùng chung cho toàn bộ bảy pháp nhân; start/end được
+  # khai báo tường minh theo mặc định năm dương lịch 01/01-31/12.
+  fiscal_year:
+    calendar_year: true
+    companies:
+    - Letron Holding
+    - LeSC
+    - LeSM
+    - LeDB
+    - LeSE
+    - LeSB
+    - LeGM
+    end_date: '2026-12-31'
+    name: '2026'
+    start_date: '2026-01-01'
+  comparative_fiscal_years:
+  # Không thay thế Fiscal Year hiện hành; chỉ phục vụ số liệu so sánh BCTC.
+  - calendar_year: true
+    companies:
+    - Letron Holding
+    - LeSC
+    - LeSM
+    - LeDB
+    - LeSE
+    - LeSB
+    - LeGM
+    end_date: '2025-12-31'
+    name: '2025'
+    start_date: '2025-01-01'
+  coa_template:
+    account_types:
+      '111': Cash
+      '112': Bank
+      '131': Receivable
+      '1331': Tax
+      '151': Stock
+      '152': Stock
+      '153': Stock
+      '154': Stock
+      '155': Stock
+      '156': Stock
+      '157': Stock
+      '158': Stock
+      '211': Fixed Asset
+      '212': Fixed Asset
+      '213': Fixed Asset
+      '2141': Accumulated Depreciation
+      '2142': Accumulated Depreciation
+      '2143': Accumulated Depreciation
+      '2147': Accumulated Depreciation
+      '2411': Capital Work in Progress
+      '2412': Capital Work in Progress
+      '2413': Capital Work in Progress
+      '2414': Capital Work in Progress
+      '331': Payable
+      '33311': Tax
+      '632': Cost of Goods Sold
+      '6424': Depreciation
+    accounts:
+    - code: '111'
+      name: Tiền mặt
+      root_type: Asset
+    - code: '112'
+      name: Tiền gửi không kỳ hạn
+      root_type: Asset
+    - code: '113'
+      name: Tiền đang chuyển
+      root_type: Asset
+    - code: '121'
+      name: Chứng khoán kinh doanh
+      root_type: Asset
+    - code: '128'
+      name: Đầu tư nắm giữ đến ngày đáo hạn
+      root_type: Asset
+    - code: '1281'
+      name: Tiền gửi có kỳ hạn
+      root_type: Asset
+    - code: '1282'
+      name: Trái phiếu
+      root_type: Asset
+    - code: '1283'
+      name: Cho vay
+      root_type: Asset
+    - code: '1288'
+      name: Các khoản đầu tư khác nắm giữ đến ngày đáo hạn
+      root_type: Asset
+    - code: '131'
+      name: Phải thu của khách hàng
+      root_type: Asset
+    - code: '133'
+      name: Thuế GTGT được khấu trừ
+      root_type: Asset
+    - code: '1331'
+      name: Thuế GTGT được khấu trừ của hàng hóa, dịch vụ
+      root_type: Asset
+    - code: '1332'
+      name: Thuế GTGT được khấu trừ của TSCĐ
+      root_type: Asset
+    - code: '136'
+      name: Phải thu nội bộ
+      root_type: Asset
+    - code: '1361'
+      name: Vốn kinh doanh ở đơn vị trực thuộc
+      root_type: Asset
+    - code: '1362'
+      name: Phải thu nội bộ về chênh lệch tỷ giá
+      root_type: Asset
+    - code: '1363'
+      name: Phải thu nội bộ về chi phí đi vay đủ điều kiện được vốn hóa
+      root_type: Asset
+    - code: '1368'
+      name: Phải thu nội bộ khác
+      root_type: Asset
+    - code: '138'
+      name: Phải thu khác
+      root_type: Asset
+    - code: '1381'
+      name: Tài sản thiếu chờ xử lý
+      root_type: Asset
+    - code: '1383'
+      name: Thuế TTĐB của hàng nhập khẩu
+      root_type: Asset
+    - code: '1388'
+      name: Phải thu khác
+      root_type: Asset
+    - code: '141'
+      name: Tạm ứng
+      root_type: Asset
+    - code: '151'
+      name: Hàng mua đang đi đường
+      root_type: Asset
+    - code: '152'
+      name: Nguyên liệu, vật liệu
+      root_type: Asset
+    - code: '153'
+      name: Công cụ, dụng cụ
+      root_type: Asset
+    - code: '154'
+      name: Chi phí sản xuất, kinh doanh dở dang
+      root_type: Asset
+    - code: '155'
+      name: Sản phẩm
+      root_type: Asset
+    - code: '156'
+      name: Hàng hóa
+      root_type: Asset
+    - code: '157'
+      name: Hàng gửi đi bán
+      root_type: Asset
+    - code: '158'
+      name: Nguyên liệu, vật tư tại kho bảo thuế
+      root_type: Asset
+    - code: '171'
+      name: Giao dịch mua, bán lại trái phiếu chính phủ
+      root_type: Asset
+    - code: '211'
+      name: Tài sản cố định hữu hình
+      root_type: Asset
+    - code: '212'
+      name: Tài sản cố định thuê tài chính
+      root_type: Asset
+    - code: '213'
+      name: Tài sản cố định vô hình
+      root_type: Asset
+    - code: '214'
+      name: Hao mòn tài sản cố định
+      root_type: Asset
+    - code: '2141'
+      name: Hao mòn TSCĐ hữu hình
+      root_type: Asset
+    - code: '2142'
+      name: Hao mòn TSCĐ thuê tài chính
+      root_type: Asset
+    - code: '2143'
+      name: Hao mòn TSCĐ vô hình
+      root_type: Asset
+    - code: '2147'
+      name: Hao mòn bất động sản đầu tư
+      root_type: Asset
+    - code: '215'
+      name: Tài sản sinh học
+      root_type: Asset
+    - code: '2151'
+      name: Súc vật nuôi cho sản phẩm định kỳ
+      root_type: Asset
+    - code: '21511'
+      name: Súc vật nuôi cho sản phẩm định kỳ chưa đạt đến giai đoạn trưởng thành
+      root_type: Asset
+    - code: '21512'
+      name: Súc vật nuôi cho sản phẩm định kỳ đạt đến giai đoạn trưởng thành
+      root_type: Asset
+    - code: '215121'
+      name: Nguyên giá
+      root_type: Asset
+    - code: '215122'
+      name: Giá trị khấu hao lũy kế
+      root_type: Asset
+    - code: '2152'
+      name: Súc vật nuôi lấy sản phẩm một lần
+      root_type: Asset
+    - code: '2153'
+      name: Cây trồng theo mùa vụ hoặc lấy sản phẩm một lần
+      root_type: Asset
+    - code: '217'
+      name: Bất động sản đầu tư
+      root_type: Asset
+    - code: '221'
+      name: Đầu tư vào công ty con
+      root_type: Asset
+    - code: '222'
+      name: Đầu tư vào công ty liên doanh liên kết
+      root_type: Asset
+    - code: '228'
+      name: Đầu tư khác
+      root_type: Asset
+    - code: '2281'
+      name: Đầu tư góp vốn vào đơn vị khác
+      root_type: Asset
+    - code: '2288'
+      name: Đầu tư khác
+      root_type: Asset
+    - code: '229'
+      name: Dự phòng tổn thất tài sản
+      root_type: Asset
+    - code: '2291'
+      name: Dự phòng giảm giá chứng khoán kinh doanh
+      root_type: Asset
+    - code: '2292'
+      name: Dự phòng tổn thất đầu tư vào đơn vị khác
+      root_type: Asset
+    - code: '2293'
+      name: Dự phòng phải thu khó đòi
+      root_type: Asset
+    - code: '2294'
+      name: Dự phòng giảm giá hàng tồn kho
+      root_type: Asset
+    - code: '2295'
+      name: Dự phòng tổn thất tài sản sinh học
+      root_type: Asset
+    - code: '241'
+      name: Xây dựng cơ bản dở dang
+      root_type: Asset
+    - code: '2411'
+      name: Mua sắm TSCĐ
+      root_type: Asset
+    - code: '2412'
+      name: Xây dựng cơ bản
+      root_type: Asset
+    - code: '2413'
+      name: Sửa chữa bảo dưỡng định kỳ TSCĐ
+      root_type: Asset
+    - code: '2414'
+      name: Nâng cấp cải tạo TSCĐ
+      root_type: Asset
+    - code: '242'
+      name: Chi phí chờ phân bổ
+      root_type: Asset
+    - code: '243'
+      name: Tài sản thuế thu nhập hoãn lại
+      root_type: Asset
+    - code: '244'
+      name: Ký quỹ ký cược
+      root_type: Asset
+    - code: '331'
+      name: Phải trả cho người bán
+      root_type: Liability
+    - code: '332'
+      name: Phải trả cổ tức lợi nhuận
+      root_type: Liability
+    - code: '333'
+      name: Thuế và các khoản phải nộp Nhà nước
+      root_type: Liability
+    - code: '3331'
+      name: Thuế giá trị gia tăng phải nộp
+      root_type: Liability
+    - code: '33311'
+      name: Thuế GTGT đầu ra
+      root_type: Liability
+    - code: '33312'
+      name: Thuế GTGT hàng nhập khẩu
+      root_type: Liability
+    - code: '3332'
+      name: Thuế tiêu thụ đặc biệt
+      root_type: Liability
+    - code: '3333'
+      name: Thuế xuất nhập khẩu
+      root_type: Liability
+    - code: '3334'
+      name: Thuế thu nhập doanh nghiệp
+      root_type: Liability
+    - code: '3335'
+      name: Thuế thu nhập cá nhân
+      root_type: Liability
+    - code: '3336'
+      name: Thuế tài nguyên
+      root_type: Liability
+    - code: '3337'
+      name: Thuế nhà đất tiền thuê đất
+      root_type: Liability
+    - code: '3338'
+      name: Thuế bảo vệ môi trường và các loại thuế khác
+      root_type: Liability
+    - code: '33381'
+      name: Thuế bảo vệ môi trường
+      root_type: Liability
+    - code: '33382'
+      name: Các loại thuế khác
+      root_type: Liability
+    - code: '3339'
+      name: Phí lệ phí và các khoản phải nộp khác
+      root_type: Liability
+    - code: '334'
+      name: Phải trả người lao động
+      root_type: Liability
+    - code: '335'
+      name: Chi phí phải trả
+      root_type: Liability
+    - code: '336'
+      name: Phải trả nội bộ
+      root_type: Liability
+    - code: '3361'
+      name: Phải trả nội bộ về vốn kinh doanh
+      root_type: Liability
+    - code: '3362'
+      name: Phải trả nội bộ về chênh lệch tỷ giá
+      root_type: Liability
+    - code: '3363'
+      name: Phải trả nội bộ về chi phí đi vay đủ điều kiện vốn hóa
+      root_type: Liability
+    - code: '3368'
+      name: Phải trả nội bộ khác
+      root_type: Liability
+    - code: '337'
+      name: Thanh toán theo tiến độ hợp đồng xây dựng
+      root_type: Liability
+    - code: '338'
+      name: Phải trả phải nộp khác
+      root_type: Liability
+    - code: '3381'
+      name: Tài sản thừa chờ giải quyết
+      root_type: Liability
+    - code: '3382'
+      name: Kinh phí công đoàn
+      root_type: Liability
+    - code: '3383'
+      name: Bảo hiểm xã hội
+      root_type: Liability
+    - code: '3384'
+      name: Bảo hiểm y tế
+      root_type: Liability
+    - code: '3386'
+      name: Bảo hiểm thất nghiệp
+      root_type: Liability
+    - code: '3387'
+      name: Doanh thu chờ phân bổ
+      root_type: Liability
+    - code: '3388'
+      name: Phải trả phải nộp khác
+      root_type: Liability
+    - code: '341'
+      name: Vay và nợ thuê tài chính
+      root_type: Liability
+    - code: '3411'
+      name: Các khoản đi vay
+      root_type: Liability
+    - code: '3412'
+      name: Nợ thuê tài chính
+      root_type: Liability
+    - code: '343'
+      name: Trái phiếu phát hành
+      root_type: Liability
+    - code: '3431'
+      name: Trái phiếu thường
+      root_type: Liability
+    - code: '3432'
+      name: Trái phiếu chuyển đổi
+      root_type: Liability
+    - code: '344'
+      name: Nhận ký quỹ ký cược
+      root_type: Liability
+    - code: '347'
+      name: Thuế thu nhập hoãn lại phải trả
+      root_type: Liability
+    - code: '352'
+      name: Dự phòng phải trả
+      root_type: Liability
+    - code: '3521'
+      name: Dự phòng bảo hành sản phẩm hàng hóa
+      root_type: Liability
+    - code: '3522'
+      name: Dự phòng bảo hành công trình xây dựng
+      root_type: Liability
+    - code: '3523'
+      name: Dự phòng tái cơ cấu doanh nghiệp
+      root_type: Liability
+    - code: '3525'
+      name: Dự phòng phải trả khác
+      root_type: Liability
+    - code: '353'
+      name: Quỹ khen thưởng phúc lợi
+      root_type: Liability
+    - code: '3531'
+      name: Quỹ khen thưởng
+      root_type: Liability
+    - code: '3532'
+      name: Quỹ phúc lợi
+      root_type: Liability
+    - code: '3533'
+      name: Quỹ phúc lợi đã hình thành TSCĐ
+      root_type: Liability
+    - code: '3534'
+      name: Quỹ thưởng ban quản lý điều hành công ty
+      root_type: Liability
+    - code: '356'
+      name: Quỹ phát triển khoa học và công nghệ
+      root_type: Liability
+    - code: '3561'
+      name: Quỹ phát triển khoa học và công nghệ
+      root_type: Liability
+    - code: '3562'
+      name: Quỹ phát triển khoa học và công nghệ đã hình thành tài sản
+      root_type: Liability
+    - code: '357'
+      name: Quỹ bình ổn giá
+      root_type: Liability
+    - code: '411'
+      name: Vốn đầu tư của chủ sở hữu
+      root_type: Equity
+    - code: '4111'
+      name: Vốn góp của chủ sở hữu
+      root_type: Equity
+    - code: '41111'
+      name: Cổ phiếu phổ thông có quyền biểu quyết
+      root_type: Equity
+    - code: '41112'
+      name: Cổ phiếu ưu đãi
+      root_type: Equity
+    - code: '4112'
+      name: Thặng dư vốn
+      root_type: Equity
+    - code: '4113'
+      name: Quyền chọn chuyển đổi trái phiếu
+      root_type: Equity
+    - code: '4118'
+      name: Vốn khác
+      root_type: Equity
+    - code: '412'
+      name: Chênh lệch đánh giá lại tài sản
+      root_type: Equity
+    - code: '413'
+      name: Chênh lệch tỷ giá hối đoái
+      root_type: Equity
+    - code: '414'
+      name: Quỹ đầu tư phát triển
+      root_type: Equity
+    - code: '418'
+      name: Các quỹ khác thuộc vốn chủ sở hữu
+      root_type: Equity
+    - code: '419'
+      name: Cổ phiếu mua lại của chính mình
+      root_type: Equity
+    - code: '421'
+      name: Lợi nhuận sau thuế chưa phân phối
+      root_type: Equity
+    - code: '4211'
+      name: Lợi nhuận sau thuế chưa phân phối lũy kế đến cuối năm trước
+      root_type: Equity
+    - code: '4212'
+      name: Lợi nhuận sau thuế chưa phân phối năm nay
+      root_type: Equity
+    - code: '511'
+      name: Doanh thu bán hàng và cung cấp dịch vụ
+      root_type: Income
+    - code: '515'
+      name: Doanh thu hoạt động tài chính
+      root_type: Income
+    - code: '521'
+      name: Các khoản giảm trừ doanh thu
+      root_type: Income
+    - code: '621'
+      name: Chi phí nguyên liệu vật liệu trực tiếp
+      root_type: Expense
+    - code: '622'
+      name: Chi phí nhân công trực tiếp
+      root_type: Expense
+    - code: '623'
+      name: Chi phí sử dụng máy thi công
+      root_type: Expense
+    - code: '6231'
+      name: Chi phí nhân công
+      root_type: Expense
+    - code: '6232'
+      name: Chi phí vật liệu
+      root_type: Expense
+    - code: '6233'
+      name: Chi phí dụng cụ sản xuất
+      root_type: Expense
+    - code: '6234'
+      name: Chi phí khấu hao máy thi công
+      root_type: Expense
+    - code: '6237'
+      name: Chi phí dịch vụ mua ngoài
+      root_type: Expense
+    - code: '6238'
+      name: Chi phí bằng tiền khác
+      root_type: Expense
+    - code: '627'
+      name: Chi phí sản xuất chung
+      root_type: Expense
+    - code: '6271'
+      name: Chi phí nhân viên phân xưởng
+      root_type: Expense
+    - code: '6272'
+      name: Chi phí vật liệu
+      root_type: Expense
+    - code: '6273'
+      name: Chi phí dụng cụ sản xuất
+      root_type: Expense
+    - code: '6274'
+      name: Chi phí khấu hao TSCĐ
+      root_type: Expense
+    - code: '6275'
+      name: Thuế phí lệ phí
+      root_type: Expense
+    - code: '6277'
+      name: Chi phí dịch vụ mua ngoài
+      root_type: Expense
+    - code: '6278'
+      name: Chi phí bằng tiền khác
+      root_type: Expense
+    - code: '632'
+      name: Giá vốn hàng bán
+      root_type: Expense
+    - code: '635'
+      name: Chi phí tài chính
+      root_type: Expense
+    - code: '641'
+      name: Chi phí bán hàng
+      root_type: Expense
+    - code: '6411'
+      name: Chi phí nhân viên
+      root_type: Expense
+    - code: '6412'
+      name: Chi phí vật liệu bao bì
+      root_type: Expense
+    - code: '6413'
+      name: Chi phí dụng cụ đồ dùng
+      root_type: Expense
+    - code: '6414'
+      name: Chi phí khấu hao TSCĐ
+      root_type: Expense
+    - code: '6415'
+      name: Thuế phí lệ phí
+      root_type: Expense
+    - code: '6417'
+      name: Chi phí dịch vụ mua ngoài
+      root_type: Expense
+    - code: '6418'
+      name: Chi phí bằng tiền khác
+      root_type: Expense
+    - code: '642'
+      name: Chi phí quản lý doanh nghiệp
+      root_type: Expense
+    - code: '6421'
+      name: Chi phí nhân viên quản lý
+      root_type: Expense
+    - code: '6422'
+      name: Chi phí vật liệu quản lý
+      root_type: Expense
+    - code: '6423'
+      name: Chi phí đồ dùng văn phòng
+      root_type: Expense
+    - code: '6424'
+      name: Chi phí khấu hao TSCĐ
+      root_type: Expense
+    - code: '6425'
+      name: Thuế phí và lệ phí
+      root_type: Expense
+    - code: '6426'
+      name: Chi phí dự phòng
+      root_type: Expense
+    - code: '6427'
+      name: Chi phí dịch vụ mua ngoài
+      root_type: Expense
+    - code: '6428'
+      name: Chi phí bằng tiền khác
+      root_type: Expense
+    - code: '711'
+      name: Thu nhập khác
+      root_type: Income
+    - code: '811'
+      name: Chi phí khác
+      root_type: Expense
+    - code: '821'
+      name: Chi phí thuế thu nhập doanh nghiệp
+      root_type: Expense
+    - code: '8211'
+      name: Chi phí thuế TNDN hiện hành
+      root_type: Expense
+    - code: '82111'
+      name: Chi phí thuế TNDN hiện hành theo Luật thuế TNDN
+      root_type: Expense
+    - code: '82112'
+      name: Chi phí thuế TNDN bổ sung theo thuế tối thiểu toàn cầu
+      root_type: Expense
+    - code: '8212'
+      name: Chi phí thuế TNDN hoãn lại
+      root_type: Expense
+    - code: '911'
+      name: Xác định kết quả kinh doanh
+      root_type: Equity
+    bctc_mapping:
+      statements:
+        balance_sheet:
+        - account_codes:
+          - '111'
+          - '112'
+          - '113'
+          code: A1
+          name: Tiền và tương đương tiền
+        - account_codes:
+          - '121'
+          - '128'
+          - '171'
+          code: A2
+          name: Đầu tư tài chính ngắn hạn
+        - account_codes:
+          - '131'
+          - '136'
+          code: A3
+          name: Phải thu ngắn hạn
+        - account_codes:
+          - '151'
+          - '152'
+          - '153'
+          - '154'
+          - '155'
+          - '156'
+          - '157'
+          - '158'
+          code: A4
+          name: Hàng tồn kho
+        - account_codes:
+          - '133'
+          - '138'
+          - '141'
+          code: A5
+          name: Tài sản ngắn hạn khác
+        - account_codes:
+          - '211'
+          - '212'
+          - '213'
+          - '214'
+          - '215'
+          code: B1
+          name: Tài sản cố định và tài sản sinh học
+        - account_codes:
+          - '241'
+          code: B2
+          name: Chi phí xây dựng cơ bản dở dang
+        - account_codes:
+          - '217'
+          - '221'
+          - '222'
+          - '228'
+          - '229'
+          code: B3
+          name: Đầu tư tài chính dài hạn và bất động sản đầu tư
+        - account_codes:
+          - '242'
+          - '243'
+          - '244'
+          code: B4
+          name: Tài sản dài hạn khác
+        - account_codes:
+          - '331'
+          - '336'
+          - '337'
+          code: C1
+          name: Nợ phải trả người bán và nội bộ
+        - account_codes:
+          - '333'
+          - '3331'
+          code: C2
+          name: Thuế và phải trả Nhà nước
+        - account_codes:
+          - '334'
+          - '335'
+          code: C3
+          name: Phải trả người lao động và chi phí phải trả
+        - account_codes:
+          - '332'
+          - '338'
+          - '344'
+          - '347'
+          - '352'
+          - '353'
+          - '356'
+          - '357'
+          code: C4
+          name: Phải trả khác và dự phòng
+        - account_codes:
+          - '341'
+          - '343'
+          code: C5
+          name: Vay và nợ thuê tài chính và trái phiếu
+        - account_codes:
+          - '411'
+          - '412'
+          - '413'
+          - '414'
+          - '418'
+          - '419'
+          - '421'
+          code: D1
+          name: Vốn chủ sở hữu
+        profit_and_loss:
+        - account_codes:
+          - '511'
+          code: E1
+          name: Doanh thu bán hàng và cung cấp dịch vụ
+        - account_codes:
+          - '521'
+          code: E2
+          name: Các khoản giảm trừ doanh thu
+        - account_codes:
+          - '515'
+          code: E3
+          name: Doanh thu hoạt động tài chính
+        - account_codes:
+          - '621'
+          - '622'
+          - '623'
+          - '627'
+          code: E4
+          name: Chi phí sản xuất trực tiếp và chung
+        - account_codes:
+          - '632'
+          code: E5
+          name: Giá vốn hàng bán
+        - account_codes:
+          - '641'
+          code: E6
+          name: Chi phí bán hàng
+        - account_codes:
+          - '642'
+          code: E7
+          name: Chi phí quản lý doanh nghiệp
+        - account_codes:
+          - '635'
+          code: E8
+          name: Chi phí tài chính
+        - account_codes:
+          - '711'
+          code: E9
+          name: Thu nhập khác
+        - account_codes:
+          - '811'
+          code: E10
+          name: Chi phí khác
+        - account_codes:
+          - '821'
+          code: E11
+          name: Chi phí thuế thu nhập doanh nghiệp
+        - account_codes:
+          - '911'
+          code: E12
+          name: Xác định kết quả kinh doanh
+      version: 2
+      statutory_forms:
+        version: 1
+        regulation: Thông tư 99/2025/TT-BTC
+        forms:
+          B01-DN:
+            name: Báo cáo tình hình tài chính
+            statement: balance_sheet
+            columns: [closing_balance, opening_balance]
+            lines:
+            - {code: '100', name: TÀI SẢN NGẮN HẠN, line_type: subtotal, formula: 110+120+130+140+150+160}
+            - {code: '110', name: Tiền và các khoản tương đương tiền, line_type: subtotal, formula: 111+112}
+            - {code: '111', name: Tiền, line_type: account, source_account_codes: ['111', '112', '113']}
+            - {code: '112', name: Các khoản tương đương tiền, line_type: account, source_account_codes: ['1281', '1288'], source: subledger_classification_required}
+            - {code: '120', name: Đầu tư tài chính ngắn hạn, line_type: subtotal, formula: 121+122+123+124+125+126}
+            - {code: '121', name: Chứng khoán kinh doanh, line_type: account, source_account_codes: ['121']}
+            - {code: '122', name: Dự phòng giảm giá chứng khoán kinh doanh, line_type: account, source_account_codes: ['2291']}
+            - {code: '123', name: Đầu tư nắm giữ đến ngày đáo hạn ngắn hạn, line_type: account, source_account_codes: ['1281', '1282', '1283', '1288'], maturity: current}
+            - {code: '124', name: Dự phòng đầu tư nắm giữ đến ngày đáo hạn ngắn hạn, line_type: account, source_account_codes: ['2292'], maturity: current, source: subledger_classification_required}
+            - {code: '125', name: Đầu tư ngắn hạn khác, line_type: account, source_account_codes: ['2281'], maturity: current}
+            - {code: '126', name: Dự phòng tổn thất các khoản đầu tư ngắn hạn khác, line_type: account, source_account_codes: ['2292'], maturity: current, source: subledger_classification_required}
+            - {code: '130', name: Các khoản phải thu ngắn hạn, line_type: subtotal, formula: 131+132+133+134+135+136+137}
+            - {code: '131', name: Phải thu ngắn hạn của khách hàng, line_type: account, source_account_codes: ['131'], maturity: current}
+            - {code: '132', name: Trả trước cho người bán ngắn hạn, line_type: account, source_account_codes: ['331'], maturity: current}
+            - {code: '133', name: Phải thu nội bộ ngắn hạn, line_type: account, source_account_codes: ['1362', '1363', '1368'], maturity: current}
+            - {code: '134', name: Phải thu theo tiến độ hợp đồng xây dựng, line_type: account, source_account_codes: ['337'], maturity: current}
+            - {code: '135', name: Phải thu ngắn hạn khác, line_type: account, source_account_codes: ['1388', '334', '338', '141', '244'], maturity: current}
+            - {code: '136', name: Dự phòng phải thu ngắn hạn khó đòi, line_type: account, source_account_codes: ['2293'], maturity: current}
+            - {code: '137', name: Tài sản thiếu chờ xử lý, line_type: account, source_account_codes: ['1381']}
+            - {code: '140', name: Hàng tồn kho, line_type: subtotal, formula: 141+142}
+            - {code: '141', name: Hàng tồn kho, line_type: account, source_account_codes: ['151', '152', '153', '154', '155', '156', '157', '158']}
+            - {code: '142', name: Dự phòng giảm giá hàng tồn kho, line_type: account, source_account_codes: ['2294']}
+            - {code: '150', name: Tài sản sinh học ngắn hạn, line_type: subtotal, formula: 151+152+153}
+            - {code: '151', name: Súc vật nuôi lấy sản phẩm một lần ngắn hạn, line_type: account, source_account_codes: ['2152'], maturity: current}
+            - {code: '152', name: Cây trồng theo mùa vụ hoặc lấy sản phẩm một lần ngắn hạn, line_type: account, source_account_codes: ['2153'], maturity: current}
+            - {code: '153', name: Dự phòng tổn thất tài sản sinh học ngắn hạn, line_type: account, source_account_codes: ['2295'], maturity: current, source: subledger_classification_required}
+            - {code: '160', name: Tài sản ngắn hạn khác, line_type: subtotal, formula: 161+162+163+164+165}
+            - {code: '161', name: Chi phí chờ phân bổ ngắn hạn, line_type: account, source_account_codes: ['242'], maturity: current}
+            - {code: '162', name: Thuế giá trị gia tăng được khấu trừ, line_type: account, source_account_codes: ['133']}
+            - {code: '163', name: Thuế và các khoản khác phải thu nhà nước, line_type: account, source_account_codes: ['1383', '333'], maturity: current}
+            - {code: '164', name: Giao dịch mua bán lại trái phiếu Chính phủ, line_type: account, source_account_codes: ['171']}
+            - {code: '165', name: Tài sản ngắn hạn khác, line_type: account, source_account_codes: ['2288'], maturity: current}
+            - {code: '200', name: TÀI SẢN DÀI HẠN, line_type: subtotal, formula: 210+220+230+240+250+260+270}
+            - {code: '210', name: Các khoản phải thu dài hạn, line_type: subtotal, formula: 211+212+213+214+215+216}
+            - {code: '211', name: Phải thu dài hạn của khách hàng, line_type: account, source_account_codes: ['131'], maturity: non_current}
+            - {code: '212', name: Trả trước cho người bán dài hạn, line_type: account, source_account_codes: ['331'], maturity: non_current}
+            - {code: '213', name: Vốn kinh doanh ở đơn vị trực thuộc, line_type: account, source_account_codes: ['1361'], maturity: non_current}
+            - {code: '214', name: Phải thu nội bộ dài hạn, line_type: account, source_account_codes: ['1362', '1363', '1368'], maturity: non_current}
+            - {code: '215', name: Phải thu dài hạn khác, line_type: account, source_account_codes: ['1388', '334', '338', '141', '244'], maturity: non_current}
+            - {code: '216', name: Dự phòng phải thu dài hạn khó đòi, line_type: account, source_account_codes: ['2293'], maturity: non_current}
+            - {code: '220', name: Tài sản cố định, line_type: subtotal, formula: 221+224+227}
+            - {code: '221', name: Tài sản cố định hữu hình, line_type: subtotal, formula: 222+223}
+            - {code: '222', name: Nguyên giá tài sản cố định hữu hình, line_type: account, source_account_codes: ['211']}
+            - {code: '223', name: Giá trị hao mòn lũy kế tài sản cố định hữu hình, line_type: account, source_account_codes: ['2141']}
+            - {code: '224', name: Tài sản cố định thuê tài chính, line_type: subtotal, formula: 225+226}
+            - {code: '225', name: Nguyên giá tài sản cố định thuê tài chính, line_type: account, source_account_codes: ['212']}
+            - {code: '226', name: Giá trị hao mòn lũy kế tài sản cố định thuê tài chính, line_type: account, source_account_codes: ['2142']}
+            - {code: '227', name: Tài sản cố định vô hình, line_type: subtotal, formula: 228+229}
+            - {code: '228', name: Nguyên giá tài sản cố định vô hình, line_type: account, source_account_codes: ['213']}
+            - {code: '229', name: Giá trị hao mòn lũy kế tài sản cố định vô hình, line_type: account, source_account_codes: ['2143']}
+            - {code: '230', name: Tài sản sinh học dài hạn, line_type: subtotal, formula: 231+236+237+238}
+            - {code: '231', name: Súc vật nuôi cho sản phẩm định kỳ dài hạn, line_type: subtotal, formula: 232+233}
+            - {code: '232', name: Súc vật nuôi cho sản phẩm định kỳ chưa đến giai đoạn trưởng thành, line_type: account, source_account_codes: ['21511'], maturity: non_current}
+            - {code: '233', name: Súc vật nuôi cho sản phẩm định kỳ đạt đến giai đoạn trưởng thành, line_type: subtotal, formula: 234+235}
+            - {code: '234', name: Nguyên giá, line_type: account, source_account_codes: ['215121'], maturity: non_current}
+            - {code: '235', name: Giá trị khấu hao lũy kế, line_type: account, source_account_codes: ['215122'], maturity: non_current}
+            - {code: '236', name: Súc vật nuôi lấy sản phẩm một lần dài hạn, line_type: account, source_account_codes: ['2152'], maturity: non_current}
+            - {code: '237', name: Cây trồng theo mùa vụ hoặc lấy sản phẩm một lần dài hạn, line_type: account, source_account_codes: ['2153'], maturity: non_current}
+            - {code: '238', name: Dự phòng tổn thất tài sản sinh học dài hạn, line_type: account, source_account_codes: ['2295'], maturity: non_current, source: subledger_classification_required}
+            - {code: '240', name: Bất động sản đầu tư, line_type: subtotal, formula: 241+242}
+            - {code: '241', name: Nguyên giá bất động sản đầu tư, line_type: account, source_account_codes: ['217']}
+            - {code: '242', name: Giá trị hao mòn lũy kế bất động sản đầu tư, line_type: account, source_account_codes: ['2147']}
+            - {code: '250', name: Tài sản dở dang dài hạn, line_type: subtotal, formula: 251+252}
+            - {code: '251', name: 'Chi phí sản xuất, kinh doanh dở dang dài hạn', line_type: account, source_account_codes: ['154', '2294'], maturity: non_current}
+            - {code: '252', name: Chi phí xây dựng cơ bản dở dang, line_type: account, source_account_codes: ['241']}
+            - {code: '260', name: Đầu tư tài chính dài hạn, line_type: subtotal, formula: 261+262+263+264+265+266}
+            - {code: '261', name: Đầu tư vào công ty con, line_type: account, source_account_codes: ['221']}
+            - {code: '262', name: 'Đầu tư vào công ty liên doanh, liên kết', line_type: account, source_account_codes: ['222']}
+            - {code: '263', name: Đầu tư góp vốn vào đơn vị khác, line_type: account, source_account_codes: ['2281'], maturity: non_current}
+            - {code: '264', name: Dự phòng tổn thất đầu tư vào đơn vị khác dài hạn, line_type: account, source_account_codes: ['2292'], maturity: non_current, source: subledger_classification_required}
+            - {code: '265', name: Đầu tư nắm giữ đến ngày đáo hạn dài hạn, line_type: account, source_account_codes: ['1281', '1282', '1283', '1288'], maturity: non_current}
+            - {code: '266', name: Dự phòng đầu tư nắm giữ đến ngày đáo hạn dài hạn, line_type: account, source_account_codes: ['2292'], maturity: non_current, source: subledger_classification_required}
+            - {code: '270', name: Tài sản dài hạn khác, line_type: subtotal, formula: 271+272+273+274}
+            - {code: '271', name: Chi phí chờ phân bổ dài hạn, line_type: account, source_account_codes: ['242'], maturity: non_current}
+            - {code: '272', name: Tài sản thuế thu nhập hoãn lại, line_type: account, source_account_codes: ['243']}
+            - {code: '273', name: 'Thiết bị, vật tư, phụ tùng thay thế dài hạn', line_type: account, source_account_codes: ['153', '2294'], maturity: non_current}
+            - {code: '274', name: Tài sản dài hạn khác, line_type: account, source_account_codes: ['2288'], maturity: non_current}
+            - {code: '280', name: TỔNG CỘNG TÀI SẢN, line_type: subtotal, formula: 100+200}
+            - {code: '300', name: NỢ PHẢI TRẢ, line_type: subtotal, formula: 310+330}
+            - {code: '310', name: Nợ ngắn hạn, line_type: subtotal, formula: 311+312+313+314+315+316+317+318+319+320+321+322+323+324+325}
+            - {code: '311', name: Phải trả người bán ngắn hạn, line_type: account, source_account_codes: ['331'], maturity: current}
+            - {code: '312', name: Người mua trả tiền trước ngắn hạn, line_type: account, source_account_codes: ['131'], maturity: current}
+            - {code: '313', name: Phải trả cổ tức lợi nhuận, line_type: account, source_account_codes: ['332'], maturity: current}
+            - {code: '314', name: Thuế và các khoản phải nộp Nhà nước ngắn hạn, line_type: account, source_account_codes: ['333'], maturity: current}
+            - {code: '315', name: Phải trả người lao động, line_type: account, source_account_codes: ['334'], maturity: current}
+            - {code: '316', name: Chi phí phải trả ngắn hạn, line_type: account, source_account_codes: ['335'], maturity: current}
+            - {code: '317', name: Phải trả nội bộ ngắn hạn, line_type: account, source_account_codes: ['3362', '3363', '3368'], maturity: current}
+            - {code: '318', name: Phải trả theo tiến độ hợp đồng xây dựng, line_type: account, source_account_codes: ['337'], maturity: current}
+            - {code: '319', name: Doanh thu chờ phân bổ ngắn hạn, line_type: account, source_account_codes: ['3387'], maturity: current}
+            - {code: '320', name: Phải trả ngắn hạn khác, line_type: account, source_account_codes: ['338', '138', '344'], maturity: current}
+            - {code: '321', name: Vay và nợ thuê tài chính ngắn hạn, line_type: account, source_account_codes: ['341', '3431'], maturity: current}
+            - {code: '322', name: Dự phòng phải trả ngắn hạn, line_type: account, source_account_codes: ['352'], maturity: current}
+            - {code: '323', name: 'Quỹ khen thưởng, phúc lợi', line_type: account, source_account_codes: ['353'], maturity: current}
+            - {code: '324', name: Quỹ bình ổn giá, line_type: account, source_account_codes: ['357'], maturity: current}
+            - {code: '325', name: Giao dịch mua bán lại trái phiếu Chính phủ, line_type: account, source_account_codes: ['171'], maturity: current}
+            - {code: '330', name: Nợ dài hạn, line_type: subtotal, formula: 331+332+333+334+335+336+337+338+339+340+341+342+343+344}
+            - {code: '331', name: Phải trả người bán dài hạn, line_type: account, source_account_codes: ['331'], maturity: non_current}
+            - {code: '332', name: Người mua trả tiền trước dài hạn, line_type: account, source_account_codes: ['131'], maturity: non_current}
+            - {code: '333', name: Thuế và các khoản phải nộp Nhà nước dài hạn, line_type: account, source_account_codes: ['333'], maturity: non_current}
+            - {code: '334', name: Chi phí phải trả dài hạn, line_type: account, source_account_codes: ['335'], maturity: non_current}
+            - {code: '335', name: Phải trả nội bộ về vốn kinh doanh, line_type: account, source_account_codes: ['3361'], maturity: non_current}
+            - {code: '336', name: Phải trả nội bộ dài hạn, line_type: account, source_account_codes: ['3362', '3363', '3368'], maturity: non_current}
+            - {code: '337', name: Doanh thu chờ phân bổ dài hạn, line_type: account, source_account_codes: ['3387'], maturity: non_current}
+            - {code: '338', name: Phải trả dài hạn khác, line_type: account, source_account_codes: ['338', '344'], maturity: non_current}
+            - {code: '339', name: Vay và nợ thuê tài chính dài hạn, line_type: account, source_account_codes: ['341', '3431'], maturity: non_current}
+            - {code: '340', name: Trái phiếu chuyển đổi, line_type: account, source_account_codes: ['3432']}
+            - {code: '341', name: Cổ phiếu ưu đãi, line_type: account, source_account_codes: ['41112'], source: subledger_classification_required}
+            - {code: '342', name: Thuế thu nhập hoãn lại phải trả, line_type: account, source_account_codes: ['347']}
+            - {code: '343', name: Dự phòng phải trả dài hạn, line_type: account, source_account_codes: ['352'], maturity: non_current}
+            - {code: '344', name: Quỹ phát triển khoa học và công nghệ, line_type: account, source_account_codes: ['356']}
+            - {code: '400', name: VỐN CHỦ SỞ HỮU, line_type: subtotal, formula: 411+412+413+414+415+416+417+418+419+420}
+            - {code: '411', name: Vốn góp của chủ sở hữu, line_type: account, source_account_codes: ['4111']}
+            - {code: '411a', name: Cổ phiếu phổ thông có quyền biểu quyết, line_type: account, source_account_codes: ['41111']}
+            - {code: '411b', name: Cổ phiếu ưu đãi, line_type: account, source_account_codes: ['41112']}
+            - {code: '412', name: Thặng dư vốn, line_type: account, source_account_codes: ['4112']}
+            - {code: '413', name: Quyền chọn chuyển đổi trái phiếu, line_type: account, source_account_codes: ['4113']}
+            - {code: '414', name: Vốn khác của chủ sở hữu, line_type: account, source_account_codes: ['4118']}
+            - {code: '415', name: Cổ phiếu quỹ, line_type: account, source_account_codes: ['419']}
+            - {code: '416', name: Chênh lệch đánh giá lại tài sản, line_type: account, source_account_codes: ['412']}
+            - {code: '417', name: Chênh lệch tỷ giá hối đoái, line_type: account, source_account_codes: ['413']}
+            - {code: '418', name: Quỹ đầu tư phát triển, line_type: account, source_account_codes: ['414']}
+            - {code: '419', name: Quỹ khác thuộc vốn chủ sở hữu, line_type: account, source_account_codes: ['418']}
+            - {code: '420', name: Lợi nhuận sau thuế chưa phân phối, line_type: subtotal, formula: 420a+420b}
+            - {code: '420a', name: LNST chưa phân phối lũy kế đến cuối kỳ trước, line_type: account, source_account_codes: ['4211']}
+            - {code: '420b', name: LNST chưa phân phối kỳ này, line_type: account, source_account_codes: ['4212']}
+            - {code: '440', name: TỔNG CỘNG NGUỒN VỐN, line_type: subtotal, formula: 300+400}
+          B02-DN:
+            name: Báo cáo kết quả hoạt động kinh doanh
+            statement: profit_and_loss
+            columns: [current_period, comparative_period]
+            lines:
+            - {code: '01', name: Doanh thu bán hàng và cung cấp dịch vụ, line_type: account, source_account_codes: ['511']}
+            - {code: '02', name: Các khoản giảm trừ doanh thu, line_type: account, source_account_codes: ['521']}
+            - {code: '10', name: Doanh thu thuần về bán hàng và cung cấp dịch vụ, line_type: subtotal, formula: 01-02}
+            - {code: '11', name: Giá vốn hàng bán, line_type: account, source_account_codes: ['632']}
+            - {code: '20', name: Lợi nhuận gộp về bán hàng và cung cấp dịch vụ, line_type: subtotal, formula: 10-11}
+            - {code: '21', name: 'Lãi/lỗ của hoạt động bán, thanh lý bất động sản đầu tư', line_type: account, source_account_codes: ['711', '811'], source: subledger_classification_required}
+            - {code: '22', name: Doanh thu hoạt động tài chính, line_type: account, source_account_codes: ['515']}
+            - {code: '23', name: Chi phí tài chính, line_type: account, source_account_codes: ['635']}
+            - {code: '24', name: 'Trong đó: Chi phí đi vay', line_type: account, source_account_codes: ['635'], source: subledger_classification_required}
+            - {code: '25', name: Chi phí bán hàng, line_type: account, source_account_codes: ['641']}
+            - {code: '26', name: Chi phí quản lý doanh nghiệp, line_type: account, source_account_codes: ['642']}
+            - {code: '30', name: Lợi nhuận thuần từ hoạt động kinh doanh, line_type: subtotal, formula: 20+21+22-23-25-26}
+            - {code: '31', name: Thu nhập khác, line_type: account, source_account_codes: ['711']}
+            - {code: '32', name: Chi phí khác, line_type: account, source_account_codes: ['811']}
+            - {code: '40', name: Lợi nhuận khác, line_type: subtotal, formula: 31-32}
+            - {code: '50', name: Tổng lợi nhuận kế toán trước thuế, line_type: subtotal, formula: 30+40}
+            - {code: '51', name: Chi phí thuế thu nhập doanh nghiệp hiện hành, line_type: account, source_account_codes: ['82111']}
+            - {code: '52', name: Chi phí thuế thu nhập doanh nghiệp hoãn lại, line_type: account, source_account_codes: ['8212']}
+            - {code: '60', name: Lợi nhuận sau thuế thu nhập doanh nghiệp, line_type: subtotal, formula: 50-51-52}
+            - {code: '70', name: Lãi cơ bản trên cổ phiếu, line_type: metric, metric: basic_eps}
+            - {code: '71', name: Lãi suy giảm trên cổ phiếu, line_type: metric, metric: diluted_eps}
+          B03-DN:
+            name: Báo cáo lưu chuyển tiền tệ (theo phương pháp gián tiếp)
+            statement: cash_flow
+            columns: [current_period, comparative_period]
+            lines:
+            - {code: '01', name: Lợi nhuận trước thuế, line_type: metric, metric: profit_before_tax}
+            - {code: '02', name: Khấu hao TSCĐ và bất động sản đầu tư, line_type: metric, metric: depreciation}
+            - {code: '03', name: Các khoản dự phòng, line_type: metric, metric: provisions}
+            - {code: '04', name: Lãi, lỗ chênh lệch tỷ giá hối đoái do đánh giá lại các khoản mục tiền tệ có gốc ngoại tệ, line_type: metric, metric: fx_revaluation}
+            - {code: '05', name: Lãi, lỗ từ hoạt động đầu tư và tài chính, line_type: metric, metric: investing_financing_gain_loss}
+            - {code: '06', name: Chi phí đi vay, line_type: metric, metric: borrowing_cost}
+            - {code: '07', name: Các khoản điều chỉnh khác, line_type: metric, metric: other_operating_adjustments}
+            - {code: '08', name: Lợi nhuận từ hoạt động kinh doanh trước thay đổi vốn lưu động, line_type: subtotal, formula: 01+02+03+04+05+06+07}
+            - {code: '09', name: Tăng, giảm các khoản phải thu, line_type: metric, metric: receivables_change}
+            - {code: '10', name: Tăng, giảm hàng tồn kho, line_type: metric, metric: inventory_change}
+            - {code: '11', name: Tăng, giảm các khoản phải trả (không kể lãi vay phải trả, thuế thu nhập doanh nghiệp phải nộp), line_type: metric, metric: payables_change_excluding_interest_and_tax}
+            - {code: '12', name: Tăng, giảm chi phí chờ phân bổ, line_type: metric, metric: prepaid_expense_change}
+            - {code: '13', name: Tăng, giảm chứng khoán kinh doanh, line_type: metric, metric: trading_securities_change}
+            - {code: '14', name: Chi phí đi vay đã trả, line_type: metric, metric: interest_paid}
+            - {code: '15', name: Thuế thu nhập doanh nghiệp đã nộp, line_type: metric, metric: income_tax_paid}
+            - {code: '16', name: Tiền thu khác từ hoạt động kinh doanh, line_type: metric, metric: other_operating_receipts}
+            - {code: '17', name: Tiền chi khác cho hoạt động kinh doanh, line_type: metric, metric: other_operating_payments}
+            - {code: '20', name: Lưu chuyển tiền thuần từ hoạt động kinh doanh, line_type: subtotal, formula: 08+09+10+11+12+13+14+15+16+17}
+            - {code: '21', name: Tiền chi để mua sắm, xây dựng TSCĐ và các tài sản dài hạn khác, line_type: metric, metric: fixed_asset_purchases}
+            - {code: '22', name: Tiền thu từ thanh lý, nhượng bán TSCĐ và các tài sản dài hạn khác, line_type: metric, metric: fixed_asset_disposals}
+            - {code: '23', name: Tiền chi cho vay, mua các công cụ nợ của đơn vị khác, line_type: metric, metric: loans_and_debt_instrument_purchases}
+            - {code: '24', name: Tiền thu hồi cho vay, bán lại các công cụ nợ của đơn vị khác, line_type: metric, metric: loans_and_debt_instrument_collections}
+            - {code: '25', name: Tiền chi đầu tư góp vốn vào đơn vị khác, line_type: metric, metric: equity_investment_purchases}
+            - {code: '26', name: Tiền thu hồi đầu tư góp vốn vào đơn vị khác, line_type: metric, metric: equity_investment_proceeds}
+            - {code: '27', name: Tiền thu lãi cho vay, cổ tức và lợi nhuận được chia, line_type: metric, metric: interest_dividends_proceeds}
+            - {code: '30', name: Lưu chuyển tiền thuần từ hoạt động đầu tư, line_type: subtotal, formula: 21+22+23+24+25+26+27}
+            - {code: '31', name: Tiền thu từ phát hành cổ phiếu, nhận vốn góp của chủ sở hữu, line_type: metric, metric: equity_issuance_proceeds}
+            - {code: '32', name: Tiền trả lại vốn góp cho các chủ sở hữu, mua lại cổ phiếu của doanh nghiệp đã phát hành, line_type: metric, metric: equity_return_and_share_repurchase}
+            - {code: '33', name: Tiền thu từ các khoản đi vay, line_type: metric, metric: borrowings_proceeds}
+            - {code: '34', name: Tiền trả nợ gốc vay, line_type: metric, metric: borrowings_principal_repayments}
+            - {code: '35', name: Tiền trả nợ gốc thuê tài chính, line_type: metric, metric: finance_lease_principal_repayments}
+            - {code: '36', name: Cổ tức, lợi nhuận đã trả cho chủ sở hữu, line_type: metric, metric: dividends_and_profit_distributions}
+            - {code: '40', name: Lưu chuyển tiền thuần từ hoạt động tài chính, line_type: subtotal, formula: 31+32+33+34+35+36}
+            - {code: '50', name: Lưu chuyển tiền thuần trong kỳ, line_type: subtotal, formula: 20+30+40}
+            - {code: '60', name: Tiền và tương đương tiền đầu kỳ, line_type: metric, metric: opening_cash}
+            - {code: '61', name: Ảnh hưởng của thay đổi tỷ giá hối đoái quy đổi ngoại tệ, line_type: metric, metric: translation_fx_effect}
+            - {code: '70', name: Tiền và tương đương tiền cuối kỳ, line_type: subtotal, formula: 50+60+61}
+    company_defaults:
+      accumulated_depreciation_account: '2141'
+      capital_work_in_progress_account: '2412'
+      default_bank_account: '112'
+      default_cash_account: '111'
+      default_expense_account: '6428'
+      default_income_account: '511'
+      default_inventory_account: '152'
+      default_payable_account: '331'
+      default_receivable_account: '131'
+      depreciation_expense_account: '6424'
+    framework: VAS
+    legacy_account_numbers:
+    - '1000'
+    - '1100'
+    - '1200'
+    - '1300'
+    - '1400'
+    - '1500'
+    - '1510'
+    - '1520'
+    - '1530'
+    - '1540'
+    - '1590'
+    - '1600'
+    - '1700'
+    - '1710'
+    - '1800'
+    - '2000'
+    - '2100'
+    - '2200'
+    - '2300'
+    - '2400'
+    - '2500'
+    - '2800'
+    - '3000'
+    - '3100'
+    - '3300'
+    - '3400'
+    - '3500'
+    - '4000'
+    - '4100'
+    - '4200'
+    - '4400'
+    - '4500'
+    - '4900'
+    - '5000'
+    - '5100'
+    - '5200'
+    - '5300'
+    - '5400'
+    - '5500'
+    - '5600'
+    - '5700'
+    - '5800'
+    - '5900'
+    - '5950'
+    name: Letron Group VAS COA
+    regulation: Thông tư 99/2025/TT-BTC
+    reporting:
+      cash_flow_categories:
+      - operating
+      - investing
+      - financing
+      cash_flow:
+        standard: VAS 24
+        method: indirect
+        categories:
+          operating:
+            native_account_types:
+            - Depreciation
+            - Receivable
+            - Payable
+            - Stock
+            account_codes:
+            - '133'
+            - '138'
+            - '141'
+            - '151'
+            - '152'
+            - '153'
+            - '154'
+            - '155'
+            - '156'
+            - '157'
+            - '158'
+            - '331'
+            - '332'
+            - '333'
+            - '334'
+            - '335'
+            - '336'
+            - '337'
+            - '338'
+            - '341'
+            - '343'
+            - '344'
+            - '347'
+            - '352'
+            - '353'
+            - '356'
+            - '357'
+          investing:
+            native_account_types:
+            - Fixed Asset
+            - Capital Work in Progress
+            account_codes:
+            - '211'
+            - '212'
+            - '213'
+            - '214'
+            - '215'
+            - '217'
+            - '221'
+            - '222'
+            - '228'
+            - '229'
+            - '241'
+          financing:
+            native_account_types:
+            - Equity
+            account_codes:
+            - '411'
+            - '412'
+            - '413'
+            - '414'
+            - '418'
+            - '419'
+            - '421'
+        metric_sources:
+          provisions: ['352']
+          fx_revaluation: ['413']
+          investing_financing_gain_loss: ['711', '811']
+          borrowing_cost: ['635']
+          other_operating_adjustments: ['6428']
+          payables_change_excluding_interest_and_tax: ['331']
+          prepaid_expense_change: ['242']
+          trading_securities_change: ['121']
+          interest_paid: ['635']
+          income_tax_paid: ['333']
+          other_operating_receipts: ['711']
+          other_operating_payments: ['811']
+          fixed_asset_purchases: ['211']
+          fixed_asset_disposals: ['211']
+          loans_and_debt_instrument_purchases: ['1281']
+          loans_and_debt_instrument_collections: ['1281']
+          equity_investment_purchases: ['221']
+          equity_investment_proceeds: ['221']
+          interest_dividends_proceeds: ['515']
+          equity_issuance_proceeds: ['4111']
+          equity_return_and_share_repurchase: ['419']
+          borrowings_proceeds: ['341']
+          borrowings_principal_repayments: ['341']
+          finance_lease_principal_repayments: ['3431']
+          dividends_and_profit_distributions: ['332']
+          translation_fx_effect: ['413']
+      current_non_current: required_for_balance_sheet
+      statement_classification:
+        balance_sheet:
+          current: [A1, A2, A3, A4, A5, C1, C2, C3, C4]
+          non_current: [B1, B2, B3, B4, C5]
+          equity: [D1]
+      disclosure_notes:
+      - {code: N01, name: Accounting policies and reporting framework, source: policy}
+      - {code: N02, name: Cash and cash equivalents, source: balance_sheet.A1}
+      - {code: N03, name: Receivables and payables, source: balance_sheet.A3/C1}
+      - {code: N04, name: Fixed assets and depreciation, source: balance_sheet.B1}
+      - {code: N05, name: Revenue and expenses, source: profit_and_loss}
+      - {code: N06, name: Related-party and intercompany transactions, source: consolidation}
+      - {code: N07, name: Unmapped accounts and reconciliation exceptions, source: unmapped_accounts}
+      effective_from: '2026-01-01'
+      effective_to: null
+      currency:
+        reporting_currency: VND
+        allowed_accounting_currencies:
+        - VND
+        foreign_currency_transactions: disabled
+        exchange_rate_source: native_exchange_rate
+        revaluation_required_at_close: true
+        translation: not_configured
+      assets:
+        default_depreciation_method: Straight Line
+        default_frequency_months: 12
+        require_cost_center: true
+        accounts:
+          fixed_asset: '211'
+          accumulated_depreciation: '2141'
+          depreciation_expense: '6424'
+          capital_work_in_progress: '2412'
+    source: VAS
+    version: 2
+  consolidation:
+    holding_company: Letron Holding
+    companies: [Letron Holding, LeSC, LeSM, LeDB, LeSE, LeSB, LeGM]
+    finance_book: Consolidation Adjustment
+    reporting_currency: VND
+    require_closed_period: true
+    intercompany_marker: LETRON-IC|id={matching_id}|source={source_company}|counterparty={counterparty_company}|type={transaction_type}
+    elimination_rules:
+    - code: IC_AR_AP
+      label: Eliminate intercompany receivable and payable
+      source_account_codes: ['131', '136', '138']
+      counterparty_account_codes: ['331', '336', '338']
+      debit_account_code: '331'
+      credit_account_code: '131'
+      # Post to the actual leaf Accounts found in the marked GL rows. The
+      # fixed debit/credit codes above remain the policy fallback, while this
+      # mode prevents posting to a parent Account such as 336 or 338.
+      posting_mode: mirror_actual_accounts
+    - code: IC_REVENUE_COST
+      label: Eliminate intercompany revenue and cost
+      source_account_codes: ['511', '515', '711']
+      counterparty_account_codes: ['632', '635', '641', '642', '811']
+      debit_account_code: '511'
+      credit_account_code: '632'
+      # Preserve the real revenue/expense Account pair (for example 515/635)
+      # instead of forcing every elimination through 511/632.
+      posting_mode: mirror_actual_accounts
+  cost_centers:
+  - code: HLD
+    company: Letron Holding
+    functions:
+    - FIN
+    - TRE
+    - LEG
+    - EXE
+    - ADM
+  - code: LESC
+    company: LeSC
+    functions:
+    - FIN
+    - SAL
+    - ENG
+    - OPS
+    - PRJ
+  - code: LESM
+    company: LeSM
+    functions:
+    - FIN
+    - SAL
+    - OPS
+    - PRJ
+  - code: LEDB
+    company: LeDB
+    functions:
+    - FIN
+    - ENG
+    - OPS
+    - PRJ
+  - code: LESE
+    company: LeSE
+    functions:
+    - FIN
+    - ENG
+    - OPS
+    - PRJ
+  - code: LESB
+    company: LeSB
+    functions:
+    - FIN
+    - ENG
+    - OPS
+    - PRJ
+  - code: LEGM
+    company: LeGM
+    functions:
+    - FIN
+    - SAL
+    - PRD
+    - QLT
+    - SCM
+  function_codes:
+  - FIN
+  - TRE
+  - HR
+  - LEG
+  - SAL
+  - MKT
+  - ENG
+  - OPS
+  - PRJ
+  - PRD
+  - QLT
+  - SCM
+  - IT
+  - EXE
+  - ADM
+  master_data_policy:
+    company_specific:
+    - Account
+    - Cost Center
+    - Warehouse
+    - Bank Account
+    - Asset Category
+    - Accounting Period
+    shared:
+    - Customer
+    - Supplier
+    - Item
+    - Item Group
+    - UOM
+    - Currency
+    - Finance Book
+    - Payment Term
+    - Payment Terms Template
+    - Workflow
+version: 3
