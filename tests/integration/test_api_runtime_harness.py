@@ -33,50 +33,6 @@ def _config() -> dict[str, Any]:
     return config
 
 
-def cleanup_consumer_events(prefix: str, event_ids: list[str] | None = None) -> None:
-    """Delete one run's durable consumer events and require a stable zero."""
-
-    delivery = _config()["delivery"]
-    if not delivery["enabled"]:
-        return
-    realtime_url = delivery["realtime_url"]
-    realtime_token = delivery["realtime_token"]
-    if not realtime_url or not realtime_token:
-        return
-    port = os.environ.get("LETRON_CONSUMER_PORT", "8091")
-    events_url = realtime_url.replace("http://event-consumer:8090", f"http://127.0.0.1:{port}").replace(
-        "/realtime", "/events"
-    )
-    headers = {"Authorization": f"Bearer {realtime_token}", "Content-Type": "application/json"}
-
-    def delete_events(ids: list[str]) -> int:
-        request = Request(
-            events_url,
-            data=json.dumps({"event_ids": ids, "prefix": prefix}).encode(),
-            method="DELETE",
-            headers=headers,
-        )
-        try:
-            with build_opener().open(request, timeout=30) as response:
-                status = response.status
-                payload = json.loads(response.read().decode())
-        except HTTPError as error:
-            status = error.code
-            payload = json.loads(error.read().decode())
-        assert status == 200, f"consumer cleanup failed for {prefix}: {status} {payload}"
-        return int(payload["deleted"])
-
-    time.sleep(2)
-    delete_events(event_ids or [])
-    stable_zero_polls = 0
-    for _ in range(60):
-        time.sleep(0.5)
-        stable_zero_polls = stable_zero_polls + 1 if delete_events([]) == 0 else 0
-        if stable_zero_polls >= 5:
-            return
-    raise AssertionError("consumer acceptance residue did not remain zero for five consecutive polls")
-
-
 @dataclass
 class Response:
     status: int
@@ -404,42 +360,4 @@ def response_data(response: Response) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise TypeError(f"response has no document data: {_summary(response.data)}")
     return data
-
-
-def create_or_reuse(client: ApiClient, doctype: str, payload: dict[str, Any], created: list[tuple[str, str]] | None = None) -> str:
-    name = payload.get("name") or payload.get("item_code")
-    if name:
-        existing = client.document("GET", doctype, name, expected={200, 404})
-        if existing.status == 200:
-            return response_data(existing)["name"]
-    result = response_data(client.document("POST", doctype, payload=payload, expected={200}))["name"]
-    if created is not None:
-        created.append((doctype, result))
-    return result
-
-
-def cleanup(client: ApiClient, created: list[tuple[str, str]], prefix: str) -> None:
-    """Fail closed if a document created by this run cannot be removed."""
-    failures: list[str] = []
-    for doctype, name in reversed(created):
-        try:
-            client.document("DELETE", doctype, name, expected={200, 202, 404})
-        except (AssertionError, RuntimeUnavailable):
-            failures.append(f"{doctype}:{name}")
-    # Always run the scoped teardown endpoint. Normal document deletion does
-    # not remove durable outbox rows, so using this only as a fallback leaves
-    # acceptance evidence behind after an otherwise successful run.
-    fallback = client.request(
-        "POST",
-        f"/api/method/letron_api.control.api.acceptance_cleanup?prefix={quote(prefix, safe='')}",
-        expected={200},
-    )
-    cleanup_result = fallback.data.get("message", {}) if isinstance(fallback.data, dict) else {}
-    endpoint_failures = cleanup_result.get("failures", [])
-    if endpoint_failures:
-        raise AssertionError("fixture cleanup failed: " + ", ".join(endpoint_failures))
-    for doctype, name in created:
-        client.document("GET", doctype, name, expected={404})
-    if failures and not cleanup_result.get("deleted"):
-        raise AssertionError("fixture cleanup fallback removed nothing: " + ", ".join(failures))
 
