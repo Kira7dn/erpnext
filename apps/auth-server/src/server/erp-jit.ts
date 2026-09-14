@@ -1,4 +1,4 @@
-import { createHmac, randomUUID } from "node:crypto";
+import { createHash, createHmac, randomUUID } from "node:crypto";
 
 import { getEnv } from "./env";
 
@@ -16,8 +16,16 @@ export async function ensureErpIdentity(user: JitUser): Promise<void> {
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const expires = String(Number(timestamp) + 60);
   const requestId = randomUUID();
+  const bodyPayload = JSON.stringify({
+    tenant_key: identity.tenantKey,
+    subject: identity.subject,
+    subject_type: identity.subjectType,
+    email: user.email,
+    display_name: user.displayName,
+  });
+  const bodyHash = createHash("sha256").update(bodyPayload).digest("hex");
   const signature = createHmac("sha256", env.LETRON_AUTH_TO_ERP_JIT_SECRET)
-    .update(`${timestamp}.${expires}.POST.${path}.${requestId}`)
+    .update(`${timestamp}.${expires}.POST.${path}.${requestId}.${bodyHash}`)
     .digest("hex");
   const csrfResponse = await fetch(new URL("/api/method/letron_api.auth.gateway.csrf_token", `${env.FRAPPE_ERP_NEXT_URL}/`), {
     headers: { accept: "application/json" },
@@ -44,17 +52,12 @@ export async function ensureErpIdentity(user: JitUser): Promise<void> {
       "X-Letron-JIT-Timestamp": timestamp,
       "X-Letron-JIT-Expires-At": expires,
       "X-Letron-JIT-Request-Id": requestId,
+      "X-Letron-JIT-Body-Sha256": bodyHash,
       "X-Letron-JIT-Signature": signature,
       "X-Frappe-CSRF-Token": csrf,
       cookie: cookies,
     },
-    body: JSON.stringify({
-      tenant_key: identity.tenantKey,
-      subject: identity.subject,
-      subject_type: identity.subjectType,
-      email: user.email,
-      display_name: user.displayName,
-    }),
+    body: bodyPayload,
     signal: AbortSignal.timeout(15_000),
   });
   if (!response.ok) {

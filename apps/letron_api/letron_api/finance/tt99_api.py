@@ -92,9 +92,11 @@ def _audit(document: Any, action: str, changes: dict[str, Any] | None = None) ->
     comment = getattr(document, "add_comment", None)
     if callable(comment):
         actor = getattr(frappe.local, "letron_gateway_actor", None)
+        authorization = getattr(frappe.local, "letron_request_identity", None)
         payload = {
             "action": action,
             "actor": actor or frappe.session.user,
+            "authorization": authorization,
             "changes": changes or {},
         }
         comment("Info", json.dumps(payload, ensure_ascii=False, sort_keys=True))

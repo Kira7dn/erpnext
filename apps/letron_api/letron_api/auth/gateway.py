@@ -8,6 +8,8 @@ from typing import Any, cast
 
 import frappe
 
+INTERNAL_API_USER = "leducanh@ledb.vn"
+
 
 @frappe.whitelist(allow_guest=True, methods=["GET"])
 def csrf_token() -> str:
@@ -124,6 +126,17 @@ def verify_gateway_request() -> str:
         "tenant_key": tenant,
         "subject": subject,
         "subject_type": subject_type,
+        "policy_version": headers.get("X-Letron-Gateway-Policy-Version", "").strip(),
+        "request_id": request_id,
+        "issued_at": timestamp,
+        "expires_at": expires_at,
+    }
+    frappe.local.letron_request_identity = {
+        "auth_source": "portal",
+        "portal_actor": dict(frappe.local.letron_gateway_actor),
+        "erp_principal": email,
+        "request_id": request_id,
+        "policy_version": headers.get("X-Letron-Gateway-Policy-Version", "").strip(),
     }
     return email
 
@@ -155,11 +168,18 @@ def verify_internal_api_request() -> str:
         scope="internal-api",
         error_prefix="Internal API",
     )
-    user = os.environ.get("LETRON_INTERNAL_API_USER", "leducanh@ledb.vn").strip().lower()
+    user = INTERNAL_API_USER
     if not user or not frappe.db.exists("User", {"name": user, "enabled": 1}):
         frappe.throw("Internal API user is not provisioned in ERP", exc=frappe.AuthenticationError)
     frappe.set_user(user)
     frappe.local.letron_authz_granted = True
+    frappe.local.letron_request_identity = {
+        "auth_source": "internal_api",
+        "portal_actor": None,
+        "erp_principal": user,
+        "request_id": request_id,
+        "policy_version": None,
+    }
     return user
 
 
@@ -170,8 +190,12 @@ def verify_jit_request() -> None:
     expires_at = headers.get("X-Letron-JIT-Expires-At", "")
     request_id = headers.get("X-Letron-JIT-Request-Id", "")
     signature = headers.get("X-Letron-JIT-Signature", "")
+    body_hash = headers.get("X-Letron-JIT-Body-Sha256", "")
     path = "/api/method/letron_api.auth.sso_identity.provision_identity"
-    payload = f"{timestamp}.{expires_at}.POST.{path}.{request_id}"
+    actual_body_hash = hashlib.sha256(frappe.local.request.get_data(cache=True)).hexdigest()
+    if not hmac.compare_digest(body_hash, actual_body_hash):
+        frappe.throw("Identity provisioning body mismatch", exc=frappe.AuthenticationError)
+    payload = f"{timestamp}.{expires_at}.POST.{path}.{request_id}.{body_hash}"
     _verify_expiring_signature(
         secret=secret,
         timestamp=timestamp,
@@ -193,6 +217,28 @@ def verify_jit_request() -> None:
     # This is a private service-to-service endpoint authenticated by the
     # expiring HMAC above; it is not a browser/session endpoint.
     frappe.local.flags.ignore_csrf = True
+    frappe.local.letron_request_identity = {
+        "auth_source": "jit",
+        "portal_actor": None,
+        "erp_principal": "Administrator",
+        "request_id": request_id,
+        "policy_version": None,
+    }
+
+
+def clear_request_auth_context(response=None, request=None) -> None:
+    """Clear authorization state before the request-local context is reused."""
+    del response, request
+    for name in (
+        "letron_authz_granted",
+        "letron_gateway_actor",
+        "letron_request_identity",
+        "letron_jit_authorized",
+    ):
+        if hasattr(frappe.local, name):
+            setattr(frappe.local, name, None)
+    frappe.flags.ignore_permissions = False
+    frappe.local.flags.ignore_csrf = False
 
 
 def enforce_gateway_ingress() -> None:

@@ -112,6 +112,69 @@ def _update_profile(identity: Any, user: Any, snapshot: IdentitySnapshot) -> Any
     return user
 
 
+def _provision_identity_snapshot(snapshot: IdentitySnapshot) -> dict[str, Any]:
+    identity = _identity(snapshot.identity_key)
+    created = identity is None
+    if identity is None:
+        if frappe.db.exists("User", snapshot.email):
+            linked = frappe.db.exists(IDENTITY_DOCTYPE, {"user": snapshot.email})
+            if linked:
+                raise SsoIdentityConflict("Email already belongs to another stable Lark identity")
+            user = cast(Any, frappe.get_doc("User", snapshot.email))
+            user.flags.lark_sso_sync = True
+            user.enabled = 1
+            user.user_type = "Website User"
+            user.save(ignore_permissions=True)
+        else:
+            user = _create_user(snapshot)
+        identity = frappe.get_doc(
+            {
+                "doctype": IDENTITY_DOCTYPE,
+                "name": snapshot.identity_key,
+                "identity_key": snapshot.identity_key,
+                "provider": "lark",
+                "tenant_key": snapshot.tenant_key,
+                "subject": snapshot.subject,
+                "subject_type": snapshot.subject_type,
+                "user": user.name,
+                "email": snapshot.email,
+                "display_name": snapshot.display_name,
+                "provisioned_at": _frappe_datetime(snapshot.provisioned_at),
+            }
+        )
+        identity.insert(ignore_permissions=True)
+    else:
+        user = cast(Any, frappe.get_doc("User", identity.user))
+        user = _update_profile(identity, user, snapshot)
+        if not int(user.enabled):
+            user.flags.lark_sso_sync = True
+            user.enabled = 1
+            user.user_type = "Website User"
+            user.save(ignore_permissions=True)
+        for field, value in {
+            "email": snapshot.email,
+            "display_name": snapshot.display_name,
+            "provisioned_at": _frappe_datetime(snapshot.provisioned_at),
+        }.items():
+            frappe.db.set_value(IDENTITY_DOCTYPE, identity.name, field, value, update_modified=True)
+    context = getattr(frappe.local, "letron_request_identity", {})
+    audit_context = {
+        key: context[key]
+        for key in ("auth_source", "request_id", "policy_version", "erp_principal")
+        if isinstance(context, dict) and context.get(key) is not None
+    }
+    _audit(
+        "identity.jit_provisioned" if created else "identity.jit_refreshed",
+        source="request",
+        outcome="success",
+        identity=identity.name,
+        user=user.name,
+        detail={"actor": "auth_portal", "roles_changed": False, **audit_context},
+    )
+    frappe.db.commit()
+    return {"ok": True, "user": user.name, "identity": identity.name, "created": created}
+
+
 @frappe.whitelist(allow_guest=True)
 def provision_identity() -> dict[str, Any]:
     """JIT-provision only the ERP identity anchor after Auth authorization."""
@@ -136,60 +199,9 @@ def provision_identity() -> dict[str, Any]:
         display_name=display_name,
         provisioned_at=datetime.now(UTC),
     )
-    identity = _identity(snapshot.identity_key)
-    created = identity is None
-    if identity is None:
-        if frappe.db.exists("User", email):
-            linked = frappe.db.exists(IDENTITY_DOCTYPE, {"user": email})
-            if linked:
-                raise SsoIdentityConflict("Email already belongs to another stable Lark identity")
-            user = cast(Any, frappe.get_doc("User", email))
-            user.flags.lark_sso_sync = True
-            user.enabled = 1
-            user.user_type = "Website User"
-            user.save(ignore_permissions=True)
-        else:
-            user = _create_user(snapshot)
-        identity = frappe.get_doc(
-            {
-                "doctype": IDENTITY_DOCTYPE,
-                "name": snapshot.identity_key,
-                "identity_key": snapshot.identity_key,
-                "provider": "lark",
-                "tenant_key": tenant_key,
-                "subject": subject,
-                "subject_type": subject_type,
-                "user": user.name,
-                "email": email,
-                "display_name": display_name,
-                "provisioned_at": _frappe_datetime(snapshot.provisioned_at),
-            }
-        )
-        identity.insert(ignore_permissions=True)
-    else:
-        user = cast(Any, frappe.get_doc("User", identity.user))
-        user = _update_profile(identity, user, snapshot)
-        if not int(user.enabled):
-            user.flags.lark_sso_sync = True
-            user.enabled = 1
-            user.user_type = "Website User"
-            user.save(ignore_permissions=True)
-        for field, value in {
-            "email": email,
-            "display_name": display_name,
-            "provisioned_at": _frappe_datetime(snapshot.provisioned_at),
-        }.items():
-            frappe.db.set_value(IDENTITY_DOCTYPE, identity.name, field, value, update_modified=True)
-    _audit(
-        "identity.jit_provisioned" if created else "identity.jit_refreshed",
-        source="request",
-        outcome="success",
-        identity=identity.name,
-        user=user.name,
-        detail={"actor": "auth_portal", "roles_changed": False},
-    )
-    frappe.db.commit()
-    return {"ok": True, "user": user.name, "identity": identity.name, "created": created}
+    cache = cast(Any, frappe.cache)()
+    with cache.lock(f"letron:identity:provision:{snapshot.identity_key}", timeout=15, blocking_timeout=15):
+        return _provision_identity_snapshot(snapshot)
 
 
 def status() -> dict[str, Any]:
