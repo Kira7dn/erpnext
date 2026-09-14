@@ -112,8 +112,10 @@ def verify_gateway_request() -> str:
     # Auth Portal is the sole authorization source. The JIT handshake creates
     # this exact ERP User before a Gateway session is issued; never fall back to
     # Administrator or another technical principal.
-    if not frappe.db.exists("User", email):
-        frappe.throw("Gateway identity is not provisioned in ERP", exc=frappe.AuthenticationError)
+    if not frappe.db.exists("User", {"name": email, "enabled": 1}):
+        frappe.throw("Gateway identity is not an active ERP user", exc=frappe.AuthenticationError)
+    if not frappe.db.exists("Letron SSO Identity", {"user": email}):
+        frappe.throw("Gateway identity is not active", exc=frappe.AuthenticationError)
     frappe.set_user(email)
     frappe.local.letron_authz_granted = True
     frappe.local.letron_gateway_actor = {

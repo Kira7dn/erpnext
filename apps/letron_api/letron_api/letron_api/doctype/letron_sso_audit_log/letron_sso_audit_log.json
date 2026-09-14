@@ -5,7 +5,7 @@
   "creation": "2026-09-04 00:00:00.000000",
   "doctype": "DocType",
   "engine": "InnoDB",
-  "field_order": ["occurred_at", "event_type", "identity", "user", "source", "outcome", "before_roles", "after_roles", "detail"],
+  "field_order": ["occurred_at", "event_type", "identity", "user", "source", "outcome", "detail"],
   "fields": [
     {"fieldname": "occurred_at", "fieldtype": "Datetime", "label": "Occurred At", "reqd": 1, "read_only": 1},
     {"fieldname": "event_type", "fieldtype": "Data", "label": "Event Type", "reqd": 1, "read_only": 1},
@@ -13,8 +13,6 @@
     {"fieldname": "user", "fieldtype": "Link", "label": "ERP User", "options": "User", "read_only": 1},
     {"fieldname": "source", "fieldtype": "Select", "label": "Source", "options": "login\nrequest\nbreak-glass\nmigration\nacceptance", "reqd": 1, "read_only": 1},
     {"fieldname": "outcome", "fieldtype": "Select", "label": "Outcome", "options": "success\ndenied\nerror", "reqd": 1, "read_only": 1},
-    {"fieldname": "before_roles", "fieldtype": "Long Text", "label": "Roles Before", "read_only": 1},
-    {"fieldname": "after_roles", "fieldtype": "Long Text", "label": "Roles After", "read_only": 1},
     {"fieldname": "detail", "fieldtype": "Long Text", "label": "Detail", "read_only": 1}
   ],
   "index_web_pages_for_search": 0,

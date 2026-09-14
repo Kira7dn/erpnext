@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, cast
@@ -28,8 +27,7 @@ class IdentitySnapshot:
     subject_type: str
     email: str
     display_name: str
-    groups: frozenset[str]
-    synced_at: datetime
+    provisioned_at: datetime
 
     @property
     def identity_key(self) -> str:
@@ -58,9 +56,6 @@ def _audit(
             "user": user,
             "source": source,
             "outcome": outcome,
-            # Legacy columns remain empty: authorization is not an ERP role.
-            "before_roles": "[]",
-            "after_roles": "[]",
             "detail": json.dumps(detail or {}, ensure_ascii=False, separators=(",", ":")),
         }
     )
@@ -139,8 +134,7 @@ def provision_identity() -> dict[str, Any]:
         subject_type=subject_type,
         email=email,
         display_name=display_name,
-        groups=frozenset(),
-        synced_at=datetime.now(UTC),
+        provisioned_at=datetime.now(UTC),
     )
     identity = _identity(snapshot.identity_key)
     created = identity is None
@@ -168,9 +162,7 @@ def provision_identity() -> dict[str, Any]:
                 "user": user.name,
                 "email": email,
                 "display_name": display_name,
-                "group_ids": "[]",
-                "last_sync_at": _frappe_datetime(snapshot.synced_at),
-                "sync_state": "Active",
+                "provisioned_at": _frappe_datetime(snapshot.provisioned_at),
             }
         )
         identity.insert(ignore_permissions=True)
@@ -185,9 +177,7 @@ def provision_identity() -> dict[str, Any]:
         for field, value in {
             "email": email,
             "display_name": display_name,
-            "last_sync_at": _frappe_datetime(snapshot.synced_at),
-            "sync_state": "Active",
-            "last_error": None,
+            "provisioned_at": _frappe_datetime(snapshot.provisioned_at),
         }.items():
             frappe.db.set_value(IDENTITY_DOCTYPE, identity.name, field, value, update_modified=True)
     _audit(
@@ -205,19 +195,20 @@ def provision_identity() -> dict[str, Any]:
 def status() -> dict[str, Any]:
     if not frappe.db.table_exists(IDENTITY_DOCTYPE):
         return {"enabled": True, "installed": False}
-    counts = dict(Counter(frappe.get_all(IDENTITY_DOCTYPE, pluck="sync_state")))
+    identity_rows = frappe.get_all(IDENTITY_DOCTYPE, fields=["user"])
+    active_count = sum(bool(frappe.db.get_value("User", row.user, "enabled")) for row in identity_rows)
     latest_rows = frappe.get_all(
         IDENTITY_DOCTYPE,
-        fields=["last_sync_at"],
-        filters={"last_sync_at": ["is", "set"]},
-        order_by="last_sync_at desc",
+        fields=["provisioned_at"],
+        filters={"provisioned_at": ["is", "set"]},
+        order_by="provisioned_at desc",
         limit=1,
     )
-    latest = latest_rows[0].last_sync_at if latest_rows else None
+    latest = latest_rows[0].provisioned_at if latest_rows else None
     return {
         "enabled": True,
         "installed": True,
-        "identities": sum(counts.values()),
-        "states": counts,
+        "identities": len(identity_rows),
+        "states": {"Active": active_count, "Disabled": len(identity_rows) - active_count},
         "last_successful_sync_at": str(latest) if latest else None,
     }

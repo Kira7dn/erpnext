@@ -102,44 +102,19 @@ credential riêng trong Auth Server; ERP origin vẫn phải nằm trong mạng 
 nếu chưa có ERP-side verifier, policy projection readback và direct-origin deny
 acceptance.
 
-Gateway làm mới group membership khi snapshot quá hạn, có lease chống gọi trùng.
-Session lookup không gọi network Lark. User không hoạt động không tạo API call
-Lark và role sync không dùng cron. Endpoint
-nội bộ dùng bearer secret riêng; không dùng Lark App Secret và không được công
-khai cho client.
+Gateway chỉ dùng membership do Auth Portal quyết định. Session lookup không gọi
+network Lark; endpoint nội bộ dùng bearer secret riêng và không được công khai
+cho client.
 
 Luồng vòng đời:
 
-- Lần đăng nhập đầu: nếu danh tính thuộc group truy cập bắt buộc, ERP tạo `System User` theo JIT và lưu liên kết `tenant_key + union_id`.
+- Lần đăng nhập đầu: nếu danh tính được Auth Portal cho phép, ERP tạo identity anchor theo JIT và lưu liên kết `tenant_key + union_id`.
 - Email hoặc tên đổi trong Lark: ERP cập nhật User đã liên kết theo stable identity, không dò ghép lại bằng email.
-- Bị gỡ khỏi group truy cập hoặc Auth User bị disable: ERP gỡ role do Lark quản lý, disable User và xóa session.
-- Được thêm lại: ERP enable User và khôi phục role theo mapping; local admin block vẫn được tôn trọng.
-- Endpoint lỗi: login mới từ chối snapshot quá `LETRON_SSO_SNAPSHOT_MAX_AGE_SECONDS`; request đang hoạt động được dùng snapshot gần nhất trong cửa sổ cho phép. Khi lần đồng bộ thành công gần nhất quá `LETRON_SSO_STALE_LOCK_SECONDS`, User bị disable và session hiện có bị xóa. Snapshot mới hợp lệ sẽ mở khóa.
+- Bị gỡ quyền hoặc Auth User bị disable: Auth Portal không cấp Gateway request mới; ERP chỉ nhận identity anchor đang Active.
 
-Thay đổi trực tiếp các role/permission thuộc centrally managed policy trong
-ERPNext bị chặn hoặc phải tạo drift alert. Role ngoài allowlist và policy chưa
-được Global Portal quản lý vẫn do ERP/operator quản lý. ERPNext luôn là nơi
-enforce permission runtime.
-
-Break-glass chỉ chạy bằng lệnh operator không public, có lý do và TTL bị giới hạn bởi `LETRON_SSO_BREAK_GLASS_MAX_SECONDS`:
-
-```powershell
-docker exec `
-  -e LETRON_BREAK_GLASS_USER=user@example.com `
-  -e LETRON_BREAK_GLASS_ROLE_NAMES="Desk User,Accounts User" `
-  -e LETRON_BREAK_GLASS_REASON="Incident reference" `
-  -e LETRON_BREAK_GLASS_TTL_SECONDS=900 `
-  erpnext-backend-1 bench --site frontend execute letron_api.auth.sso_admin.break_glass_from_environment
-```
-
-Không dùng break-glass để vượt qua việc bị gỡ khỏi group truy cập hoặc local admin block. Mọi lần JIT, thu hồi, reconcile, stale-lock và break-glass được ghi vào `Letron SSO Audit Log`.
-
-Frappe scheduler vẫn phục vụ các job ERP khác nhưng không tham gia đồng bộ role
-Lark. Không thêm lại cron quét toàn bộ identity; Gateway kiểm tra policy trên
-mỗi request và chỉ đồng bộ snapshot khi cần.
-
-ERP chỉ được projection các role kỹ thuật có prefix `Letron Policy - group-`;
-`Administrator`, `All`, `Guest` và `System Manager` không bao giờ được quản lý bởi Portal.
+Auth Portal là nguồn duy nhất cho trạng thái truy cập và quyền. ERPNext không
+projection role từ Lark và không có break-glass public; Frappe chỉ thực hiện
+identity, validation nghiệp vụ, workflow và persistence.
 
 Issuer: `${LETRON_AUTH_BASE_URL}/api/oidc`
 
@@ -162,12 +137,9 @@ GET http://localhost:3000/api/health
 GET http://localhost:8080/api/method/letron_api.control.api.health
 ```
 
-Health Auth phải báo group sync enabled. Health ERP phải báo
-`sso_role_sync.enabled=true`, `installed=true` và identity ở trạng thái
-`Active`. Bằng chứng on-demand yêu cầu `last_sync_at` tự tăng sau khi chờ hết
-`LETRON_SSO_REQUEST_CHECK_INTERVAL_SECONDS` rồi gửi một request ERP đã xác thực;
-không dùng reconcile thủ công. Gate cuối cùng vẫn là mở Web App thật trong Lark
-Desktop, chọn ERP và vào được `/desk`.
+Health Auth phải báo Auth Portal hoạt động. Health ERP phải báo identity anchor
+đã cài đặt và identity ở trạng thái `Active`. Gate cuối cùng vẫn là mở Web App
+thật trong Lark Desktop, chọn ERP và vào được `/desk`.
 
 ### Sau khi thay đổi Prisma schema
 

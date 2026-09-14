@@ -309,7 +309,10 @@ def add_request_headers(response=None, request=None) -> None:
 before_request = ["letron_api.auth.gateway.enforce_gateway_ingress", "letron_api.hooks.rewrite_public_routes"]
 after_request = ["letron_api.hooks.add_request_headers"]
 auth_hooks = []
-after_migrate = ["letron_api.procurement.purchase_schema.ensure_schema"]
+after_migrate = [
+    "letron_api.patches.v20260914_01_cleanup_legacy_sso.execute",
+    "letron_api.procurement.purchase_schema.ensure_schema",
+]
 
 doc_events = {
     doctype: {
