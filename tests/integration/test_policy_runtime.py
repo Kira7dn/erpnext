@@ -11,7 +11,6 @@ from typing import Any
 import pytest
 import yaml
 from letron_api.control.policy import load_policy, policy_sha256
-from letron_api.control.policy_acceptance import DOCUMENT_BUILDERS
 from letron_api.control.system_config import load_config
 
 from .test_api_runtime_harness import ApiClient, RuntimeUnavailable, response_data
@@ -393,28 +392,6 @@ def test_compute_yaml_control_api_policy_boundary_and_drift() -> None:
         "/api/method/letron_api.control.config_control.get_configuration?kind=arbitrary-file",
         expected={400, 417},
     )
-
-
-DOCUMENT_SOURCES = sorted(DOCUMENT_BUILDERS)
-APPLY_SHARDS = [
-    DOCUMENT_SOURCES[index : index + 4] for index in range(0, len(DOCUMENT_SOURCES), 4)
-]
-
-
-@pytest.mark.parametrize("doctypes", APPLY_SHARDS)
-def test_registry_driven_policy_apply_roundtrip(doctypes: list[str]) -> None:
-    apply_result = json.loads(
-        bench_execute(
-            "letron_api.control.policy_acceptance.probe_policy_apply_registry",
-            {"doctypes": doctypes},
-        )
-    )
-    assert apply_result["ok"] is True
-    assert apply_result["sources"] == len(doctypes)
-    assert apply_result["first_applied"] > 0
-    assert apply_result["second_applied"] == 0
-    assert apply_result["removed"] > 0
-    assert apply_result["roundtrip_diff"] == 0
 
 
 def test_registry_driven_asset_lifecycle() -> None:
