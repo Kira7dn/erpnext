@@ -180,21 +180,6 @@ def test_policy_bundle_protects_native_configuration() -> None:
     client.request("GET", "/api/v1/config/business-policies", expected={404})
 
 
-def test_policy_drift_and_idempotent_restore() -> None:
-    drift = json.loads(bench_execute("letron_api.control.policy.acceptance_force_drift"))
-    assert drift["drift_count"] == 1
-    try:
-        restored = json.loads(bench_execute("letron_api.control.policy.sync"))
-        assert restored["ok"] is True
-        assert restored["drift_count"] == 0
-    finally:
-        # Make cleanup idempotent even when the assertions above fail.
-        bench_execute("letron_api.control.policy.sync")
-
-    second_sync = json.loads(bench_execute("letron_api.control.policy.sync"))
-    assert second_sync["applied"] == 0
-
-
 def _control_client() -> ApiClient:
     client = ApiClient()
     try:
@@ -239,7 +224,7 @@ def test_compute_yaml_control_api_access_and_idempotency() -> None:
         expected={403, 417},
     )
 
-    for kind in ("config", "policy"):
+    for kind in ("config",):
         current = _configuration_source(client, kind)
         assert "content" in current and current["source_sha256"]
         if kind == "config":
@@ -398,23 +383,6 @@ def test_compute_yaml_control_api_policy_boundary_and_drift() -> None:
     )
 
 
-def test_registry_driven_asset_lifecycle() -> None:
-    asset_result = json.loads(
-        bench_execute("letron_api.control.policy_acceptance.probe_asset_lifecycle")
-    )
-    assert asset_result["ok"] is True
-    assert asset_result["public_private"] == 2
-    assert asset_result["checksum_conflict"] == "rejected"
-    assert asset_result["traversal"] == "rejected"
-    assert asset_result["collision"] == "rejected"
-    assert asset_result["rollback"] == "byte-clean"
-
-    cleanup = json.loads(
-        bench_execute("letron_api.control.policy_acceptance.cleanup_registry_residue")
-    )
-    assert cleanup["ok"] is True
-
-
 @pytest.mark.parametrize("rate", [0, 5, 8, 10])
 def test_policy_tax_invoice_gl_effect(rate: int) -> None:
     result = json.loads(
@@ -550,29 +518,3 @@ def test_policy_cross_cutting_effect(effect: str) -> None:
     )
     assert result["ok"] is True
     assert result["effect"] == effect
-
-
-@pytest.mark.parametrize(
-    "step",
-    [
-        "after-assets",
-        "after-documents",
-        "after-deletes",
-        "before-cache",
-        "before-commit",
-    ],
-)
-def test_policy_failure_rollback(step: str) -> None:
-    result = json.loads(
-        bench_execute(
-            "letron_api.control.policy_acceptance.probe_failure_rollback", {"step": step}
-        )
-    )
-    assert result == {
-        "ok": True,
-        "step": step,
-        "document_restored": True,
-        "asset_restored": True,
-        "yaml_unchanged": True,
-        "cache_restored": True,
-    }

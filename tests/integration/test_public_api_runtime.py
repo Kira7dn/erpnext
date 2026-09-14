@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import uuid
 from urllib.parse import quote
 
@@ -30,7 +31,12 @@ def test_health_contract() -> None:
         for name in ("bootstrap", "policy", "config", "configuration_bundle")
     }
     assert all(isinstance(value, dict) for value in components.values()), components
-    assert message.get("ok") is True, components
+    failed = {
+        name: value
+        for name, value in components.items()
+        if isinstance(value, dict) and value.get("ok") is not True
+    }
+    assert message.get("ok") is True, json.dumps(failed, indent=2, default=str)
 
 
 def test_public_contract_and_lifecycle(request: pytest.FixtureRequest) -> None:
